@@ -41,7 +41,7 @@ target_include_directories( labhelper
     ${CMAKE_SOURCE_DIR}/labhelper
     ${CMAKE_SOURCE_DIR}/external_src/stb-master
     ${CMAKE_SOURCE_DIR}/external_src/tinyobjloader-1.0.6
-    #${SDL2_INCLUDE_DIRS}
+    ${SDL2_INCLUDE_DIR}
     ${GLM_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
@@ -50,8 +50,10 @@ target_include_directories( labhelper
 target_link_libraries ( labhelper
     PUBLIC
     imgui
-    #${SDL2_LIBRARIES}
+	${SDL2_LIBRARY}
+	${SDL2MAIN_LIBRARY}
+    ${SDL2_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${OPENGL_LIBRARY}
-	SDL2::SDL2
+	#SDL2::SDL2
     )
