@@ -10,6 +10,10 @@ set(glm_DIR "${CMAKE_SOURCE_DIR}/external/glm")
 set(OpenGL_GL_PREFERENCE "GLVND")
 
 find_package ( SDL2 REQUIRED )
+
+message("> lib=${SDL2_LIBRARY} # libs=${SDL2_LIBRARIES}")
+message("> dir=${SDL2_INCLUDE_DIR} # dirs=${SDL2_INCLUDE_DIRS}")
+
 find_package ( glm REQUIRED )
 find_package ( GLEW REQUIRED )
 find_package ( OpenGL REQUIRED )
@@ -41,7 +45,7 @@ target_include_directories( labhelper
     ${CMAKE_SOURCE_DIR}/labhelper
     ${CMAKE_SOURCE_DIR}/external_src/stb-master
     ${CMAKE_SOURCE_DIR}/external_src/tinyobjloader-1.0.6
-    ${SDL2_INCLUDE_DIR}
+    ${SDL2_INCLUDE_DIRS}
     ${GLM_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
@@ -50,10 +54,13 @@ target_include_directories( labhelper
 target_link_libraries ( labhelper
     PUBLIC
     imgui
-	${SDL2_LIBRARY}
-	${SDL2MAIN_LIBRARY}
     ${SDL2_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${OPENGL_LIBRARY}
-	#SDL2::SDL2
     )
+
+if(UNIX)
+	target_link_libraries ( labhelper
+			PUBLIC
+			SDL2::SDL2 )
+endif()
