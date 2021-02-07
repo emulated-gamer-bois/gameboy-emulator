@@ -8,6 +8,7 @@ build/
 
 # Clion
 .idea/
+.run/project.run.xml
 
 # Cmake
 cmake-build-debug/
