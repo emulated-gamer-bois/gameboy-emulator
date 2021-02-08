@@ -46,12 +46,24 @@ target_include_directories( labhelper
     ${GLEW_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
     )
-
-target_link_libraries ( labhelper
-    PUBLIC
-    imgui
-    ${SDL2_LIBRARIES}
-    ${GLEW_LIBRARIES}
-    ${OPENGL_LIBRARY}
-	SDL2::SDL2
-    )
+#IF( NOT EXISTS ${SDL_LIBRARY}) is due to Isak having problems with loading SDL2::SDL2. I've narrowed it down to SDL2 not being installed
+#in the same directory as you other Linux users. Therefore this solution works for me
+#/Isak
+if (NOT EXISTS ${SDL_LIBRARY})
+	target_link_libraries(labhelper
+			PUBLIC
+			imgui
+			${SDL2_LIBRARIES}
+			${GLEW_LIBRARIES}
+			${OPENGL_LIBRARY}
+			# SDL2::SDL2
+			)
+else (target_link_libraries (labhelper
+		PUBLIC
+		imgui
+		${SDL2_LIBRARIES}
+		${GLEW_LIBRARIES}
+		${OPENGL_LIBRARY}
+		SDL2::SDL2
+		))
+endif ()
