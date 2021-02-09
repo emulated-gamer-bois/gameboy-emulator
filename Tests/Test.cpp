@@ -12,3 +12,7 @@ TEST(Test,test){
 TEST(TESTSUITETWO,TESTONE){
     ASSERT_TRUE(1!=2);
 }
+
+TEST(TestSuiteThree,Test){
+    ASSERT_TRUE(1==2);
+}
