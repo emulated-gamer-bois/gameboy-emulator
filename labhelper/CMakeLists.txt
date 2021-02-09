@@ -10,6 +10,10 @@ set(glm_DIR "${CMAKE_SOURCE_DIR}/external/glm")
 set(OpenGL_GL_PREFERENCE "GLVND")
 
 find_package ( SDL2 REQUIRED )
+
+message("> lib=${SDL2_LIBRARY} # libs=${SDL2_LIBRARIES}")
+message("> dir=${SDL2_INCLUDE_DIR} # dirs=${SDL2_INCLUDE_DIRS}")
+
 find_package ( glm REQUIRED )
 find_package ( GLEW REQUIRED )
 find_package ( OpenGL REQUIRED )
@@ -46,24 +50,22 @@ target_include_directories( labhelper
     ${GLEW_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
     )
-#IF( NOT EXISTS ${SDL_LIBRARY}) is due to Isak having problems with loading SDL2::SDL2. I've narrowed it down to SDL2 not being installed
-#in the same directory as you other Linux users. Therefore this solution works for me
+
+#If exists SDL_LIBRARY is due to Isak having problem with SDL2::SDL2 but SDL_2LIBRARIES is working.
 #/Isak
-if (NOT EXISTS ${SDL_LIBRARY})
-	target_link_libraries(labhelper
+
+
+target_link_libraries ( labhelper
+    PUBLIC
+    imgui
+    ${SDL2_LIBRARIES}
+    ${GLEW_LIBRARIES}
+    ${OPENGL_LIBRARY}
+    )
+
+if(UNIX AND EXISTS ${SDL_LIBRARY})
+	target_link_libraries ( labhelper
 			PUBLIC
-			imgui
-			${SDL2_LIBRARIES}
-			${GLEW_LIBRARIES}
-			${OPENGL_LIBRARY}
-			# SDL2::SDL2
-			)
-else (target_link_libraries (labhelper
-		PUBLIC
-		imgui
-		${SDL2_LIBRARIES}
-		${GLEW_LIBRARIES}
-		${OPENGL_LIBRARY}
-		SDL2::SDL2
-		))
-endif ()
+			SDL2::SDL2 )
+endif()
+
