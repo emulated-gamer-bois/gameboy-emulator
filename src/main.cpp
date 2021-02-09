@@ -44,6 +44,7 @@ bool g_isMouseDragging = false;
 GLuint shaderProgram;       // Shader for rendering the final image
 GLuint simpleShaderProgram; // Shader used to draw the shadow map
 GLuint backgroundProgram;
+GLuint testProgram;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Environment
@@ -84,24 +85,24 @@ mat4 fighterModelMatrix;
 
 void loadShaders(bool is_reload)
 {
-	GLuint shader = labhelper::loadShaderProgram("../project/simple.vert",
-												 "../project/simple.frag",
+	GLuint shader = labhelper::loadShaderProgram("../src/shaders/simple.vert",
+												 "../src/shaders/simple.frag",
 	                                             is_reload);
 	if(shader != 0)
 	{
 		simpleShaderProgram = shader;
 	}
 
-	shader = labhelper::loadShaderProgram("../project/background.vert",
-										  "../project/background.frag",
+	shader = labhelper::loadShaderProgram("../src/shaders/background.vert",
+										  "../src/shaders/background.frag",
 	                                      is_reload);
 	if(shader != 0)
 	{
 		backgroundProgram = shader;
 	}
 
-	shader = labhelper::loadShaderProgram("../project/shading.vert",
-										  "../project/shading.frag",
+	shader = labhelper::loadShaderProgram("../src/shaders/shading.vert",
+										  "../src/shaders/shading.frag",
 										  is_reload);
 	if(shader != 0)
 	{
@@ -209,6 +210,44 @@ void drawScene(GLuint currentShaderProgram,
 	labhelper::render(fighterModel);
 }
 
+// NEW DISPLAY ---------------------------------------------------------------------------------------------------------
+
+void display2(void) {
+    // Create quad
+    vec2 vertices[] = { { -1.0f, -1.0f }, { 1.0f, -1.0f }, { 1.0f, 1.0f },
+                        { -1.0f, -1.0f }, { 1.0f, 1.0f },  { -1.0f, 1.0f } };
+    int vertexAmount = 6;
+    GLuint vertexArrayObject = 0;
+
+    if(vertexArrayObject == 0)
+    {
+        glGenVertexArrays(1, &vertexArrayObject);
+        labhelper::createAddAttribBuffer(vertexArrayObject, vertices, sizeof(vertices), 0, 2, GL_FLOAT);
+    }
+    glBindVertexArray(vertexArrayObject);
+
+    // Check if window size has changed and resize buffers as needed
+    {
+        int w, h;
+        SDL_GetWindowSize(g_window, &w, &h);
+        if(w != windowWidth || h != windowHeight)
+        {
+            windowWidth = w;
+            windowHeight = h;
+        }
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, windowWidth, windowHeight);
+    glClearColor(0., 0., 0., 1.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glUseProgram(testProgram);
+
+    glDrawArrays(GL_TRIANGLES, 0, vertexAmount);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 void display(void)
 {
@@ -351,43 +390,84 @@ void gui()
 	ImGui::Render();
 }
 
+void oldMain(void) {
+    g_window = labhelper::init_window_SDL("OpenGL Project");
+
+    initGL();
+
+    bool stopRendering = false;
+    auto startTime = std::chrono::system_clock::now();
+
+    while(!stopRendering)
+    {
+        //update currentTime
+        std::chrono::duration<float> timeSinceStart = std::chrono::system_clock::now() - startTime;
+        previousTime = currentTime;
+        currentTime = timeSinceStart.count();
+        deltaTime = currentTime - previousTime;
+        // render to window
+        display();
+
+        // Render overlay GUI.
+        if(showUI)
+        {
+            gui();
+        }
+
+        // Swap front and back buffer. This frame will now been displayed.
+        SDL_GL_SwapWindow(g_window);
+
+        // check events (keyboard among other)
+        stopRendering = update();
+    }
+    // Free Models
+    labhelper::freeModel(fighterModel);
+    labhelper::freeModel(landingpadModel);
+    labhelper::freeModel(sphereModel);
+
+    // Shut down everything. This includes the window and all other subsystems.
+    labhelper::shutDown(g_window);
+}
+
 int main(int argc, char* argv[])
 {
-	g_window = labhelper::init_window_SDL("OpenGL Project");
+    g_window = labhelper::init_window_SDL("Lame Boy");
 
-	initGL();
+    GLuint shader = labhelper::loadShaderProgram("../src/shaders/test.vert",
+                                                 "../src/shaders/test.frag",
+                                                 false);
+    if(shader != 0)
+    {
+        testProgram = shader;
+    }
 
-	bool stopRendering = false;
-	auto startTime = std::chrono::system_clock::now();
+    bool stopRendering = false;
+    auto startTime = std::chrono::system_clock::now();
 
-	while(!stopRendering)
-	{
-		//update currentTime
-		std::chrono::duration<float> timeSinceStart = std::chrono::system_clock::now() - startTime;
-		previousTime = currentTime;
-		currentTime = timeSinceStart.count();
-		deltaTime = currentTime - previousTime;
-		// render to window
-		display();
+    while(!stopRendering) {
+        //update currentTime
+        std::chrono::duration<float> timeSinceStart = std::chrono::system_clock::now() - startTime;
+        previousTime = currentTime;
+        currentTime = timeSinceStart.count();
+        deltaTime = currentTime - previousTime;
+        // render to window
+        display2();
 
-		// Render overlay GUI.
-		if(showUI)
-		{
-			gui();
-		}
+        // Swap front and back buffer. This frame will now been displayed.
+        SDL_GL_SwapWindow(g_window);
 
-		// Swap front and back buffer. This frame will now been displayed.
-		SDL_GL_SwapWindow(g_window);
+        // Check if it is time to quit or not
+        {
+            SDL_Event event;
+            while (SDL_PollEvent(&event)) {
+                if (event.type == SDL_QUIT) {
+                    stopRendering = true;
+                }
+            }
+        }
+    }
 
-		// check events (keyboard among other)
-		stopRendering = update();
-	}
-	// Free Models
-	labhelper::freeModel(fighterModel);
-	labhelper::freeModel(landingpadModel);
-	labhelper::freeModel(sphereModel);
+    labhelper::shutDown(g_window);
 
-	// Shut down everything. This includes the window and all other subsystems.
-	labhelper::shutDown(g_window);
 	return 0;
 }

@@ -4,8 +4,8 @@ project ( project )
 
 # Find *all* shaders.
 file(GLOB_RECURSE SHADERS
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.vert"
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.frag"
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert"
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.frag"
 )
 # Separate filter for shaders.
 source_group("Shaders" FILES ${SHADERS})
