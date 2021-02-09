@@ -1,5 +1,4 @@
 dist: trusty
-sudo: false
 language: cpp
 
 addons:
@@ -15,7 +14,7 @@ before_install:
   - pip install --user cpp-coveralls
 
 script:
-  - CXX=/usr/bin/g++-6 CC=/usr/bin/gcc-6 cmake -DCOVERAGE=1 .
+  - CXX=/usr/bin/g++-6 CC=/usr/bin/gcc-6 cmake -DCOVERAGE=1 ./tests
   - cmake --configure ./tests
   - cmake --build ./tests
   - ./tests
