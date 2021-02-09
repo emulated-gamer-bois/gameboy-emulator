@@ -15,7 +15,7 @@ before_install:
   - cd tests
 
 script:
-  - CXX=/usr/bin/g++-6 CC=/usr/bin/gcc-6 cmake -DCOVERAGE=1 ./tests
+  - CXX=/usr/bin/g++-6 CC=/usr/bin/gcc-6 cmake -DCOVERAGE=1 .
   - cmake --configure ./tests
   - cmake --build ./tests
   - ./tests
