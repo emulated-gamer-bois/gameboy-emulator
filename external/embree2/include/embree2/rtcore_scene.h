@@ -192,43 +192,43 @@ RTCORE_API void rtcIntersectNM (RTCScene scene, const RTCIntersectContext* conte
  *  of the ray packet. */
 RTCORE_API void rtcIntersectNp (RTCScene scene, const RTCIntersectContext* context, const RTCRayNp& rays, const size_t N);
 
-/*! Tests if a single ray is occluded by the scene. The ray has to be
+/*! tests if a single ray is occluded by the scene. The ray has to be
  *  aligned to 16 bytes. This function can only be called for scenes
  *  with the RTC_INTERSECT1 flag set. */
 RTCORE_API void rtcOccluded (RTCScene scene, RTCRay& ray);
 
-/*! Tests if a single ray is occluded by the scene. The ray has to be
+/*! tests if a single ray is occluded by the scene. The ray has to be
  *  aligned to 16 bytes. This function can only be called for scenes
  *  with the RTC_INTERSECT1 flag set. */
 RTCORE_API void rtcOccluded1Ex (RTCScene scene, const RTCIntersectContext* context, RTCRay& ray);
 
-/*! Tests if a packet of 4 rays is occluded by the scene. This
+/*! tests if a packet of 4 rays is occluded by the scene. This
  *  function can only be called for scenes with the RTC_INTERSECT4
  *  flag set. The valid mask and ray have both to be aligned to 16
  *  bytes. */
 RTCORE_API void rtcOccluded4 (const void* valid, RTCScene scene, RTCRay4& ray);
 
-/*! Tests if a packet of 4 rays is occluded by the scene. This
+/*! tests if a packet of 4 rays is occluded by the scene. This
  *  function can only be called for scenes with the RTC_INTERSECT4
  *  flag set. The valid mask and ray have both to be aligned to 16
  *  bytes. */
 RTCORE_API void rtcOccluded4Ex (const void* valid, RTCScene scene, const RTCIntersectContext* context, RTCRay4& ray);
 
-/*! Tests if a packet of 8 rays is occluded by the scene. The valid
+/*! tests if a packet of 8 rays is occluded by the scene. The valid
  *  mask and ray have both to be aligned to 32 bytes. This function
  *  can only be called for scenes with the RTC_INTERSECT8 flag
  *  set. For performance reasons, the rtcOccluded8 function should
  *  only get called if the CPU supports AVX. */
 RTCORE_API void rtcOccluded8 (const void* valid, RTCScene scene, RTCRay8& ray);
 
-/*! Tests if a packet of 8 rays is occluded by the scene. The valid
+/*! tests if a packet of 8 rays is occluded by the scene. The valid
  *  mask and ray have both to be aligned to 32 bytes. This function
  *  can only be called for scenes with the RTC_INTERSECT8 flag
  *  set. For performance reasons, the rtcOccluded8 function should
  *  only get called if the CPU supports AVX. */
 RTCORE_API void rtcOccluded8Ex (const void* valid, RTCScene scene, const RTCIntersectContext* context, RTCRay8& ray);
 
-/*! Tests if a packet of 16 rays is occluded by the scene. The valid
+/*! tests if a packet of 16 rays is occluded by the scene. The valid
  *  mask and ray have both to be aligned to 64 bytes. This function
  *  can only be called for scenes with the RTC_INTERSECT16 flag
  *  set. For performance reasons, the rtcOccluded16 function should
@@ -236,7 +236,7 @@ RTCORE_API void rtcOccluded8Ex (const void* valid, RTCScene scene, const RTCInte
  *  instructions. */
 RTCORE_API void rtcOccluded16 (const void* valid, RTCScene scene, RTCRay16& ray);
 
-/*! Tests if a packet of 16 rays is occluded by the scene. The valid
+/*! tests if a packet of 16 rays is occluded by the scene. The valid
  *  mask and ray have both to be aligned to 64 bytes. This function
  *  can only be called for scenes with the RTC_INTERSECT16 flag
  *  set. For performance reasons, the rtcOccluded16 function should
@@ -244,23 +244,23 @@ RTCORE_API void rtcOccluded16 (const void* valid, RTCScene scene, RTCRay16& ray)
  *  instructions. */
 RTCORE_API void rtcOccluded16Ex (const void* valid, RTCScene scene, const RTCIntersectContext* context, RTCRay16& ray);
 
-/*! Tests if a stream of M rays is occluded by the scene. This
+/*! tests if a stream of M rays is occluded by the scene. This
  *  function can only be called for scenes with the RTC_INTERSECT_STREAM
  *  flag set. The stride specifies the offset between rays in bytes.*/
 RTCORE_API void rtcOccluded1M (RTCScene scene, const RTCIntersectContext* context, RTCRay* rays, const size_t M, const size_t stride);
 
-/*! Tests if a stream of pointers to M rays is occluded by the scene. This
+/*! tests if a stream of pointers to M rays is occluded by the scene. This
  *  function can only be called for scenes with the RTC_INTERSECT_STREAM
  *  flag set. */
 RTCORE_API void rtcOccluded1Mp (RTCScene scene, const RTCIntersectContext* context, RTCRay** rays, const size_t M);
 
-/*! Tests if a stream of M ray packets of size N in SOA format is occluded by
+/*! tests if a stream of M ray packets of size N in SOA format is occluded by
  *  the scene. This function can only be called for scenes with the
  *  RTC_INTERSECT_STREAM flag set. The stride specifies the offset between
  *  rays in bytes.*/
 RTCORE_API void rtcOccludedNM (RTCScene scene, const RTCIntersectContext* context, struct RTCRayN* rays, const size_t N, const size_t M, const size_t stride);
 
-/*! Tests if a stream of M ray packets of size N in SOA format is
+/*! tests if a stream of M ray packets of size N in SOA format is
  *  occluded by the scene. This function can only be called for scenes
  *  with the RTC_INTERSECT_STREAM flag set. The stride specifies the offset
  *  between rays in bytes. In contrast to the rtcOccludedNM function
