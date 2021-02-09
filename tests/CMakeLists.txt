@@ -1,5 +1,5 @@
 project(tests)
-
+cmake_minimum_required(VERSION 3.9.2)
 
 #Adds /tests as directory for tests, also adds GTest and Gmock.
 include(gtest.cmake)
