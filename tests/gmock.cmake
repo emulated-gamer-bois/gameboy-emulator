@@ -14,8 +14,8 @@ set(GOOGLEMOCK_SOURCES
         ${CMAKE_SOURCE_DIR}/${GOOGLEMOCK_ROOT}/src/gmock_main.cc
         )
 
-foreach(_source ${GOOGLEMOCK_SOURCES})
+foreach (_source ${GOOGLEMOCK_SOURCES})
     set_source_files_properties(${_source} PROPERTIES GENERATED 1)
-endforeach()
+endforeach ()
 
-add_library(gmock ${GOOGLEMOCK_SOURCES} )
+add_library(gmock ${GOOGLEMOCK_SOURCES})
