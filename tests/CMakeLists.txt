@@ -5,7 +5,6 @@ set (GOOGLETEST_INCLUDE ${CMAKE_SOURCE_DIR}/googletest/include)
 set (GOOGLETEST_BINARY_DIR ${CMAKE_SOURCE_DIR}/googletest)
 set (GOOGLETEST_LIBRARY ${CMAKE_SOURCE_DIR}/googletest)
 enable_testing ()
-# Use booleval's include directories + test include directories
 include_directories (
         ${GOOGLETEST_INCLUDE}
 )
@@ -17,8 +16,6 @@ link_directories (
         ${GOOGLETEST_LIBRARY}
 )
 
-# Link against GoogleTest, libbooleval and pthread.
-# Pthread is required by GoogleTest
 link_libraries (
         gtest
         gtest_main
