@@ -10,11 +10,12 @@ addons:
     packages:
       - g++-6
       - clang-5.0
-      - sudo apt-get update -qq
-      - sudo apt-get install -qq cppcheck
-      - sudo apt-get install -qq libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libegl1-mesa-dev libgles2-mesa-dev
+
 before_install:
   - pip install --user cpp-coveralls
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq cppcheck
+  - sudo apt-get install -qq libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libegl1-mesa-dev libgles2-mesa-dev
 
 script:
   - CXX=/usr/bin/g++-6 CC=/usr/bin/gcc-6 cmake -DCOVERAGE=1 .
