@@ -1,32 +1,26 @@
-project(tests)
-cmake_minimum_required(VERSION 3.9.2)
+cmake_minimum_required (VERSION 3.2)
+add_subdirectory(gtest)
+set (GOOGLETEST_ROOT ${CMAKE_SOURCE_DIR}/googletest)
+set (GOOGLETEST_INCLUDE ${CMAKE_SOURCE_DIR}/googletest/include)
+set (GOOGLETEST_BINARY_DIR ${CMAKE_SOURCE_DIR}/googletest)
+set (GOOGLETEST_LIBRARY ${CMAKE_SOURCE_DIR}/googletest)
+enable_testing ()
+# Use booleval's include directories + test include directories
+include_directories (
+        ${GOOGLETEST_INCLUDE}
+)
 
-#Adds /tests as directory for tests, also adds GTest and Gmock.
-include(gtest.cmake)
-include(gmock.cmake)
+# Find pthread library
+find_package (Threads REQUIRED)
 
-SET(COVERAGE OFF CACHE BOOL "Coverage")
-set(CMAKE_CXX_STANDARD 14)
+link_directories (
+        ${GOOGLETEST_LIBRARY}
+)
 
-add_executable(tests test.cpp)
-find_package (Threads)
-target_link_libraries(tests PRIVATE gtest ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(tests PRIVATE gmock ${CMAKE_THREAD_LIBS_INIT})
-if (MSVC)
-    target_compile_options(tests PRIVATE /std:c++17 /W4 /WX)
-
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ox")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Od")
-
-    # VS 2017 removed tr1
-    add_definitions(-DGTEST_HAS_TR1_TUPLE=0)
-else()
-    target_compile_options(tests PRIVATE -std=c++14 -g -Wall -Werror -Wextra -Wpedantic -Wconversion -Wswitch-default -Wswitch-enum -Wunreachable-code -Wwrite-strings -Wcast-align -Wshadow -Wundef)
-
-    if (COVERAGE)
-        target_compile_options(tests PRIVATE --coverage)
-        target_link_libraries(tests PRIVATE --coverage)
-    endif()
-endif()
-
-##Ending for tests.
+# Link against GoogleTest, libbooleval and pthread.
+# Pthread is required by GoogleTest
+link_libraries (
+        gtest
+        gtest_main
+)
+add_executable(tests tests.cpp)

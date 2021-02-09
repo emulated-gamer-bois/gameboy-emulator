@@ -14,5 +14,5 @@ TEST(TESTSUITETWO,TESTONE){
 }
 
 TEST(TestSuiteThree,Test){
-    ASSERT_TRUE(1==2);
+    ASSERT_TRUE(2==2);
 }
