@@ -8,7 +8,12 @@ build/
 
 # Clion
 .idea/
+.run/project.run.xml
 
 # Cmake
 cmake-build-debug/
+
 /labhelper/imgui.ini
+
+cmake-build-debug-visual-studio/
+
