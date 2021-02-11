@@ -1,6 +1,10 @@
 dist: trusty
 language: cpp
 
+notifications:
+  email: false
+  slack: emulated-gamer-bois:92M1WTR813EoUsescZzmjurB
+
 addons:
   apt:
     sources:
