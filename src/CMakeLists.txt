@@ -14,7 +14,7 @@ source_group("Shaders" FILES ${SHADERS})
 add_executable ( ${PROJECT_NAME}
     main.cpp
     ${SHADERS}
-    )
+        RenderView.h RenderView.cpp)
 
 target_link_libraries ( ${PROJECT_NAME} labhelper )
 config_build_output()

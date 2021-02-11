@@ -12,6 +12,8 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 #include <imgui.h>
 #include <imgui_impl_sdl_gl3.h>
 
+#include "RenderView.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
@@ -64,15 +66,9 @@ void display(void) {
 }
 
 int main(int argc, char* argv[]) {
-    g_window = labhelper::init_window_SDL("Lame Boy");
+    g_window = labhelper::init_window_SDL("Lame Boy", 160, 144);
 
-    GLuint shader = labhelper::loadShaderProgram("../src/shaders/test.vert",
-                                                 "../src/shaders/test.frag",
-                                                 false);
-    if(shader != 0)
-    {
-        testProgram = shader;
-    }
+    RenderView* rv = new RenderView();
 
     bool stopRendering = false;
     auto startTime = std::chrono::system_clock::now();
@@ -84,7 +80,7 @@ int main(int argc, char* argv[]) {
         currentTime = timeSinceStart.count();
         deltaTime = currentTime - previousTime;
         // render to window
-        display();
+        rv->render();
 
         // Swap front and back buffer. This frame will now been displayed.
         SDL_GL_SwapWindow(g_window);
@@ -99,6 +95,8 @@ int main(int argc, char* argv[]) {
             }
         }
     }
+
+    delete rv;
 
     labhelper::shutDown(g_window);
 
