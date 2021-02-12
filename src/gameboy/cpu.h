@@ -12,6 +12,8 @@ public:
     CPU() {
         std::cout << "Hello CPU!" << std::endl;
     }
+
+    int one() {return 1;}
 };
 
 

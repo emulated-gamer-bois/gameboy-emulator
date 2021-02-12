@@ -6,6 +6,7 @@ if (WIN32)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 endif ()
 
+include_directories( ../src/gameboy )
 
 # Find pthread library
 find_package (Threads REQUIRED)
@@ -18,4 +19,4 @@ link_libraries (
         gtest
         gtest_main
 )
-add_executable(tests tests.cpp)
+add_executable(tests tests.cpp cpuTest.cpp )
