@@ -2,6 +2,8 @@ cmake_minimum_required ( VERSION 3.0.2 )
 
 project ( project )
 
+add_subdirectory( gameboy )
+
 # Find *all* shaders.
 file(GLOB_RECURSE SHADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert"
@@ -14,7 +16,7 @@ source_group("Shaders" FILES ${SHADERS})
 add_executable ( ${PROJECT_NAME}
     main.cpp
     ${SHADERS}
-        RenderView.h RenderView.cpp)
+        RenderView.h RenderView.cpp )
 
 target_link_libraries ( ${PROJECT_NAME} labhelper )
 config_build_output()
