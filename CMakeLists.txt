@@ -1,6 +1,6 @@
 cmake_minimum_required ( VERSION 3.0.2 )
 
-project ( simple-gl-project )
+project ( lame-boy )
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # For windows we use our bundled binaries.
@@ -37,6 +37,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
 add_subdirectory ( labhelper )
-add_subdirectory ( project )
+
+add_subdirectory ( src )
 
 add_subdirectory(tests)
