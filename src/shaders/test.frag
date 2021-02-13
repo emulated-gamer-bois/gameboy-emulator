@@ -6,10 +6,12 @@ precision highp float;
 layout(location = 0) out vec4 fragmentColor;
 in vec2 texCoord;
 
+layout (binding = 0) uniform sampler2D screenTex;
+
 void main() 
 {
-	vec2 uv = texCoord;
-	fragmentColor = vec4(uv.x, uv.y, 0.5f, 1.f);
+	vec4 texColor = texture(screenTex, texCoord);
+	fragmentColor = vec4(texColor.rgb, 1.f);
 }
 
 

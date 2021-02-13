@@ -13,6 +13,8 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 #include <imgui_impl_sdl_gl3.h>
 
 #include "RenderView.h"
+#include "temp_screen_helper.h"
+#include <iostream>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
@@ -28,50 +30,24 @@ float previousTime = 0.0f;
 float deltaTime = 0.0f;
 int windowWidth, windowHeight;
 
-GLuint testProgram;
-
-void display(void) {
-    // Create quad
-    vec2 vertices[] = { { -1.0f, -1.0f }, { 1.0f, -1.0f }, { 1.0f, 1.0f },
-                        { -1.0f, -1.0f }, { 1.0f, 1.0f },  { -1.0f, 1.0f } };
-    int vertexAmount = 6;
-    GLuint vertexArrayObject = 0;
-
-    if(vertexArrayObject == 0)
-    {
-        glGenVertexArrays(1, &vertexArrayObject);
-        labhelper::createAddAttribBuffer(vertexArrayObject, vertices, sizeof(vertices), 0, 2, GL_FLOAT);
-    }
-    glBindVertexArray(vertexArrayObject);
-
-    // Check if window size has changed and resize buffers as needed
-    {
-        int w, h;
-        SDL_GetWindowSize(g_window, &w, &h);
-        if(w != windowWidth || h != windowHeight)
-        {
-            windowWidth = w;
-            windowHeight = h;
-        }
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, windowWidth, windowHeight);
-    glClearColor(0., 0., 0., 1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glUseProgram(testProgram);
-
-    glDrawArrays(GL_TRIANGLES, 0, vertexAmount);
-}
-
 int main(int argc, char* argv[]) {
-    g_window = labhelper::init_window_SDL("Lame Boy", 160, 144);
+    g_window = labhelper::init_window_SDL("Lame Boy", 160*2, 144*2);
 
-    RenderView* rv = new RenderView();
+    RenderView* rv = new RenderView(2);
 
     bool stopRendering = false;
     auto startTime = std::chrono::system_clock::now();
+
+    // Deluxe temp------------------------------------------------------------------------------------------------------
+    uint8_t* byteArr = temporary::importTempscreen();
+    if (!byteArr) {
+        delete rv;
+        labhelper::shutDown(g_window);
+        return 0;
+    }
+    rv->setScreenTexture(byteArr);
+    delete[] byteArr;
+    // End Deluxe temp--------------------------------------------------------------------------------------------------
 
     while(!stopRendering) {
         //update currentTime

@@ -23,6 +23,7 @@ private:
     int screenMultiplier;
     vec2 screenVertices[VERTEX_AMOUNT];
     GLuint vertexArrayObject;
+    GLuint screenTexture;
     GLuint renderShaderProgram;
     GLuint fxShaderProgram;
 
@@ -32,6 +33,7 @@ public:
     virtual ~RenderView();
 
     void render();
+    void setScreenTexture(uint8_t textureData[]);
 };
 
 #endif //LAME_BOY_RENDERVIEW_H
