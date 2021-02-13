@@ -50,7 +50,7 @@ void RenderView::render() {
     glBindTexture(GL_TEXTURE_2D, screenTexture);
 
     glBindVertexArray(vertexArrayObject);
-    glDrawArrays(GL_TRIANGLES, 0, VERTEX_AMOUNT)
+    glDrawArrays(GL_TRIANGLES, 0, VERTEX_AMOUNT);
     glBindVertexArray(0);
 }
 
@@ -61,11 +61,11 @@ void RenderView::setScreenTexture(uint8_t textureData[]) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
-                 GL_RGB,
+                 GL_RED,
                  GAME_BOY_LCD_WIDTH,
                  GAME_BOY_LCD_HEIGHT,
                  0,
-                 GL_RGB,
+                 GL_RED,
                  GL_UNSIGNED_BYTE,
                  textureData);
     glBindTexture(GL_TEXTURE_2D, 0);
