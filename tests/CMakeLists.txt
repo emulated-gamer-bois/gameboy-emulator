@@ -1,4 +1,7 @@
 cmake_minimum_required (VERSION 3.2)
+
+project( tests )
+
 add_subdirectory(gtest)
 enable_testing ()
 if (WIN32)
@@ -15,11 +18,10 @@ link_directories (
 
 link_libraries (
         gtest
-        gtest_main
-)
+        gtest_main)
 
 add_executable(tests
         tests.cpp
         cpuTest.cpp
-        ${CMAKE_SOURCE_DIR}/src/gameboy/cpu.cpp
-        ${CMAKE_SOURCE_DIR}/src/gameboy/cpu.h)
+        ../src/gameboy/cpu.cpp
+        ../src/gameboy/cpu.h)
