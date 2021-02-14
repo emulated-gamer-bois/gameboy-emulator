@@ -4,7 +4,7 @@
 
 #include "cpu.h"
 
-CPU::CPU(u_int16_t, std::shared_ptr<MMU> mmu) {
+CPU::CPU(u_int16_t PC, std::shared_ptr<MMU> mmu) {
     this->PC = PC;
     this->memory = mmu;
 }
