@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <memory>
+#include "register_pair.h"
 
 /**
  * Temporary class until the actual MMU is created
@@ -39,8 +40,17 @@ public:
      * Returns value of PC for testing purposes
      */
      u_int16_t getPC() {return PC;}
+
+     /**
+      * Returns value of SP for testing purposes
+      */
+     u_int16_t  getSP() {return SP.all_16; }
 private:
+    //Registers
     u_int16_t PC;
+    RegisterPair SP;
+
+    //Memory
     std::shared_ptr<MMU> memory;
 };
 

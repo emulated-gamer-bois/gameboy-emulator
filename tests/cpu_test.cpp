@@ -11,9 +11,22 @@ TEST(CPU, Execute_NOP_Instruction){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::unique_ptr<CPU> cpu(new CPU(0x00, mmu));
 
-    mmu->write(0, 0);
+    mmu->write(0x00, 0x00);
     cpu->execute_cycle();
 
-    ASSERT_EQ(mmu->read(0), 0);
+    ASSERT_EQ(mmu->read(0x00), 0x00);
     ASSERT_EQ(cpu->getPC(), 0x01);
+}
+
+TEST(CPU, Execute_LD_SP_D16_Instruction) {
+    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
+    std::unique_ptr<CPU> cpu(new CPU(0x00, mmu));
+
+    mmu->write(0x00, 0x31);
+    mmu->write(0x01, 0xFF);
+    mmu->write(0x02, 0xAA);
+    cpu->execute_cycle();
+
+    ASSERT_EQ(cpu->getPC(), 0x03);
+    ASSERT_EQ(cpu->getSP(), 0xAAFF);
 }
