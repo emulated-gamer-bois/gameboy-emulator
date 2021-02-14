@@ -22,6 +22,9 @@ link_libraries (
 
 add_executable(tests
         tests.cpp
-        cpuTest.cpp
+        cpu_test.cpp
+        register_pair_test.cpp
+
         ../src/gameboy/cpu.cpp
-        ../src/gameboy/cpu.h)
+        ../src/gameboy/cpu.h
+        ../src/gameboy/register_pair.h)

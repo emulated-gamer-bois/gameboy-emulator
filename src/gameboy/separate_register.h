@@ -1,8 +1,0 @@
-//
-// Created by davidm on 2021-02-14.
-//
-
-#ifndef LAME_BOY_SEPARATE_REGISTER_H
-#define LAME_BOY_SEPARATE_REGISTER_H
-
-#endif //LAME_BOY_SEPARATE_REGISTER_H
