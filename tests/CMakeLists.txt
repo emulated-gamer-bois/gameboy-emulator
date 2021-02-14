@@ -17,4 +17,9 @@ link_libraries (
         gtest
         gtest_main
 )
-add_executable(tests tests.cpp cpuTest.cpp )
+
+add_executable(tests
+        tests.cpp
+        cpuTest.cpp
+        ${CMAKE_SOURCE_DIR}/src/gameboy/cpu.cpp
+        ${CMAKE_SOURCE_DIR}/src/gameboy/cpu.h)

@@ -4,9 +4,9 @@
 
 #include "cpu.h"
 
-CPU::CPU(u_int16_t, MMU &memory) {
+CPU::CPU(u_int16_t, std::shared_ptr<MMU> mmu) {
     this->PC = PC;
-    this->memory = &memory;
+    this->memory = mmu;
 }
 
 void nop() {}
@@ -18,5 +18,6 @@ void CPU::execute_cycle() {
             break;
         default:
             nop();
+            break;
     }
 }

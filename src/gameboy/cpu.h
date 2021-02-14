@@ -6,6 +6,7 @@
 #define LAME_BOY_CPU_H
 
 #include <iostream>
+#include <memory>
 
 /**
  * Temporary class until the actual MMU is created
@@ -16,7 +17,7 @@ public:
         memory = new u_int16_t[0xF000];
     }
     ~MMU(){
-        delete memory;
+        delete[] memory;
     }
 
     u_int16_t read(int addr) {return memory[addr];}
@@ -27,7 +28,7 @@ private:
 
 class CPU {
 public:
-    CPU(u_int16_t, MMU&);
+    CPU(u_int16_t, std::shared_ptr<MMU>);
 
     /**
      * Fetches, decodes and executes the instruction at location PC
@@ -40,7 +41,7 @@ public:
      u_int16_t getPC() {return PC;}
 private:
     u_int16_t PC;
-    MMU *memory;
+    std::shared_ptr<MMU> memory;
 };
 
 
