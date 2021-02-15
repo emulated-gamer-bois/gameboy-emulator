@@ -24,7 +24,8 @@ add_executable(tests
         tests.cpp
         cpu_test.cpp
         register_pair_test.cpp
+        mmu_test.cpp
 
         ../src/gameboy/cpu.cpp
         ../src/gameboy/cpu.h
-        ../src/gameboy/register_pair.h)
+        ../src/gameboy/register_pair.h ../src/gameboy/mmu.h ../src/gameboy/mmu.cpp)
