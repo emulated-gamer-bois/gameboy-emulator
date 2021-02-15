@@ -66,7 +66,7 @@ void MMU::load_rom(std::string filepath) {
         // Resize game_rom to size
         this->game_rom.resize(size);
         // Copy data
-        memcpy(&this->game_rom[this->game_rom.size() - size], &memblock[0], size);
+        std::memcpy(&this->game_rom[this->game_rom.size() - size], &memblock[0], size);
 
         delete[] memblock;
     }
