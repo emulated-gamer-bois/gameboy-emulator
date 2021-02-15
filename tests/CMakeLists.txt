@@ -24,4 +24,4 @@ add_executable(tests
         cpu_test.cpp
         register_pair_test.cpp)
 
-target_link_libraries(${PROJECT_NAME} gameboy)
+target_link_libraries(${PROJECT_NAME} gameboy )

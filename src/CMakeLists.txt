@@ -5,18 +5,20 @@ project ( project )
 add_subdirectory( gameboy )
 
 # Find *all* shaders.
-file(GLOB_RECURSE SHADERS
-    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert"
-    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.frag"
-)
-# Separate filter for shaders.
-source_group("Shaders" FILES ${SHADERS})
+if(NOT TRAVIS)
+    file(GLOB_RECURSE SHADERS
+        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert"
+        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.frag"
+    )
+    # Separate filter for shaders.
+    source_group("Shaders" FILES ${SHADERS})
 
-# Build and link executable.
-add_executable ( ${PROJECT_NAME}
-    main.cpp
-    ${SHADERS}
-        RenderView.h RenderView.cpp )
+    # Build and link executable.
+    add_executable ( ${PROJECT_NAME}
+        main.cpp
+        ${SHADERS}
+            RenderView.h RenderView.cpp )
 
-target_link_libraries ( ${PROJECT_NAME} labhelper )
-config_build_output()
+    target_link_libraries ( ${PROJECT_NAME} labhelper )
+    config_build_output()
+endif()
