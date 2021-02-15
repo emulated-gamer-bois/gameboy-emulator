@@ -10,27 +10,8 @@
 #include <memory>
 #include <cstdint>
 #include "register_pair.h"
+#include "mmu.h"
 
-/**
- * Temporary class until the actual MMU is created
- */
-class MMU {
-public:
-    MMU() {
-        memory = new uint16_t[0xF000];
-    }
-
-    ~MMU() {
-        delete[] memory;
-    }
-
-    uint16_t read(int addr) { return memory[addr]; }
-
-    void write(int addr, uint16_t value) { memory[addr] = value; }
-
-private:
-    uint16_t *memory;
-};
 
 class CPU {
 public:

@@ -3,6 +3,7 @@
 //
 
 #include "cpu.h"
+#include "mmu.h"
 
 CPU::CPU(uint16_t PC, std::shared_ptr<MMU> mmu) {
     this->PC = PC;
