@@ -208,8 +208,8 @@ void CPU::rr(uint8_t &reg) {
 }
 
 void CPU::execute_cycle() {
-    switch (memory->read(PC++)) {
-        case 0x00:
+    switch (memory->read(this->PC++)) {
+        case 0x00: //NOP
             nop();
             break;
         case 0x03:
@@ -279,8 +279,8 @@ void CPU::execute_cycle() {
             decrement8(HL.low_8);
             break;
         case 0x31: // LD SP, d16
-            ldsp(memory->read(PC), memory->read(PC + 1), SP);
-            PC += 2;
+            ldsp(memory->read(PC), memory->read(this->PC+1), this->SP);
+            this->PC += 2;
             break;
         case 0x33:
             increment16(SP.all_16);

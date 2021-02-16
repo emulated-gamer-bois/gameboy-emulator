@@ -11,10 +11,10 @@ TEST(MMU, read_write){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     mmu->disable_boot_rom();
 
-    mmu->write(0x30, 0xa1);
+    mmu->write_ONLY_IN_TESTS(0x30, 0xa1);
     ASSERT_EQ(mmu->read(0x30), 0xa1);
 
-    mmu->write(0x30, 0xd5);
+    mmu->write_ONLY_IN_TESTS(0x30, 0xd5);
     ASSERT_EQ(mmu->read(0x30), 0xd5);
 }
 

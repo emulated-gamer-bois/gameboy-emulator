@@ -36,6 +36,8 @@ public:
     void write(uint16_t addr, uint8_t data);
     void disable_boot_rom();
     void load_rom(std::string filepath);
+    void write_ONLY_IN_TESTS(uint16_t addr, uint8_t data);
+
 
 private:
     // Using vector for memory with variable size; game_rom and xram.
@@ -51,6 +53,7 @@ private:
     std::array<uint8_t, 128> hram;
 
     bool booting;
+
 };
 
 #endif //LAME_BOY_MMU_H

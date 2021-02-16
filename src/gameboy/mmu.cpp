@@ -79,23 +79,29 @@ void MMU::write(uint16_t addr, uint8_t data) {
             //Video RAM
         case VRAM_START:
             this->vram[addr - VRAM_START] = data;
+            break;
 
             //External RAM
         case xRAM_START:
             this->xram[addr - xRAM_START] = data;
+            break;
 
             //Work RAM
         case RAM_START:
             this->ram[addr - RAM_START] = data;
+            break;
 
             //OAM / IO / High RAM
         case 0xe000:
             if(OAM_START <= addr && addr <= OAM_END) {
                 this->oam[addr - OAM_START] = data;
+                break;
             } else if (IO_START <= addr && addr <= IO_END) {
                 this->io[addr - IO_START] = data;
+                break;
             } else if (HRAM_START <= addr && addr <= HRAM_END) {
                 this->hram[addr - HRAM_START] = data;
+                break;
             }
 
         default:
@@ -137,5 +143,50 @@ void MMU::load_rom(std::string filepath) {
     else {
         std::cout << "Unable to open file";
         exit(1);
+    }
+}
+
+//IS ONLY TO BE USED IN TESTS. CAN WRITE TO ROM
+void MMU::write_ONLY_IN_TESTS(uint16_t addr, uint8_t data) {
+    switch(addr & 0xe000) {
+        //Boot ROM/Game ROM
+        case GAME_ROM_START:
+        case GAME_ROM_START + 0x2000:
+        case GAME_ROM_START + 0x4000:
+        case GAME_ROM_START + 0x6000:
+            this->game_rom[addr] = data;
+            break;
+
+            //Video RAM
+        case VRAM_START:
+            this->vram[addr - VRAM_START] = data;
+            break;
+
+            //External RAM
+        case xRAM_START:
+            this->xram[addr - xRAM_START] = data;
+            break;
+
+            //Work RAM
+        case RAM_START:
+            this->ram[addr - RAM_START] = data;
+            break;
+
+            //OAM / IO / High RAM
+        case 0xe000:
+            if(OAM_START <= addr && addr <= OAM_END) {
+                this->oam[addr - OAM_START] = data;
+                break;
+            } else if (IO_START <= addr && addr <= IO_END) {
+                this->io[addr - IO_START] = data;
+                break;
+            } else if (HRAM_START <= addr && addr <= HRAM_END) {
+                this->hram[addr - HRAM_START] = data;
+                break;
+            }
+
+        default:
+            std::cout<<"Tried to write to unused memory address: "<<addr;
+            exit(1);
     }
 }
