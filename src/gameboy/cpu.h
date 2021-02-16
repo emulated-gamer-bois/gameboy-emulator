@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <memory>
+#include <cstdint>
 #include "register_pair.h"
 
 /**
@@ -45,6 +46,11 @@ public:
       * Returns value of SP for testing purposes
       */
      u_int16_t  getSP() {return SP.all_16; }
+
+    void setZNFlags(uint8_t, bool);
+    uint8_t getFlags() {return AF.low_8; }
+    void setHFlag(uint8_t a, uint8_t b);
+    void setCFlag(uint8_t a, uint8_t b);
 private:
     //Registers
     u_int16_t PC;
