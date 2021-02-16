@@ -49,6 +49,10 @@ private:
     //Registers
     u_int16_t PC;
     RegisterPair SP;
+    RegisterPair AF;
+    RegisterPair BC;
+    RegisterPair DE;
+    RegisterPair HL;
 
     //Memory
     std::shared_ptr<MMU> memory;
