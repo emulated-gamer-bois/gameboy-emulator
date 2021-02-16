@@ -128,6 +128,28 @@ void CPU::rlc(uint8_t &reg) {
     AF.low_8 = (AF.low_8 & 0xEF) | (d7 << 4);
  }
 
+/**
+* Rotate right, d0 -> C flag and d0 -> d7
+*/
+void CPU::rrc(uint8_t &reg) {
+    auto d0 = reg & 0x01;
+    reg = (reg >> 1) | (d0 << 7);
+
+    //Sets C flag to d0
+    AF.low_8 = (AF.low_8 & 0xEF) | (d0 << 4);
+}
+
+/**
+ * Rotate left, C -> d7 and d0 -> C
+ */
+void CPU::rr(uint8_t &reg) {
+    auto d0 = reg & 0x01;
+    reg = (reg >> 1) | ((AF.low_8 << 3) & 0x80);
+
+    //Sets C flag to d7
+    AF.low_8 = (AF.low_8 & 0xEF) | (d0 << 4);
+}
+
 void CPU::execute_cycle() {
     switch (memory->read(PC++)) {
         case 0x00: //NOP
@@ -136,8 +158,14 @@ void CPU::execute_cycle() {
         case 0x07: //RLCA
             rlc(AF.high_8);
             break;
+        case 0x0F: //RRCA
+            rrc(AF.high_8);
+            break;
         case 0x17: //RLA
             rl(AF.high_8);
+            break;
+        case 0x1F: //RRA
+            rr(AF.high_8);
             break;
         case 0x31: // LD SP, d16
             ldsp(memory->read(PC), memory->read(PC+1), SP);

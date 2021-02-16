@@ -72,4 +72,15 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->execute_cycle();
     ASSERT_EQ(cpu->getA(), 0x0B);
     ASSERT_EQ(cpu->getFlags() & 0x10, 0x00);
+
+    mmu->write(cpu->getPC(), 0x0F); //RRCA
+    mmu->write(cpu->getPC()+1, 0x0F);
+    cpu->execute_cycle();
+    ASSERT_EQ(cpu->getA(), 0x85);
+    ASSERT_EQ(cpu->getFlags() & 0x10, 0x10);
+
+    mmu->write(cpu->getPC(), 0x1F); //RRA
+    cpu->execute_cycle();
+    ASSERT_EQ(cpu->getA(), 0xC2);
+    ASSERT_EQ(cpu->getFlags() & 0x10, 0x10);
 }

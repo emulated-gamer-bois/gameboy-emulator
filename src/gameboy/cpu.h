@@ -78,6 +78,10 @@ private:
     void rlc(uint8_t &reg);
 
     void rl(uint8_t &reg);
+
+    void rrc(uint8_t &reg);
+
+    void rr(uint8_t &reg);
 };
 
 
