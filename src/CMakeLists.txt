@@ -4,8 +4,10 @@ project ( project )
 
 add_subdirectory( gameboy )
 
-# Find *all* shaders.
+
+# Excludes graphics code if tests are run in travis
 if(NOT TRAVIS)
+    # Find *all* shaders.
     file(GLOB_RECURSE SHADERS
         "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert"
         "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.frag"

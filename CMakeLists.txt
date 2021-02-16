@@ -37,6 +37,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
 
+# Excludes graphics code if tests are run in travis
 if(NOT TRAVIS)
     add_subdirectory ( labhelper )
 endif()
