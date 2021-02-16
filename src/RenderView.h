@@ -26,6 +26,9 @@ public:
     RenderView(int screenMultiplier);
     RenderView();
 
-    void render();
+    void render() const;
     void setScreenTexture(uint8_t textureData[]);
+
+    int getWidth() const;
+    int getHeight() const;
 };

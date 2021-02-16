@@ -1,11 +1,15 @@
 // Uncomment if opengl won't work
-//#ifdef _WIN32
-//extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
-//#endif
+/*
+#ifdef _WIN32
+extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
+#endif
+*/
 
 #include <chrono> // std::chrono::system_clock::now()
+#include <iostream>
 
-#include "Application.h"
+#include "Application.h" // Implements
+#include "RenderView.h"
 
 // TEMP
 #include <fstream> // file reading
@@ -14,6 +18,10 @@ void TEMP_setTexture(const char* filename, RenderView& rv);
 
 const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
 
+/*
+ * This function initializes sdl, creates a window and gets a OpenGL context. If an error occurs in this function
+ * the program should exit.
+ */
 void Application::initSDL() {
     // Initialize SDL and check if SDL could be initialize.
     assert(SDL_Init(SDL_INIT_VIDEO) >= 0);
@@ -58,6 +66,9 @@ void Application::initSDL() {
     }
 }
 
+/*
+ * Cleans up after SDL.
+ */
 void Application::terminateSDL() {
     //Destroy window
     SDL_DestroyWindow(window);
@@ -66,10 +77,13 @@ void Application::terminateSDL() {
     SDL_Quit();
 }
 
+/*
+ * Call from main. Is the main loop of this application.
+ */
 void Application::start() {
     initSDL();
 
-    RenderView renderView(1);
+    RenderView renderView(2);
 
     bool quit = false;
     auto startTime = std::chrono::system_clock::now();
@@ -85,6 +99,16 @@ void Application::start() {
         previousTime = currentTime;
         currentTime = timeSinceStart.count();
         deltaTime = currentTime - previousTime;
+
+        // Resize window to the size of the render view if needed.
+        {
+            int w, h;
+            SDL_GetWindowSize(window, &w, &h);
+            if (w != renderView.getWidth() || h != renderView.getHeight()) {
+                SDL_SetWindowSize(window, renderView.getWidth(), renderView.getHeight());
+                std::cout << renderView.getWidth() << "x" << renderView.getHeight() << std::endl;
+            }
+        }
 
         // render to window
         renderView.render();

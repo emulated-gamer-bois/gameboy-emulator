@@ -32,7 +32,7 @@ RenderView::RenderView(int screenMultiplier) {
 
 RenderView::RenderView() : RenderView(1) {}
 
-void RenderView::render() {
+void RenderView::render() const {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, GAME_BOY_LCD_WIDTH * screenMultiplier, GAME_BOY_LCD_HEIGHT * screenMultiplier);
     glClearColor(0., 0., 0., 1.0);
@@ -62,4 +62,12 @@ void RenderView::setScreenTexture(uint8_t textureData[]) {
                  GL_UNSIGNED_BYTE,
                  textureData);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+int RenderView::getWidth() const {
+    return GAME_BOY_LCD_WIDTH * screenMultiplier;
+}
+
+int RenderView::getHeight() const {
+    return GAME_BOY_LCD_HEIGHT * screenMultiplier;
 }

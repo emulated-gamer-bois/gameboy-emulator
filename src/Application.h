@@ -4,13 +4,10 @@
  * to the emulator.
  */
 
-#ifndef LAME_BOY_APPLICATION_H
-#define LAME_BOY_APPLICATION_H
+#pragma once
 
 #include <SDL.h>
 #include <string>
-
-#include "RenderView.h"
 
 class Application {
 private:
@@ -24,8 +21,7 @@ private:
 
     void initSDL();
     void terminateSDL();
+
 public:
     void start();
 };
-
-#endif //LAME_BOY_APPLICATION_H
