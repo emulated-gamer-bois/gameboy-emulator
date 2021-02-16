@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 #include "../src/gameboy/cpu.h"
 
-TEST(CPU, Execute_NOP_Instruction){
+TEST(CPU, Execute_NOP_Instruction) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::unique_ptr<CPU> cpu(new CPU(0x00, mmu));
 
