@@ -40,6 +40,30 @@ void CPU::setCFlag(uint8_t a, uint8_t b) {
     AF.low_8 |= CFlag;
 }
 
+void loadIm16(uint8_t firstByte, uint8_t secondByte, RegisterPair &reg) {
+    reg.low_8 =  firstByte;
+    reg.high_8 = secondByte;
+}
+
+void loadIm8(uint8_t firstByte, uint8_t &reg) {
+    reg = firstByte;
+}
+
+void CPU::loadImp(uint8_t &reg, uint16_t addr) {
+    reg = memory->read(addr);
+}
+
+/**
+ * Used for LD (BC), A or similar
+ * @param reg (BC)
+ * @param value value fo A
+ */
+void CPU::storeAddr(uint16_t addr, uint8_t value) {
+    memory->write(addr, value);
+}
+
+
+
 void CPU::execute_cycle() {
     switch (memory->read(PC++)) {
         case 0x00: //NOP

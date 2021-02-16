@@ -62,6 +62,10 @@ private:
 
     //Memory
     std::shared_ptr<MMU> memory;
+
+    void storeAddr(uint16_t addr, uint8_t value);
+
+    void loadImp(uint8_t &reg, uint16_t addr);
 };
 
 
