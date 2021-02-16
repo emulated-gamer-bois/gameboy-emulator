@@ -10,6 +10,8 @@
 #include <SDL.h>
 #include <string>
 
+#include "RenderView.h"
+
 class Application {
 private:
     const static int DEFAULT_WINDOW_WIDTH = 160;
