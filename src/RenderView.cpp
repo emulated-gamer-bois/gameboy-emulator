@@ -1,11 +1,6 @@
-/*
- * RenderView
- * This class handles the rendering of the Game Boy lcd.
- *
- * Author: Andreas Palmqvist
- */
+#include "RenderView.h" // implements
 
-#include "RenderView.h"
+using namespace glm;
 
 RenderView::RenderView(int screenMultiplier) {
     this->screenMultiplier = screenMultiplier;
@@ -36,8 +31,6 @@ RenderView::RenderView(int screenMultiplier) {
 }
 
 RenderView::RenderView() : RenderView(1) {}
-
-RenderView::~RenderView() {}
 
 void RenderView::render() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

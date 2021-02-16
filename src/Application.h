@@ -9,7 +9,6 @@
 
 #include <SDL.h>
 #include <string>
-#include <GL/glew.h>
 
 class Application {
 private:
@@ -17,15 +16,14 @@ private:
     const static int DEFAULT_WINDOW_HEIGHT = 144;
     const static std::string DEFAULT_WINDOW_CAPTION;
 
-    //SDL_Window* window;
+    // SDL related
+    SDL_Window* window; // Application claims no ownership of this pointer.
     SDL_GLContext glContext;
 
-    //void initAppliction();
+    void initSDL();
+    void terminateSDL();
 public:
-    void run();
-    void initAppliction();
-    void destroyAppliction();
-    SDL_Window* window;
+    void start();
 };
 
 #endif //LAME_BOY_APPLICATION_H

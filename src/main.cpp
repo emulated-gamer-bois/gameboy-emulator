@@ -2,55 +2,41 @@
 //extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 //#endif
 
-#include <GL/glew.h>
-#include <cmath>
-#include <cstdlib>
-#include <algorithm>
-#include <chrono>
-
-#include <labhelper.h>
-#include <imgui.h>
-#include <imgui_impl_sdl_gl3.h>
-
-#include "RenderView.h"
-#include "temp_screen_helper.h"
+#include <chrono> //
 #include <iostream>
 
-#include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
-
 #include "Application.h"
+#include "RenderView.h"
+#include "temp_screen_helper.h"
 
-using namespace glm;
 
-///////////////////////////////////////////////////////////////////////////////
-// Various globals
-///////////////////////////////////////////////////////////////////////////////
-SDL_Window* g_window = nullptr;
-float currentTime = 0.0f;
-float previousTime = 0.0f;
-float deltaTime = 0.0f;
-int windowWidth, windowHeight;
 
 int main(int argc, char* argv[]) {
     Application app;
-    app.initAppliction();
-    g_window = app.window;
-    //g_window = labhelper::init_window_SDL("Lame Boy", 160*2, 144*2);
+    app.start();
 
-    RenderView* rv = new RenderView(1);
+    return 0;
+}
+
+void Application::start() {
+    initSDL();
+
+    RenderView rv(1);
 
     bool stopRendering = false;
     auto startTime = std::chrono::system_clock::now();
+    float currentTime = 0.0f;
+    float previousTime = 0.0f;
+    float deltaTime = 0.0f;
 
     // Deluxe temp------------------------------------------------------------------------------------------------------
+    // Manual memory management, no exception handling
     uint8_t* byteArr = temporary::importTempscreen();
     if (!byteArr) {
-        delete rv;
-        labhelper::shutDown(g_window);
-        return 0;
+        terminateSDL();
+        return;
     }
-    rv->setScreenTexture(byteArr);
+    rv.setScreenTexture(byteArr);
     delete[] byteArr;
     // End Deluxe temp--------------------------------------------------------------------------------------------------
 
@@ -61,10 +47,10 @@ int main(int argc, char* argv[]) {
         currentTime = timeSinceStart.count();
         deltaTime = currentTime - previousTime;
         // render to window
-        rv->render();
+        rv.render();
 
         // Swap front and back buffer. This frame will now been displayed.
-        SDL_GL_SwapWindow(g_window);
+        SDL_GL_SwapWindow(window);
 
         // Check if it is time to quit or not
         {
@@ -77,17 +63,13 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    delete rv;
-
-    app.destroyAppliction();
-
-	return 0;
+    terminateSDL();
 }
 
 const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
 
 
-void Application::initAppliction() {
+void Application::initSDL() {
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         fprintf(stderr, "%s: %s\n", "Couldn't initialize SDL", SDL_GetError());
@@ -139,7 +121,7 @@ void Application::initAppliction() {
     }
 }
 
-void Application::destroyAppliction() {
+void Application::terminateSDL() {
     //Destroy window
     SDL_DestroyWindow(window);
 
