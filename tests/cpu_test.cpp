@@ -48,8 +48,15 @@ TEST(CPU, SET_FLAGS) {
     cpu->setHFlag(0x0D, 0x01);
     ASSERT_EQ(cpu->getFlags() & 0x20, 0x00);
 
-
     cpu->setCFlag(0xFF, 0x01);
     ASSERT_EQ(cpu->getFlags() & 0x10, 0x10);
 
+    cpu->orA(0x55);
+    ASSERT_EQ(cpu->getA(), 0x55);
+
+    cpu->xorA(0x04);
+    ASSERT_EQ(cpu->getA(), 0x51);
+
+    cpu->andA(0x4F);
+    ASSERT_EQ(cpu->getA(), 0x41);
 }

@@ -47,10 +47,17 @@ public:
       */
      u_int16_t  getSP() {return SP.all_16; }
 
-    void setZNFlags(uint8_t, bool);
     uint8_t getFlags() {return AF.low_8; }
+
+    uint8_t getA()  {return AF.high_8; }
+
+    //TODO: Should be private
+    void setZNFlags(uint8_t, bool);
     void setHFlag(uint8_t a, uint8_t b);
     void setCFlag(uint8_t a, uint8_t b);
+    void andA(uint8_t);
+    void xorA(uint8_t);
+    void orA(uint8_t);
 private:
     //Registers
     u_int16_t PC;

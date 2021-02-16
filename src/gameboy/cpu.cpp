@@ -7,6 +7,11 @@
 CPU::CPU(u_int16_t PC, std::shared_ptr<MMU> mmu) {
     this->PC = PC;
     this->memory = mmu;
+    SP.all_16 = 0x00;
+    AF.all_16 = 0x00;
+    BC.all_16 = 0x00;
+    DE.all_16 = 0x00;
+    HL.all_16 = 0x00;
 }
 
 void nop() {}
@@ -62,7 +67,44 @@ void CPU::storeAddr(uint16_t addr, uint8_t value) {
     memory->write(addr, value);
 }
 
+//Logical operations ******************
 
+/**
+ * Executes AND with the A register and the given value
+ * stores the result in A
+ */
+void CPU::andA(uint8_t value) {
+    AF.high_8 &= value;
+    setZNFlags(AF.high_8, false);
+
+    //Sets H flag = 1, C = 0
+    AF.low_8 &= 0xC0;
+    AF.low_8 |= 0x20;
+}
+
+/**
+ * Executes XOR with the A register and the given value
+ * stores the result in A
+ */
+void CPU::xorA(uint8_t value) {
+    AF.high_8 ^= value;
+    setZNFlags(AF.high_8, false);
+
+    //Sets all flags except Z to 0
+    AF.low_8 &= 0x80;
+}
+
+/**
+ * Executes OR with the A register and the given value
+ * stores the result in A
+ */
+void CPU::orA(uint8_t value) {
+    AF.high_8 |= value;
+    setZNFlags(AF.high_8, false);
+
+    //Sets all flags except Z to 0
+    AF.low_8 &= 0x80;
+}
 
 void CPU::execute_cycle() {
     switch (memory->read(PC++)) {
