@@ -51,7 +51,8 @@ public:
 
     uint8_t getA()  {return AF.high_8; }
 
-    //TODO: Should be private
+    //TODO: Should be private using FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS)
+    //https://stackoverflow.com/questions/2396370/how-to-make-google-test-classes-friends-with-my-classes
     void setZNFlags(uint8_t, bool);
     void setHFlag(uint8_t a, uint8_t b);
     void setCFlag(uint8_t a, uint8_t b);
@@ -73,6 +74,10 @@ private:
     void storeAddr(uint16_t addr, uint8_t value);
 
     void loadImp(uint8_t &reg, uint16_t addr);
+
+    void rlc(uint8_t &reg);
+
+    void rl(uint8_t &reg);
 };
 
 

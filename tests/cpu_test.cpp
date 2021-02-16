@@ -31,7 +31,7 @@ TEST(CPU, Execute_LD_SP_D16_Instruction) {
     ASSERT_EQ(cpu->getSP(), 0xAAFF);
 }
 
-TEST(CPU, SET_FLAGS) {
+TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::unique_ptr<CPU> cpu(new CPU(0x00, mmu));
 
@@ -59,4 +59,17 @@ TEST(CPU, SET_FLAGS) {
 
     cpu->andA(0x4F);
     ASSERT_EQ(cpu->getA(), 0x41);
+
+    mmu->write(cpu->getPC(), 0x07); //RLCA
+    mmu->write(cpu->getPC()+1, 0x07);
+    cpu->execute_cycle();
+    ASSERT_EQ(cpu->getA(), 0x82);
+    cpu->execute_cycle();
+    ASSERT_EQ(cpu->getA(), 0x05);
+    ASSERT_EQ(cpu->getFlags() & 0x10, 0x10);
+
+    mmu->write(cpu->getPC(), 0x17); //RLA
+    cpu->execute_cycle();
+    ASSERT_EQ(cpu->getA(), 0x0B);
+    ASSERT_EQ(cpu->getFlags() & 0x10, 0x00);
 }

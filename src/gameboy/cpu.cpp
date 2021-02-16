@@ -106,10 +106,38 @@ void CPU::orA(uint8_t value) {
     AF.low_8 &= 0x80;
 }
 
+/**
+ * Rotate left, d7 -> C flag and d7 -> d0
+ */
+void CPU::rlc(uint8_t &reg) {
+    auto d7 = (reg & 0x80) >> 0x07;
+    reg = (reg << 1) | d7;
+
+    //Sets C flag to d7
+    AF.low_8 = (AF.low_8 & 0xEF) | (d7 << 4);
+}
+
+/**
+ * Rotate left, C -> d0 and d7 -> C
+ */
+ void CPU::rl(uint8_t &reg) {
+    auto d7 = (reg & 0x80) >> 0x07;
+    reg = (reg << 1) | ((AF.low_8 >> 4) & 0x01);
+
+    //Sets C flag to d7
+    AF.low_8 = (AF.low_8 & 0xEF) | (d7 << 4);
+ }
+
 void CPU::execute_cycle() {
     switch (memory->read(PC++)) {
         case 0x00: //NOP
             nop();
+            break;
+        case 0x07: //RLCA
+            rlc(AF.high_8);
+            break;
+        case 0x17: //RLA
+            rl(AF.high_8);
             break;
         case 0x31: // LD SP, d16
             ldsp(memory->read(PC), memory->read(PC+1), SP);
