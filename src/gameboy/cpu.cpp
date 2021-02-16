@@ -18,13 +18,13 @@ void ldsp(uint8_t first_byte,uint8_t second_byte, RegisterPair &SP) {
 }
 
 void CPU::execute_cycle() {
-    switch (memory->read(PC++)) {
+    switch (memory->read(this->PC++)) {
         case 0x00: //NOP
             nop();
             break;
         case 0x31: // LD SP, d16
-            ldsp(memory->read(PC), memory->read(PC+1), SP);
-            PC += 2;
+            ldsp(memory->read(PC), memory->read(this->PC+1), this->SP);
+            this->PC += 2;
             break;
         default:
             nop();
