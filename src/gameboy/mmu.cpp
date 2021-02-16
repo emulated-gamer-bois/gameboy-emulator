@@ -6,6 +6,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstring>
+
 
 MMU::MMU() {
     // Reset arrays to 0
@@ -25,18 +27,80 @@ MMU::MMU() {
 }
 
 uint8_t MMU::read(uint16_t addr) {
-    // Temporary ugly if statements
-    if (GAME_ROM_START <= addr && addr <= GAME_ROM_END) {
-        return this->game_rom[addr];
-    } else {
-        return 0x00;
+    switch(addr & 0xe000) {
+            //Boot ROM/Game ROM
+        case GAME_ROM_START:
+            if(BOOT_ROM_START <= addr && addr <= BOOT_ROM_END && this->booting) {
+                return this->boot_rom[addr];
+            }
+        case GAME_ROM_START + 0x2000:
+        case GAME_ROM_START + 0x4000:
+        case GAME_ROM_START + 0x6000:
+            return this->game_rom[addr];
+
+            //Video RAM
+        case VRAM_START:
+            return this->vram[addr - VRAM_START];
+
+            //External RAM
+        case xRAM_START:
+            return this->xram[addr - xRAM_START];
+
+            //Work RAM
+        case RAM_START:
+            return this->ram[addr - RAM_START];
+
+            //OAM / IO / High RAM
+        case 0xe000:
+            if(OAM_START <= addr && addr <= OAM_END) {
+                return this->oam[addr - OAM_START];
+            } else if (IO_START <= addr && addr <= IO_END) {
+                return this->io[addr - IO_START];
+            } else if (HRAM_START <= addr && addr <= HRAM_END) {
+                return this->hram[addr - HRAM_START];
+            }
+
+        default:
+            std::cout<<"Tried to read unused memory address: "<<addr;
+            exit(1);
     }
 }
 
 void MMU::write(uint16_t addr, uint8_t data) {
-    // Temporary ugly if statements
-    if (GAME_ROM_START <= addr && addr <= GAME_ROM_END) {
-        this->game_rom[addr] = data;
+    switch(addr & 0xe000) {
+            //Boot ROM/Game ROM
+        case GAME_ROM_START:
+        case GAME_ROM_START + 0x2000:
+        case GAME_ROM_START + 0x4000:
+        case GAME_ROM_START + 0x6000:
+            std::cout<<"Tried to write to ROM at address: "<<addr;
+            exit(1); //TODO: could write to ROM address when bankswitching
+
+            //Video RAM
+        case VRAM_START:
+            this->vram[addr - VRAM_START] = data;
+
+            //External RAM
+        case xRAM_START:
+            this->xram[addr - xRAM_START] = data;
+
+            //Work RAM
+        case RAM_START:
+            this->ram[addr - RAM_START] = data;
+
+            //OAM / IO / High RAM
+        case 0xe000:
+            if(OAM_START <= addr && addr <= OAM_END) {
+                this->oam[addr - OAM_START] = data;
+            } else if (IO_START <= addr && addr <= IO_END) {
+                this->io[addr - IO_START] = data;
+            } else if (HRAM_START <= addr && addr <= HRAM_END) {
+                this->hram[addr - HRAM_START] = data;
+            }
+
+        default:
+            std::cout<<"Tried to write to unused memory address: "<<addr;
+            exit(1);
     }
 }
 

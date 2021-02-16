@@ -10,24 +10,24 @@
 #include <vector>
 #include <string>
 
-
-#define BOOT_ROM_START  0x0000
-#define BOOT_ROM_END    0x00ff
-#define GAME_ROM_START  0x0000
-#define GAME_ROM_END    0x7fff
-#define VRAM_START      0x8000
-#define VRAM_END        0x9fff
-#define xRAM_START      0xa000
-#define xRAM_END        0xbfff
-#define RAM_START       0xc000
-#define RAM_END         0xdfff
-#define OAM_START       0xfe00
-#define OAM_END         0xfe9f
-#define IO_START        0xff00
-#define IO_END          0xff7f
-#define HRAM_START      0xff80
-#define HRAM_END        0xffff
-
+#define ADDR_SPACE_START 0x0000
+#define BOOT_ROM_START   0x0000
+#define BOOT_ROM_END     0x00ff
+#define GAME_ROM_START   0x0000
+#define GAME_ROM_END     0x7fff
+#define VRAM_START       0x8000
+#define VRAM_END         0x9fff
+#define xRAM_START       0xa000
+#define xRAM_END         0xbfff
+#define RAM_START        0xc000
+#define RAM_END          0xdfff
+#define OAM_START        0xfe00
+#define OAM_END          0xfe9f
+#define IO_START         0xff00
+#define IO_END           0xff7f
+#define HRAM_START       0xff80
+#define HRAM_END         0xffff
+#define ADDR_SPACE_END   0xffff
 
 class MMU {
 public:
