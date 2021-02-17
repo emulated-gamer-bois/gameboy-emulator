@@ -7,6 +7,11 @@
 CPU::CPU(u_int16_t PC, std::shared_ptr<MMU> mmu) {
     this->PC = PC;
     this->memory = mmu;
+    SP.all_16 = 0x00;
+    AF.all_16 = 0x00;
+    BC.all_16 = 0x00;
+    DE.all_16 = 0x00;
+    HL.all_16 = 0x00;
 }
 
 void nop() {}
@@ -105,18 +110,111 @@ void CPU::decrement16(uint16_t &addr){
     addr-=1;
 }
 
-void CPU::decrement8(uint8_t &addr,bool setFlags){
-    if(setFlags){
-        setZNFlags(addr+1, true);
-        setHFlag(addr,0x1);
+void CPU::decrement8(uint8_t &addr,bool setFlags) {
+    if (setFlags) {
+        setZNFlags(addr + 1, true);
+        setHFlag(addr, 0x1);
     }
-    addr-=1;
+    addr -= 1;
+//Logical operations ******************
+}
+/**
+ * Executes AND with the A register and the given value
+ * stores the result in A
+ */
+void CPU::andA(uint8_t value) {
+    AF.high_8 &= value;
+    setZNFlags(AF.high_8, false);
+
+    //Sets H flag = 1, C = 0
+    AF.low_8 &= 0xC0;
+    AF.low_8 |= 0x20;
+}
+
+/**
+ * Executes XOR with the A register and the given value
+ * stores the result in A
+ */
+void CPU::xorA(uint8_t value) {
+    AF.high_8 ^= value;
+    setZNFlags(AF.high_8, false);
+
+    //Sets all flags except Z to 0
+    AF.low_8 &= 0x80;
+}
+
+/**
+ * Executes OR with the A register and the given value
+ * stores the result in A
+ */
+void CPU::orA(uint8_t value) {
+    AF.high_8 |= value;
+    setZNFlags(AF.high_8, false);
+
+    //Sets all flags except Z to 0
+    AF.low_8 &= 0x80;
+}
+
+/**
+ * Rotate left, d7 -> C flag and d7 -> d0
+ */
+void CPU::rlc(uint8_t &reg) {
+    auto d7 = (reg & 0x80) >> 0x07;
+    reg = (reg << 1) | d7;
+
+    //Sets C flag to d7
+    AF.low_8 = (AF.low_8 & 0xEF) | (d7 << 4);
+}
+
+/**
+ * Rotate left, C -> d0 and d7 -> C
+ */
+ void CPU::rl(uint8_t &reg) {
+    auto d7 = (reg & 0x80) >> 0x07;
+    reg = (reg << 1) | ((AF.low_8 >> 4) & 0x01);
+
+    //Sets C flag to d7
+    AF.low_8 = (AF.low_8 & 0xEF) | (d7 << 4);
+ }
+
+/**
+* Rotate right, d0 -> C flag and d0 -> d7
+*/
+void CPU::rrc(uint8_t &reg) {
+    auto d0 = reg & 0x01;
+    reg = (reg >> 1) | (d0 << 7);
+
+    //Sets C flag to d0
+    AF.low_8 = (AF.low_8 & 0xEF) | (d0 << 4);
+}
+
+/**
+ * Rotate left, C -> d7 and d0 -> C
+ */
+void CPU::rr(uint8_t &reg) {
+    auto d0 = reg & 0x01;
+    reg = (reg >> 1) | ((AF.low_8 << 3) & 0x80);
+
+    //Sets C flag to d7
+    AF.low_8 = (AF.low_8 & 0xEF) | (d0 << 4);
 }
 
 void CPU::execute_cycle() {
     switch (memory->read(PC++)) {
         case 0x00: //NOP
             nop();
+            break;
+        case 0x07: //RLCA
+            rlc(AF.high_8);
+            break;
+        case 0x0F: //RRCA
+            rrc(AF.high_8);
+            break;
+        case 0x17: //RLA
+            rl(AF.high_8);
+            break;
+        case 0x1F: //RRA
+            rr(AF.high_8);
             break;
         case 0x31: // LD SP, d16
             ldsp(memory->read(PC), memory->read(PC + 1), SP);
