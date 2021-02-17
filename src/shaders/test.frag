@@ -9,6 +9,11 @@ const float C1_MAX = 0.205f;
 const float C2_MAX = 0.565f;
 const float C3_MAX = 0.86f;
 
+uniform vec3 c1;
+uniform vec3 c2;
+uniform vec3 c3;
+uniform vec3 c4;
+
 void main() 
 {
 	vec4 texColor = texture(screenTex, texCoord);
@@ -16,19 +21,19 @@ void main()
 	vec3 color = texColor.rrr;
 	if (texColor.r <= C1_MAX)
 	{
-		color = vec3(8/255.f, 24/255.f, 32/255.f);
+		color = c1;
 	}
 	else if (texColor.r <= C2_MAX)
 	{
-		color = vec3(52/255.f, 104/255.f, 86/255.f);
+		color = c2;
 	}
 	else if (texColor.r <= C3_MAX)
 	{
-		color = vec3(136/255.f, 192/255.f, 12/255.f);
+		color = c3;
 	}
 	else
 	{
-		color = vec3(224/255.f, 248/255.f, 208/255.f);
+		color = c4;
 	}
 	fragmentColor = vec4(color, 1.f);
 }

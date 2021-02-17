@@ -6,7 +6,6 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 */
 
 #include <chrono> // std::chrono::system_clock::now()
-#include <iostream>
 
 #include "Application.h" // Implements
 #include "RenderView.h"
@@ -83,7 +82,7 @@ void Application::terminateSDL() {
 void Application::start() {
     initSDL();
 
-    RenderView renderView(2);
+    RenderView renderView;
 
     bool quit = false;
     auto startTime = std::chrono::system_clock::now();
@@ -106,7 +105,6 @@ void Application::start() {
             SDL_GetWindowSize(window, &w, &h);
             if (w != renderView.getWidth() || h != renderView.getHeight()) {
                 SDL_SetWindowSize(window, renderView.getWidth(), renderView.getHeight());
-                std::cout << renderView.getWidth() << "x" << renderView.getHeight() << std::endl;
             }
         }
 
@@ -120,8 +118,26 @@ void Application::start() {
         {
             SDL_Event event;
             while (SDL_PollEvent(&event)) {
-                if (event.type == SDL_QUIT) {
-                    quit = true;
+                switch (event.type) {
+                    case SDL_QUIT:
+                        quit = true;
+                        break;
+                    case SDL_KEYDOWN:
+                        switch( event.key.keysym.sym ){
+                            case SDLK_1:
+                                renderView.setPalette(PALETTE_POCKET);
+                                break;
+                            case SDLK_2:
+                                renderView.setPalette(PALETTE_DMG);
+                                break;
+                            case SDLK_3:
+                                renderView.setPalette(PALETTE_DMG_SMOOTH);
+                                break;
+                            case SDLK_4:
+                                break;
+                            default:
+                                break;
+                        }
                 }
             }
         }
@@ -148,7 +164,7 @@ void TEMP_setTexture(const char* filename, RenderView& rv) {
         return;
     }
 
-    uint8_t* redPixels = new uint8_t[pixelAmount];
+    auto* redPixels = new uint8_t[pixelAmount];
     for (int i = 0; i < pixelAmount; i += 1) {
         redPixels[i] = rgbPixels[i * 3];
     }

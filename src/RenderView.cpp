@@ -2,8 +2,9 @@
 
 using namespace glm;
 
-RenderView::RenderView(int screenMultiplier) {
+RenderView::RenderView(int screenMultiplier, Palette palette) {
     this->screenMultiplier = screenMultiplier;
+    this->palette = palette;
 
     // Initialize screen quad.
     screenVertices[0] = {-1.0f, -1.0f};
@@ -30,7 +31,7 @@ RenderView::RenderView(int screenMultiplier) {
     fxShaderProgram = 0; // TO-DO Implement post process fx
 }
 
-RenderView::RenderView() : RenderView(1) {}
+RenderView::RenderView() : RenderView(4, PALETTE_POCKET) {}
 
 void RenderView::render() const {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -41,6 +42,11 @@ void RenderView::render() const {
     glUseProgram(renderShaderProgram);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, screenTexture);
+
+    glUniform3f(glGetUniformLocation(renderShaderProgram, "c1"), palette.c1.r, palette.c1.g, palette.c1.b);
+    glUniform3f(glGetUniformLocation(renderShaderProgram, "c2"), palette.c2.r, palette.c2.g, palette.c2.b);
+    glUniform3f(glGetUniformLocation(renderShaderProgram, "c3"), palette.c3.r, palette.c3.g, palette.c3.b);
+    glUniform3f(glGetUniformLocation(renderShaderProgram, "c4"), palette.c4.r, palette.c4.g, palette.c4.b);
 
     glBindVertexArray(vertexArrayObject);
     glDrawArrays(GL_TRIANGLES, 0, VERTEX_AMOUNT);
@@ -62,6 +68,10 @@ void RenderView::setScreenTexture(uint8_t textureData[]) {
                  GL_UNSIGNED_BYTE,
                  textureData);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void RenderView::setPalette(Palette palette) {
+    this->palette = palette;
 }
 
 int RenderView::getWidth() const {

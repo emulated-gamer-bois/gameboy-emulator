@@ -17,7 +17,8 @@ add_executable ( ${PROJECT_NAME}
         RenderView.h
         RenderView.cpp
         Application.h
-        Application.cpp)
+        Application.cpp
+        Palette.h)
 
 target_link_libraries ( ${PROJECT_NAME} labhelper )
 config_build_output()
