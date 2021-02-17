@@ -29,18 +29,22 @@
 #define HRAM_END         0xfffe
 #define INTERRUPT_ENABLE 0xffff
 #define ADDR_SPACE_END   0xffff
+#define IO_DISABLE_BOOT_ROM 0xff50
 
 class MMU {
 public:
     MMU();
     uint8_t read(uint16_t addr);
     void write(uint16_t addr, uint8_t data);
-    void disable_boot_rom();
     void load_rom(std::string filepath);
-    void write_ONLY_IN_TESTS(uint16_t addr, uint8_t data);
+    void write_GAME_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data);
+    void write_BOOT_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data);
 
 
 private:
+    void write_io(uint16_t addr, uint8_t data);
+    void disable_boot_rom();
+
     // Using vector for memory with variable size; game_rom and xram.
     std::vector<uint8_t> game_rom;
     std::vector<uint8_t> xram;
