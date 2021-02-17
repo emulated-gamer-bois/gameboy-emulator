@@ -5,7 +5,7 @@
 #ifndef LAME_BOY_MMU_H
 #define LAME_BOY_MMU_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <array>
 #include <vector>
 #include <string>
@@ -26,7 +26,8 @@
 #define IO_START         0xff00
 #define IO_END           0xff7f
 #define HRAM_START       0xff80
-#define HRAM_END         0xffff
+#define HRAM_END         0xfffe
+#define INTERRUPT_ENABLE 0xffff
 #define ADDR_SPACE_END   0xffff
 
 class MMU {
@@ -53,6 +54,7 @@ private:
     std::array<uint8_t, 128> hram;
 
     bool booting;
+    uint8_t interrupt_enable;
 
 };
 
