@@ -45,6 +45,42 @@ TEST(MMU, disable_boot_rom){
     ASSERT_EQ(mmu->read(0x00), 0x00);
 }
 
+TEST(MMU, joypad){
+    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
+
+    mmu->write(IO_JOYPAD, JOYPAD_SEL_BUTTONS);
+    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1111);
+    mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
+    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1111);
+
+    // Press Left button
+    mmu->joypad_press(JOYPAD_LEFT);
+    mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
+    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1101);
+
+//    // Press Down button
+//    mmu->joypad_press(JOYPAD_DOWN);
+//    mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
+//    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b0101);
+//
+//    // Press Select button
+//    mmu->joypad_press(JOYPAD_SELECT);
+//    mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
+//    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b0101);
+//
+//    mmu->write(IO_JOYPAD, JOYPAD_SEL_BUTTONS);
+//    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1011);
+//
+//    // Release Down button
+//    mmu->joypad_release(JOYPAD_DOWN);
+//
+//    mmu->write(IO_JOYPAD, JOYPAD_SEL_BUTTONS);
+//    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1011);
+//
+//    mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
+//    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1101);
+}
+
 //TEST(MMU, load_rom){
 //    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
 //    mmu->disable_boot_rom();

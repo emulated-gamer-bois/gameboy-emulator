@@ -26,6 +26,9 @@ MMU::MMU() {
     this->booting = true;
     // Enable all interrupts by default
     this->interrupt_enable = 0b11111;
+
+    // No buttons pressed by default
+    this->io_joypad = 0xff;
 }
 
 uint8_t MMU::read(uint16_t addr) {
@@ -57,7 +60,7 @@ uint8_t MMU::read(uint16_t addr) {
             if(OAM_START <= addr && addr <= OAM_END) {
                 return this->oam[addr - OAM_START];
             } else if (IO_START <= addr && addr <= IO_END) {
-                return this->io[addr - IO_START];
+                return this->read_io(addr);
             } else if (HRAM_START <= addr && addr <= HRAM_END) {
                 return this->hram[addr - HRAM_START];
             } else if (addr == INTERRUPT_ENABLE) {
@@ -176,5 +179,27 @@ void MMU::write_BOOT_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data) {
 void MMU::write_io(uint16_t addr, uint8_t data) {
     if (addr == IO_DISABLE_BOOT_ROM) {
         if (data != 0) this->disable_boot_rom();
+    } else if (addr == IO_JOYPAD) {
+        this->io_joypad_select = data;
     }
+}
+
+uint8_t MMU::read_io(uint16_t addr) {
+    if (addr == IO_JOYPAD) {
+        if ((this->io_joypad_select & JOYPAD_SEL_DIRECTIONS)) {
+            return ((this->io_joypad >> 0) & 0xf);
+        } else {
+            return ((this->io_joypad >> 4) & 0xf);
+        }
+    }
+}
+
+void MMU::joypad_release(uint8_t button) {
+    auto temp = this->io_joypad;
+    this->io_joypad = temp | (1 << button);
+}
+
+void MMU::joypad_press(uint8_t button) {
+    uint8_t temp = this->io_joypad;
+    this->io_joypad = (temp & ~(1 << button));
 }
