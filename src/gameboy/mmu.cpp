@@ -101,7 +101,7 @@ void MMU::write(uint16_t addr, uint8_t data) {
                 this->oam[addr - OAM_START] = data;
                 break;
             } else if (IO_START <= addr && addr <= IO_END) {
-                this->io[addr - IO_START] = data;
+                this->write_io(addr, data);
                 break;
             } else if (HRAM_START <= addr && addr <= HRAM_END) {
                 this->hram[addr - HRAM_START] = data;
@@ -153,50 +153,28 @@ void MMU::load_rom(std::string filepath) {
     }
 }
 
-//IS ONLY TO BE USED IN TESTS. CAN WRITE TO ROM
-void MMU::write_ONLY_IN_TESTS(uint16_t addr, uint8_t data) {
-    switch(addr & 0xe000) {
-        //Boot ROM/Game ROM
-        case GAME_ROM_START:
-        case GAME_ROM_START + 0x2000:
-        case GAME_ROM_START + 0x4000:
-        case GAME_ROM_START + 0x6000:
-            this->game_rom[addr] = data;
-            break;
+// ONLY TO BE USED IN TESTS. CAN WRITE TO GAME ROM
+void MMU::write_GAME_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data) {
+    if (GAME_ROM_START <= addr && addr <= GAME_ROM_END) {
+        this->game_rom[addr] = data;
+    } else {
+        std::cout << "Tried to use function MMU::write_GAME_ROM_ONLY_IN_TESTS with addr: " << addr << std::endl;
+        exit(1);
+    }
+}
 
-            //Video RAM
-        case VRAM_START:
-            this->vram[addr - VRAM_START] = data;
-            break;
+// ONLY TO BE USED IN TESTS. CAN WRITE TO BOOT ROM
+void MMU::write_BOOT_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data) {
+    if (BOOT_ROM_START <= addr && addr <= BOOT_ROM_END) {
+        this->boot_rom[addr] = data;
+    } else {
+        std::cout << "Tried to use function MMU::write_BOOT_ROM_ONLY_IN_TESTS with addr: " << addr << std::endl;
+        exit(1);
+    }
+}
 
-            //External RAM
-        case xRAM_START:
-            this->xram[addr - xRAM_START] = data;
-            break;
-
-            //Work RAM
-        case RAM_START:
-            this->ram[addr - RAM_START] = data;
-            break;
-
-            //OAM / IO / High RAM
-        case 0xe000:
-            if(OAM_START <= addr && addr <= OAM_END) {
-                this->oam[addr - OAM_START] = data;
-                break;
-            } else if (IO_START <= addr && addr <= IO_END) {
-                this->io[addr - IO_START] = data;
-                break;
-            } else if (HRAM_START <= addr && addr <= HRAM_END) {
-                this->hram[addr - HRAM_START] = data;
-                break;
-            } else if (addr == INTERRUPT_ENABLE) {
-                this->interrupt_enable = data;
-                break;
-            }
-
-        default:
-            std::cout<<"Tried to write to unused memory address: "<<addr;
-            exit(1);
+void MMU::write_io(uint16_t addr, uint8_t data) {
+    if (addr == IO_DISABLE_BOOT_ROM) {
+        if (data != 0) this->disable_boot_rom();
     }
 }

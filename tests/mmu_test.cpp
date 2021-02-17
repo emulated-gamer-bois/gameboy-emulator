@@ -9,24 +9,40 @@
 
 TEST(MMU, read_write){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    mmu->disable_boot_rom();
 
-    mmu->write_ONLY_IN_TESTS(0x30, 0xa1);
+    // Disable boot ROM
+    mmu->write(0xff50, 0x01);
+
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(0x30, 0xa1);
     ASSERT_EQ(mmu->read(0x30), 0xa1);
 
-    mmu->write_ONLY_IN_TESTS(0x30, 0xd5);
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(0x30, 0xd5);
     ASSERT_EQ(mmu->read(0x30), 0xd5);
 }
 
 TEST(MMU, read_write_interrupt_enable){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    mmu->disable_boot_rom();
+
+    // Disable boot ROM
+    mmu->write(0xff50, 0x01);
 
     // Test default value
     ASSERT_EQ(mmu->read(0xffff), 0x1f);
 
     mmu->write(0xffff, 0x0a);
     ASSERT_EQ(mmu->read(0xffff), 0x0a);
+}
+
+TEST(MMU, disable_boot_rom){
+    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
+
+    mmu->write_BOOT_ROM_ONLY_IN_TESTS(0x00, 0x55);
+    ASSERT_EQ(mmu->read(0x00), 0x55);
+
+    // Disable boot ROM
+    mmu->write(0xff50, 0x01);
+
+    ASSERT_EQ(mmu->read(0x00), 0x00);
 }
 
 //TEST(MMU, load_rom){
