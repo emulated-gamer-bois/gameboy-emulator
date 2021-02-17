@@ -3,9 +3,10 @@
 //
 
 #include <memory>
-
+#include <bitset>
 #include "gtest/gtest.h"
 #include "../src/gameboy/cpu.h"
+
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
 
@@ -64,7 +65,7 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->getA(), 0x41);
 
     mmu->write(cpu->getPC(), 0x07); //RLCA
-    mmu->write(cpu->getPC()+1, 0x07);
+    mmu->write(cpu->getPC() + 1, 0x07);
     cpu->execute_cycle();
     ASSERT_EQ(cpu->getA(), 0x82);
     cpu->execute_cycle();
@@ -77,7 +78,7 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->getFlags() & 0x10, 0x00);
 
     mmu->write(cpu->getPC(), 0x0F); //RRCA
-    mmu->write(cpu->getPC()+1, 0x0F);
+    mmu->write(cpu->getPC() + 1, 0x0F);
     cpu->execute_cycle();
     ASSERT_EQ(cpu->getA(), 0x85);
     ASSERT_EQ(cpu->getFlags() & 0x10, 0x10);
@@ -87,6 +88,80 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->getA(), 0xC2);
     ASSERT_EQ(cpu->getFlags() & 0x10, 0x10);
 
+
+    mmu->write(cpu->getPC(), 0x80); //ADD B
+    cpu->setA(5);
+    cpu->setB(14);
+    uint8_t val = cpu->getA() + cpu->getB();
+    cpu->execute_cycle();
+    ASSERT_EQ(cpu->getA(), val);
+    ASSERT_EQ(cpu->getFlags(), 0x20); // Only H-flag set.
+
+
+    mmu->write(cpu->getPC(), 0x90);//SUB B
+    cpu->setA(3);
+    cpu->setB(5);
+    val = cpu->getA() - cpu->getB();
+    cpu->execute_cycle();
+    std::string binVal = std::bitset<8>(val).to_string(); // converting to binary, might want to look over this
+    std::string binA = std::bitset<8>(cpu->getA()).to_string();
+    ASSERT_EQ(binVal, binA);
+    ASSERT_EQ(cpu->getFlags() & 0x40, 0x40);
+    //TODO uncertain if H-flag is supposed to be set here or not, not set atm.
+
+
+    mmu->write(cpu->getPC(), 0x80); //ADD B
+    cpu->setA(255);
+    cpu->setB(1);
+    val = cpu->getA() + cpu->getB();
+    cpu->execute_cycle();
+    ASSERT_EQ(cpu->getA(), val);
+    ASSERT_EQ(cpu->getFlags(), 0xB0); //Z,H and C.
+    mmu->write(cpu->getPC(), 0x88); //ADC B
+    cpu->setA(15);
+    cpu->setB(5);
+    val = cpu->getA() + cpu->getB();
+    cpu->execute_cycle();
+    ASSERT_EQ(cpu->getA(), val + 1);
+    ASSERT_EQ(cpu->getFlags(), 0x20); // Only H flag.
+
+
+    //setting C-flag for next test.
+    mmu->write(cpu->getPC(), 0x80); //ADD B
+    cpu->setA(255);
+    cpu->setB(1);
+    val = cpu->getA() + cpu->getB();
+    cpu->execute_cycle();
+    //C-flag set and rdy for SBC test.
+    mmu->write(cpu->getPC(), 0x98);//SBC B
+    cpu->setA(10);
+    cpu->setB(5);
+    val = cpu->getA() - cpu->getB();
+    cpu->execute_cycle();
+    ASSERT_EQ(cpu->getA(), val - 1);
+    ASSERT_EQ(cpu->getFlags() & 0x40, 0x40);
+    //TODO uncertain if H-flag is supposed to be set here or not, not set atm.
+
+    mmu->write(cpu->getPC(), 0x04); // INC B
+    int8_t prevB = cpu->getB();
+    cpu->execute_cycle();
+    ASSERT_EQ(cpu->getB(), prevB + 1);
+
+    mmu->write(cpu->getPC(), 0x05); // DEC B
+    prevB = cpu->getB();
+    cpu->execute_cycle();
+    ASSERT_EQ(cpu->getB(), prevB - 1);
+    ASSERT_EQ(cpu->getFlags() & 0x40, 0x40);
+
+    mmu->write(cpu->getPC(), 0x33); // INC SP
+    int8_t prevSP = cpu->getSP();
+    cpu->execute_cycle();
+    ASSERT_EQ(cpu->getSP(), prevSP + 1);
+
+    mmu->write(cpu->getPC(), 0x3B); // DEC SP
+    prevSP = cpu->getSP();
+    cpu->execute_cycle();
+    ASSERT_EQ(cpu->getSP(), prevSP - 1);
+
+
 }
-
-
