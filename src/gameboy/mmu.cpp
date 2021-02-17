@@ -24,6 +24,8 @@ MMU::MMU() {
                                               // Size depends on info in game rom header.
 
     this->booting = true;
+    // Enable all interrupts by default
+    this->interrupt_enable = 0b11111;
 }
 
 uint8_t MMU::read(uint16_t addr) {
@@ -58,6 +60,8 @@ uint8_t MMU::read(uint16_t addr) {
                 return this->io[addr - IO_START];
             } else if (HRAM_START <= addr && addr <= HRAM_END) {
                 return this->hram[addr - HRAM_START];
+            } else if (addr == INTERRUPT_ENABLE) {
+                return this->interrupt_enable;
             }
 
         default:
@@ -101,6 +105,9 @@ void MMU::write(uint16_t addr, uint8_t data) {
                 break;
             } else if (HRAM_START <= addr && addr <= HRAM_END) {
                 this->hram[addr - HRAM_START] = data;
+                break;
+            } else if (addr == INTERRUPT_ENABLE) {
+                this->interrupt_enable = data;
                 break;
             }
 
@@ -182,6 +189,9 @@ void MMU::write_ONLY_IN_TESTS(uint16_t addr, uint8_t data) {
                 break;
             } else if (HRAM_START <= addr && addr <= HRAM_END) {
                 this->hram[addr - HRAM_START] = data;
+                break;
+            } else if (addr == INTERRUPT_ENABLE) {
+                this->interrupt_enable = data;
                 break;
             }
 

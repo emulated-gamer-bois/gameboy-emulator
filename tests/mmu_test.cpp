@@ -18,6 +18,17 @@ TEST(MMU, read_write){
     ASSERT_EQ(mmu->read(0x30), 0xd5);
 }
 
+TEST(MMU, read_write_interrupt_enable){
+    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
+    mmu->disable_boot_rom();
+
+    // Test default value
+    ASSERT_EQ(mmu->read(0xffff), 0x1f);
+
+    mmu->write(0xffff, 0x0a);
+    ASSERT_EQ(mmu->read(0xffff), 0x0a);
+}
+
 //TEST(MMU, load_rom){
 //    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
 //    mmu->disable_boot_rom();
