@@ -68,8 +68,8 @@ uint8_t MMU::read(uint16_t addr) {
             }
 
         default:
-            std::cout<<"Tried to read unused memory address: "<<addr;
-            exit(1);
+            std::cout << "Tried to read unused memory address: " << addr << std::endl;
+            // TODO: Error handling
     }
 }
 
@@ -80,8 +80,9 @@ void MMU::write(uint16_t addr, uint8_t data) {
         case GAME_ROM_START + 0x2000:
         case GAME_ROM_START + 0x4000:
         case GAME_ROM_START + 0x6000:
-            std::cout<<"Tried to write to ROM at address: "<<addr;
-            exit(1); //TODO: could write to ROM address when bankswitching
+            std::cout << "Tried to write to ROM at address: " << addr << std::endl;
+            // TODO: Error handling
+            // TODO: could write to ROM addresses when bankswitching is implemented
 
             //Video RAM
         case VRAM_START:
@@ -115,8 +116,8 @@ void MMU::write(uint16_t addr, uint8_t data) {
             }
 
         default:
-            std::cout<<"Tried to write to unused memory address: "<<addr;
-            exit(1);
+            std::cout << "Tried to write to unused memory address: " << addr << std::endl;
+            // TODO: Error handling
     }
 }
 
@@ -151,8 +152,8 @@ void MMU::load_rom(std::string filepath) {
         delete[] memblock;
     }
     else {
-        std::cout << "Unable to open file";
-        exit(1);
+        std::cout << "Unable to open file: " << filepath << std::endl;
+        // TODO: Error handling
     }
 }
 
@@ -161,8 +162,8 @@ void MMU::write_GAME_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data) {
     if (GAME_ROM_START <= addr && addr <= GAME_ROM_END) {
         this->game_rom[addr] = data;
     } else {
-        std::cout << "Tried to use function MMU::write_GAME_ROM_ONLY_IN_TESTS with addr: " << addr << std::endl;
-        exit(1);
+        std::cout << "Tried to use write_GAME_ROM_ONLY_IN_TESTS with invalid addr: " << addr << std::endl;
+        // TODO: Error handling
     }
 }
 
@@ -171,8 +172,8 @@ void MMU::write_BOOT_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data) {
     if (BOOT_ROM_START <= addr && addr <= BOOT_ROM_END) {
         this->boot_rom[addr] = data;
     } else {
-        std::cout << "Tried to use function MMU::write_BOOT_ROM_ONLY_IN_TESTS with addr: " << addr << std::endl;
-        exit(1);
+        std::cout << "Tried to use write_BOOT_ROM_ONLY_IN_TESTS with invalid addr: " << addr << std::endl;
+        // TODO: Error handling
     }
 }
 
