@@ -655,6 +655,101 @@ void CPU::execute_cycle() {
         case 0x9F:
             subA(AF.high_8, true);
             break;
+        case 0xA0:
+            andA(BC.high_8);
+            break;
+        case 0xA1:
+            andA(BC.low_8);
+            break;
+        case 0xA2:
+            andA(DE.high_8);
+            break;
+        case 0xA3:
+            andA(DE.low_8);
+            break;
+        case 0xA4:
+            andA(HL.high_8);
+            break;
+        case 0xA5:
+            andA(HL.low_8);
+            break;
+        case 0xA6:
+            andA(memory->read(HL.all_16));
+            break;
+        case 0xA7:
+            andA(AF.high_8);
+            break;
+        case 0xA8:
+            xorA(BC.high_8);
+            break;
+        case 0xA9:
+            xorA(BC.low_8);
+            break;
+        case 0xAA:
+            xorA(DE.high_8);
+            break;
+        case 0xAB:
+            xorA(DE.low_8);
+            break;
+        case 0xAC:
+            xorA(HL.high_8);
+            break;
+        case 0xAD:
+            xorA(HL.low_8);
+            break;
+        case 0xAE:
+            xorA(memory->read(HL.all_16));
+            break;
+        case 0xAF:
+            xorA(AF.high_8);
+            break;
+        case 0xB0:
+            orA(BC.high_8);
+            break;
+        case 0xB1:
+            orA(BC.low_8);
+            break;
+        case 0xB2:
+            orA(DE.high_8);
+            break;
+        case 0xB3:
+            orA(DE.low_8);
+            break;
+        case 0xB4:
+            orA(HL.high_8);
+            break;
+        case 0xB5:
+            orA(HL.low_8);
+            break;
+        case 0xB6:
+            orA(memory->read(HL.all_16));
+            break;
+        case 0xB7:
+            orA(AF.high_8);
+            break;
+        case 0xC6:
+            addA(read_and_inc_pc(),false);
+            break;
+        case 0xD6:
+            subA(read_and_inc_pc(),false);
+            break;
+        case 0xE6:
+            andA(read_and_inc_pc());
+            break;
+        case 0xF6:
+            orA(read_and_inc_pc());
+            break;
+        case 0xCE:
+            addA(read_and_inc_pc(),true);
+            break;
+        case 0xDE:
+            subA(read_and_inc_pc(),true);
+            break;
+        case 0xEE:
+            xorA(read_and_inc_pc());
+            break;
+
+
         default:
             nop();
             break;
