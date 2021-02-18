@@ -132,4 +132,18 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     prevSP = cpu->SP.all_16;
     cpu->decrement16(cpu->SP.all_16);
     ASSERT_EQ(cpu->SP.all_16, prevSP - 1);
+
+    cpu->loadIm16(0xDC, 0xFE, cpu->HL);
+    ASSERT_EQ(cpu->HL.all_16, 0xFEDC);
+
+    cpu->loadIm8(0xBA, cpu->HL.low_8);
+    ASSERT_EQ(cpu->HL.all_16, 0xFEBA);
+
+    //RAM: 0xC000 to 0xE000
+    mmu->write(0xC001, 0x98);
+    cpu->loadImp(cpu->HL.high_8, 0xC001);
+    ASSERT_EQ(cpu->HL.all_16, 0x98BA);
+
+    cpu->storeAddr(0xC002, cpu->HL.low_8);
+    ASSERT_EQ(mmu->read(0xC002), 0xBA);
 }
