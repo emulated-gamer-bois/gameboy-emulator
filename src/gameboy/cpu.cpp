@@ -207,21 +207,18 @@ void CPU::rr(uint8_t &reg) {
 }
 
 /**
- * Every time we read, we want to increment PC. This also works for reading n,n+1 as it increments
- * it procedurally.
- * Ugly name, but it describes
+ * Every time we read PC, we want to increment it.
  * */
 uint16_t CPU::read_and_inc_pc() {
     return memory->read(PC++);
 }
-
 uint16_t combine_bytes(uint8_t first_byte, uint8_t second_byte) {
     //first byte low, second high.
     return second_byte << 8 | first_byte;
 }
 
 void CPU::execute_cycle() {
-    switch (memory->read(PC++)) {
+    switch (read_and_inc_pc()) {
         case 0x00:
             nop();
             break;
@@ -345,7 +342,8 @@ void CPU::execute_cycle() {
             loadIm8(HL.low_8,read_and_inc_pc());
             break;
         case 0x31:
-            loadIm16(read_and_inc_pc(), read_and_inc_pc(),SP);
+            loadIm16(memory->read(PC), memory->read(PC + 1), SP);
+            PC += 2;
             break;
         case 0x32:
             storeAddr(HL.all_16, AF.high_8);
@@ -426,10 +424,6 @@ void CPU::execute_cycle() {
         case 0x4F:
             loadIm8(BC.low_8,AF.high_8);
             break;
-
-
-
-
         case 0x50:
             loadIm8(DE.high_8,BC.high_8);
             break;
@@ -544,35 +538,33 @@ void CPU::execute_cycle() {
         case 0x75:
             storeAddr(HL.all_16,HL.low_8);
             break;
-        case 0x67:
-            loadIm8(HL.high_8,AF.high_8);
+        case 0x77:
+            storeAddr(HL.all_16,AF.high_8);
             break;
-        case 0x68:
-            loadIm8(HL.low_8,BC.high_8);
+        case 0x78:
+            loadIm8(AF.high_8,BC.high_8);
             break;
-        case 0x69:
-            loadIm8(HL.low_8,BC.low_8);
+        case 0x79:
+            loadIm8(AF.high_8,BC.low_8);
             break;
-        case 0x6A:
-            loadIm8(HL.low_8,DE.high_8);
+        case 0x7A:
+            loadIm8(AF.high_8,DE.high_8);
             break;
-        case 0x6B:
-            loadIm8(HL.low_8,DE.low_8);
+        case 0x7B:
+            loadIm8(AF.high_8,DE.low_8);
             break;
-        case 0x6C:
-            loadIm8(HL.low_8,HL.high_8);
+        case 0x7C:
+            loadIm8(AF.high_8,HL.high_8);
             break;
-        case 0x6D:
-            loadIm8(HL.low_8,HL.low_8);
+        case 0x7D:
+            loadIm8(AF.high_8,HL.low_8);
             break;
-        case 0x6E:
-            loadIm8(HL.low_8,memory->read(HL.all_16));
+        case 0x7E:
+            loadIm8(AF.high_8,memory->read(HL.all_16));
             break;
-        case 0x6F:
-            loadIm8(HL.low_8,AF.high_8);
+        case 0x7F:
+            loadIm8(AF.high_8,AF.high_8);
             break;
-
-
         case 0x80:
             addA(BC.high_8, false);
             break;
