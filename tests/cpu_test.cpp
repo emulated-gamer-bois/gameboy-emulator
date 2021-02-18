@@ -164,4 +164,32 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->popReg(cpu->HL);
     ASSERT_EQ(cpu->HL.all_16, 0x98BA);
     ASSERT_EQ(cpu->SP.all_16, prevSP);
+
+    cpu->jump(0xC123);
+    ASSERT_EQ(cpu->PC, 0xC123);
+    cpu->AF.low_8 |= 0x80;
+    cpu->jumpZ(0xD123, true);
+    ASSERT_EQ(cpu->PC, 0xD123);
+    cpu->jumpZ(0xC123, false);
+    ASSERT_EQ(cpu->PC, 0xD123);
+    cpu->AF.low_8 &= 0x7F;
+    cpu->jumpZ(0xC123, false);
+    ASSERT_EQ(cpu->PC, 0xC123);
+    cpu->jumpZ(0xB123, true);
+    ASSERT_EQ(cpu->PC, 0xC123);
+
+    cpu->branch(0x02);
+    ASSERT_EQ(cpu->PC, 0xC125);
+    cpu->branch(-0x02);
+    ASSERT_EQ(cpu->PC, 0xC123);
+    cpu->AF.low_8 |= 0x80;
+    cpu->branchZ(0x10, true);
+    ASSERT_EQ(cpu->PC, 0xC133);
+    cpu->branchZ(0x10, false);
+    ASSERT_EQ(cpu->PC, 0xC133);
+    cpu->AF.low_8 &= 0x7F;
+    cpu->branchZ(-0x20, false);
+    ASSERT_EQ(cpu->PC, 0xC113);
+    cpu->branchZ(0x10, true);
+    ASSERT_EQ(cpu->PC, 0xC113);
 }

@@ -236,6 +236,36 @@ void CPU::popReg(RegisterPair &reg) {
     reg.high_8 = memory->read(SP.all_16++);
 }
 
+/**
+ * Jumps immediately to the specified address
+ */
+void CPU::jump(uint16_t addr) {
+    PC = addr;
+}
+
+/*
+ * Jumps immediately to the specified address if Z is one or zero
+ * depending on the if_one parameter
+ */
+void CPU::jumpZ(uint16_t addr, bool if_one) {
+    if(!if_one  ==  !(AF.low_8 & 0x80)) PC = addr;
+}
+
+/**
+ * Increments PC with the given number of steps
+ */
+void CPU::branch(int8_t steps) {
+    PC += steps;
+}
+
+/*
+ * Increments PC with the given number of steps if Z is one or zero
+ * depending on the if_one parameter
+ */
+void CPU::branchZ(int8_t steps, bool if_one) {
+    if(!if_one  ==  !(AF.low_8 & 0x80)) PC += steps;
+}
+
 
 void CPU::execute_cycle() {
     switch (memory->read(PC++)) {

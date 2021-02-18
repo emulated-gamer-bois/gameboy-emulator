@@ -88,6 +88,14 @@ private:
     void popReg(RegisterPair &reg);
     void pushReg(RegisterPair &reg);
 
+    //Jump and Branch
+    //Jump (aka JP)   = Jump to the specified address
+    //Branch (aka JR) = Jump a specified number of steps from PC
+    void jump(uint16_t addr);
+    void jumpZ(uint16_t addr, bool if_one);
+    void branch(int8_t steps);
+    void branchZ(int8_t steps, bool if_one);
+
     //Other
     void compareA(uint8_t value);
 
