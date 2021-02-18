@@ -27,8 +27,8 @@ void CPU::setZNFlags(uint8_t newValue, bool subtraction) {
     AF.low_8 |= newValue == 0x00 ? 0x80 : 0x00;
 
     //Set the N flag if operation is subtraction
-    AF.low_8 |= subtraction ? 0x40 : 0x00;
     AF.low_8 &= !subtraction ? 0xBF : 0xFF;
+    AF.low_8 |= subtraction ? 0x40 : 0x00;
 }
 
 void CPU::setHFlag(uint8_t a, uint8_t b) {
@@ -45,12 +45,12 @@ void CPU::setCFlag(uint8_t a, uint8_t b) {
     AF.low_8 |= CFlag;
 }
 
-void loadIm16(uint8_t firstByte, uint8_t secondByte, RegisterPair &reg) {
+void CPU::loadIm16(uint8_t firstByte, uint8_t secondByte, RegisterPair &reg) {
     reg.low_8 = firstByte;
     reg.high_8 = secondByte;
 }
 
-void loadIm8(uint8_t firstByte, uint8_t &reg) {
+void CPU::loadIm8(uint8_t firstByte, uint8_t &reg) {
     reg = firstByte;
 }
 
@@ -72,9 +72,9 @@ void CPU::storeAddr(uint16_t addr, uint8_t value) {
  * stores the result in A. Can be done with or without carry.
  */
 void CPU::addA(uint8_t value, bool withCarry) {
-    auto CFlag = withCarry ? ((AF.low_8 & 0x10) > 0x04) : 0;
+    auto CFlag = withCarry ? ((AF.low_8 & 0x10) >> 0x04) : 0;
     setCFlag(AF.high_8, value + CFlag);
-    setHFlag(AF.high_8,value+CFlag);
+    setHFlag(AF.high_8,value + CFlag);
     AF.high_8 += value + CFlag;
     setZNFlags(AF.high_8, false);
 }
@@ -89,11 +89,11 @@ uint8_t twosComp(uint8_t value) {
  * currently subtracts 1 if set.
  */
 void CPU::subA(uint8_t value, bool withCarry) {
-    auto CFlag = withCarry ? ((AF.low_8 & 0x10) > 0x04) : 0;
-    auto twosCompVal = twosComp(value);
-    setHFlag(AF.high_8, twosCompVal - CFlag);
+    auto CFlag = withCarry ? ((AF.low_8 & 0x10) >> 0x04) : 0;
+    value = twosComp(value + CFlag);
     setCFlag(AF.high_8, value);
-    AF.high_8 += twosCompVal - CFlag;
+    setHFlag(AF.high_8, value);
+    AF.high_8 += value;
     setZNFlags(AF.high_8, true);
 }
 
@@ -101,7 +101,7 @@ void CPU::subA(uint8_t value, bool withCarry) {
  * Will have to consider the increment and decrement of 16 bit addresses where flags are to be set
  * later as well (HL).
  */
-void increment16(uint16_t &addr) {
+void CPU::increment16(uint16_t &addr) {
     addr += 1;
 }
 

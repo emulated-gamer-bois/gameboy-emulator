@@ -3,13 +3,8 @@
 //
 
 #include <memory>
-#include <bitset>
 #include "gtest/gtest.h"
 #include "../src/gameboy/cpu.h"
-
-#define FRIEND_TEST(test_case_name, test_name)\
-friend class test_case_name##_##test_name##_Test
-
 
 /*TEST(CPU, Execute_NOP_Instruction) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
@@ -84,71 +79,57 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->AF.high_8, 0xC2);
     ASSERT_EQ(cpu->AF.low_8 & 0x10, 0x10);
 
-    cpu->setA(5);
-    cpu->setB(14);
+    cpu->setA(0x05);
+    cpu->setB(0x0E);
     uint8_t val = cpu->AF.high_8 + cpu->BC.high_8;
     cpu->addA(cpu->BC.high_8, false);
     ASSERT_EQ(cpu->AF.high_8, val);
-    ASSERT_EQ(cpu->AF.low_8, 0x20); // Only H-flag set.
+    ASSERT_EQ(cpu->AF.low_8 & 0xF0 , 0x20); // Only H-flag set.
 
-    cpu->setA(3);
-    cpu->setB(5);
-    val = cpu->AF.high_8 - cpu->BC.high_8;
+    cpu->setA(8);
+    cpu->setB(8);
     cpu->subA(cpu->BC.high_8, false);
-    ASSERT_EQ(val, cpu->AF.high_8);
-    ASSERT_EQ(cpu->AF.low_8 & 0x40, 0x40);
-    //TODO uncertain if H-flag is supposed to be set here or not, not set atm.
+    ASSERT_EQ(0x00, cpu->AF.high_8);
+    ASSERT_EQ(cpu->AF.low_8 & 0xF0, 0xF0); // All flags set
 
-
-    mmu->write(cpu->PC, 0x80); //ADD B
     cpu->setA(255);
     cpu->setB(1);
     val = cpu->AF.high_8 + cpu->BC.high_8;
-    cpu->execute_cycle();
+    cpu->addA(cpu->BC.high_8, false);
     ASSERT_EQ(cpu->AF.high_8, val);
     ASSERT_EQ(cpu->AF.low_8, 0xB0); //Z,H and C.
-    mmu->write(cpu->PC, 0x88); //ADC B
+
     cpu->setA(15);
     cpu->setB(5);
     val = cpu->AF.high_8 + cpu->BC.high_8;
-    cpu->execute_cycle();
+    cpu->addA(cpu->BC.high_8, true);
     ASSERT_EQ(cpu->AF.high_8, val + 1);
     ASSERT_EQ(cpu->AF.low_8, 0x20); // Only H flag.
 
     //setting C-flag for next test.
-    mmu->write(cpu->PC, 0x80); //ADD B
-    cpu->setA(255);
-    cpu->setB(1);
-    val = cpu->AF.high_8 + cpu->BC.high_8;
-    cpu->execute_cycle();
-    //C-flag set and rdy for SBC test.
-    mmu->write(cpu->PC, 0x98);//SBC B
+    cpu->AF.low_8 |= 0x10;
+
     cpu->setA(10);
     cpu->setB(5);
     val = cpu->AF.high_8 - cpu->BC.high_8;
-    cpu->execute_cycle();
+    cpu->subA(cpu->BC.high_8, true);
     ASSERT_EQ(cpu->AF.high_8, val - 1);
-    ASSERT_EQ(cpu->AF.low_8 & 0x40, 0x40);
-    //TODO uncertain if H-flag is supposed to be set here or not, not set atm.
+    ASSERT_EQ(cpu->AF.low_8 & 0xF0, 0x70); //H, C, N set
 
-    mmu->write(cpu->PC, 0x04); // INC B
     int8_t prevB = cpu->BC.high_8;
-    cpu->execute_cycle();
+    cpu->increment8(cpu->BC.high_8);
     ASSERT_EQ(cpu->BC.high_8, prevB + 1);
 
-    mmu->write(cpu->PC, 0x05); // DEC B
     prevB = cpu->BC.high_8;
-    cpu->execute_cycle();
+    cpu->decrement8(cpu->BC.high_8);
     ASSERT_EQ(cpu->BC.high_8, prevB - 1);
     ASSERT_EQ(cpu->AF.low_8 & 0x40, 0x40);
 
-    mmu->write(cpu->PC, 0x33); // INC SP
     uint16_t prevSP = cpu->SP.all_16;
-    cpu->execute_cycle();
+    cpu->increment16(cpu->SP.all_16);
     ASSERT_EQ(cpu->SP.all_16, prevSP + 1);
 
-    mmu->write(cpu->PC, 0x3B); // DEC SP
     prevSP = cpu->SP.all_16;
-    cpu->execute_cycle();
+    cpu->decrement16(cpu->SP.all_16);
     ASSERT_EQ(cpu->SP.all_16, prevSP - 1);
 }

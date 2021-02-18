@@ -65,6 +65,7 @@ private:
     void addA(uint8_t value, bool withCarry);
     void subA(uint8_t value, bool withCarry);
     void increment8(uint8_t &addr);
+    void increment16(uint16_t &reg);
     void decrement8(uint8_t &addr);
     void decrement16(uint16_t &addr);
 
@@ -80,6 +81,8 @@ private:
     //Read and write memory
     void storeAddr(uint16_t addr, uint8_t value);
     void loadImp(uint8_t &reg, uint16_t addr);
+    void loadIm16(uint8_t firstByte, uint8_t secondByte, RegisterPair &reg);
+    void loadIm8(uint8_t firstByte, uint8_t &reg);
 
     FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);
 };

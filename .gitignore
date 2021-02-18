@@ -21,3 +21,4 @@ Makefile
 *.cmake
 CMakeCache.txt
 *.a
+cmake-build-debug-coverage/
