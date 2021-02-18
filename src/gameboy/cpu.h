@@ -34,7 +34,7 @@ private:
 
 class CPU {
 public:
-    CPU(u_int16_t, std::shared_ptr<MMU>);
+    CPU(uint16_t, uint16_t, std::shared_ptr<MMU>);
 
     /**
      * Fetches, decodes and executes the instruction at location PC
@@ -83,6 +83,13 @@ private:
     void loadImp(uint8_t &reg, uint16_t addr);
     void loadIm16(uint8_t firstByte, uint8_t secondByte, RegisterPair &reg);
     void loadIm8(uint8_t firstByte, uint8_t &reg);
+
+    //Stack functions
+    void popReg(RegisterPair &reg);
+    void pushReg(RegisterPair &reg);
+
+    //Other
+    void compareA(uint8_t value);
 
     FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);
 };

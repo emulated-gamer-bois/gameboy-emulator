@@ -4,10 +4,10 @@
 
 #include "cpu.h"
 
-CPU::CPU(u_int16_t PC, std::shared_ptr<MMU> mmu) {
+CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
     this->PC = PC;
     this->memory = mmu;
-    SP.all_16 = 0x00;
+    this->SP.all_16 = SP;
     AF.all_16 = 0x00;
     BC.all_16 = 0x00;
     DE.all_16 = 0x00;
@@ -205,6 +205,37 @@ void CPU::rr(uint8_t &reg) {
     //Sets C flag to d7
     AF.low_8 = (AF.low_8 & 0xEF) | (d0 << 4);
 }
+
+/**
+ * Executes subtraction between value and register A and sets flags accordingly
+ * the result is not saved
+ */
+void CPU::compareA(uint8_t value) {
+    value = twosComp(value);
+    setCFlag(AF.high_8, value);
+    setHFlag(AF.high_8, value);
+    setZNFlags(AF.high_8 + value, true);
+}
+
+
+/**
+ * Stores the value of the given reg on the stack
+ * SP is adjusted accordingly
+ */
+void CPU::pushReg(RegisterPair &reg) {
+    memory->write(--SP.all_16, reg.high_8);
+    memory->write(--SP.all_16, reg.low_8);
+}
+
+/**
+ * Stores the first two bytes from the stack in the given reg
+ * SP is adjusted accordingly
+ */
+void CPU::popReg(RegisterPair &reg) {
+    reg.low_8 = memory->read(SP.all_16++);
+    reg.high_8 = memory->read(SP.all_16++);
+}
+
 
 void CPU::execute_cycle() {
     switch (memory->read(PC++)) {

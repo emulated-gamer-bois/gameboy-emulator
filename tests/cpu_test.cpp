@@ -32,7 +32,7 @@ TEST(CPU, Execute_LD_SP_D16_Instruction) {
 
 TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<CPU> cpu(new CPU(0x00, mmu));
+    std::unique_ptr<CPU> cpu(new CPU(0x00, 0xC100, mmu));
 
     cpu->setZNFlags(0x00, false);
     ASSERT_EQ(cpu->AF.low_8 & 0x80, 0x80);
@@ -146,4 +146,22 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
 
     cpu->storeAddr(0xC002, cpu->HL.low_8);
     ASSERT_EQ(mmu->read(0xC002), 0xBA);
+
+    cpu->setA(0xAB);
+    cpu->compareA(0xAB);
+    ASSERT_EQ(cpu->AF.low_8 & 0xF0, 0xF0);
+
+    cpu->compareA(0xA0);
+    ASSERT_EQ(cpu->AF.low_8 & 0xF0, 0x50);
+
+    //RAM: 0xC000 to 0xE000
+    prevSP = cpu->SP.all_16;
+    cpu->HL.all_16 = 0x98BA;
+    cpu->pushReg(cpu->HL);
+    cpu->HL.all_16 = 0x1234;
+    ASSERT_NE(cpu->HL.all_16, 0x98BA);
+    ASSERT_EQ(cpu->SP.all_16, prevSP - 2);
+    cpu->popReg(cpu->HL);
+    ASSERT_EQ(cpu->HL.all_16, 0x98BA);
+    ASSERT_EQ(cpu->SP.all_16, prevSP);
 }
