@@ -16,11 +16,6 @@ CPU::CPU(uint16_t PC, std::shared_ptr<MMU> mmu) {
 
 void nop() {}
 
-void ldsp(uint8_t first_byte, uint8_t second_byte, RegisterPair &SP) {
-    SP.low_8 = first_byte;
-    SP.high_8 = second_byte;
-}
-
 void CPU::setZNFlags(uint8_t newValue, bool subtraction) {
     //Sets the Z flag to 1 if newValue == 0
     AF.low_8 &= 0x7F;
