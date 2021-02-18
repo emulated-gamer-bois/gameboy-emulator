@@ -50,11 +50,11 @@ void loadIm16(uint8_t firstByte, uint8_t secondByte, RegisterPair &reg) {
     reg.high_8 = secondByte;
 }
 
-void loadIm8(uint8_t firstByte, uint8_t &reg) {
+void loadIm8(uint8_t &reg, uint8_t firstByte) {
     reg = firstByte;
 }
 
-void CPU::loadImp(uint8_t &reg, uint16_t addr) {
+void CPU::loadImp(uint16_t addr, uint8_t &reg) {
     reg = memory->read(addr);
 }
 
@@ -74,7 +74,7 @@ void CPU::storeAddr(uint16_t addr, uint8_t value) {
 void CPU::addA(uint8_t value, bool withCarry) {
     auto CFlag = withCarry ? ((AF.low_8 & 0x10) > 0x04) : 0;
     setCFlag(AF.high_8, value + CFlag);
-    setHFlag(AF.high_8,value+CFlag);
+    setHFlag(AF.high_8, value + CFlag);
     AF.high_8 += value + CFlag;
     setZNFlags(AF.high_8, false);
 }
@@ -206,10 +206,30 @@ void CPU::rr(uint8_t &reg) {
     AF.low_8 = (AF.low_8 & 0xEF) | (d0 << 4);
 }
 
+/**
+ * Every time we read, we want to increment PC. This also works for reading n,n+1 as it increments
+ * it procedurally.
+ * Ugly name, but it describes
+ * */
+uint16_t CPU::read_and_inc_pc() {
+    return memory->read(PC++);
+}
+
+uint16_t combine_bytes(uint8_t first_byte, uint8_t second_byte) {
+    //first byte low, second high.
+    return second_byte << 8 | first_byte;
+}
+
 void CPU::execute_cycle() {
     switch (memory->read(PC++)) {
         case 0x00:
             nop();
+            break;
+        case 0x01:
+            loadIm16(read_and_inc_pc(), read_and_inc_pc(), BC);
+            break;
+        case 0x02:
+            storeAddr(BC.all_16, AF.high_8);
             break;
         case 0x03:
             increment16(BC.all_16);
@@ -220,8 +240,20 @@ void CPU::execute_cycle() {
         case 0x05:
             decrement8(BC.high_8);
             break;
+        case 0x06:
+            loadIm8(BC.high_8,read_and_inc_pc());
+            break;
         case 0x07: //RLCA
             rlc(AF.high_8);
+            break;
+        case 0x08:
+            //special case, not using read_and_inc PC
+            storeAddr(combine_bytes(memory->read(PC), memory->read(PC + 1)), SP.low_8);
+            storeAddr(combine_bytes(memory->read(PC), memory->read(PC + 1)) + 1, SP.high_8);
+            PC += 2;
+            break;
+        case 0x0A:
+            loadImp(BC.all_16, AF.high_8);
             break;
         case 0x0B:
             decrement16(BC.all_16);
@@ -232,8 +264,17 @@ void CPU::execute_cycle() {
         case 0x0D:
             decrement8(BC.low_8);
             break;
+        case 0x0E:
+            loadIm8(BC.low_8,read_and_inc_pc());
+            break;
         case 0x0F: //RRCA
             rrc(AF.high_8);
+            break;
+        case 0x11:
+            loadIm16(read_and_inc_pc(), read_and_inc_pc(), DE);
+            break;
+        case 0x12:
+            storeAddr(DE.all_16, AF.high_8);
             break;
         case 0x13:
             increment16(DE.all_16);
@@ -244,8 +285,14 @@ void CPU::execute_cycle() {
         case 0x15:
             decrement8(DE.high_8);
             break;
+        case 0x16:
+            loadIm8( DE.high_8,read_and_inc_pc());
+            break;
         case 0x17: //RLA
             rl(AF.high_8);
+            break;
+        case 0x1A:
+            loadImp(DE.all_16, AF.high_8);
             break;
         case 0x1B:
             decrement16(DE.all_16);
@@ -256,8 +303,18 @@ void CPU::execute_cycle() {
         case 0x1D:
             decrement8(DE.low_8);
             break;
+        case 0x1E:
+            loadIm8(DE.low_8,read_and_inc_pc());
+            break;
         case 0x1F: //RRA
             rr(AF.high_8);
+            break;
+        case 0x21:
+            loadIm16(read_and_inc_pc(), read_and_inc_pc(), HL);
+            break;
+        case 0x22:
+            storeAddr(HL.all_16, AF.high_8);
+            increment16(HL.all_16);
             break;
         case 0x23:
             increment16(HL.all_16);
@@ -268,6 +325,13 @@ void CPU::execute_cycle() {
         case 0x25:
             decrement8(HL.high_8);
             break;
+        case 0x26:
+            loadIm8(HL.high_8,read_and_inc_pc());
+            break;
+        case 0x2A:
+            loadImp(HL.all_16, AF.high_8);
+            increment16(HL.all_16);
+            break;
         case 0x2B:
             decrement16(HL.all_16);
             break;
@@ -277,12 +341,29 @@ void CPU::execute_cycle() {
         case 0x2D:
             decrement8(HL.low_8);
             break;
-        case 0x31: // LD SP, d16
-            ldsp(memory->read(PC), memory->read(PC + 1), SP);
-            PC += 2;
+        case 0x2E:
+            loadIm8(HL.low_8,read_and_inc_pc());
+            break;
+        case 0x31:
+            loadIm16(read_and_inc_pc(), read_and_inc_pc(),SP);
+            break;
+        case 0x32:
+            storeAddr(HL.all_16, AF.high_8);
+            decrement16(HL.all_16);
             break;
         case 0x33:
             increment16(SP.all_16);
+            break;
+            //TODO 0X34 0X35
+        case 0x36:
+            storeAddr(HL.all_16, read_and_inc_pc());
+            break;
+        case 0x37: //RLA
+            rl(AF.high_8);
+            break;
+        case 0x3A:
+            loadImp(HL.all_16, AF.high_8);
+            decrement16(HL.all_16);
             break;
         case 0x3B:
             decrement16(SP.all_16);
@@ -293,6 +374,205 @@ void CPU::execute_cycle() {
         case 0x3D:
             decrement8(AF.high_8);
             break;
+        case 0x3E:
+            loadIm8(AF.high_8,read_and_inc_pc());
+            break;
+        case 0x40:
+            //This is stoopid.
+            loadIm8(BC.high_8,BC.high_8);
+            break;
+        case 0x41:
+            loadIm8(BC.high_8,BC.low_8);
+            break;
+        case 0x42:
+            loadIm8(BC.high_8,DE.high_8);
+            break;
+        case 0x43:
+            loadIm8(BC.high_8,DE.low_8);
+            break;
+        case 0x44:
+            loadIm8(BC.high_8,HL.high_8);
+            break;
+        case 0x45:
+            loadIm8(BC.high_8,HL.low_8);
+            break;
+        case 0x46:
+            loadIm8(BC.high_8,memory->read(HL.all_16));
+            break;
+        case 0x47:
+            loadIm8(BC.high_8,AF.high_8);
+            break;
+        case 0x48:
+            loadIm8(BC.low_8,BC.high_8);
+            break;
+        case 0x49:
+            loadIm8(BC.low_8,BC.low_8);
+            break;
+        case 0x4A:
+            loadIm8(BC.low_8,DE.high_8);
+            break;
+        case 0x4B:
+            loadIm8(BC.low_8,DE.low_8);
+            break;
+        case 0x4C:
+            loadIm8(BC.low_8,HL.high_8);
+            break;
+        case 0x4D:
+            loadIm8(BC.low_8,HL.low_8);
+            break;
+        case 0x4E:
+            loadIm8(BC.low_8,memory->read(HL.all_16));
+            break;
+        case 0x4F:
+            loadIm8(BC.low_8,AF.high_8);
+            break;
+
+
+
+
+        case 0x50:
+            loadIm8(DE.high_8,BC.high_8);
+            break;
+        case 0x51:
+            loadIm8(DE.high_8,BC.low_8);
+            break;
+        case 0x52:
+            loadIm8(DE.high_8,DE.high_8);
+            break;
+        case 0x53:
+            loadIm8(DE.high_8,DE.low_8);
+            break;
+        case 0x54:
+            loadIm8(DE.high_8,HL.high_8);
+            break;
+        case 0x55:
+            loadIm8(DE.high_8,HL.low_8);
+            break;
+        case 0x56:
+            loadIm8(DE.high_8,memory->read(HL.all_16));
+            break;
+        case 0x57:
+            loadIm8(DE.high_8,AF.high_8);
+            break;
+        case 0x58:
+            loadIm8(DE.low_8,BC.high_8);
+            break;
+        case 0x59:
+            loadIm8(DE.low_8,BC.low_8);
+            break;
+        case 0x5A:
+            loadIm8(DE.low_8,DE.high_8);
+            break;
+        case 0x5B:
+            loadIm8(DE.low_8,DE.low_8);
+            break;
+        case 0x5C:
+            loadIm8(DE.low_8,HL.high_8);
+            break;
+        case 0x5D:
+            loadIm8(DE.low_8,HL.low_8);
+            break;
+        case 0x5E:
+            loadIm8(DE.low_8,memory->read(HL.all_16));
+            break;
+        case 0x5F:
+            loadIm8(BC.low_8,AF.high_8);
+            break;
+        case 0x60:
+            loadIm8(HL.high_8,BC.high_8);
+            break;
+        case 0x61:
+            loadIm8(HL.high_8,BC.low_8);
+            break;
+        case 0x62:
+            loadIm8(HL.high_8,DE.high_8);
+            break;
+        case 0x63:
+            loadIm8(HL.high_8,DE.low_8);
+            break;
+        case 0x64:
+            loadIm8(HL.high_8,HL.high_8);
+            break;
+        case 0x65:
+            loadIm8(HL.high_8,HL.low_8);
+            break;
+        case 0x66:
+            loadIm8(HL.high_8,memory->read(HL.all_16));
+            break;
+        case 0x67:
+            loadIm8(HL.high_8,AF.high_8);
+            break;
+        case 0x68:
+            loadIm8(HL.low_8,BC.high_8);
+            break;
+        case 0x69:
+            loadIm8(HL.low_8,BC.low_8);
+            break;
+        case 0x6A:
+            loadIm8(HL.low_8,DE.high_8);
+            break;
+        case 0x6B:
+            loadIm8(HL.low_8,DE.low_8);
+            break;
+        case 0x6C:
+            loadIm8(HL.low_8,HL.high_8);
+            break;
+        case 0x6D:
+            loadIm8(HL.low_8,HL.low_8);
+            break;
+        case 0x6E:
+            loadIm8(HL.low_8,memory->read(HL.all_16));
+            break;
+        case 0x6F:
+            loadIm8(HL.low_8,AF.high_8);
+            break;
+        case 0x70:
+            storeAddr(HL.all_16,BC.high_8);
+            break;
+        case 0x71:
+            storeAddr(HL.all_16,BC.low_8);
+            break;
+        case 0x72:
+            storeAddr(HL.all_16,DE.high_8);
+            break;
+        case 0x73:
+            storeAddr(HL.all_16,DE.low_8);
+            break;
+        case 0x74:
+            storeAddr(HL.all_16,HL.high_8);
+            break;
+        case 0x75:
+            storeAddr(HL.all_16,HL.low_8);
+            break;
+        case 0x67:
+            loadIm8(HL.high_8,AF.high_8);
+            break;
+        case 0x68:
+            loadIm8(HL.low_8,BC.high_8);
+            break;
+        case 0x69:
+            loadIm8(HL.low_8,BC.low_8);
+            break;
+        case 0x6A:
+            loadIm8(HL.low_8,DE.high_8);
+            break;
+        case 0x6B:
+            loadIm8(HL.low_8,DE.low_8);
+            break;
+        case 0x6C:
+            loadIm8(HL.low_8,HL.high_8);
+            break;
+        case 0x6D:
+            loadIm8(HL.low_8,HL.low_8);
+            break;
+        case 0x6E:
+            loadIm8(HL.low_8,memory->read(HL.all_16));
+            break;
+        case 0x6F:
+            loadIm8(HL.low_8,AF.high_8);
+            break;
+
+
         case 0x80:
             addA(BC.high_8, false);
             break;
@@ -311,9 +591,9 @@ void CPU::execute_cycle() {
         case 0x85:
             addA(HL.low_8, false);
             break;
-
-            //TODO missing 0x86
-
+        case 0x86:
+            addA(memory->read(HL.all_16), false);
+            break;
         case 0x87:
             addA(AF.high_8, false);
             break;
@@ -335,7 +615,8 @@ void CPU::execute_cycle() {
         case 0x8D:
             addA(HL.low_8, true);
             break;
-            //TODO missing x08E
+        case 0x8E:
+            addA(memory->read(HL.all_16), true);
         case 0x8F:
             addA(AF.high_8, true);
             break;
@@ -381,7 +662,9 @@ void CPU::execute_cycle() {
         case 0x9D:
             subA(HL.low_8, true);
             break;
-            //TODO missing 0x9E
+        case 0x9E:
+            subA(memory->read(HL.all_16), true);
+            break;
         case 0x9F:
             subA(AF.high_8, true);
             break;
@@ -390,3 +673,5 @@ void CPU::execute_cycle() {
             break;
     }
 }
+
+

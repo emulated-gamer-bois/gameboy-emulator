@@ -83,7 +83,6 @@ private:
 
 
     void storeAddr(uint16_t addr, uint8_t value);
-    void loadImp(uint8_t &reg, uint16_t addr);
     void increment8(uint8_t &addr);
     void decrement8(uint8_t &addr);
     void decrement16(uint16_t &addr);
@@ -95,6 +94,9 @@ private:
     void rrc(uint8_t &reg);
 
     void rr(uint8_t &reg);
+    uint16_t read_and_inc_pc();
+
+    void loadImp(uint16_t addr, uint8_t &reg);
 };
 
 
