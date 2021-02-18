@@ -16,8 +16,8 @@ TEST(MMU, read_write){
     mmu->write_GAME_ROM_ONLY_IN_TESTS(0x30, 0xa1);
     ASSERT_EQ(mmu->read(0x30), 0xa1);
 
-    mmu->write_GAME_ROM_ONLY_IN_TESTS(0x30, 0xd5);
-    ASSERT_EQ(mmu->read(0x30), 0xd5);
+    mmu->write(0xc030, 0xd5);
+    ASSERT_EQ(mmu->read(0xc030), 0xd5);
 }
 
 TEST(MMU, read_write_interrupt_enable){
@@ -58,27 +58,27 @@ TEST(MMU, joypad){
     mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
     ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1101);
 
-//    // Press Down button
-//    mmu->joypad_press(JOYPAD_DOWN);
-//    mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
-//    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b0101);
-//
-//    // Press Select button
-//    mmu->joypad_press(JOYPAD_SELECT);
-//    mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
-//    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b0101);
-//
-//    mmu->write(IO_JOYPAD, JOYPAD_SEL_BUTTONS);
-//    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1011);
-//
-//    // Release Down button
-//    mmu->joypad_release(JOYPAD_DOWN);
-//
-//    mmu->write(IO_JOYPAD, JOYPAD_SEL_BUTTONS);
-//    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1011);
-//
-//    mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
-//    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1101);
+    // Press Down button
+    mmu->joypad_press(JOYPAD_DOWN);
+    mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
+    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b0101);
+
+    // Press Select button
+    mmu->joypad_press(JOYPAD_SELECT);
+    mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
+    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b0101);
+
+    mmu->write(IO_JOYPAD, JOYPAD_SEL_BUTTONS);
+    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1011);
+
+    // Release Down button
+    mmu->joypad_release(JOYPAD_DOWN);
+
+    mmu->write(IO_JOYPAD, JOYPAD_SEL_BUTTONS);
+    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1011);
+
+    mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
+    ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1101);
 }
 
 //TEST(MMU, load_rom){
