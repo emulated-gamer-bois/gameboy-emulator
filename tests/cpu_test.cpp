@@ -64,48 +64,38 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->andA(0x4F);
     ASSERT_EQ(cpu->AF.high_8, 0x41);
 
-    mmu->write(cpu->PC, 0x07); //RLCA
-    mmu->write(cpu->PC + 1, 0x07);
-    cpu->execute_cycle();
+    cpu->rlc(cpu->AF.high_8);
     ASSERT_EQ(cpu->AF.high_8, 0x82);
-    cpu->execute_cycle();
+    ASSERT_EQ(cpu->AF.low_8 & 0x10, 0x00);
+
+    cpu->rlc(cpu->AF.high_8);
     ASSERT_EQ(cpu->AF.high_8, 0x05);
     ASSERT_EQ(cpu->AF.low_8 & 0x10, 0x10);
 
-    mmu->write(cpu->PC, 0x17); //RLA
-    cpu->execute_cycle();
+    cpu->rl(cpu->AF.high_8);
     ASSERT_EQ(cpu->AF.high_8, 0x0B);
     ASSERT_EQ(cpu->AF.low_8 & 0x10, 0x00);
 
-    mmu->write(cpu->PC, 0x0F); //RRCA
-    mmu->write(cpu->PC + 1, 0x0F);
-    cpu->execute_cycle();
+    cpu->rrc(cpu->AF.high_8);
     ASSERT_EQ(cpu->AF.high_8, 0x85);
     ASSERT_EQ(cpu->AF.low_8 & 0x10, 0x10);
 
-    mmu->write(cpu->PC, 0x1F); //RRA
-    cpu->execute_cycle();
+    cpu->rr(cpu->AF.high_8);
     ASSERT_EQ(cpu->AF.high_8, 0xC2);
     ASSERT_EQ(cpu->AF.low_8 & 0x10, 0x10);
 
-
-    mmu->write(cpu->PC, 0x80); //ADD B
     cpu->setA(5);
     cpu->setB(14);
     uint8_t val = cpu->AF.high_8 + cpu->BC.high_8;
-    cpu->execute_cycle();
+    cpu->addA(cpu->BC.high_8, false);
     ASSERT_EQ(cpu->AF.high_8, val);
     ASSERT_EQ(cpu->AF.low_8, 0x20); // Only H-flag set.
 
-
-    mmu->write(cpu->PC, 0x90);//SUB B
     cpu->setA(3);
     cpu->setB(5);
     val = cpu->AF.high_8 - cpu->BC.high_8;
-    cpu->execute_cycle();
-    std::string binVal = std::bitset<8>(val).to_string(); // converting to binary, might want to look over this
-    std::string binA = std::bitset<8>(cpu->AF.high_8).to_string();
-    ASSERT_EQ(binVal, binA);
+    cpu->subA(cpu->BC.high_8, false);
+    ASSERT_EQ(val, cpu->AF.high_8);
     ASSERT_EQ(cpu->AF.low_8 & 0x40, 0x40);
     //TODO uncertain if H-flag is supposed to be set here or not, not set atm.
 
