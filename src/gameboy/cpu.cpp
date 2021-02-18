@@ -357,7 +357,9 @@ void CPU::execute_cycle() {
         case 0x95:
             subA(HL.low_8, false);
             break;
-            //TODO 0x96
+        case 0x96:
+            subA(memory->read(HL.all_16), false);
+            break;
         case 0x97:
             subA(AF.high_8, false);
             break;
