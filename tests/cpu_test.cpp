@@ -42,6 +42,9 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::unique_ptr<CPU> cpu(new CPU(0x00, mmu));
 
+    // Disable boot ROM
+    mmu->write(0xff50, 0x01);
+
     cpu->setZNFlags(0x00, false);
     ASSERT_EQ(cpu->getFlags() & 0x80, 0x80);
     ASSERT_EQ(cpu->getFlags() & 0x40, 0x00);
@@ -67,32 +70,32 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->andA(0x4F);
     ASSERT_EQ(cpu->getA(), 0x41);
 
-    mmu->write(cpu->getPC(), 0x07); //RLCA
-    mmu->write(cpu->getPC() + 1, 0x07);
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC(), 0x07); //RLCA
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC() + 1, 0x07);
     cpu->execute_cycle();
     ASSERT_EQ(cpu->getA(), 0x82);
     cpu->execute_cycle();
     ASSERT_EQ(cpu->getA(), 0x05);
     ASSERT_EQ(cpu->getFlags() & 0x10, 0x10);
 
-    mmu->write(cpu->getPC(), 0x17); //RLA
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC(), 0x17); //RLA
     cpu->execute_cycle();
     ASSERT_EQ(cpu->getA(), 0x0B);
     ASSERT_EQ(cpu->getFlags() & 0x10, 0x00);
 
-    mmu->write(cpu->getPC(), 0x0F); //RRCA
-    mmu->write(cpu->getPC() + 1, 0x0F);
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC(), 0x0F); //RRCA
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC() + 1, 0x0F);
     cpu->execute_cycle();
     ASSERT_EQ(cpu->getA(), 0x85);
     ASSERT_EQ(cpu->getFlags() & 0x10, 0x10);
 
-    mmu->write(cpu->getPC(), 0x1F); //RRA
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC(), 0x1F); //RRA
     cpu->execute_cycle();
     ASSERT_EQ(cpu->getA(), 0xC2);
     ASSERT_EQ(cpu->getFlags() & 0x10, 0x10);
 
 
-    mmu->write(cpu->getPC(), 0x80); //ADD B
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC(), 0x80); //ADD B
     cpu->setA(5);
     cpu->setB(14);
     uint8_t val = cpu->getA() + cpu->getB();
@@ -101,7 +104,7 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->getFlags(), 0x20); // Only H-flag set.
 
 
-    mmu->write(cpu->getPC(), 0x90);//SUB B
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC(), 0x90);//SUB B
     cpu->setA(3);
     cpu->setB(5);
     val = cpu->getA() - cpu->getB();
@@ -113,14 +116,14 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     //TODO uncertain if H-flag is supposed to be set here or not, not set atm.
 
 
-    mmu->write(cpu->getPC(), 0x80); //ADD B
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC(), 0x80); //ADD B
     cpu->setA(255);
     cpu->setB(1);
     val = cpu->getA() + cpu->getB();
     cpu->execute_cycle();
     ASSERT_EQ(cpu->getA(), val);
     ASSERT_EQ(cpu->getFlags(), 0xB0); //Z,H and C.
-    mmu->write(cpu->getPC(), 0x88); //ADC B
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC(), 0x88); //ADC B
     cpu->setA(15);
     cpu->setB(5);
     val = cpu->getA() + cpu->getB();
@@ -130,13 +133,13 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
 
 
     //setting C-flag for next test.
-    mmu->write(cpu->getPC(), 0x80); //ADD B
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC(), 0x80); //ADD B
     cpu->setA(255);
     cpu->setB(1);
     val = cpu->getA() + cpu->getB();
     cpu->execute_cycle();
     //C-flag set and rdy for SBC test.
-    mmu->write(cpu->getPC(), 0x98);//SBC B
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC(), 0x98);//SBC B
     cpu->setA(10);
     cpu->setB(5);
     val = cpu->getA() - cpu->getB();
@@ -145,23 +148,23 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->getFlags() & 0x40, 0x40);
     //TODO uncertain if H-flag is supposed to be set here or not, not set atm.
 
-    mmu->write(cpu->getPC(), 0x04); // INC B
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC(), 0x04); // INC B
     int8_t prevB = cpu->getB();
     cpu->execute_cycle();
     ASSERT_EQ(cpu->getB(), prevB + 1);
 
-    mmu->write(cpu->getPC(), 0x05); // DEC B
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC(), 0x05); // DEC B
     prevB = cpu->getB();
     cpu->execute_cycle();
     ASSERT_EQ(cpu->getB(), prevB - 1);
     ASSERT_EQ(cpu->getFlags() & 0x40, 0x40);
 
-    mmu->write(cpu->getPC(), 0x33); // INC SP
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC(), 0x33); // INC SP
     int8_t prevSP = cpu->getSP();
     cpu->execute_cycle();
     ASSERT_EQ(cpu->getSP(), prevSP + 1);
 
-    mmu->write(cpu->getPC(), 0x3B); // DEC SP
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(cpu->getPC(), 0x3B); // DEC SP
     prevSP = cpu->getSP();
     cpu->execute_cycle();
     ASSERT_EQ(cpu->getSP(), prevSP - 1);
