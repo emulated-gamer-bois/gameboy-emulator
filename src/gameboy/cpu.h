@@ -6,6 +6,7 @@
 #define LAME_BOY_CPU_H
 
 #include <iostream>
+#include <cstdint>
 #include <memory>
 #include <cstdint>
 #include "register_pair.h"
@@ -16,24 +17,24 @@
 class MMU {
 public:
     MMU() {
-        memory = new u_int16_t[0xF000];
+        memory = new uint16_t[0xF000];
     }
 
     ~MMU() {
         delete[] memory;
     }
 
-    u_int16_t read(int addr) { return memory[addr]; }
+    uint16_t read(int addr) { return memory[addr]; }
 
-    void write(int addr, u_int16_t value) { memory[addr] = value; }
+    void write(int addr, uint16_t value) { memory[addr] = value; }
 
 private:
-    u_int16_t *memory;
+    uint16_t *memory;
 };
 
 class CPU {
 public:
-    CPU(u_int16_t, std::shared_ptr<MMU>);
+    CPU(uint16_t, std::shared_ptr<MMU>);
 
     /**
      * Fetches, decodes and executes the instruction at location PC
@@ -43,12 +44,12 @@ public:
     /**
      * Returns value of PC for testing purposes
      */
-    u_int16_t getPC() { return PC; }
+    uint16_t getPC() { return PC; }
 
     /**
      * Returns value of SP for testing purposes
      */
-    u_int16_t getSP() { return SP.all_16; }
+    uint16_t getSP() { return SP.all_16; }
 
     uint8_t getFlags() {return AF.low_8; }
     //TODO: Should be private using FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS)
@@ -72,7 +73,7 @@ public:
     void orA(uint8_t);
 private:
     //Registers
-    u_int16_t PC;
+    uint16_t PC;
     RegisterPair SP;
     RegisterPair AF;
     RegisterPair BC;

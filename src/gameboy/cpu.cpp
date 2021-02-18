@@ -4,7 +4,7 @@
 
 #include "cpu.h"
 
-CPU::CPU(u_int16_t PC, std::shared_ptr<MMU> mmu) {
+CPU::CPU(uint16_t PC, std::shared_ptr<MMU> mmu) {
     this->PC = PC;
     this->memory = mmu;
     SP.all_16 = 0x00;
@@ -16,7 +16,7 @@ CPU::CPU(u_int16_t PC, std::shared_ptr<MMU> mmu) {
 
 void nop() {}
 
-void ldsp(u_int8_t first_byte, u_int8_t second_byte, RegisterPair &SP) {
+void ldsp(uint8_t first_byte, uint8_t second_byte, RegisterPair &SP) {
     SP.low_8 = first_byte;
     SP.high_8 = second_byte;
 }

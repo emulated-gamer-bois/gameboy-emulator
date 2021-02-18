@@ -3,6 +3,8 @@ cmake_minimum_required (VERSION 3.2)
 project( tests )
 add_subdirectory(gtest)
 enable_testing ()
+
+# Must be included each time a library is made
 if (WIN32)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
