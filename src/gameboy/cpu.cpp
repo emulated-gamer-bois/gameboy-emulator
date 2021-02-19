@@ -298,7 +298,7 @@ void CPU::branchZ(int8_t steps, bool if_one) {
 /**
  * Every time we read PC, we want to increment it.
  * */
-uint16_t CPU::read_and_inc_pc() {
+uint8_t CPU::read_and_inc_pc() {
     return memory->read(PC++);
 }
 

@@ -81,7 +81,7 @@ private:
 
     //Other
     void compareA(uint8_t value);
-    uint16_t read_and_inc_pc();
+    uint8_t read_and_inc_pc();
 
     FRIEND_TEST(CPU, Execute_NOP_Instruction);
     FRIEND_TEST(CPU, Execute_LD_SP_D16_Instruction);
