@@ -6,6 +6,7 @@
 #define LAME_BOY_CPU_H
 
 #include <iostream>
+#include <cstdint>
 #include <memory>
 #include <cstdint>
 #include "register_pair.h"
@@ -17,21 +18,22 @@
 class MMU {
 public:
     MMU() {
-        memory = new u_int16_t[0xF000];
+        memory = new uint16_t[0xF000];
     }
 
     ~MMU() {
         delete[] memory;
     }
 
-    u_int16_t read(int addr) { return memory[addr]; }
+    uint16_t read(int addr) { return memory[addr]; }
 
-    void write(int addr, u_int16_t value) { memory[addr] = value; }
+    void write(int addr, uint16_t value) { memory[addr] = value; }
 
 private:
-    u_int16_t *memory;
+    uint16_t *memory;
 };
 
+//TODO: Add names to all parameters
 class CPU {
 public:
     CPU(uint16_t, uint16_t, std::shared_ptr<MMU>);
@@ -43,7 +45,7 @@ public:
 
 private:
     //Registers
-    u_int16_t PC;
+    uint16_t PC;
     RegisterPair SP;
     RegisterPair AF;
     RegisterPair BC;
@@ -98,8 +100,9 @@ private:
 
     //Other
     void compareA(uint8_t value);
-
-    FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);
+    uint16_t read_and_inc_pc();
+  
+    FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS); 
 };
 
 
