@@ -16,4 +16,9 @@ cmake-build-debug/
 *.ini
 
 cmake-build-debug-visual-studio/
-
+CMakeFiles/
+Makefile
+*.cmake
+CMakeCache.txt
+*.a
+cmake-build-debug-coverage/
