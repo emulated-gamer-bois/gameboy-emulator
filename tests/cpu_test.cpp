@@ -6,11 +6,14 @@
 #include "gtest/gtest.h"
 #include "../src/gameboy/cpu.h"
 
-/*TEST(CPU, Execute_NOP_Instruction) {
+TEST(CPU, Execute_NOP_Instruction) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<CPU> cpu(new CPU(0x00, mmu));
-
-    mmu->write(0x00, 0x00);
+    std::unique_ptr<CPU> cpu(new CPU(0x0000, 0xFFFE, mmu));
+    
+    // Disable boot ROM
+    mmu->write(0xff50, 0x01);
+  
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(0x00, 0x00);
     cpu->execute_cycle();
 
     ASSERT_EQ(mmu->read(0x00), 0x00);
@@ -19,20 +22,26 @@
 
 TEST(CPU, Execute_LD_SP_D16_Instruction) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<CPU> cpu(new CPU(0x00, mmu));
+    std::unique_ptr<CPU> cpu(new CPU(0x0000, 0xFFFE, mmu));
 
-    mmu->write(0x00, 0x31);
-    mmu->write(0x01, 0xFF);
-    mmu->write(0x02, 0xAA);
+    // Disable boot ROM
+    mmu->write(0xff50, 0x01);
+
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(0x00, 0x31);
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(0x01, 0xFF);
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(0x02, 0xAA);
     cpu->execute_cycle();
 
     ASSERT_EQ(cpu->PC, 0x03);
-    ASSERT_EQ(cpu->SP, 0xAAFF);
-}*/
+    ASSERT_EQ(cpu->SP.all_16, 0xAAFF);
+}
 
 TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::unique_ptr<CPU> cpu(new CPU(0x00, 0xC100, mmu));
+
+    // Disable boot ROM
+    mmu->write(0xff50, 0x01);
 
     cpu->setZNFlags(0x00, false);
     ASSERT_EQ(cpu->AF.low_8 & 0x80, 0x80);
@@ -192,4 +201,5 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->PC, 0xC113);
     cpu->branchZ(0x10, true);
     ASSERT_EQ(cpu->PC, 0xC113);
+
 }

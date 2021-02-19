@@ -3,6 +3,7 @@
 //
 
 #include "cpu.h"
+#include "mmu.h"
 
 CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
     this->PC = PC;
@@ -857,5 +858,3 @@ void CPU::execute_instruction() {
             break;
     }
 }
-
-
