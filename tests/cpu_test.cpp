@@ -136,12 +136,12 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->loadIm16(0xDC, 0xFE, cpu->HL);
     ASSERT_EQ(cpu->HL.all_16, 0xFEDC);
 
-    cpu->loadIm8(0xBA, cpu->HL.low_8);
+    cpu->loadIm8(cpu->HL.low_8, 0xBA);
     ASSERT_EQ(cpu->HL.all_16, 0xFEBA);
 
     //RAM: 0xC000 to 0xE000
     mmu->write(0xC001, 0x98);
-    cpu->loadImp(cpu->HL.high_8, 0xC001);
+    cpu->loadImp(0xC001, cpu->HL.high_8);
     ASSERT_EQ(cpu->HL.all_16, 0x98BA);
 
     cpu->storeAddr(0xC002, cpu->HL.low_8);

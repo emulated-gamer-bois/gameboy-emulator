@@ -82,9 +82,9 @@ private:
 
     //Read and write memory
     void storeAddr(uint16_t addr, uint8_t value);
-    void loadImp(uint8_t &reg, uint16_t addr);
+    void loadImp(uint16_t addr, uint8_t &reg);
     void loadIm16(uint8_t firstByte, uint8_t secondByte, RegisterPair &reg);
-    void loadIm8(uint8_t firstByte, uint8_t &reg);
+    void loadIm8(uint8_t &reg, uint8_t firstByte);
 
     //Stack functions
     void popReg(RegisterPair &reg);
