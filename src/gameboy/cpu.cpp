@@ -40,7 +40,7 @@ void CPU::setHFlag(uint8_t a, uint8_t b) {
 
 void CPU::setCFlag(uint8_t a, uint8_t b) {
     // Sets the C flag if overflow
-    auto CFlag = ((a + b) & 0x100) >> 0x04;
+    auto CFlag = (((uint16_t) a + b) & 0x100) >> 0x04;
     AF.low_8 &= 0xEF;
     AF.low_8 |= CFlag;
 }
