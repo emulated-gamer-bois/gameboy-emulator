@@ -4,10 +4,10 @@
 
 #include "cpu.h"
 
-CPU::CPU(uint16_t PC, std::shared_ptr<MMU> mmu) {
+CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
     this->PC = PC;
     this->memory = mmu;
-    SP.all_16 = 0x00;
+    this->SP.all_16 = SP;
     AF.all_16 = 0x00;
     BC.all_16 = 0x00;
     DE.all_16 = 0x00;
@@ -22,8 +22,8 @@ void CPU::setZNFlags(uint8_t newValue, bool subtraction) {
     AF.low_8 |= newValue == 0x00 ? 0x80 : 0x00;
 
     //Set the N flag if operation is subtraction
-    AF.low_8 |= subtraction ? 0x40 : 0x00;
     AF.low_8 &= !subtraction ? 0xBF : 0xFF;
+    AF.low_8 |= subtraction ? 0x40 : 0x00;
 }
 
 void CPU::setHFlag(uint8_t a, uint8_t b) {
@@ -35,17 +35,18 @@ void CPU::setHFlag(uint8_t a, uint8_t b) {
 
 void CPU::setCFlag(uint8_t a, uint8_t b) {
     // Sets the C flag if overflow
-    auto CFlag = ((a + b) & 0x100) >> 0x04;
+    auto CFlag = (((uint16_t) a + b) & 0x100) >> 0x04;
     AF.low_8 &= 0xEF;
     AF.low_8 |= CFlag;
 }
 
-void loadIm16(uint8_t firstByte, uint8_t secondByte, RegisterPair &reg) {
+void CPU::loadIm16(uint8_t firstByte, uint8_t secondByte, RegisterPair &reg) {
     reg.low_8 = firstByte;
     reg.high_8 = secondByte;
 }
 
-void loadIm8(uint8_t &reg, uint8_t firstByte) {
+
+void CPU::loadIm8(uint8_t &reg, uint8_t firstByte) {
     reg = firstByte;
 }
 
@@ -67,7 +68,7 @@ void CPU::storeAddr(uint16_t addr, uint8_t value) {
  * stores the result in A. Can be done with or without carry.
  */
 void CPU::addA(uint8_t value, bool withCarry) {
-    auto CFlag = withCarry ? ((AF.low_8 & 0x10) > 0x04) : 0;
+    auto CFlag = withCarry ? ((AF.low_8 & 0x10) >> 0x04) : 0;
     setCFlag(AF.high_8, value + CFlag);
     setHFlag(AF.high_8, value + CFlag);
     AF.high_8 += value + CFlag;
@@ -84,11 +85,11 @@ uint8_t twosComp(uint8_t value) {
  * currently subtracts 1 if set.
  */
 void CPU::subA(uint8_t value, bool withCarry) {
-    auto CFlag = withCarry ? ((AF.low_8 & 0x10) > 0x04) : 0;
-    auto twosCompVal = twosComp(value);
-    setHFlag(AF.high_8, twosCompVal - CFlag);
+    auto CFlag = withCarry ? ((AF.low_8 & 0x10) >> 0x04) : 0;
+    value = twosComp(value + CFlag);
     setCFlag(AF.high_8, value);
-    AF.high_8 += twosCompVal - CFlag;
+    setHFlag(AF.high_8, value);
+    AF.high_8 += value;
     setZNFlags(AF.high_8, true);
 }
 
@@ -96,7 +97,7 @@ void CPU::subA(uint8_t value, bool withCarry) {
  * Will have to consider the increment and decrement of 16 bit addresses where flags are to be set
  * later as well (HL).
  */
-void increment16(uint16_t &addr) {
+void CPU::increment16(uint16_t &addr) {
     addr += 1;
 }
 
@@ -202,6 +203,66 @@ void CPU::rr(uint8_t &reg) {
 }
 
 /**
+ * Executes subtraction between value and register A and sets flags accordingly
+ * the result is not saved
+ */
+void CPU::compareA(uint8_t value) {
+    value = twosComp(value);
+    setCFlag(AF.high_8, value);
+    setHFlag(AF.high_8, value);
+    setZNFlags(AF.high_8 + value, true);
+}
+
+
+/**
+ * Stores the value of the given reg on the stack
+ * SP is adjusted accordingly
+ */
+void CPU::pushReg(RegisterPair &reg) {
+    memory->write(--SP.all_16, reg.high_8);
+    memory->write(--SP.all_16, reg.low_8);
+}
+
+/**
+ * Stores the first two bytes from the stack in the given reg
+ * SP is adjusted accordingly
+ */
+void CPU::popReg(RegisterPair &reg) {
+    reg.low_8 = memory->read(SP.all_16++);
+    reg.high_8 = memory->read(SP.all_16++);
+}
+
+/**
+ * Jumps immediately to the specified address
+ */
+void CPU::jump(uint16_t addr) {
+    PC = addr;
+}
+
+/*
+ * Jumps immediately to the specified address if Z is one or zero
+ * depending on the if_one parameter
+ */
+void CPU::jumpZ(uint16_t addr, bool if_one) {
+    if(!if_one  ==  !(AF.low_8 & 0x80)) PC = addr;
+}
+
+/**
+ * Increments PC with the given number of steps
+ */
+void CPU::branch(int8_t steps) {
+    PC += steps;
+}
+
+/*
+ * Increments PC with the given number of steps if Z is one or zero
+ * depending on the if_one parameter
+ */
+void CPU::branchZ(int8_t steps, bool if_one) {
+    if(!if_one  ==  !(AF.low_8 & 0x80)) PC += steps;
+}
+
+/*
  * Every time we read PC, we want to increment it.
  * */
 uint16_t CPU::read_and_inc_pc() {
