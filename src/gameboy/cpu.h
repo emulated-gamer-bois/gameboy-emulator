@@ -10,8 +10,10 @@
 #include <memory>
 #include <cstdint>
 #include "register_pair.h"
-#include "gtest/gtest.h"
 #include "mmu.h"
+
+#define FRIEND_TEST(test_case_name, test_name)\
+friend class test_case_name##_##test_name##_Test
 
 class CPU {
 public:
@@ -80,8 +82,10 @@ private:
     //Other
     void compareA(uint8_t value);
     uint16_t read_and_inc_pc();
-  
-    FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS); 
+
+    FRIEND_TEST(CPU, Execute_NOP_Instruction);
+    FRIEND_TEST(CPU, Execute_LD_SP_D16_Instruction);
+    FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);
 };
 
 

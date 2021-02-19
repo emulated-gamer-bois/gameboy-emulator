@@ -71,6 +71,7 @@ uint8_t MMU::read(uint16_t addr) {
             std::cout << "Tried to read unused memory address: " << addr << std::endl;
             // TODO: Error handling
     }
+    return 0;
 }
 
 void MMU::write(uint16_t addr, uint8_t data) {
@@ -193,6 +194,7 @@ uint8_t MMU::read_io(uint16_t addr) {
             return ((this->io_joypad >> 4) & 0xf);
         }
     }
+    return 0;
 }
 
 void MMU::joypad_release(uint8_t button) {

@@ -14,7 +14,7 @@ TEST(CPU, Execute_NOP_Instruction) {
     mmu->write(0xff50, 0x01);
   
     mmu->write_GAME_ROM_ONLY_IN_TESTS(0x00, 0x00);
-    cpu->execute_cycle();
+    cpu->execute_instruction();
 
     ASSERT_EQ(mmu->read(0x00), 0x00);
     ASSERT_EQ(cpu->PC, 0x01);
@@ -30,7 +30,7 @@ TEST(CPU, Execute_LD_SP_D16_Instruction) {
     mmu->write_GAME_ROM_ONLY_IN_TESTS(0x00, 0x31);
     mmu->write_GAME_ROM_ONLY_IN_TESTS(0x01, 0xFF);
     mmu->write_GAME_ROM_ONLY_IN_TESTS(0x02, 0xAA);
-    cpu->execute_cycle();
+    cpu->execute_instruction();
 
     ASSERT_EQ(cpu->PC, 0x03);
     ASSERT_EQ(cpu->SP.all_16, 0xAAFF);
