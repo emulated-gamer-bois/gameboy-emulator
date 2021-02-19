@@ -16,6 +16,10 @@ CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
 
 void nop() {}
 
+/**
+ * Z set if newValue is 0
+ * N set if subtraction is true
+ */
 void CPU::setZNFlags(uint8_t newValue, bool subtraction) {
     //Sets the Z flag to 1 if newValue == 0
     AF.low_8 &= 0x7F;
@@ -26,6 +30,11 @@ void CPU::setZNFlags(uint8_t newValue, bool subtraction) {
     AF.low_8 |= subtraction ? 0x40 : 0x00;
 }
 
+/**
+ * Sets H flag if there is a carry between bit 3 and bit 4
+ * @param a parameter 1 in addition
+ * @param b parameter 2 in addition
+ */
 void CPU::setHFlag(uint8_t a, uint8_t b) {
     // Sets the H flag if carry from bit 3 to bit 4
     auto HFlag = (((a & 0x0F) + (b & 0x0F)) & 0x10) << 0x01;
@@ -33,6 +42,11 @@ void CPU::setHFlag(uint8_t a, uint8_t b) {
     AF.low_8 |= HFlag;
 }
 
+/**
+ * Sets C flag if there is a carry between bit 7 and bit 8
+ * @param a parameter 1 in addition
+ * @param b parameter 2 in addition
+ */
 void CPU::setCFlag(uint8_t a, uint8_t b) {
     // Sets the C flag if overflow
     auto CFlag = (((uint16_t) a + b) & 0x100) >> 0x04;
@@ -40,16 +54,26 @@ void CPU::setCFlag(uint8_t a, uint8_t b) {
     AF.low_8 |= CFlag;
 }
 
+/**
+ * Loads the immediate value of the two bytes into the provided register
+ * @param firstByte the first argument to the operation code, will be loaded to the lower part of the register
+ * @param secondByte the second argument to the operation code, will be loaded to the higher part of the register
+ */
 void CPU::loadIm16(uint8_t firstByte, uint8_t secondByte, RegisterPair &reg) {
     reg.low_8 = firstByte;
     reg.high_8 = secondByte;
 }
 
-
+/**
+ * Loads the immediate value of the value of the op-code parameter
+ */
 void CPU::loadIm8(uint8_t &reg, uint8_t firstByte) {
     reg = firstByte;
 }
 
+/**
+ * Loads the specified register with the value found on the specified address
+ */
 void CPU::loadImp(uint16_t addr, uint8_t &reg) {
     reg = memory->read(addr);
 }
@@ -75,6 +99,9 @@ void CPU::addA(uint8_t value, bool withCarry) {
     setZNFlags(AF.high_8, false);
 }
 
+/**
+ * Makes a number negative by converting it to two complement
+ */
 uint8_t twosComp(uint8_t value) {
     return ~value + 1;
 }
@@ -97,29 +124,34 @@ void CPU::subA(uint8_t value, bool withCarry) {
  * Will have to consider the increment and decrement of 16 bit addresses where flags are to be set
  * later as well (HL).
  */
-void CPU::increment16(uint16_t &addr) {
-    addr += 1;
+void CPU::increment16(uint16_t &reg) {
+    reg += 1;
 }
 
-void CPU::increment8(uint8_t &addr) {
-
-    setZNFlags(addr + 1, false);
-    setHFlag(addr, 0x1);
-    addr += 1;
+/**
+ * Increment the value of the specified 8 bit register with one
+ */
+void CPU::increment8(uint8_t &reg) {
+    setZNFlags(reg + 1, false);
+    setHFlag(reg, 0x1);
+    reg += 1;
 }
 
-void CPU::decrement16(uint16_t &addr) {
-    addr -= 1;
+/**
+ * Decrement the value of the specified 16 bit register with one
+ */
+void CPU::decrement16(uint16_t &reg) {
+    reg -= 1;
 }
 
+/**
+ * Decrement the value of the specified 8 bit register with one
+ */
 void CPU::decrement8(uint8_t &addr) {
     setZNFlags(addr - 1, true);
     setHFlag(addr, twosComp(0x1));
     addr -= 1;
 }
-
-
-//Logical operations ******************
 
 /**
  * Executes AND with the A register and the given value
@@ -239,7 +271,7 @@ void CPU::jump(uint16_t addr) {
     PC = addr;
 }
 
-/*
+/**
  * Jumps immediately to the specified address if Z is one or zero
  * depending on the if_one parameter
  */
@@ -254,7 +286,7 @@ void CPU::branch(int8_t steps) {
     PC += steps;
 }
 
-/*
+/**
  * Increments PC with the given number of steps if Z is one or zero
  * depending on the if_one parameter
  */
@@ -262,18 +294,27 @@ void CPU::branchZ(int8_t steps, bool if_one) {
     if(!if_one  ==  !(AF.low_8 & 0x80)) PC += steps;
 }
 
-/*
+/**
  * Every time we read PC, we want to increment it.
  * */
 uint16_t CPU::read_and_inc_pc() {
     return memory->read(PC++);
 }
+
+/**
+ * /**
+ * Combines two bytes to a 16 bit variable
+ * @param first_byte 8 lowest bits
+ * @param second_byte 8 highest bits
+ */
 uint16_t combine_bytes(uint8_t first_byte, uint8_t second_byte) {
-    //first byte low, second high.
     return second_byte << 8 | first_byte;
 }
 
-void CPU::execute_cycle() {
+/**
+ * Fetches, decodes and executes the instruction at location PC
+ */
+void CPU::execute_instruction() {
     switch (read_and_inc_pc()) {
         case 0x00:
             nop();

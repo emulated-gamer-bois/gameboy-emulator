@@ -36,12 +36,12 @@ private:
 //TODO: Add names to all parameters
 class CPU {
 public:
-    CPU(uint16_t, uint16_t, std::shared_ptr<MMU>);
+    CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> memory);
 
     /**
      * Fetches, decodes and executes the instruction at location PC
      */
-    void execute_cycle();
+    void execute_instruction();
 
 private:
     //Registers
@@ -66,15 +66,15 @@ private:
     //Register arithmetics
     void addA(uint8_t value, bool withCarry);
     void subA(uint8_t value, bool withCarry);
-    void increment8(uint8_t &addr);
+    void increment8(uint8_t &reg);
     void increment16(uint16_t &reg);
-    void decrement8(uint8_t &addr);
-    void decrement16(uint16_t &addr);
+    void decrement8(uint8_t &reg);
+    void decrement16(uint16_t &reg);
 
     //Bitwise operations
-    void andA(uint8_t);
-    void xorA(uint8_t);
-    void orA(uint8_t);
+    void andA(uint8_t value);
+    void xorA(uint8_t value);
+    void orA(uint8_t value);
     void rlc(uint8_t &reg);
     void rl(uint8_t &reg);
     void rrc(uint8_t &reg);
