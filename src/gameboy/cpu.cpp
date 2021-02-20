@@ -5,6 +5,8 @@
 #include "cpu.h"
 #include "mmu.h"
 
+uint16_t combine_bytes(uint8_t first_byte, uint8_t second_byte);
+
 CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
     this->PC = PC;
     this->memory = mmu;
@@ -281,6 +283,14 @@ void CPU::jumpZ(uint16_t addr, bool if_one) {
 }
 
 /**
+ * Jumps immediately to the specified address if C is one or zero
+ * depending on the if_one parameter
+ */
+void CPU::jumpC(uint16_t addr, bool if_one) {
+    if(!if_one  ==  !(AF.low_8 & 0x10)) PC = addr;
+}
+
+/**
  * Increments PC with the given number of steps
  */
 void CPU::branch(int8_t steps) {
@@ -293,6 +303,83 @@ void CPU::branch(int8_t steps) {
  */
 void CPU::branchZ(int8_t steps, bool if_one) {
     if(!if_one  ==  !(AF.low_8 & 0x80)) PC += steps;
+}
+
+/**
+ * Increments PC with the given number of steps if C is one or zero
+ * depending on the if_one parameter
+ */
+void CPU::branchC(int8_t steps, bool if_one) {
+    if(!if_one  ==  !(AF.low_8 & 0x10)) PC += steps;
+}
+
+/**
+ * Call sub routine
+ * Stores value of PC on the stack and sets the value of PC to the immediate data
+ * @param firstByte fist parameter and the lower byte
+ * @param secondByte second parameter the higher byte
+ */
+void CPU::call(uint8_t firstByte, uint8_t secondByte) {
+    memory->write(--SP.all_16, PC >> 0x08);
+    memory->write(--SP.all_16, PC & 0x00FF);
+    PC = combine_bytes(firstByte, secondByte);
+}
+
+/**
+ * Calls subroutine if Z is one or zero
+ * depending on the if_one parameter
+ * @param firstByte fist parameter and the lower byte
+ * @param secondByte second parameter the higher byte
+ * @param if_one true if Z should be 1, false if Z should be 0
+ */
+void CPU::callZ(uint8_t firstByte, uint8_t secondByte, bool if_one) {
+    if(!if_one  !=  !(AF.low_8 & 0x80)) return;
+    call(firstByte, secondByte);
+}
+
+/**
+ * Calls subroutine if C is one or zero
+ * depending on the if_one parameter
+ * @param firstByte fist parameter and the lower byte
+ * @param secondByte second parameter the higher byte
+ * @param if_one true if C should be 1, false if C should be 0
+ */
+void CPU::callC(uint8_t firstByte, uint8_t secondByte, bool if_one) {
+    if(!if_one  !=  !(AF.low_8 & 0x10)) return;
+    call(firstByte, secondByte);
+}
+
+/**
+ * Return from a subroutine by setting PC with
+ * the two latest values on the stack
+ * @param from_interrupt if the subroutine returns from interrupt
+ */
+void CPU::ret(bool from_interrupt) {
+    PC = memory->read(SP.all_16++);
+    PC &= memory->read(SP.all_16++) << 0x08;
+    if(from_interrupt) {
+        //TODO: Reset the interrupt flag
+    }
+}
+
+/**
+ * Return from subroutine if Z is one or zero
+ * depending on the if_one parameter
+ * @param if_one true if Z should be 1, false if Z should be 0
+ */
+void CPU::retZ(bool if_one) {
+    if(!if_one  !=  !(AF.low_8 & 0x80)) return;
+    ret(false);
+}
+
+/**
+ * Return from subroutine if C is one or zero
+ * depending on the if_one parameter
+ * @param if_one true if C should be 1, false if C should be 0
+ */
+void CPU::retC(bool if_one) {
+    if(!if_one  !=  !(AF.low_8 & 0x10)) return;
+    ret(false);
 }
 
 /**
