@@ -38,7 +38,7 @@ TEST(CPU, Execute_LD_SP_D16_Instruction) {
 
 TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<CPU> cpu(new CPU(0x00, 0xC100, mmu));
+    std::unique_ptr<CPU> cpu(new CPU(0x00, 0xFFFE, mmu));
 
     // Disable boot ROM
     mmu->write(0xff50, 0x01);
@@ -187,6 +187,17 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->jumpZ(0xB123, true);
     ASSERT_EQ(cpu->PC, 0xC123);
 
+    cpu->AF.low_8 |= 0x10;
+    cpu->jumpC(0xD123, true);
+    ASSERT_EQ(cpu->PC, 0xD123);
+    cpu->jumpC(0xC123, false);
+    ASSERT_EQ(cpu->PC, 0xD123);
+    cpu->AF.low_8 &= 0xEF;
+    cpu->jumpC(0xC123, false);
+    ASSERT_EQ(cpu->PC, 0xC123);
+    cpu->jumpC(0xB123, true);
+    ASSERT_EQ(cpu->PC, 0xC123);
+
     cpu->branch(0x02);
     ASSERT_EQ(cpu->PC, 0xC125);
     cpu->branch(-0x02);
@@ -201,5 +212,16 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->PC, 0xC113);
     cpu->branchZ(0x10, true);
     ASSERT_EQ(cpu->PC, 0xC113);
+
+    cpu->AF.low_8 |= 0x10;
+    cpu->branchC(0x10, true);
+    ASSERT_EQ(cpu->PC, 0xC123);
+    cpu->branchC(0x10, false);
+    ASSERT_EQ(cpu->PC, 0xC123);
+    cpu->AF.low_8 &= 0xEF;
+    cpu->branchC(-0x20, false);
+    ASSERT_EQ(cpu->PC, 0xC103);
+    cpu->branchC(0x10, true);
+    ASSERT_EQ(cpu->PC, 0xC103);
 
 }
