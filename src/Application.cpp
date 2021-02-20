@@ -32,9 +32,6 @@ void Application::initSDL() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
-    // Try to put OpenGL in debug mode.
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-
     // Use double buffering. May be on by default. Not sure.
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
@@ -132,10 +129,6 @@ void Application::start() {
                                 break;
                             case SDLK_3:
                                 renderView.setPalette(PALETTE_DMG_SMOOTH);
-                                break;
-                            case SDLK_4:
-                                break;
-                            default:
                                 break;
                         }
                 }
