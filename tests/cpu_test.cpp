@@ -224,4 +224,40 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->branchC(0x10, true);
     ASSERT_EQ(cpu->PC, 0xC103);
 
+    auto prevPC = cpu->PC;
+    prevSP = cpu->SP.all_16;
+    cpu->call(0xCD, 0xAB);
+    ASSERT_EQ(cpu->PC, 0xABCD);
+    ASSERT_EQ(cpu->SP.all_16, prevSP - 2);
+    cpu->ret(false);
+    ASSERT_EQ(cpu->PC, prevPC);
+    ASSERT_EQ(cpu->SP.all_16, prevSP);
+
+    cpu->AF.low_8 |= 0x80;
+    cpu->callZ(0xCD, 0xAB, false);
+    ASSERT_EQ(cpu->PC, prevPC);
+    ASSERT_EQ(cpu->SP.all_16, prevSP);
+    cpu->callZ(0xCD, 0xAB, true);
+    ASSERT_EQ(cpu->PC, 0xABCD);
+    ASSERT_EQ(cpu->SP.all_16, prevSP - 2);
+    cpu->retZ(false);
+    ASSERT_EQ(cpu->PC, 0xABCD);
+    ASSERT_EQ(cpu->SP.all_16, prevSP - 2);
+    cpu->retZ(true);
+    ASSERT_EQ(cpu->PC, prevPC);
+    ASSERT_EQ(cpu->SP.all_16, prevSP);
+
+    cpu->AF.low_8 &= 0xEF;
+    cpu->callC(0xCD, 0xAB, true);
+    ASSERT_EQ(cpu->PC, prevPC);
+    ASSERT_EQ(cpu->SP.all_16, prevSP);
+    cpu->callC(0xCD, 0xAB, false);
+    ASSERT_EQ(cpu->PC, 0xABCD);
+    ASSERT_EQ(cpu->SP.all_16, prevSP - 2);
+    cpu->retC(true);
+    ASSERT_EQ(cpu->PC, 0xABCD);
+    ASSERT_EQ(cpu->SP.all_16, prevSP - 2);
+    cpu->retC(false);
+    ASSERT_EQ(cpu->PC, prevPC);
+    ASSERT_EQ(cpu->SP.all_16, prevSP);
 }
