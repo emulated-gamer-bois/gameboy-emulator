@@ -38,7 +38,7 @@ TEST(CPU, Execute_LD_SP_D16_Instruction) {
 
 TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<CPU> cpu(new CPU(0x00, 0xFFFE, mmu));
+    std::unique_ptr<CPU> cpu(new CPU(0x00, 0xC100, mmu));
 
     // Disable boot ROM
     mmu->write(0xff50, 0x01);
@@ -260,4 +260,9 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->retC(false);
     ASSERT_EQ(cpu->PC, prevPC);
     ASSERT_EQ(cpu->SP.all_16, prevSP);
+
+    cpu->reset(3);
+    ASSERT_EQ(cpu->PC, 0x0018);
+    cpu->ret(false);
+    ASSERT_EQ(cpu->PC, prevPC);
 }

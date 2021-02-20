@@ -356,7 +356,7 @@ void CPU::callC(uint8_t firstByte, uint8_t secondByte, bool if_one) {
  */
 void CPU::ret(bool from_interrupt) {
     PC = memory->read(SP.all_16++);
-    PC &= memory->read(SP.all_16++) << 0x08;
+    PC |= memory->read(SP.all_16++) << 0x08;
     if(from_interrupt) {
         //TODO: Reset the interrupt flag
     }
@@ -380,6 +380,15 @@ void CPU::retZ(bool if_one) {
 void CPU::retC(bool if_one) {
     if(!if_one  !=  !(AF.low_8 & 0x10)) return;
     ret(false);
+}
+
+/**
+ * Restart PC from the nth byte (n as in number)
+ * pushes PC to the stack before resetting PC
+ * @param nth_byte vale from 0 to 7 of how many bytes from 0 PC should start at
+ */
+void CPU::reset(uint8_t nth_byte) {
+    call(0x08 * nth_byte, 0x00);
 }
 
 /**
