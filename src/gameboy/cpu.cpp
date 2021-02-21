@@ -951,6 +951,30 @@ void CPU::execute_instruction() {
         case 0xB7:
             orA(AF.high_8);
             break;
+        case 0xB8:
+            compareA(BC.high_8);
+            break;
+        case 0xB9:
+            compareA(BC.low_8);
+            break;
+        case 0xBA:
+            compareA(DE.high_8);
+            break;
+        case 0xBB:
+            compareA(DE.low_8);
+            break;
+        case 0xBC:
+            compareA(HL.high_8);
+            break;
+        case 0xBD:
+            compareA(HL.low_8);
+            break;
+        case 0xBE:
+            compareA(memory->read(HL.all_16));
+            break;
+        case 0xBF:
+            compareA(AF.high_8);
+            break;
         case 0xC0:
             retZ(false);
             break;
@@ -1072,6 +1096,9 @@ void CPU::execute_instruction() {
             break;
         case 0xF7:
             reset(6);
+            break;
+        case 0xFE:
+            compareA(read_and_inc_pc());
             break;
         case 0xFF:
             reset(7);
