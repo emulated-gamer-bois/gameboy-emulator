@@ -77,9 +77,9 @@ private:
     void jump(uint16_t addr);
     void jumpZ(uint16_t addr, bool if_one);
     void jumpC(uint16_t addr, bool if_one);
-    void branch(int8_t steps);
-    void branchZ(int8_t steps, bool if_one);
-    void branchC(int8_t steps, bool if_one);
+    void jumpRelative(int8_t steps);
+    void jumpRelativeZ(int8_t steps, bool if_one);
+    void jumpRelativeC(int8_t steps, bool if_one);
 
     //Call subroutines and return
     void ret(bool from_interrupt);
@@ -93,6 +93,7 @@ private:
     void reset(uint8_t nth_byte);
     void compareA(uint8_t value);
     uint8_t read_and_inc_pc();
+    uint16_t read16_and_inc_pc();
 
     FRIEND_TEST(CPU, Execute_NOP_Instruction);
     FRIEND_TEST(CPU, Execute_LD_SP_D16_Instruction);

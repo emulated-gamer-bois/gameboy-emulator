@@ -198,30 +198,30 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->jumpC(0xB123, true);
     ASSERT_EQ(cpu->PC, 0xC123);
 
-    cpu->branch(0x02);
+    cpu->jumpRelative(0x02);
     ASSERT_EQ(cpu->PC, 0xC125);
-    cpu->branch(-0x02);
+    cpu->jumpRelative(-0x02);
     ASSERT_EQ(cpu->PC, 0xC123);
     cpu->AF.low_8 |= 0x80;
-    cpu->branchZ(0x10, true);
+    cpu->jumpRelativeZ(0x10, true);
     ASSERT_EQ(cpu->PC, 0xC133);
-    cpu->branchZ(0x10, false);
+    cpu->jumpRelativeZ(0x10, false);
     ASSERT_EQ(cpu->PC, 0xC133);
     cpu->AF.low_8 &= 0x7F;
-    cpu->branchZ(-0x20, false);
+    cpu->jumpRelativeZ(-0x20, false);
     ASSERT_EQ(cpu->PC, 0xC113);
-    cpu->branchZ(0x10, true);
+    cpu->jumpRelativeZ(0x10, true);
     ASSERT_EQ(cpu->PC, 0xC113);
 
     cpu->AF.low_8 |= 0x10;
-    cpu->branchC(0x10, true);
+    cpu->jumpRelativeC(0x10, true);
     ASSERT_EQ(cpu->PC, 0xC123);
-    cpu->branchC(0x10, false);
+    cpu->jumpRelativeC(0x10, false);
     ASSERT_EQ(cpu->PC, 0xC123);
     cpu->AF.low_8 &= 0xEF;
-    cpu->branchC(-0x20, false);
+    cpu->jumpRelativeC(-0x20, false);
     ASSERT_EQ(cpu->PC, 0xC103);
-    cpu->branchC(0x10, true);
+    cpu->jumpRelativeC(0x10, true);
     ASSERT_EQ(cpu->PC, 0xC103);
 
     auto prevPC = cpu->PC;

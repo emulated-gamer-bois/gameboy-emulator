@@ -293,7 +293,7 @@ void CPU::jumpC(uint16_t addr, bool if_one) {
 /**
  * Increments PC with the given number of steps
  */
-void CPU::branch(int8_t steps) {
+void CPU::jumpRelative(int8_t steps) {
     PC += steps;
 }
 
@@ -301,7 +301,7 @@ void CPU::branch(int8_t steps) {
  * Increments PC with the given number of steps if Z is one or zero
  * depending on the if_one parameter
  */
-void CPU::branchZ(int8_t steps, bool if_one) {
+void CPU::jumpRelativeZ(int8_t steps, bool if_one) {
     if(!if_one  ==  !(AF.low_8 & 0x80)) PC += steps;
 }
 
@@ -309,7 +309,7 @@ void CPU::branchZ(int8_t steps, bool if_one) {
  * Increments PC with the given number of steps if C is one or zero
  * depending on the if_one parameter
  */
-void CPU::branchC(int8_t steps, bool if_one) {
+void CPU::jumpRelativeC(int8_t steps, bool if_one) {
     if(!if_one  ==  !(AF.low_8 & 0x10)) PC += steps;
 }
 
@@ -399,6 +399,17 @@ uint8_t CPU::read_and_inc_pc() {
 }
 
 /**
+ * Reads the two upcoming bytes, returns their combined value and incs PC twice
+ * The first byte is the lower byte
+ * The second byte is the higher byte
+ * @return
+ */
+uint16_t CPU::read16_and_inc_pc() {
+    PC += 1;
+    return combine_bytes(memory->read(PC-2), memory->read(PC-1));
+}
+
+/**
  * /**
  * Combines two bytes to a 16 bit variable
  * @param first_byte 8 lowest bits
@@ -482,6 +493,9 @@ void CPU::execute_instruction() {
         case 0x17: //RLA
             rl(AF.high_8);
             break;
+        case 0x18:
+            jumpRelative(read_and_inc_pc());
+            break;
         case 0x1A:
             loadImp(DE.all_16, AF.high_8);
             break;
@@ -499,6 +513,9 @@ void CPU::execute_instruction() {
             break;
         case 0x1F: //RRA
             rr(AF.high_8);
+            break;
+        case 0x20:
+            jumpRelativeZ(read_and_inc_pc(), false);
             break;
         case 0x21:
             loadIm16(read_and_inc_pc(), read_and_inc_pc(), HL);
@@ -519,6 +536,9 @@ void CPU::execute_instruction() {
         case 0x26:
             loadIm8(HL.high_8,read_and_inc_pc());
             break;
+        case 0x28:
+            jumpRelativeZ(read_and_inc_pc(), true);
+            break;
         case 0x2A:
             loadImp(HL.all_16, AF.high_8);
             increment16(HL.all_16);
@@ -534,6 +554,9 @@ void CPU::execute_instruction() {
             break;
         case 0x2E:
             loadIm8(HL.low_8,read_and_inc_pc());
+            break;
+        case 0x30:
+            jumpRelativeC(read_and_inc_pc(), false);
             break;
         case 0x31:
             loadIm16(memory->read(PC), memory->read(PC + 1), SP);
@@ -553,6 +576,8 @@ void CPU::execute_instruction() {
         case 0x37: //RLA
             rl(AF.high_8);
             break;
+        case 0x38:
+            jumpRelativeC(read_and_inc_pc(), true);
         case 0x3A:
             loadImp(HL.all_16, AF.high_8);
             decrement16(HL.all_16);
@@ -926,29 +951,130 @@ void CPU::execute_instruction() {
         case 0xB7:
             orA(AF.high_8);
             break;
+        case 0xC0:
+            retZ(false);
+            break;
+        case 0xC1:
+            popReg(BC);
+            break;
+        case 0xC2:
+            jumpZ(read16_and_inc_pc(), false);
+            break;
+        case 0xC3:
+            jump(read16_and_inc_pc());
+            break;
+        case 0xC4:
+            callZ(memory->read(PC), memory->read(PC+1), false);
+            PC += 2;
+            break;
+        case 0xC5:
+            pushReg(BC);
+            break;
         case 0xC6:
             addA(read_and_inc_pc(),false);
             break;
-        case 0xD6:
-            subA(read_and_inc_pc(),false);
+        case 0xC7:
+            reset(0);
             break;
-        case 0xE6:
-            andA(read_and_inc_pc());
+        case 0xC8:
+            retZ(true);
             break;
-        case 0xF6:
-            orA(read_and_inc_pc());
+        case 0xC9:
+            ret(false);
+            break;
+        case 0xCA:
+            jumpZ(read16_and_inc_pc(), true);
+            break;
+        case 0xCC:
+            callZ(memory->read(PC), memory->read(PC+1), true);
+            PC += 2;
+            break;
+        case 0xCD:
+            call(memory->read(PC), memory->read(PC+1));
+            PC += 2;
             break;
         case 0xCE:
             addA(read_and_inc_pc(),true);
             break;
+        case 0xCF:
+            reset(1);
+            break;
+        case 0xD0:
+            retC(false);
+            break;
+        case 0xD1:
+            popReg(DE);
+            break;
+        case 0xD2:
+            jumpC(read16_and_inc_pc(), false);
+            break;
+        case 0xD4:
+            callC(memory->read(PC), memory->read(PC+1), false);
+            PC += 2;
+            break;
+        case 0xD5:
+            pushReg(DE);
+            break;
+        case 0xD6:
+            subA(read_and_inc_pc(),false);
+            break;
+        case 0xD7:
+            reset(2);
+            break;
+        case 0xD8:
+            retC(true);
+            break;
+        case 0xD9:
+            ret(true);
+            break;
+        case 0xDA:
+            jumpC(read16_and_inc_pc(), true);
+            break;
+        case 0xDC:
+            callC(memory->read(PC), memory->read(PC+1), true);
+            PC += 2;
+            break;
         case 0xDE:
             subA(read_and_inc_pc(),true);
+            break;
+        case 0xDF:
+            reset(3);
+            break;
+        case 0xE1:
+            popReg(HL);
+            break;
+        case 0xE5:
+            pushReg(HL);
+            break;
+        case 0xE6:
+            andA(read_and_inc_pc());
+            break;
+        case 0xE7:
+            reset(4);
+            break;
+        case 0xE9:
+            jump(HL.all_16);
             break;
         case 0xEE:
             xorA(read_and_inc_pc());
             break;
-
-
+        case 0xEF:
+            reset(5);
+            break;
+        case 0xF1:
+            popReg(AF);
+            break;
+        case 0xF5:
+            pushReg(AF);
+            break;
+        case 0xF6:
+            orA(read_and_inc_pc());
+            break;
+        case 0xF7:
+            reset(6);
+            break;
+        case 0xFF:
+            reset(7);
         default:
             nop();
             break;
