@@ -26,6 +26,8 @@ MMU::MMU() {
     this->booting = true;
     // Enable all interrupts by default
     this->interrupt_enable = 0b11111;
+    // No interrupt requests by default
+    this->interrupt_flag = 0;
 
     // No buttons pressed by default
     this->io_joypad = 0xff;
@@ -183,6 +185,8 @@ void MMU::write_io(uint16_t addr, uint8_t data) {
         if (data != 0) this->disable_boot_rom();
     } else if (addr == IO_JOYPAD) {
         this->io_joypad_select = data;
+    } else if (addr == INTERRUPT_FLAG) {
+        this->interrupt_flag = data;
     }
 }
 
@@ -193,6 +197,8 @@ uint8_t MMU::read_io(uint16_t addr) {
         } else {
             return ((this->io_joypad >> 4) & 0xf);
         }
+    } else if (addr == INTERRUPT_FLAG) {
+        return this->interrupt_flag & (0x1f);
     }
     return 0;
 }
@@ -205,4 +211,8 @@ void MMU::joypad_release(uint8_t button) {
 void MMU::joypad_press(uint8_t button) {
     uint8_t temp = this->io_joypad;
     this->io_joypad = (temp & ~(1 << button));
+
+    // Raise interrupt flag
+    temp = this->interrupt_flag;
+    this->interrupt_flag = (temp | (1 << 4));
 }

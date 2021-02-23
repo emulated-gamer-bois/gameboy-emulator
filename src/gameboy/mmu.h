@@ -35,6 +35,7 @@ friend class test_case_name##_##test_name##_Test
 #define ADDR_SPACE_END      0xffff
 #define IO_DISABLE_BOOT_ROM 0xff50
 #define IO_JOYPAD           0xff00
+#define INTERRUPT_FLAG      0xff0f
 
 // Joypad constants
 #define JOYPAD_SEL_BUTTONS      0x10
@@ -78,6 +79,7 @@ private:
 
     bool booting;
     uint8_t interrupt_enable;
+    uint8_t interrupt_flag;
     uint8_t io_joypad_select;
     uint8_t io_joypad;
 
