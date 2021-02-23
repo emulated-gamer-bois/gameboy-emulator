@@ -11,10 +11,11 @@ CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
     this->PC = PC;
     this->memory = mmu;
     this->SP.all_16 = SP;
-    AF.all_16 = 0x00;
+    A.all_16 = 0x00;
     BC.all_16 = 0x00;
     DE.all_16 = 0x00;
     HL.all_16 = 0x00;
+    F.all_8 = 0x0;
 }
 
 void nop() {}
@@ -25,12 +26,10 @@ void nop() {}
  */
 void CPU::setZNFlags(uint8_t newValue, bool subtraction) {
     //Sets the Z flag to 1 if newValue == 0
-    AF.low_8 &= 0x7F;
-    AF.low_8 |= newValue == 0x00 ? 0x80 : 0x00;
-
+    F.z = newValue == 0 ? 1 : 0;
     //Set the N flag if operation is subtraction
-    AF.low_8 &= !subtraction ? 0xBF : 0xFF;
-    AF.low_8 |= subtraction ? 0x40 : 0x00;
+    F.n = subtraction ? 1 : 0;
+
 }
 
 /**
@@ -40,9 +39,10 @@ void CPU::setZNFlags(uint8_t newValue, bool subtraction) {
  */
 void CPU::setHFlag(uint8_t a, uint8_t b) {
     // Sets the H flag if carry from bit 3 to bit 4
-    auto HFlag = (((a & 0x0F) + (b & 0x0F)) & 0x10) << 0x01;
-    AF.low_8 &= 0xDF;
-    AF.low_8 |= HFlag;
+
+    F.h = (((a & 0x0F) + (b & 0x0F)) & 0x10) == 0x10 ? 1 : 0;
+
+
 }
 
 /**
@@ -50,11 +50,9 @@ void CPU::setHFlag(uint8_t a, uint8_t b) {
  * @param a parameter 1 in addition
  * @param b parameter 2 in addition
  */
-void CPU::setCFlag(uint8_t a, uint8_t b) {
+void CPU::setCFlag(uint16_t a, uint16_t b) {
     // Sets the C flag if overflow
-    auto CFlag = (((uint16_t) a + b) & 0x100) >> 0x04;
-    AF.low_8 &= 0xEF;
-    AF.low_8 |= CFlag;
+    F.c = (a + b) > 0xFF ? 1 : 0;
 }
 
 /**
@@ -95,11 +93,11 @@ void CPU::storeAddr(uint16_t addr, uint8_t value) {
  * stores the result in A. Can be done with or without carry.
  */
 void CPU::addA(uint8_t value, bool withCarry) {
-    auto CFlag = withCarry ? ((AF.low_8 & 0x10) >> 0x04) : 0;
-    setCFlag(AF.high_8, value + CFlag);
-    setHFlag(AF.high_8, value + CFlag);
-    AF.high_8 += value + CFlag;
-    setZNFlags(AF.high_8, false);
+    auto CFlag = withCarry ? F.c : 0;
+    setCFlag(A.high_8, value + CFlag);
+    setHFlag(A.high_8, value + CFlag);
+    A.high_8 += value + CFlag;
+    setZNFlags(A.high_8, false);
 }
 
 /**
@@ -115,12 +113,12 @@ uint8_t twosComp(uint8_t value) {
  * currently subtracts 1 if set.
  */
 void CPU::subA(uint8_t value, bool withCarry) {
-    auto CFlag = withCarry ? ((AF.low_8 & 0x10) >> 0x04) : 0;
+    auto CFlag = withCarry ? F.c : 0;
     value = twosComp(value + CFlag);
-    setCFlag(AF.high_8, value);
-    setHFlag(AF.high_8, value);
-    AF.high_8 += value;
-    setZNFlags(AF.high_8, true);
+    setCFlag(A.high_8, value);
+    setHFlag(A.high_8, value);
+    A.high_8 += value;
+    setZNFlags(A.high_8, true);
 }
 
 /**
@@ -161,12 +159,13 @@ void CPU::decrement8(uint8_t &addr) {
  * stores the result in A
  */
 void CPU::andA(uint8_t value) {
-    AF.high_8 &= value;
-    setZNFlags(AF.high_8, false);
+    A.high_8 &= value;
+    setZNFlags(A.high_8, false);
 
     //Sets H flag = 1, C = 0
-    AF.low_8 &= 0xC0;
-    AF.low_8 |= 0x20;
+    F.h=1;
+    F.c=0;
+
 }
 
 /**
@@ -174,11 +173,13 @@ void CPU::andA(uint8_t value) {
  * stores the result in A
  */
 void CPU::xorA(uint8_t value) {
-    AF.high_8 ^= value;
-    setZNFlags(AF.high_8, false);
+    A.high_8 ^= value;
+    setZNFlags(A.high_8, false);
 
     //Sets all flags except Z to 0
-    AF.low_8 &= 0x80;
+    F.c=0;
+    F.n=0;
+    F.h=0;
 }
 
 /**
@@ -186,11 +187,13 @@ void CPU::xorA(uint8_t value) {
  * stores the result in A
  */
 void CPU::orA(uint8_t value) {
-    AF.high_8 |= value;
-    setZNFlags(AF.high_8, false);
+    A.high_8 |= value;
+    setZNFlags(A.high_8, false);
 
     //Sets all flags except Z to 0
-    AF.low_8 &= 0x80;
+    F.c=0;
+    F.n=0;
+    F.h=0;
 }
 
 /**
@@ -201,7 +204,7 @@ void CPU::rlc(uint8_t &reg) {
     reg = (reg << 1) | d7;
 
     //Sets C flag to d7
-    AF.low_8 = (AF.low_8 & 0xEF) | (d7 << 4);
+    F.c = d7 ==0 ? 0 : 1;
 }
 
 /**
@@ -209,10 +212,10 @@ void CPU::rlc(uint8_t &reg) {
  */
 void CPU::rl(uint8_t &reg) {
     auto d7 = (reg & 0x80) >> 0x07;
-    reg = (reg << 1) | ((AF.low_8 >> 4) & 0x01);
+    reg = (reg << 1) | ((F.all_8 >> 4) & 0x01);
 
     //Sets C flag to d7
-    AF.low_8 = (AF.low_8 & 0xEF) | (d7 << 4);
+    F.c = d7 == 0 ? 0:1;
 }
 
 /**
@@ -223,7 +226,7 @@ void CPU::rrc(uint8_t &reg) {
     reg = (reg >> 1) | (d0 << 7);
 
     //Sets C flag to d0
-    AF.low_8 = (AF.low_8 & 0xEF) | (d0 << 4);
+    F.c = d0 == 0 ? 0:1;
 }
 
 /**
@@ -231,10 +234,12 @@ void CPU::rrc(uint8_t &reg) {
  */
 void CPU::rr(uint8_t &reg) {
     auto d0 = reg & 0x01;
-    reg = (reg >> 1) | ((AF.low_8 << 3) & 0x80);
+    auto d7 = reg & 0x80;
+    reg = (reg >> 1) | ((F.all_8 << 3) & 0x80);
 
     //Sets C flag to d7
-    AF.low_8 = (AF.low_8 & 0xEF) | (d0 << 4);
+    F.c = d7 == 0 ? 0 : 1;
+//    AF.low_8 = (AF.low_8 & 0xEF) | (d0 << 4);
 }
 
 /**
@@ -243,14 +248,14 @@ void CPU::rr(uint8_t &reg) {
  */
 void CPU::compareA(uint8_t value) {
     value = twosComp(value);
-    setCFlag(AF.high_8, value);
-    setHFlag(AF.high_8, value);
-    setZNFlags(AF.high_8 + value, true);
+    setCFlag(A.high_8, value);
+    setHFlag(A.high_8, value);
+    setZNFlags(A.high_8 + value, true);
 }
 
 
 /**
- * Stores the value of the given reg on the stack
+ * Stores the value of the given all_8 on the stack
  * SP is adjusted accordingly
  */
 void CPU::pushReg(RegisterPair &reg) {
@@ -259,7 +264,7 @@ void CPU::pushReg(RegisterPair &reg) {
 }
 
 /**
- * Stores the first two bytes from the stack in the given reg
+ * Stores the first two bytes from the stack in the given all_8
  * SP is adjusted accordingly
  */
 void CPU::popReg(RegisterPair &reg) {
@@ -279,7 +284,7 @@ void CPU::jump(uint16_t addr) {
  * depending on the if_one parameter
  */
 void CPU::jumpZ(uint16_t addr, bool if_one) {
-    if(!if_one  ==  !(AF.low_8 & 0x80)) PC = addr;
+    if (!if_one == !(F.z)) PC = addr;
 }
 
 /**
@@ -287,7 +292,7 @@ void CPU::jumpZ(uint16_t addr, bool if_one) {
  * depending on the if_one parameter
  */
 void CPU::jumpC(uint16_t addr, bool if_one) {
-    if(!if_one  ==  !(AF.low_8 & 0x10)) PC = addr;
+    if (!if_one == !(F.c)) PC = addr;
 }
 
 /**
@@ -302,7 +307,7 @@ void CPU::jumpRelative(int8_t steps) {
  * depending on the if_one parameter
  */
 void CPU::jumpRelativeZ(int8_t steps, bool if_one) {
-    if(!if_one  ==  !(AF.low_8 & 0x80)) PC += steps;
+    if (!if_one == !(F.z)) PC += steps;
 }
 
 /**
@@ -310,7 +315,7 @@ void CPU::jumpRelativeZ(int8_t steps, bool if_one) {
  * depending on the if_one parameter
  */
 void CPU::jumpRelativeC(int8_t steps, bool if_one) {
-    if(!if_one  ==  !(AF.low_8 & 0x10)) PC += steps;
+    if (!if_one == !(F.c)) PC += steps;
 }
 
 /**
@@ -333,7 +338,7 @@ void CPU::call(uint8_t firstByte, uint8_t secondByte) {
  * @param if_one true if Z should be 1, false if Z should be 0
  */
 void CPU::callZ(uint8_t firstByte, uint8_t secondByte, bool if_one) {
-    if(!if_one  !=  !(AF.low_8 & 0x80)) return;
+    if (!if_one != !(F.z)) return;
     call(firstByte, secondByte);
 }
 
@@ -345,7 +350,7 @@ void CPU::callZ(uint8_t firstByte, uint8_t secondByte, bool if_one) {
  * @param if_one true if C should be 1, false if C should be 0
  */
 void CPU::callC(uint8_t firstByte, uint8_t secondByte, bool if_one) {
-    if(!if_one  !=  !(AF.low_8 & 0x10)) return;
+    if (!if_one != !(F.c)) return;
     call(firstByte, secondByte);
 }
 
@@ -357,7 +362,7 @@ void CPU::callC(uint8_t firstByte, uint8_t secondByte, bool if_one) {
 void CPU::ret(bool from_interrupt) {
     PC = memory->read(SP.all_16++);
     PC |= memory->read(SP.all_16++) << 0x08;
-    if(from_interrupt) {
+    if (from_interrupt) {
         //TODO: Reset the interrupt flag
     }
 }
@@ -368,7 +373,7 @@ void CPU::ret(bool from_interrupt) {
  * @param if_one true if Z should be 1, false if Z should be 0
  */
 void CPU::retZ(bool if_one) {
-    if(!if_one  !=  !(AF.low_8 & 0x80)) return;
+    if (!if_one != !(F.z)) return;
     ret(false);
 }
 
@@ -378,7 +383,7 @@ void CPU::retZ(bool if_one) {
  * @param if_one true if C should be 1, false if C should be 0
  */
 void CPU::retC(bool if_one) {
-    if(!if_one  !=  !(AF.low_8 & 0x10)) return;
+    if (!if_one != !(F.c)) return;
     ret(false);
 }
 
@@ -421,7 +426,7 @@ uint8_t CPU::read_and_inc_pc() {
  */
 uint16_t CPU::read16_and_inc_pc() {
     PC += 1;
-    return combine_bytes(memory->read(PC-2), memory->read(PC-1));
+    return combine_bytes(memory->read(PC - 2), memory->read(PC - 1));
 }
 
 /**
@@ -446,7 +451,7 @@ void CPU::execute_instruction() {
             loadIm16(read_and_inc_pc(), read_and_inc_pc(), BC);
             break;
         case 0x02:
-            storeAddr(BC.all_16, AF.high_8);
+            storeAddr(BC.all_16, A.high_8);
             break;
         case 0x03:
             increment16(BC.all_16);
@@ -458,10 +463,10 @@ void CPU::execute_instruction() {
             decrement8(BC.high_8);
             break;
         case 0x06:
-            loadIm8(BC.high_8,read_and_inc_pc());
+            loadIm8(BC.high_8, read_and_inc_pc());
             break;
         case 0x07: //RLCA
-            rlc(AF.high_8);
+            rlc(A.high_8);
             break;
         case 0x08:
             //special case, not using read_and_inc PC
@@ -470,7 +475,7 @@ void CPU::execute_instruction() {
             PC += 2;
             break;
         case 0x0A:
-            loadImp(BC.all_16, AF.high_8);
+            loadImp(BC.all_16, A.high_8);
             break;
         case 0x0B:
             decrement16(BC.all_16);
@@ -482,16 +487,16 @@ void CPU::execute_instruction() {
             decrement8(BC.low_8);
             break;
         case 0x0E:
-            loadIm8(BC.low_8,read_and_inc_pc());
+            loadIm8(BC.low_8, read_and_inc_pc());
             break;
         case 0x0F: //RRCA
-            rrc(AF.high_8);
+            rrc(A.high_8);
             break;
         case 0x11:
             loadIm16(read_and_inc_pc(), read_and_inc_pc(), DE);
             break;
         case 0x12:
-            storeAddr(DE.all_16, AF.high_8);
+            storeAddr(DE.all_16, A.high_8);
             break;
         case 0x13:
             increment16(DE.all_16);
@@ -503,16 +508,16 @@ void CPU::execute_instruction() {
             decrement8(DE.high_8);
             break;
         case 0x16:
-            loadIm8( DE.high_8,read_and_inc_pc());
+            loadIm8(DE.high_8, read_and_inc_pc());
             break;
         case 0x17: //RLA
-            rl(AF.high_8);
+            rl(A.high_8);
             break;
         case 0x18:
             jumpRelative(read_and_inc_pc());
             break;
         case 0x1A:
-            loadImp(DE.all_16, AF.high_8);
+            loadImp(DE.all_16, A.high_8);
             break;
         case 0x1B:
             decrement16(DE.all_16);
@@ -524,10 +529,10 @@ void CPU::execute_instruction() {
             decrement8(DE.low_8);
             break;
         case 0x1E:
-            loadIm8(DE.low_8,read_and_inc_pc());
+            loadIm8(DE.low_8, read_and_inc_pc());
             break;
         case 0x1F: //RRA
-            rr(AF.high_8);
+            rr(A.high_8);
             break;
         case 0x20:
             jumpRelativeZ(read_and_inc_pc(), false);
@@ -536,7 +541,7 @@ void CPU::execute_instruction() {
             loadIm16(read_and_inc_pc(), read_and_inc_pc(), HL);
             break;
         case 0x22:
-            storeAddr(HL.all_16, AF.high_8);
+            storeAddr(HL.all_16, A.high_8);
             increment16(HL.all_16);
             break;
         case 0x23:
@@ -549,13 +554,13 @@ void CPU::execute_instruction() {
             decrement8(HL.high_8);
             break;
         case 0x26:
-            loadIm8(HL.high_8,read_and_inc_pc());
+            loadIm8(HL.high_8, read_and_inc_pc());
             break;
         case 0x28:
             jumpRelativeZ(read_and_inc_pc(), true);
             break;
         case 0x2A:
-            loadImp(HL.all_16, AF.high_8);
+            loadImp(HL.all_16, A.high_8);
             increment16(HL.all_16);
             break;
         case 0x2B:
@@ -568,7 +573,7 @@ void CPU::execute_instruction() {
             decrement8(HL.low_8);
             break;
         case 0x2E:
-            loadIm8(HL.low_8,read_and_inc_pc());
+            loadIm8(HL.low_8, read_and_inc_pc());
             break;
         case 0x30:
             jumpRelativeC(read_and_inc_pc(), false);
@@ -578,7 +583,7 @@ void CPU::execute_instruction() {
             PC += 2;
             break;
         case 0x32:
-            storeAddr(HL.all_16, AF.high_8);
+            storeAddr(HL.all_16, A.high_8);
             decrement16(HL.all_16);
             break;
         case 0x33:
@@ -589,215 +594,215 @@ void CPU::execute_instruction() {
             storeAddr(HL.all_16, read_and_inc_pc());
             break;
         case 0x37: //RLA
-            rl(AF.high_8);
+            rl(A.high_8);
             break;
         case 0x38:
             jumpRelativeC(read_and_inc_pc(), true);
         case 0x3A:
-            loadImp(HL.all_16, AF.high_8);
+            loadImp(HL.all_16, A.high_8);
             decrement16(HL.all_16);
             break;
         case 0x3B:
             decrement16(SP.all_16);
             break;
         case 0x3C:
-            increment8(AF.high_8);
+            increment8(A.high_8);
             break;
         case 0x3D:
-            decrement8(AF.high_8);
+            decrement8(A.high_8);
             break;
         case 0x3E:
-            loadIm8(AF.high_8,read_and_inc_pc());
+            loadIm8(A.high_8, read_and_inc_pc());
             break;
         case 0x40:
             //This is stoopid.
-            loadIm8(BC.high_8,BC.high_8);
+            loadIm8(BC.high_8, BC.high_8);
             break;
         case 0x41:
-            loadIm8(BC.high_8,BC.low_8);
+            loadIm8(BC.high_8, BC.low_8);
             break;
         case 0x42:
-            loadIm8(BC.high_8,DE.high_8);
+            loadIm8(BC.high_8, DE.high_8);
             break;
         case 0x43:
-            loadIm8(BC.high_8,DE.low_8);
+            loadIm8(BC.high_8, DE.low_8);
             break;
         case 0x44:
-            loadIm8(BC.high_8,HL.high_8);
+            loadIm8(BC.high_8, HL.high_8);
             break;
         case 0x45:
-            loadIm8(BC.high_8,HL.low_8);
+            loadIm8(BC.high_8, HL.low_8);
             break;
         case 0x46:
-            loadIm8(BC.high_8,memory->read(HL.all_16));
+            loadIm8(BC.high_8, memory->read(HL.all_16));
             break;
         case 0x47:
-            loadIm8(BC.high_8,AF.high_8);
+            loadIm8(BC.high_8, A.high_8);
             break;
         case 0x48:
-            loadIm8(BC.low_8,BC.high_8);
+            loadIm8(BC.low_8, BC.high_8);
             break;
         case 0x49:
-            loadIm8(BC.low_8,BC.low_8);
+            loadIm8(BC.low_8, BC.low_8);
             break;
         case 0x4A:
-            loadIm8(BC.low_8,DE.high_8);
+            loadIm8(BC.low_8, DE.high_8);
             break;
         case 0x4B:
-            loadIm8(BC.low_8,DE.low_8);
+            loadIm8(BC.low_8, DE.low_8);
             break;
         case 0x4C:
-            loadIm8(BC.low_8,HL.high_8);
+            loadIm8(BC.low_8, HL.high_8);
             break;
         case 0x4D:
-            loadIm8(BC.low_8,HL.low_8);
+            loadIm8(BC.low_8, HL.low_8);
             break;
         case 0x4E:
-            loadIm8(BC.low_8,memory->read(HL.all_16));
+            loadIm8(BC.low_8, memory->read(HL.all_16));
             break;
         case 0x4F:
-            loadIm8(BC.low_8,AF.high_8);
+            loadIm8(BC.low_8, A.high_8);
             break;
         case 0x50:
-            loadIm8(DE.high_8,BC.high_8);
+            loadIm8(DE.high_8, BC.high_8);
             break;
         case 0x51:
-            loadIm8(DE.high_8,BC.low_8);
+            loadIm8(DE.high_8, BC.low_8);
             break;
         case 0x52:
-            loadIm8(DE.high_8,DE.high_8);
+            loadIm8(DE.high_8, DE.high_8);
             break;
         case 0x53:
-            loadIm8(DE.high_8,DE.low_8);
+            loadIm8(DE.high_8, DE.low_8);
             break;
         case 0x54:
-            loadIm8(DE.high_8,HL.high_8);
+            loadIm8(DE.high_8, HL.high_8);
             break;
         case 0x55:
-            loadIm8(DE.high_8,HL.low_8);
+            loadIm8(DE.high_8, HL.low_8);
             break;
         case 0x56:
-            loadIm8(DE.high_8,memory->read(HL.all_16));
+            loadIm8(DE.high_8, memory->read(HL.all_16));
             break;
         case 0x57:
-            loadIm8(DE.high_8,AF.high_8);
+            loadIm8(DE.high_8, A.high_8);
             break;
         case 0x58:
-            loadIm8(DE.low_8,BC.high_8);
+            loadIm8(DE.low_8, BC.high_8);
             break;
         case 0x59:
-            loadIm8(DE.low_8,BC.low_8);
+            loadIm8(DE.low_8, BC.low_8);
             break;
         case 0x5A:
-            loadIm8(DE.low_8,DE.high_8);
+            loadIm8(DE.low_8, DE.high_8);
             break;
         case 0x5B:
-            loadIm8(DE.low_8,DE.low_8);
+            loadIm8(DE.low_8, DE.low_8);
             break;
         case 0x5C:
-            loadIm8(DE.low_8,HL.high_8);
+            loadIm8(DE.low_8, HL.high_8);
             break;
         case 0x5D:
-            loadIm8(DE.low_8,HL.low_8);
+            loadIm8(DE.low_8, HL.low_8);
             break;
         case 0x5E:
-            loadIm8(DE.low_8,memory->read(HL.all_16));
+            loadIm8(DE.low_8, memory->read(HL.all_16));
             break;
         case 0x5F:
-            loadIm8(BC.low_8,AF.high_8);
+            loadIm8(BC.low_8, A.high_8);
             break;
         case 0x60:
-            loadIm8(HL.high_8,BC.high_8);
+            loadIm8(HL.high_8, BC.high_8);
             break;
         case 0x61:
-            loadIm8(HL.high_8,BC.low_8);
+            loadIm8(HL.high_8, BC.low_8);
             break;
         case 0x62:
-            loadIm8(HL.high_8,DE.high_8);
+            loadIm8(HL.high_8, DE.high_8);
             break;
         case 0x63:
-            loadIm8(HL.high_8,DE.low_8);
+            loadIm8(HL.high_8, DE.low_8);
             break;
         case 0x64:
-            loadIm8(HL.high_8,HL.high_8);
+            loadIm8(HL.high_8, HL.high_8);
             break;
         case 0x65:
-            loadIm8(HL.high_8,HL.low_8);
+            loadIm8(HL.high_8, HL.low_8);
             break;
         case 0x66:
-            loadIm8(HL.high_8,memory->read(HL.all_16));
+            loadIm8(HL.high_8, memory->read(HL.all_16));
             break;
         case 0x67:
-            loadIm8(HL.high_8,AF.high_8);
+            loadIm8(HL.high_8, A.high_8);
             break;
         case 0x68:
-            loadIm8(HL.low_8,BC.high_8);
+            loadIm8(HL.low_8, BC.high_8);
             break;
         case 0x69:
-            loadIm8(HL.low_8,BC.low_8);
+            loadIm8(HL.low_8, BC.low_8);
             break;
         case 0x6A:
-            loadIm8(HL.low_8,DE.high_8);
+            loadIm8(HL.low_8, DE.high_8);
             break;
         case 0x6B:
-            loadIm8(HL.low_8,DE.low_8);
+            loadIm8(HL.low_8, DE.low_8);
             break;
         case 0x6C:
-            loadIm8(HL.low_8,HL.high_8);
+            loadIm8(HL.low_8, HL.high_8);
             break;
         case 0x6D:
-            loadIm8(HL.low_8,HL.low_8);
+            loadIm8(HL.low_8, HL.low_8);
             break;
         case 0x6E:
-            loadIm8(HL.low_8,memory->read(HL.all_16));
+            loadIm8(HL.low_8, memory->read(HL.all_16));
             break;
         case 0x6F:
-            loadIm8(HL.low_8,AF.high_8);
+            loadIm8(HL.low_8, A.high_8);
             break;
         case 0x70:
-            storeAddr(HL.all_16,BC.high_8);
+            storeAddr(HL.all_16, BC.high_8);
             break;
         case 0x71:
-            storeAddr(HL.all_16,BC.low_8);
+            storeAddr(HL.all_16, BC.low_8);
             break;
         case 0x72:
-            storeAddr(HL.all_16,DE.high_8);
+            storeAddr(HL.all_16, DE.high_8);
             break;
         case 0x73:
-            storeAddr(HL.all_16,DE.low_8);
+            storeAddr(HL.all_16, DE.low_8);
             break;
         case 0x74:
-            storeAddr(HL.all_16,HL.high_8);
+            storeAddr(HL.all_16, HL.high_8);
             break;
         case 0x75:
-            storeAddr(HL.all_16,HL.low_8);
+            storeAddr(HL.all_16, HL.low_8);
             break;
         case 0x77:
-            storeAddr(HL.all_16,AF.high_8);
+            storeAddr(HL.all_16, A.high_8);
             break;
         case 0x78:
-            loadIm8(AF.high_8,BC.high_8);
+            loadIm8(A.high_8, BC.high_8);
             break;
         case 0x79:
-            loadIm8(AF.high_8,BC.low_8);
+            loadIm8(A.high_8, BC.low_8);
             break;
         case 0x7A:
-            loadIm8(AF.high_8,DE.high_8);
+            loadIm8(A.high_8, DE.high_8);
             break;
         case 0x7B:
-            loadIm8(AF.high_8,DE.low_8);
+            loadIm8(A.high_8, DE.low_8);
             break;
         case 0x7C:
-            loadIm8(AF.high_8,HL.high_8);
+            loadIm8(A.high_8, HL.high_8);
             break;
         case 0x7D:
-            loadIm8(AF.high_8,HL.low_8);
+            loadIm8(A.high_8, HL.low_8);
             break;
         case 0x7E:
-            loadIm8(AF.high_8,memory->read(HL.all_16));
+            loadIm8(A.high_8, memory->read(HL.all_16));
             break;
         case 0x7F:
-            loadIm8(AF.high_8,AF.high_8);
+            loadIm8(A.high_8, A.high_8);
             break;
         case 0x80:
             addA(BC.high_8, false);
@@ -821,7 +826,7 @@ void CPU::execute_instruction() {
             addA(memory->read(HL.all_16), false);
             break;
         case 0x87:
-            addA(AF.high_8, false);
+            addA(A.high_8, false);
             break;
         case 0x88:
             addA(BC.high_8, true);
@@ -844,7 +849,7 @@ void CPU::execute_instruction() {
         case 0x8E:
             addA(memory->read(HL.all_16), true);
         case 0x8F:
-            addA(AF.high_8, true);
+            addA(A.high_8, true);
             break;
         case 0x90:
             subA(BC.high_8, false);
@@ -868,7 +873,7 @@ void CPU::execute_instruction() {
             subA(memory->read(HL.all_16), false);
             break;
         case 0x97:
-            subA(AF.high_8, false);
+            subA(A.high_8, false);
             break;
         case 0x98:
             subA(BC.high_8, true);
@@ -892,7 +897,7 @@ void CPU::execute_instruction() {
             subA(memory->read(HL.all_16), true);
             break;
         case 0x9F:
-            subA(AF.high_8, true);
+            subA(A.high_8, true);
             break;
         case 0xA0:
             andA(BC.high_8);
@@ -916,7 +921,7 @@ void CPU::execute_instruction() {
             andA(memory->read(HL.all_16));
             break;
         case 0xA7:
-            andA(AF.high_8);
+            andA(A.high_8);
             break;
         case 0xA8:
             xorA(BC.high_8);
@@ -940,7 +945,7 @@ void CPU::execute_instruction() {
             xorA(memory->read(HL.all_16));
             break;
         case 0xAF:
-            xorA(AF.high_8);
+            xorA(A.high_8);
             break;
         case 0xB0:
             orA(BC.high_8);
@@ -964,7 +969,7 @@ void CPU::execute_instruction() {
             orA(memory->read(HL.all_16));
             break;
         case 0xB7:
-            orA(AF.high_8);
+            orA(A.high_8);
             break;
         case 0xB8:
             compareA(BC.high_8);
@@ -988,7 +993,7 @@ void CPU::execute_instruction() {
             compareA(memory->read(HL.all_16));
             break;
         case 0xBF:
-            compareA(AF.high_8);
+            compareA(A.high_8);
             break;
         case 0xC0:
             retZ(false);
@@ -1003,14 +1008,14 @@ void CPU::execute_instruction() {
             jump(read16_and_inc_pc());
             break;
         case 0xC4:
-            callZ(memory->read(PC), memory->read(PC+1), false);
+            callZ(memory->read(PC), memory->read(PC + 1), false);
             PC += 2;
             break;
         case 0xC5:
             pushReg(BC);
             break;
         case 0xC6:
-            addA(read_and_inc_pc(),false);
+            addA(read_and_inc_pc(), false);
             break;
         case 0xC7:
             reset(0);
@@ -1025,15 +1030,15 @@ void CPU::execute_instruction() {
             jumpZ(read16_and_inc_pc(), true);
             break;
         case 0xCC:
-            callZ(memory->read(PC), memory->read(PC+1), true);
+            callZ(memory->read(PC), memory->read(PC + 1), true);
             PC += 2;
             break;
         case 0xCD:
-            call(memory->read(PC), memory->read(PC+1));
+            call(memory->read(PC), memory->read(PC + 1));
             PC += 2;
             break;
         case 0xCE:
-            addA(read_and_inc_pc(),true);
+            addA(read_and_inc_pc(), true);
             break;
         case 0xCF:
             reset(1);
@@ -1048,14 +1053,14 @@ void CPU::execute_instruction() {
             jumpC(read16_and_inc_pc(), false);
             break;
         case 0xD4:
-            callC(memory->read(PC), memory->read(PC+1), false);
+            callC(memory->read(PC), memory->read(PC + 1), false);
             PC += 2;
             break;
         case 0xD5:
             pushReg(DE);
             break;
         case 0xD6:
-            subA(read_and_inc_pc(),false);
+            subA(read_and_inc_pc(), false);
             break;
         case 0xD7:
             reset(2);
@@ -1070,11 +1075,11 @@ void CPU::execute_instruction() {
             jumpC(read16_and_inc_pc(), true);
             break;
         case 0xDC:
-            callC(memory->read(PC), memory->read(PC+1), true);
+            callC(memory->read(PC), memory->read(PC + 1), true);
             PC += 2;
             break;
         case 0xDE:
-            subA(read_and_inc_pc(),true);
+            subA(read_and_inc_pc(), true);
             break;
         case 0xDF:
             reset(3);
@@ -1101,10 +1106,10 @@ void CPU::execute_instruction() {
             reset(5);
             break;
         case 0xF1:
-            popReg(AF);
+            popReg(A);
             break;
         case 0xF5:
-            pushReg(AF);
+            pushReg(A);
             break;
         case 0xF6:
             orA(read_and_inc_pc());

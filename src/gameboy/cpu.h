@@ -11,6 +11,7 @@
 #include <cstdint>
 #include "register_pair.h"
 #include "mmu.h"
+#include "Flags.h"
 
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
@@ -28,20 +29,22 @@ private:
     //Registers
     uint16_t PC;
     RegisterPair SP;
-    RegisterPair AF;
+    RegisterPair A;
     RegisterPair BC;
     RegisterPair DE;
     RegisterPair HL;
+    //Flags
+    Flags F;
     //Memory
     std::shared_ptr<MMU> memory;
 
     //Flag management
     void setZNFlags(uint8_t, bool);
     void setHFlag(uint8_t a, uint8_t b);
-    void setCFlag(uint8_t a, uint8_t b);
+    void setCFlag(uint16_t a,uint16_t b);
 
     //Setting registers
-    void setA(uint8_t val){ AF.high_8=val;};
+    void setA(uint8_t val){ A.high_8=val;};
     void setB(uint8_t val){ BC.high_8=val;};
 
     //Register arithmetics

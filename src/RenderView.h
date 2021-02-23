@@ -5,14 +5,11 @@
  * Author: Andreas Palmqvist
  */
 
-#ifndef LAME_BOY_RENDERVIEW_H
-#define LAME_BOY_RENDERVIEW_H
+#pragma once
 
-#include <GL/glew.h>
-#include <glm/glm.hpp>
-#include <labhelper.h>
+#include <labhelper.h> // includes glew.h and glm.hpp
 
-using namespace glm;
+#include "Palette.h"
 
 class RenderView {
 private:
@@ -21,17 +18,21 @@ private:
     const static int VERTEX_AMOUNT = 6;
 
     int screenMultiplier;
-    vec2 screenVertices[VERTEX_AMOUNT];
+    glm::vec2 screenVertices[VERTEX_AMOUNT];
     GLuint vertexArrayObject;
+    GLuint screenTexture;
     GLuint renderShaderProgram;
     GLuint fxShaderProgram;
+    Palette palette;
 
 public:
-    RenderView(int screenMultiplier);
+    RenderView(int screenMultiplier, Palette palette);
     RenderView();
-    virtual ~RenderView();
 
-    void render();
+    void render() const;
+    void setScreenTexture(uint8_t textureData[]);
+    void setPalette(Palette palette);
+
+    int getWidth() const;
+    int getHeight() const;
 };
-
-#endif //LAME_BOY_RENDERVIEW_H
