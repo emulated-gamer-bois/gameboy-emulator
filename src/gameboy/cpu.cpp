@@ -406,7 +406,6 @@ void CPU::bit(uint8_t bit_nr, uint8_t value) {
     F.n = 0;
     F.h = 1;
 }
-
 /**
  * Every time we read PC, we want to increment it.
  * */
@@ -1217,7 +1216,7 @@ int CPU::CB_ops() {
             rr(HL.low_8);
             return 2;
             //TODO 0x1e
-        case 0x1E:
+        case 0x1F:
             rr(A.high_8);
             return 2;
 
@@ -1241,7 +1240,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x46:
             bit(0,memory->read(HL.all_16));
-            return 2;
+            return 4;
         case 0x47:
             bit(0,A.high_8);
             return 2;
@@ -1265,7 +1264,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x4E:
             bit(1,memory->read(HL.all_16));
-            return 2;
+            return 4;
         case 0x4F:
             bit(1,A.high_8);
             return 2;
@@ -1289,7 +1288,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x56:
             bit(2,memory->read(HL.all_16));
-            return 2;
+            return 4;
         case 0x57:
             bit(2,A.high_8);
             return 2;
@@ -1313,7 +1312,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x5E:
             bit(3,memory->read(HL.all_16));
-            return 2;
+            return 4;
         case 0x5F:
             bit(3,A.high_8);
             return 2;
@@ -1337,7 +1336,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x66:
             bit(4,memory->read(HL.all_16));
-            return 2;
+            return 4;
         case 0x67:
             bit(4,A.high_8);
             return 2;
@@ -1361,7 +1360,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x6E:
             bit(5,memory->read(HL.all_16));
-            return 2;
+            return 4;
         case 0x6F:
             bit(5,A.high_8);
             return 2;
@@ -1385,7 +1384,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x76:
             bit(6,memory->read(HL.all_16));
-            return 2;
+            return 4;
         case 0x77:
             bit(6,A.high_8);
             return 2;
@@ -1409,7 +1408,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x7E:
             bit(7,memory->read(HL.all_16));
-            return 2;
+            return 4;
         case 0x7F:
             bit(7,A.high_8);
             return 2;
