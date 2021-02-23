@@ -187,19 +187,82 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->jumpZ(0xB123, true);
     ASSERT_EQ(cpu->PC, 0xC123);
 
-    cpu->branch(0x02);
+    cpu->AF.low_8 |= 0x10;
+    cpu->jumpC(0xD123, true);
+    ASSERT_EQ(cpu->PC, 0xD123);
+    cpu->jumpC(0xC123, false);
+    ASSERT_EQ(cpu->PC, 0xD123);
+    cpu->AF.low_8 &= 0xEF;
+    cpu->jumpC(0xC123, false);
+    ASSERT_EQ(cpu->PC, 0xC123);
+    cpu->jumpC(0xB123, true);
+    ASSERT_EQ(cpu->PC, 0xC123);
+
+    cpu->jumpRelative(0x02);
     ASSERT_EQ(cpu->PC, 0xC125);
-    cpu->branch(-0x02);
+    cpu->jumpRelative(-0x02);
     ASSERT_EQ(cpu->PC, 0xC123);
     cpu->AF.low_8 |= 0x80;
-    cpu->branchZ(0x10, true);
+    cpu->jumpRelativeZ(0x10, true);
     ASSERT_EQ(cpu->PC, 0xC133);
-    cpu->branchZ(0x10, false);
+    cpu->jumpRelativeZ(0x10, false);
     ASSERT_EQ(cpu->PC, 0xC133);
     cpu->AF.low_8 &= 0x7F;
-    cpu->branchZ(-0x20, false);
+    cpu->jumpRelativeZ(-0x20, false);
     ASSERT_EQ(cpu->PC, 0xC113);
-    cpu->branchZ(0x10, true);
+    cpu->jumpRelativeZ(0x10, true);
     ASSERT_EQ(cpu->PC, 0xC113);
 
+    cpu->AF.low_8 |= 0x10;
+    cpu->jumpRelativeC(0x10, true);
+    ASSERT_EQ(cpu->PC, 0xC123);
+    cpu->jumpRelativeC(0x10, false);
+    ASSERT_EQ(cpu->PC, 0xC123);
+    cpu->AF.low_8 &= 0xEF;
+    cpu->jumpRelativeC(-0x20, false);
+    ASSERT_EQ(cpu->PC, 0xC103);
+    cpu->jumpRelativeC(0x10, true);
+    ASSERT_EQ(cpu->PC, 0xC103);
+
+    auto prevPC = cpu->PC;
+    prevSP = cpu->SP.all_16;
+    cpu->call(0xCD, 0xAB);
+    ASSERT_EQ(cpu->PC, 0xABCD);
+    ASSERT_EQ(cpu->SP.all_16, prevSP - 2);
+    cpu->ret(false);
+    ASSERT_EQ(cpu->PC, prevPC);
+    ASSERT_EQ(cpu->SP.all_16, prevSP);
+
+    cpu->AF.low_8 |= 0x80;
+    cpu->callZ(0xCD, 0xAB, false);
+    ASSERT_EQ(cpu->PC, prevPC);
+    ASSERT_EQ(cpu->SP.all_16, prevSP);
+    cpu->callZ(0xCD, 0xAB, true);
+    ASSERT_EQ(cpu->PC, 0xABCD);
+    ASSERT_EQ(cpu->SP.all_16, prevSP - 2);
+    cpu->retZ(false);
+    ASSERT_EQ(cpu->PC, 0xABCD);
+    ASSERT_EQ(cpu->SP.all_16, prevSP - 2);
+    cpu->retZ(true);
+    ASSERT_EQ(cpu->PC, prevPC);
+    ASSERT_EQ(cpu->SP.all_16, prevSP);
+
+    cpu->AF.low_8 &= 0xEF;
+    cpu->callC(0xCD, 0xAB, true);
+    ASSERT_EQ(cpu->PC, prevPC);
+    ASSERT_EQ(cpu->SP.all_16, prevSP);
+    cpu->callC(0xCD, 0xAB, false);
+    ASSERT_EQ(cpu->PC, 0xABCD);
+    ASSERT_EQ(cpu->SP.all_16, prevSP - 2);
+    cpu->retC(true);
+    ASSERT_EQ(cpu->PC, 0xABCD);
+    ASSERT_EQ(cpu->SP.all_16, prevSP - 2);
+    cpu->retC(false);
+    ASSERT_EQ(cpu->PC, prevPC);
+    ASSERT_EQ(cpu->SP.all_16, prevSP);
+
+    cpu->reset(3);
+    ASSERT_EQ(cpu->PC, 0x0018);
+    cpu->ret(false);
+    ASSERT_EQ(cpu->PC, prevPC);
 }

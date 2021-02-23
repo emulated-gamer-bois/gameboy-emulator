@@ -5,6 +5,8 @@
 #include "cpu.h"
 #include "mmu.h"
 
+uint16_t combine_bytes(uint8_t first_byte, uint8_t second_byte);
+
 CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
     this->PC = PC;
     this->memory = mmu;
@@ -281,9 +283,17 @@ void CPU::jumpZ(uint16_t addr, bool if_one) {
 }
 
 /**
+ * Jumps immediately to the specified address if C is one or zero
+ * depending on the if_one parameter
+ */
+void CPU::jumpC(uint16_t addr, bool if_one) {
+    if(!if_one  ==  !(AF.low_8 & 0x10)) PC = addr;
+}
+
+/**
  * Increments PC with the given number of steps
  */
-void CPU::branch(int8_t steps) {
+void CPU::jumpRelative(int8_t steps) {
     PC += steps;
 }
 
@@ -291,8 +301,94 @@ void CPU::branch(int8_t steps) {
  * Increments PC with the given number of steps if Z is one or zero
  * depending on the if_one parameter
  */
-void CPU::branchZ(int8_t steps, bool if_one) {
+void CPU::jumpRelativeZ(int8_t steps, bool if_one) {
     if(!if_one  ==  !(AF.low_8 & 0x80)) PC += steps;
+}
+
+/**
+ * Increments PC with the given number of steps if C is one or zero
+ * depending on the if_one parameter
+ */
+void CPU::jumpRelativeC(int8_t steps, bool if_one) {
+    if(!if_one  ==  !(AF.low_8 & 0x10)) PC += steps;
+}
+
+/**
+ * Call sub routine
+ * Stores value of PC on the stack and sets the value of PC to the immediate data
+ * @param firstByte fist parameter and the lower byte
+ * @param secondByte second parameter the higher byte
+ */
+void CPU::call(uint8_t firstByte, uint8_t secondByte) {
+    memory->write(--SP.all_16, PC >> 0x08);
+    memory->write(--SP.all_16, PC & 0x00FF);
+    PC = combine_bytes(firstByte, secondByte);
+}
+
+/**
+ * Calls subroutine if Z is one or zero
+ * depending on the if_one parameter
+ * @param firstByte fist parameter and the lower byte
+ * @param secondByte second parameter the higher byte
+ * @param if_one true if Z should be 1, false if Z should be 0
+ */
+void CPU::callZ(uint8_t firstByte, uint8_t secondByte, bool if_one) {
+    if(!if_one  !=  !(AF.low_8 & 0x80)) return;
+    call(firstByte, secondByte);
+}
+
+/**
+ * Calls subroutine if C is one or zero
+ * depending on the if_one parameter
+ * @param firstByte fist parameter and the lower byte
+ * @param secondByte second parameter the higher byte
+ * @param if_one true if C should be 1, false if C should be 0
+ */
+void CPU::callC(uint8_t firstByte, uint8_t secondByte, bool if_one) {
+    if(!if_one  !=  !(AF.low_8 & 0x10)) return;
+    call(firstByte, secondByte);
+}
+
+/**
+ * Return from a subroutine by setting PC with
+ * the two latest values on the stack
+ * @param from_interrupt if the subroutine returns from interrupt
+ */
+void CPU::ret(bool from_interrupt) {
+    PC = memory->read(SP.all_16++);
+    PC |= memory->read(SP.all_16++) << 0x08;
+    if(from_interrupt) {
+        //TODO: Reset the interrupt flag
+    }
+}
+
+/**
+ * Return from subroutine if Z is one or zero
+ * depending on the if_one parameter
+ * @param if_one true if Z should be 1, false if Z should be 0
+ */
+void CPU::retZ(bool if_one) {
+    if(!if_one  !=  !(AF.low_8 & 0x80)) return;
+    ret(false);
+}
+
+/**
+ * Return from subroutine if C is one or zero
+ * depending on the if_one parameter
+ * @param if_one true if C should be 1, false if C should be 0
+ */
+void CPU::retC(bool if_one) {
+    if(!if_one  !=  !(AF.low_8 & 0x10)) return;
+    ret(false);
+}
+
+/**
+ * Restart PC from the nth byte (n as in number)
+ * pushes PC to the stack before resetting PC
+ * @param nth_byte vale from 0 to 7 of how many bytes from 0 PC should start at
+ */
+void CPU::reset(uint8_t nth_byte) {
+    call(0x08 * nth_byte, 0x00);
 }
 
 /**
@@ -300,6 +396,17 @@ void CPU::branchZ(int8_t steps, bool if_one) {
  * */
 uint8_t CPU::read_and_inc_pc() {
     return memory->read(PC++);
+}
+
+/**
+ * Reads the two upcoming bytes, returns their combined value and incs PC twice
+ * The first byte is the lower byte
+ * The second byte is the higher byte
+ * @return
+ */
+uint16_t CPU::read16_and_inc_pc() {
+    PC += 1;
+    return combine_bytes(memory->read(PC-2), memory->read(PC-1));
 }
 
 /**
@@ -386,6 +493,9 @@ void CPU::execute_instruction() {
         case 0x17: //RLA
             rl(AF.high_8);
             break;
+        case 0x18:
+            jumpRelative(read_and_inc_pc());
+            break;
         case 0x1A:
             loadImp(DE.all_16, AF.high_8);
             break;
@@ -403,6 +513,9 @@ void CPU::execute_instruction() {
             break;
         case 0x1F: //RRA
             rr(AF.high_8);
+            break;
+        case 0x20:
+            jumpRelativeZ(read_and_inc_pc(), false);
             break;
         case 0x21:
             loadIm16(read_and_inc_pc(), read_and_inc_pc(), HL);
@@ -423,6 +536,9 @@ void CPU::execute_instruction() {
         case 0x26:
             loadIm8(HL.high_8,read_and_inc_pc());
             break;
+        case 0x28:
+            jumpRelativeZ(read_and_inc_pc(), true);
+            break;
         case 0x2A:
             loadImp(HL.all_16, AF.high_8);
             increment16(HL.all_16);
@@ -438,6 +554,9 @@ void CPU::execute_instruction() {
             break;
         case 0x2E:
             loadIm8(HL.low_8,read_and_inc_pc());
+            break;
+        case 0x30:
+            jumpRelativeC(read_and_inc_pc(), false);
             break;
         case 0x31:
             loadIm16(memory->read(PC), memory->read(PC + 1), SP);
@@ -457,6 +576,8 @@ void CPU::execute_instruction() {
         case 0x37: //RLA
             rl(AF.high_8);
             break;
+        case 0x38:
+            jumpRelativeC(read_and_inc_pc(), true);
         case 0x3A:
             loadImp(HL.all_16, AF.high_8);
             decrement16(HL.all_16);
@@ -830,29 +951,157 @@ void CPU::execute_instruction() {
         case 0xB7:
             orA(AF.high_8);
             break;
+        case 0xB8:
+            compareA(BC.high_8);
+            break;
+        case 0xB9:
+            compareA(BC.low_8);
+            break;
+        case 0xBA:
+            compareA(DE.high_8);
+            break;
+        case 0xBB:
+            compareA(DE.low_8);
+            break;
+        case 0xBC:
+            compareA(HL.high_8);
+            break;
+        case 0xBD:
+            compareA(HL.low_8);
+            break;
+        case 0xBE:
+            compareA(memory->read(HL.all_16));
+            break;
+        case 0xBF:
+            compareA(AF.high_8);
+            break;
+        case 0xC0:
+            retZ(false);
+            break;
+        case 0xC1:
+            popReg(BC);
+            break;
+        case 0xC2:
+            jumpZ(read16_and_inc_pc(), false);
+            break;
+        case 0xC3:
+            jump(read16_and_inc_pc());
+            break;
+        case 0xC4:
+            callZ(memory->read(PC), memory->read(PC+1), false);
+            PC += 2;
+            break;
+        case 0xC5:
+            pushReg(BC);
+            break;
         case 0xC6:
             addA(read_and_inc_pc(),false);
             break;
-        case 0xD6:
-            subA(read_and_inc_pc(),false);
+        case 0xC7:
+            reset(0);
             break;
-        case 0xE6:
-            andA(read_and_inc_pc());
+        case 0xC8:
+            retZ(true);
             break;
-        case 0xF6:
-            orA(read_and_inc_pc());
+        case 0xC9:
+            ret(false);
+            break;
+        case 0xCA:
+            jumpZ(read16_and_inc_pc(), true);
+            break;
+        case 0xCC:
+            callZ(memory->read(PC), memory->read(PC+1), true);
+            PC += 2;
+            break;
+        case 0xCD:
+            call(memory->read(PC), memory->read(PC+1));
+            PC += 2;
             break;
         case 0xCE:
             addA(read_and_inc_pc(),true);
             break;
+        case 0xCF:
+            reset(1);
+            break;
+        case 0xD0:
+            retC(false);
+            break;
+        case 0xD1:
+            popReg(DE);
+            break;
+        case 0xD2:
+            jumpC(read16_and_inc_pc(), false);
+            break;
+        case 0xD4:
+            callC(memory->read(PC), memory->read(PC+1), false);
+            PC += 2;
+            break;
+        case 0xD5:
+            pushReg(DE);
+            break;
+        case 0xD6:
+            subA(read_and_inc_pc(),false);
+            break;
+        case 0xD7:
+            reset(2);
+            break;
+        case 0xD8:
+            retC(true);
+            break;
+        case 0xD9:
+            ret(true);
+            break;
+        case 0xDA:
+            jumpC(read16_and_inc_pc(), true);
+            break;
+        case 0xDC:
+            callC(memory->read(PC), memory->read(PC+1), true);
+            PC += 2;
+            break;
         case 0xDE:
             subA(read_and_inc_pc(),true);
+            break;
+        case 0xDF:
+            reset(3);
+            break;
+        case 0xE1:
+            popReg(HL);
+            break;
+        case 0xE5:
+            pushReg(HL);
+            break;
+        case 0xE6:
+            andA(read_and_inc_pc());
+            break;
+        case 0xE7:
+            reset(4);
+            break;
+        case 0xE9:
+            jump(HL.all_16);
             break;
         case 0xEE:
             xorA(read_and_inc_pc());
             break;
-
-
+        case 0xEF:
+            reset(5);
+            break;
+        case 0xF1:
+            popReg(AF);
+            break;
+        case 0xF5:
+            pushReg(AF);
+            break;
+        case 0xF6:
+            orA(read_and_inc_pc());
+            break;
+        case 0xF7:
+            reset(6);
+            break;
+        case 0xFE:
+            compareA(read_and_inc_pc());
+            break;
+        case 0xFF:
+            reset(7);
         default:
             nop();
             break;
