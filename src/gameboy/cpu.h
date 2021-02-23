@@ -102,8 +102,12 @@ private:
     FRIEND_TEST(CPU, Execute_NOP_Instruction);
     FRIEND_TEST(CPU, Execute_LD_SP_D16_Instruction);
     FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);
-
+    FRIEND_TEST(CPU, sixteen_bit_ops);
     int CB_ops();
+
+    void res(uint8_t bit_nr, uint8_t &reg);
+
+    void set(uint8_t bit_nr, uint8_t &reg);
 };
 
 

@@ -9,10 +9,10 @@
 TEST(CPU, Execute_NOP_Instruction) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::unique_ptr<CPU> cpu(new CPU(0x0000, 0xFFFE, mmu));
-    
+
     // Disable boot ROM
     mmu->write(0xff50, 0x01);
-  
+
     mmu->write_GAME_ROM_ONLY_IN_TESTS(0x00, 0x00);
     cpu->execute_instruction();
 
@@ -44,22 +44,22 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     mmu->write(0xff50, 0x01);
 
     cpu->setZNFlags(0x00, false);
-    ASSERT_EQ(cpu->F.z,1);
-    ASSERT_EQ(cpu->F.n,0);
+    ASSERT_EQ(cpu->F.z, 1);
+    ASSERT_EQ(cpu->F.n, 0);
 
 
     cpu->setZNFlags(0x01, true);
-    ASSERT_EQ(cpu->F.z,0);
-    ASSERT_EQ(cpu->F.n,1);
+    ASSERT_EQ(cpu->F.z, 0);
+    ASSERT_EQ(cpu->F.n, 1);
 
     cpu->setHFlag(0x0F, 0x01);
-    ASSERT_EQ(cpu->F.h,1);
+    ASSERT_EQ(cpu->F.h, 1);
 
     cpu->setHFlag(0x0D, 0x01);
-    ASSERT_EQ(cpu->F.h,0);
+    ASSERT_EQ(cpu->F.h, 0);
 
     cpu->setCFlag(0xFF, 0x01);
-    ASSERT_EQ(cpu->F.c,1);
+    ASSERT_EQ(cpu->F.c, 1);
 
 
     cpu->orA(0x55);
@@ -73,27 +73,27 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
 
     cpu->rlc(cpu->A.high_8);
     ASSERT_EQ(cpu->A.high_8, 0x82);
-    ASSERT_EQ(cpu->F.c,0);
+    ASSERT_EQ(cpu->F.c, 0);
 
 
     cpu->rlc(cpu->A.high_8);
     ASSERT_EQ(cpu->A.high_8, 0x05);
-    ASSERT_EQ(cpu->F.c,1);
+    ASSERT_EQ(cpu->F.c, 1);
 
 
     cpu->rl(cpu->A.high_8);
     ASSERT_EQ(cpu->A.high_8, 0x0B);
-    ASSERT_EQ(cpu->F.c,0);
+    ASSERT_EQ(cpu->F.c, 0);
 
 
     cpu->rrc(cpu->A.high_8);
     ASSERT_EQ(cpu->A.high_8, 0x85);
-    ASSERT_EQ(cpu->F.c,1);
+    ASSERT_EQ(cpu->F.c, 1);
 
 
     cpu->rr(cpu->A.high_8);
     ASSERT_EQ(cpu->A.high_8, 0xC2);
-    ASSERT_EQ(cpu->F.c,1);
+    ASSERT_EQ(cpu->F.c, 1);
 
 
     cpu->setA(0x05);
@@ -101,7 +101,7 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     uint8_t val = cpu->A.high_8 + cpu->BC.high_8;
     cpu->addA(cpu->BC.high_8, false);
     ASSERT_EQ(cpu->A.high_8, val);
-    ASSERT_EQ(cpu->F.all_8 & 0xF0 , 0x20); // Only H-flag set.
+    ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x20); // Only H-flag set.
 
     cpu->setA(8);
     cpu->setB(8);
@@ -280,4 +280,25 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->setA(0xF0);
     cpu->bit(3, cpu->A.high_8);
     ASSERT_EQ(cpu->F.all_8 & 0xE0, 0xA0);
+
+}
+
+TEST(CPU, sixteen_bit_ops) {
+    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
+    std::unique_ptr<CPU> cpu(new CPU(0x00, 0xC100, mmu));
+    cpu->HL.low_8 = 0xFD;
+    cpu->bit(1, cpu->HL.low_8);
+    ASSERT_EQ(cpu->F.n,0);
+    ASSERT_EQ(cpu->F.h,1);
+    ASSERT_EQ(cpu->F.z,1);
+    cpu->HL.low_8 = 0;
+    cpu->set(0,cpu->HL.low_8);
+    ASSERT_EQ(cpu->HL.low_8,0x01);
+    cpu->set(5,cpu->HL.low_8);
+    ASSERT_EQ(cpu->HL.low_8,0x21);
+    cpu->res(0,cpu->HL.low_8);
+    ASSERT_EQ(cpu->HL.low_8,0x20);
+    cpu->res(5,cpu->HL.low_8);
+    ASSERT_EQ(cpu->HL.low_8,0x00);
+
 }
