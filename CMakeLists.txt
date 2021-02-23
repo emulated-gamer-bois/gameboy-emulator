@@ -33,7 +33,7 @@ add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 set ( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 set ( CMAKE_BUILD_TYPE DEBUG )
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()
 
 # Excludes graphics code if tests are run in travis
