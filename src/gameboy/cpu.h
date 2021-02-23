@@ -101,6 +101,8 @@ private:
     FRIEND_TEST(CPU, Execute_NOP_Instruction);
     FRIEND_TEST(CPU, Execute_LD_SP_D16_Instruction);
     FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);
+
+    int CB_ops();
 };
 
 

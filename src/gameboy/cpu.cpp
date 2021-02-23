@@ -163,8 +163,8 @@ void CPU::andA(uint8_t value) {
     setZNFlags(A.high_8, false);
 
     //Sets H flag = 1, C = 0
-    F.h=1;
-    F.c=0;
+    F.h = 1;
+    F.c = 0;
 
 }
 
@@ -177,9 +177,9 @@ void CPU::xorA(uint8_t value) {
     setZNFlags(A.high_8, false);
 
     //Sets all flags except Z to 0
-    F.c=0;
-    F.n=0;
-    F.h=0;
+    F.c = 0;
+    F.n = 0;
+    F.h = 0;
 }
 
 /**
@@ -191,9 +191,9 @@ void CPU::orA(uint8_t value) {
     setZNFlags(A.high_8, false);
 
     //Sets all flags except Z to 0
-    F.c=0;
-    F.n=0;
-    F.h=0;
+    F.c = 0;
+    F.n = 0;
+    F.h = 0;
 }
 
 /**
@@ -204,7 +204,7 @@ void CPU::rlc(uint8_t &reg) {
     reg = (reg << 1) | d7;
 
     //Sets C flag to d7
-    F.c = d7 ==0 ? 0 : 1;
+    F.c = d7 == 0 ? 0 : 1;
 }
 
 /**
@@ -215,7 +215,7 @@ void CPU::rl(uint8_t &reg) {
     reg = (reg << 1) | ((F.all_8 >> 4) & 0x01);
 
     //Sets C flag to d7
-    F.c = d7 == 0 ? 0:1;
+    F.c = d7 == 0 ? 0 : 1;
 }
 
 /**
@@ -226,7 +226,7 @@ void CPU::rrc(uint8_t &reg) {
     reg = (reg >> 1) | (d0 << 7);
 
     //Sets C flag to d0
-    F.c = d0 == 0 ? 0:1;
+    F.c = d0 == 0 ? 0 : 1;
 }
 
 /**
@@ -1092,8 +1092,10 @@ void CPU::execute_instruction() {
             break;
         case 0xF1:
             popReg(A);
+            F.all_8 = A.low_8;
             break;
         case 0xF5:
+            A.low_8 = F.all_8;
             pushReg(A);
             break;
         case 0xF6:
@@ -1111,4 +1113,103 @@ void CPU::execute_instruction() {
             nop();
             break;
     }
+
+
+}
+
+int CPU::CB_ops() {
+    switch (read_and_inc_pc()) {
+        case 0x00:
+            rlc(BC.high_8);
+            return 2;
+        case 0x01:
+            rlc(BC.low_8);
+            return 2;
+        case 0x02:
+            rlc(DE.high_8);
+            return 2;
+        case 0x03:
+            rlc(DE.low_8);
+            return 2;
+        case 0x04:
+            rlc(HL.high_8);
+            return 2;
+        case 0x05:
+            rlc(HL.low_8);
+            return 2;
+        //TODO 0X06
+        case 0x07:
+            rlc(A.high_8);
+            return 2;
+        case 0x08:
+            rrc(BC.high_8);
+            return 2;
+        case 0x09:
+            rrc(BC.low_8);
+            return 2;
+        case 0x0A:
+            rrc(DE.high_8);
+            return 2;
+        case 0x0B:
+            rrc(DE.low_8);
+            return 2;
+        case 0x0C:
+            rrc(HL.high_8);
+            return 2;
+        case 0x0D:
+            rrc(HL.low_8);
+            return 2;
+
+            //TODO 0x0E
+        case 0x0F:
+            rrc(A.high_8);
+            return 2;
+        case 0x10:
+            rl(BC.high_8);
+            return 2;
+        case 0x11:
+            rl(BC.low_8);
+            return 2;
+        case 0x12:
+            rl(DE.high_8);
+            return 2;
+        case 0x13:
+            rl(DE.low_8);
+            return 2;
+        case 0x14:
+            rl(HL.high_8);
+            return 2;
+        case 0x15:
+            rl(HL.low_8);
+            return 2;
+            //TODO 0X16
+        case 0x17:
+            rl(A.high_8);
+            return 2;
+
+        case 0x18:
+            rr(BC.high_8);
+            return 2;
+        case 0x19:
+            rr(BC.low_8);
+            return 2;
+        case 0x1A:
+            rr(DE.high_8);
+            return 2;
+        case 0x1B:
+            rr(DE.low_8);
+            return 2;
+        case 0x1C:
+            rr(HL.high_8);
+            return 2;
+        case 0x1D:
+            rr(HL.low_8);
+            return 2;
+            //TODO 0x1e
+        case 0x1E:
+            rr(A.high_8);
+            return 2;
+
+    }
+    return 0;
 }
