@@ -397,6 +397,17 @@ void CPU::reset(uint8_t nth_byte) {
 }
 
 /**
+ * Sets the Z flag to the complement of bit number bit_no from value
+ * @param bit_no bit 0 to 7
+ * @param value the value of the byte which should be used
+ */
+void CPU::bit(uint8_t bit_nr, uint8_t value) {
+    F.z  = (~value >> bit_nr) & 0x01;
+    F.n = 0;
+    F.h = 1;
+}
+
+/**
  * Every time we read PC, we want to increment it.
  * */
 uint8_t CPU::read_and_inc_pc() {

@@ -76,7 +76,7 @@ private:
 
     //Jump and Branch
     //Jump (aka JP)   = Jump to the specified address
-    //Branch (aka JR) = Jump a specified number of steps from PC
+    //Jump Relative (aka JR) = Jump a specified number of steps from PC
     void jump(uint16_t addr);
     void jumpZ(uint16_t addr, bool if_one);
     void jumpC(uint16_t addr, bool if_one);
@@ -95,6 +95,7 @@ private:
     //Other
     void reset(uint8_t nth_byte);
     void compareA(uint8_t value);
+    void bit(uint8_t bit_nr, uint8_t value);
     uint8_t read_and_inc_pc();
     uint16_t read16_and_inc_pc();
 
