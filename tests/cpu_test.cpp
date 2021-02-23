@@ -265,4 +265,11 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->PC, 0x0018);
     cpu->ret(false);
     ASSERT_EQ(cpu->PC, prevPC);
+
+    cpu->setA(0xF0);
+    cpu->bit(7, cpu->AF.high_8);
+    ASSERT_EQ(cpu->AF.all_16 & 0xE0, 0x20);
+    cpu->setA(0xF0);
+    cpu->bit(3, cpu->AF.high_8);
+    ASSERT_EQ(cpu->AF.all_16 & 0xE0, 0xA0);
 }
