@@ -4,7 +4,6 @@ project ( project )
 
 add_subdirectory( gameboy )
 
-
 # Excludes graphics code if tests are run in travis
 if(NOT TRAVIS)
     # Find *all* shaders.
@@ -19,7 +18,12 @@ if(NOT TRAVIS)
     add_executable ( ${PROJECT_NAME}
         main.cpp
         ${SHADERS}
-            RenderView.h RenderView.cpp )
+        RenderView.h
+        RenderView.cpp
+        Application.h
+        Application.cpp
+        Palette.h
+        )
 
     target_link_libraries ( ${PROJECT_NAME} labhelper )
     config_build_output()
