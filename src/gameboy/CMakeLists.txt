@@ -7,4 +7,4 @@ if (WIN32)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 endif ()
 
-add_library( ${PROJECT_NAME} cpu.cpp cpu.h register_pair.h mmu.h mmu.cpp)
+add_library( ${PROJECT_NAME} cpu.cpp cpu.h register_pair.h mmu.h mmu.cpp gameboy.h gameboy.cpp)
