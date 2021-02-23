@@ -57,5 +57,5 @@ void ppu::endProcessNextLine() { //TODO check if anything else needs doing here
     memory->write(LCDC_ADDRESS, LCDC);
     memory->write(STAT_ADDRESS, STAT);
 
-    memory->write(LY_ADDRESS, (LY + 1) % LCD_HEIGHT);
+    memory->write(LY_ADDRESS, (LY + 1) % LCD_HEIGHT); //Increments LY, since we are done processing the current line
 }
