@@ -52,7 +52,22 @@ class ppu {
         uint8_t STAT;
     };
 
+    uint8_t SCY;
+    uint8_t SCX;
+    uint8_t LY;
+    uint8_t LYC;
+    uint8_t WY;
+    uint8_t WX;
+
+    uint8_t BGP;
+    uint8_t OBP0;
+    uint8_t OBP1;
+
+    uint8_t DMA;
+
     void processNextLine();
+    void initProcessNextLine();
+    void endProcessNextLine();
 public:
     explicit ppu(std::shared_ptr<MMU> memory);
     void update(uint16_t cpuCycles);
