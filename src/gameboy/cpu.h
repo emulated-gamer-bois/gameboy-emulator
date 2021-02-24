@@ -116,6 +116,10 @@ private:
     void addHL(RegisterPair reg);
 
     void addSP(int8_t value);
+
+    void sla(uint8_t &reg);
+
+    void sra(uint8_t &reg);
 };
 
 

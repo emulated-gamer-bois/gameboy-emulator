@@ -60,7 +60,7 @@ void CPU::setCFlag(uint16_t a, uint16_t b) {
  * @param firstByte the first argument to the operation code, will be loaded to the lower part of the register
  * @param secondByte the second argument to the operation code, will be loaded to the higher part of the register
  */
-void CPU::loadIm16(uint16_t value ,RegisterPair &reg) {
+void CPU::loadIm16(uint16_t value, RegisterPair &reg) {
     reg.all_16 = value;
 }
 
@@ -92,9 +92,10 @@ void CPU::storeAddr(uint16_t addr, uint8_t value) {
  * stores the result in A. Can be done with or without carry.
  */
 void CPU::addA(uint8_t value, bool withCarry) {
-    add_8bit(A.high_8,value,withCarry);
+    add_8bit(A.high_8, value, withCarry);
 }
-void CPU::add_8bit(uint8_t &a, uint8_t b, bool withCarry){
+
+void CPU::add_8bit(uint8_t &a, uint8_t b, bool withCarry) {
 
     auto CFlag = withCarry ? F.c : 0;
     setCFlag(a, b + CFlag);
@@ -102,28 +103,31 @@ void CPU::add_8bit(uint8_t &a, uint8_t b, bool withCarry){
     a += b + CFlag;
     setZNFlags(a, false);
 }
+
 /**
  * This is ugly as shit, but this seems to more or less be how the gameboy implements it.
  * https://stackoverflow.com/questions/57958631/game-boy-half-carry-flag-and-16-bit-instructions-especially-opcode-0xe8
  * */
-void CPU::addHL(RegisterPair reg){
+void CPU::addHL(RegisterPair reg) {
     auto tempZ = F.z;
-    add_8bit(HL.low_8,reg.low_8,false);
+    add_8bit(HL.low_8, reg.low_8, false);
     auto tempH = F.c;
-    add_8bit(HL.high_8,reg.high_8, true);
-    F.z=tempZ;
-    F.h=tempH;
+    add_8bit(HL.high_8, reg.high_8, true);
+    F.z = tempZ;
+    F.h = tempH;
 }
-void CPU::addSP(int8_t value){
+
+void CPU::addSP(int8_t value) {
     // TODO uncertain if im supposed to do 2comp on value here or not.
-    add_8bit(SP.low_8,value,false);
+    add_8bit(SP.low_8, value, false);
     auto tempH = F.c;
-    add_8bit(SP.high_8,0,true);
-    F.z=0;
-    F.n=0;
+    add_8bit(SP.high_8, 0, true);
+    F.z = 0;
+    F.n = 0;
     F.h = tempH;
 
 }
+
 /**
  * Makes a number negative by converting it to two complement
  */
@@ -309,11 +313,10 @@ void CPU::jump(uint16_t addr) {
  * @returns true if it jumps
  */
 bool CPU::jumpZ(uint16_t addr, bool if_one) {
-    if(!if_one == !(F.z)) {
+    if (!if_one == !(F.z)) {
         PC = addr;
         return true;
-    }
-    else
+    } else
         return false;
 }
 
@@ -355,11 +358,10 @@ bool CPU::jumpRelativeZ(int8_t steps, bool if_one) {
  * depending on the if_one parameter
  */
 bool CPU::jumpRelativeC(int8_t steps, bool if_one) {
-   if (!if_one == !(F.c)) {
+    if (!if_one == !(F.c)) {
         PC += steps;
         return true;
-    }
-    else
+    } else
         return false;
 }
 
@@ -444,7 +446,7 @@ bool CPU::retZ(bool if_one) {
  * @returns true if it returns from subroutine
  */
 bool CPU::retC(bool if_one) {
-   if (!if_one != !(F.c))
+    if (!if_one != !(F.c))
         return false;
     else {
         ret(false);
@@ -471,6 +473,7 @@ void CPU::bit(uint8_t bit_nr, uint8_t value) {
     F.n = 0;
     F.h = 1;
 }
+
 /**
  * Reset bit_nr in reg.
  * * */
@@ -482,9 +485,10 @@ void CPU::res(uint8_t bit_nr, uint8_t &reg) {
 /**
  * Set bit_nr in reg.
  * * */
-void CPU::set(uint8_t bit_nr,uint8_t &reg){
+void CPU::set(uint8_t bit_nr, uint8_t &reg) {
     reg = reg | (0x01 << bit_nr);
 }
+
 /**
  * Every time we read PC, we want to increment it.
  * */
@@ -492,6 +496,21 @@ uint8_t CPU::read_and_inc_pc() {
     return memory->read(PC++);
 }
 
+void CPU::sla(uint8_t &reg) {
+    F.c = reg >> 7;
+    reg = reg << 1;
+    reg &= 0xFE;
+    setZNFlags(reg,false);
+    F.h=0;
+}
+void CPU::sra(uint8_t &reg) {
+    auto b7 = (reg & 0x80) ;
+    F.c = reg & 0x01;
+    reg = reg >> 1;
+    reg |= b7;
+    setZNFlags(reg,false);
+    F.h=0;
+}
 /**
  * Reads the two upcoming bytes, returns their combined value and incs PC twice
  * The first byte is the lower byte
@@ -523,7 +542,7 @@ int CPU::execute_instruction() {
             nop();
             return 1;
         case 0x01:
-            loadIm16(read16_and_inc_pc(),BC);
+            loadIm16(read16_and_inc_pc(), BC);
             return 3;
         case 0x02:
             storeAddr(BC.all_16, A.high_8);
@@ -538,7 +557,7 @@ int CPU::execute_instruction() {
             decrement8(BC.high_8);
             return 1;
         case 0x06:
-            loadIm8(BC.high_8,read_and_inc_pc());
+            loadIm8(BC.high_8, read_and_inc_pc());
             return 2;
         case 0x07: //RLCA
             rlc(A.high_8);
@@ -566,7 +585,7 @@ int CPU::execute_instruction() {
             return 1;
         case 0x0E:
             loadIm8(BC.low_8, read_and_inc_pc());
-            return 2;        
+            return 2;
         case 0x0F: //RRCA
             rrc(A.high_8);
             return 1;
@@ -586,7 +605,7 @@ int CPU::execute_instruction() {
             decrement8(DE.high_8);
             return 1;
         case 0x16:
-            loadIm8( DE.high_8,read_and_inc_pc());
+            loadIm8(DE.high_8, read_and_inc_pc());
             return 2;
         case 0x17: //RLA
             rl(A.high_8);
@@ -610,13 +629,13 @@ int CPU::execute_instruction() {
             decrement8(DE.low_8);
             return 1;
         case 0x1E:
-            loadIm8(DE.low_8,read_and_inc_pc());
+            loadIm8(DE.low_8, read_and_inc_pc());
             return 2;
         case 0x1F: //RRA
             rr(A.high_8);
             return 1;
         case 0x20:
-            if(jumpRelativeZ(read_and_inc_pc(), false))
+            if (jumpRelativeZ(read_and_inc_pc(), false))
                 return 3;
             else
                 return 2;
@@ -638,10 +657,10 @@ int CPU::execute_instruction() {
             decrement8(HL.high_8);
             return 1;
         case 0x26:
-            loadIm8(HL.high_8,read_and_inc_pc());
+            loadIm8(HL.high_8, read_and_inc_pc());
             return 2;
         case 0x28:
-            if(jumpRelativeZ(read_and_inc_pc(), true))
+            if (jumpRelativeZ(read_and_inc_pc(), true))
                 return 3;
             else
                 return 2;
@@ -662,10 +681,10 @@ int CPU::execute_instruction() {
             decrement8(HL.low_8);
             return 1;
         case 0x2E:
-            loadIm8(HL.low_8,read_and_inc_pc());
+            loadIm8(HL.low_8, read_and_inc_pc());
             return 2;
         case 0x30:
-            if(jumpRelativeC(read_and_inc_pc(), false))
+            if (jumpRelativeC(read_and_inc_pc(), false))
                 return 3;
             else
                 return 2;
@@ -687,7 +706,7 @@ int CPU::execute_instruction() {
             rl(A.high_8);
             return 1;
         case 0x38:
-            if(jumpRelativeC(read_and_inc_pc(), true))
+            if (jumpRelativeC(read_and_inc_pc(), true))
                 return 3;
             else
                 return 2;
@@ -708,197 +727,197 @@ int CPU::execute_instruction() {
             decrement8(A.high_8);
             return 1;
         case 0x3E:
-            loadIm8(A.high_8,read_and_inc_pc());
+            loadIm8(A.high_8, read_and_inc_pc());
             return 2;
         case 0x40:
             //This is stoopid.
-            loadIm8(BC.high_8,BC.high_8);
+            loadIm8(BC.high_8, BC.high_8);
             return 1;
         case 0x41:
-            loadIm8(BC.high_8,BC.low_8);
+            loadIm8(BC.high_8, BC.low_8);
             return 1;
         case 0x42:
-            loadIm8(BC.high_8,DE.high_8);
+            loadIm8(BC.high_8, DE.high_8);
             return 1;
         case 0x43:
-            loadIm8(BC.high_8,DE.low_8);
+            loadIm8(BC.high_8, DE.low_8);
             return 1;
         case 0x44:
-            loadIm8(BC.high_8,HL.high_8);
+            loadIm8(BC.high_8, HL.high_8);
             return 1;
         case 0x45:
-            loadIm8(BC.high_8,HL.low_8);
+            loadIm8(BC.high_8, HL.low_8);
             return 1;
         case 0x46:
-            loadIm8(BC.high_8,memory->read(HL.all_16));
+            loadIm8(BC.high_8, memory->read(HL.all_16));
             return 2;
         case 0x47:
-            loadIm8(BC.high_8,A.high_8);
+            loadIm8(BC.high_8, A.high_8);
             return 1;
         case 0x48:
-            loadIm8(BC.low_8,BC.high_8);
+            loadIm8(BC.low_8, BC.high_8);
             return 1;
         case 0x49:
-            loadIm8(BC.low_8,BC.low_8);
+            loadIm8(BC.low_8, BC.low_8);
             return 1;
         case 0x4A:
-            loadIm8(BC.low_8,DE.high_8);
+            loadIm8(BC.low_8, DE.high_8);
             return 1;
         case 0x4B:
-            loadIm8(BC.low_8,DE.low_8);
+            loadIm8(BC.low_8, DE.low_8);
             return 1;
         case 0x4C:
-            loadIm8(BC.low_8,HL.high_8);
+            loadIm8(BC.low_8, HL.high_8);
             return 1;
         case 0x4D:
-            loadIm8(BC.low_8,HL.low_8);
+            loadIm8(BC.low_8, HL.low_8);
             return 1;
         case 0x4E:
-            loadIm8(BC.low_8,memory->read(HL.all_16));
+            loadIm8(BC.low_8, memory->read(HL.all_16));
             return 2;
         case 0x4F:
-            loadIm8(BC.low_8,A.high_8);
+            loadIm8(BC.low_8, A.high_8);
             return 1;
         case 0x50:
-            loadIm8(DE.high_8,BC.high_8);
+            loadIm8(DE.high_8, BC.high_8);
             return 1;
         case 0x51:
-            loadIm8(DE.high_8,BC.low_8);
+            loadIm8(DE.high_8, BC.low_8);
             return 1;
         case 0x52:
-            loadIm8(DE.high_8,DE.high_8);
+            loadIm8(DE.high_8, DE.high_8);
             return 1;
         case 0x53:
-            loadIm8(DE.high_8,DE.low_8);
+            loadIm8(DE.high_8, DE.low_8);
             return 1;
         case 0x54:
-            loadIm8(DE.high_8,HL.high_8);
+            loadIm8(DE.high_8, HL.high_8);
             return 1;
         case 0x55:
-            loadIm8(DE.high_8,HL.low_8);
+            loadIm8(DE.high_8, HL.low_8);
             return 1;
         case 0x56:
-            loadIm8(DE.high_8,memory->read(HL.all_16));
+            loadIm8(DE.high_8, memory->read(HL.all_16));
             return 2;
         case 0x57:
-            loadIm8(DE.high_8,A.high_8);
+            loadIm8(DE.high_8, A.high_8);
             return 1;
         case 0x58:
-            loadIm8(DE.low_8,BC.high_8);
+            loadIm8(DE.low_8, BC.high_8);
             return 1;
         case 0x59:
-            loadIm8(DE.low_8,BC.low_8);
+            loadIm8(DE.low_8, BC.low_8);
             return 1;
         case 0x5A:
-            loadIm8(DE.low_8,DE.high_8);
+            loadIm8(DE.low_8, DE.high_8);
             return 1;
         case 0x5B:
-            loadIm8(DE.low_8,DE.low_8);
+            loadIm8(DE.low_8, DE.low_8);
             return 1;
         case 0x5C:
-            loadIm8(DE.low_8,HL.high_8);
+            loadIm8(DE.low_8, HL.high_8);
             return 1;
         case 0x5D:
-            loadIm8(DE.low_8,HL.low_8);
+            loadIm8(DE.low_8, HL.low_8);
             return 1;
         case 0x5E:
-            loadIm8(DE.low_8,memory->read(HL.all_16));
+            loadIm8(DE.low_8, memory->read(HL.all_16));
             return 2;
         case 0x5F:
-            loadIm8(BC.low_8,A.high_8);
+            loadIm8(BC.low_8, A.high_8);
             return 1;
         case 0x60:
-            loadIm8(HL.high_8,BC.high_8);
+            loadIm8(HL.high_8, BC.high_8);
             return 1;
         case 0x61:
-            loadIm8(HL.high_8,BC.low_8);
+            loadIm8(HL.high_8, BC.low_8);
             return 1;
         case 0x62:
-            loadIm8(HL.high_8,DE.high_8);
+            loadIm8(HL.high_8, DE.high_8);
             return 1;
         case 0x63:
-            loadIm8(HL.high_8,DE.low_8);
+            loadIm8(HL.high_8, DE.low_8);
             return 1;
         case 0x64:
-            loadIm8(HL.high_8,HL.high_8);
+            loadIm8(HL.high_8, HL.high_8);
             return 1;
         case 0x65:
-            loadIm8(HL.high_8,HL.low_8);
+            loadIm8(HL.high_8, HL.low_8);
             return 1;
         case 0x66:
-            loadIm8(HL.high_8,memory->read(HL.all_16));
+            loadIm8(HL.high_8, memory->read(HL.all_16));
             return 2;
         case 0x67:
-            loadIm8(HL.high_8,A.high_8);
+            loadIm8(HL.high_8, A.high_8);
             return 1;
         case 0x68:
-            loadIm8(HL.low_8,BC.high_8);
+            loadIm8(HL.low_8, BC.high_8);
             return 1;
         case 0x69:
-            loadIm8(HL.low_8,BC.low_8);
+            loadIm8(HL.low_8, BC.low_8);
             return 1;
         case 0x6A:
-            loadIm8(HL.low_8,DE.high_8);
+            loadIm8(HL.low_8, DE.high_8);
             return 1;
         case 0x6B:
-            loadIm8(HL.low_8,DE.low_8);
+            loadIm8(HL.low_8, DE.low_8);
             return 1;
         case 0x6C:
-            loadIm8(HL.low_8,HL.high_8);
+            loadIm8(HL.low_8, HL.high_8);
             return 1;
         case 0x6D:
-            loadIm8(HL.low_8,HL.low_8);
+            loadIm8(HL.low_8, HL.low_8);
             return 1;
         case 0x6E:
-            loadIm8(HL.low_8,memory->read(HL.all_16));
+            loadIm8(HL.low_8, memory->read(HL.all_16));
             return 2;
         case 0x6F:
-            loadIm8(HL.low_8,A.high_8);
+            loadIm8(HL.low_8, A.high_8);
             return 1;
         case 0x70:
-            storeAddr(HL.all_16,BC.high_8);
+            storeAddr(HL.all_16, BC.high_8);
             return 2;
         case 0x71:
-            storeAddr(HL.all_16,BC.low_8);
+            storeAddr(HL.all_16, BC.low_8);
             return 2;
         case 0x72:
-            storeAddr(HL.all_16,DE.high_8);
+            storeAddr(HL.all_16, DE.high_8);
             return 2;
         case 0x73:
-            storeAddr(HL.all_16,DE.low_8);
+            storeAddr(HL.all_16, DE.low_8);
             return 2;
         case 0x74:
-            storeAddr(HL.all_16,HL.high_8);
+            storeAddr(HL.all_16, HL.high_8);
             return 2;
         case 0x75:
-            storeAddr(HL.all_16,HL.low_8);
+            storeAddr(HL.all_16, HL.low_8);
             return 2;
         case 0x77:
-            storeAddr(HL.all_16,A.high_8);
+            storeAddr(HL.all_16, A.high_8);
             return 2;
         case 0x78:
-            loadIm8(A.high_8,BC.high_8);
+            loadIm8(A.high_8, BC.high_8);
             return 1;
         case 0x79:
-            loadIm8(A.high_8,BC.low_8);
+            loadIm8(A.high_8, BC.low_8);
             return 1;
         case 0x7A:
-            loadIm8(A.high_8,DE.high_8);
+            loadIm8(A.high_8, DE.high_8);
             return 1;
         case 0x7B:
-            loadIm8(A.high_8,DE.low_8);
+            loadIm8(A.high_8, DE.low_8);
             return 1;
         case 0x7C:
-            loadIm8(A.high_8,HL.high_8);
+            loadIm8(A.high_8, HL.high_8);
             return 1;
         case 0x7D:
-            loadIm8(A.high_8,HL.low_8);
+            loadIm8(A.high_8, HL.low_8);
             return 1;
         case 0x7E:
-            loadIm8(A.high_8,memory->read(HL.all_16));
+            loadIm8(A.high_8, memory->read(HL.all_16));
             return 2;
         case 0x7F:
-            loadIm8(A.high_8,A.high_8);
+            loadIm8(A.high_8, A.high_8);
             return 1;
         case 0x80:
             addA(BC.high_8, false);
@@ -1093,7 +1112,7 @@ int CPU::execute_instruction() {
             compareA(A.high_8);
             return 1;
         case 0xC0:
-            if(retZ(false))
+            if (retZ(false))
                 return 5;
             else
                 return 2;
@@ -1101,7 +1120,7 @@ int CPU::execute_instruction() {
             popReg(BC);
             return 3;
         case 0xC2:
-            if(jumpZ(read16_and_inc_pc(), false))
+            if (jumpZ(read16_and_inc_pc(), false))
                 return 4;
             else
                 return 3;
@@ -1109,11 +1128,10 @@ int CPU::execute_instruction() {
             jump(read16_and_inc_pc());
             return 4;
         case 0xC4:
-            if(callZ(memory->read(PC), memory->read(PC+1), false)) {
+            if (callZ(memory->read(PC), memory->read(PC + 1), false)) {
                 PC += 2;
                 return 6;
-            }
-            else {
+            } else {
                 PC += 2;
                 return 3;
             }
@@ -1121,13 +1139,13 @@ int CPU::execute_instruction() {
             pushReg(BC);
             return 4;
         case 0xC6:
-            addA(read_and_inc_pc(),false);
+            addA(read_and_inc_pc(), false);
             return 2;
         case 0xC7:
             reset(0);
             return 4;
         case 0xC8:
-            if(retZ(true))
+            if (retZ(true))
                 return 5;
             else
                 return 2;
@@ -1135,17 +1153,16 @@ int CPU::execute_instruction() {
             ret(false);
             return 4;
         case 0xCA:
-            if(jumpZ(read16_and_inc_pc(), true))
+            if (jumpZ(read16_and_inc_pc(), true))
                 return 4;
             else
                 return 3;
         case 0xCC:
-            if(callZ(memory->read(PC), memory->read(PC+1), true)) {
+            if (callZ(memory->read(PC), memory->read(PC + 1), true)) {
                 PC += 2;
                 return 6;
-            }
-            else {
-                PC +=2;
+            } else {
+                PC += 2;
                 return 3;
             }
         case 0xCD:
@@ -1153,13 +1170,13 @@ int CPU::execute_instruction() {
             PC += 2;
             return 6;
         case 0xCE:
-            addA(read_and_inc_pc(),true);
+            addA(read_and_inc_pc(), true);
             return 2;
         case 0xCF:
             reset(1);
             return 4;
         case 0xD0:
-            if(retC(false))
+            if (retC(false))
                 return 5;
             else
                 return 2;
@@ -1167,16 +1184,15 @@ int CPU::execute_instruction() {
             popReg(DE);
             return 3;
         case 0xD2:
-            if(jumpC(read16_and_inc_pc(), false))
+            if (jumpC(read16_and_inc_pc(), false))
                 return 4;
             else
                 return 3;
         case 0xD4:
-            if(callC(memory->read(PC), memory->read(PC+1), false)) {
+            if (callC(memory->read(PC), memory->read(PC + 1), false)) {
                 PC += 2;
                 return 6;
-            }
-            else {
+            } else {
                 PC += 2;
                 return 3;
             }
@@ -1184,13 +1200,13 @@ int CPU::execute_instruction() {
             pushReg(DE);
             return 4;
         case 0xD6:
-            subA(read_and_inc_pc(),false);
+            subA(read_and_inc_pc(), false);
             return 2;
         case 0xD7:
             reset(2);
             return 4;
         case 0xD8:
-            if(retC(true))
+            if (retC(true))
                 return 5;
             else
                 return 2;
@@ -1198,21 +1214,20 @@ int CPU::execute_instruction() {
             ret(true);
             return 4;
         case 0xDA:
-            if(jumpC(read16_and_inc_pc(), true))
+            if (jumpC(read16_and_inc_pc(), true))
                 return 4;
             else
                 return 3;
         case 0xDC:
-            if(callC(memory->read(PC), memory->read(PC+1), true)) {
+            if (callC(memory->read(PC), memory->read(PC + 1), true)) {
                 PC += 2;
                 return 6;
-            }
-            else {
+            } else {
                 PC += 2;
                 return 3;
             }
         case 0xDE:
-            subA(read_and_inc_pc(),true);
+            subA(read_and_inc_pc(), true);
             return 2;
         case 0xDF:
             reset(3);
@@ -1236,7 +1251,7 @@ int CPU::execute_instruction() {
             jump(HL.all_16);
             return 1;
         case 0xEA:
-            memory->write(read16_and_inc_pc(),A.high_8);
+            memory->write(read16_and_inc_pc(), A.high_8);
             return 4;
         case 0xEE:
             xorA(read_and_inc_pc());
@@ -1259,7 +1274,7 @@ int CPU::execute_instruction() {
             reset(6);
             return 4;
         case 0xFA:
-            memory->write(A.high_8,read16_and_inc_pc());
+            memory->write(A.high_8, read16_and_inc_pc());
             return 4;
         case 0xFE:
             compareA(read_and_inc_pc());
@@ -1578,7 +1593,7 @@ int CPU::CB_ops() {
         case 0x85:
             res(0, HL.low_8);
             return 2;
-     //TODO 0x86
+            //TODO 0x86
         case 0x87:
             res(0, A.high_8);
             return 2;
@@ -1600,7 +1615,7 @@ int CPU::CB_ops() {
         case 0x8D:
             res(1, HL.low_8);
             return 2;
-        //TODO 0X8E
+            //TODO 0X8E
         case 0x8F:
             res(1, A.high_8);
             return 2;
