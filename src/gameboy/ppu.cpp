@@ -3,6 +3,7 @@
 //
 
 #include "ppu.h"
+#include <iostream>
 
 #define LCDC_ADDRESS 0xFF40
 #define STAT_ADDRESS 0xFF41
@@ -16,6 +17,12 @@
 #define OBP1_ADDRESS 0xFF49
 #define WY_ADDRESS 0xFF4A
 #define WX_ADDRESS 0xFF4B
+
+#define BG_WINDOW_MAP0 0x9800
+#define BG_WINDOW_MAP1 0x9C00
+
+#define BG_WINDOW_TILE_DATA0 0x9000
+#define BG_WINDOW_TILE_DATA1 0x8000
 
 ppu::ppu(std::shared_ptr<MMU> memory) {
     this->memory = memory;
@@ -32,6 +39,7 @@ void ppu::update(uint16_t cpuCycles) {
 
 void ppu::processNextLine() {
     initProcessNextLine();
+    drawBackgroundScanLine();
     //TODO actual "drawing" code
     endProcessNextLine();
 }
@@ -58,4 +66,73 @@ void ppu::endProcessNextLine() { //TODO check if anything else needs doing here
     memory->write(STAT_ADDRESS, STAT);
 
     memory->write(LY_ADDRESS, (LY + 1) % LCD_HEIGHT); //Increments LY, since we are done processing the current line
+}
+
+void ppu::drawBackgroundScanLine() {
+    uint16_t bgMapStart;
+    if (tileMapDisplaySelect) {
+        bgMapStart = BG_WINDOW_MAP1;
+    } else {
+        bgMapStart = BG_WINDOW_MAP0;
+    }
+
+    for (uint8_t x = 0; x < 160; ++x) {
+        uint8_t absolutePixelX = (SCX + x) % 256;
+        uint8_t absolutePixelY = (SCY + LY) % 256;
+        uint8_t tileID = getTileID(bgMapStart, absolutePixelX, absolutePixelY);
+        uint8_t pixel = getTilePixel(tileID, absolutePixelX, absolutePixelY);
+        bytes[LY * 160 + x] = pixel;
+    }
+}
+
+/**
+ *
+ * @param bgMapStart
+ * @param pixelAbsoluteX
+ * @param pixelAbsoluteY
+ * @return The ID of the tile containing the target pixel
+ */
+uint8_t ppu::getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY) {
+    uint16_t tileAbsoluteX = pixelAbsoluteX / 8;
+    uint16_t tileAbsoluteY = pixelAbsoluteY / 8;
+    uint16_t offset = tileAbsoluteY * 32 + tileAbsoluteX;
+    return memory->read(bgMapStart + offset);
+}
+
+uint8_t ppu::getTilePixel(uint8_t tileID, uint8_t absolutePixelX, uint8_t absolutePixelY) { //TODO test
+    uint16_t tileDataBasePointer;
+    uint16_t address;
+    if (bgWindowTileDataSelect) {
+        tileDataBasePointer = BG_WINDOW_TILE_DATA1;
+        address = tileID * 16 + tileDataBasePointer;
+    } else {
+        tileDataBasePointer = BG_WINDOW_TILE_DATA0;
+        auto signedID = (int8_t)tileID;
+        address = signedID * 16 + tileDataBasePointer;
+    }
+
+    uint8_t tileY = absolutePixelY % 8;
+    uint8_t tileX = 7 - (absolutePixelX % 8);
+
+    uint8_t lowByte = memory->read(address + tileY * 2);
+    uint8_t highByte = memory->read(address + tileY * 2 + 1);
+
+    uint8_t lowBit = lowByte & (1 << tileX);
+    uint8_t highBit = highByte & (1 << tileX);
+
+    uint8_t pixel = (highBit << 1) | lowBit;
+
+    switch (pixel) {
+        case 0:
+            return BGP & (3 << 0);
+        case 1:
+            return BGP & (3 << 2);
+        case 2:
+            return BGP & (3 << 4);
+        case 3:
+            return BGP & (3 << 6);
+        default:
+            printf("Unsupported color");
+            return 0;
+    }
 }
