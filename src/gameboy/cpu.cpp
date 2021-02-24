@@ -60,9 +60,8 @@ void CPU::setCFlag(uint16_t a, uint16_t b) {
  * @param firstByte the first argument to the operation code, will be loaded to the lower part of the register
  * @param secondByte the second argument to the operation code, will be loaded to the higher part of the register
  */
-void CPU::loadIm16(uint8_t firstByte, uint8_t secondByte, RegisterPair &reg) {
-    reg.low_8 = firstByte;
-    reg.high_8 = secondByte;
+void CPU::loadIm16(uint16_t value ,RegisterPair &reg) {
+    reg.all_16 = value;
 }
 
 /**
@@ -457,7 +456,9 @@ void CPU::execute_instruction() {
             nop();
             break;
         case 0x01:
-            loadIm16(read_and_inc_pc(), read_and_inc_pc(), BC);
+            loadIm16(read16_and_inc_pc(),BC);
+
+
             break;
         case 0x02:
             storeAddr(BC.all_16, A.high_8);
@@ -502,7 +503,7 @@ void CPU::execute_instruction() {
             rrc(A.high_8);
             break;
         case 0x11:
-            loadIm16(read_and_inc_pc(), read_and_inc_pc(), DE);
+            loadIm16(read16_and_inc_pc(), DE);
             break;
         case 0x12:
             storeAddr(DE.all_16, A.high_8);
@@ -547,7 +548,7 @@ void CPU::execute_instruction() {
             jumpRelativeZ(read_and_inc_pc(), false);
             break;
         case 0x21:
-            loadIm16(read_and_inc_pc(), read_and_inc_pc(), HL);
+            loadIm16(read16_and_inc_pc(), HL);
             break;
         case 0x22:
             storeAddr(HL.all_16, A.high_8);
@@ -588,7 +589,7 @@ void CPU::execute_instruction() {
             jumpRelativeC(read_and_inc_pc(), false);
             break;
         case 0x31:
-            loadIm16(memory->read(PC), memory->read(PC + 1), SP);
+            loadIm16(read16_and_inc_pc(), SP);
             PC += 2;
             break;
         case 0x32:
