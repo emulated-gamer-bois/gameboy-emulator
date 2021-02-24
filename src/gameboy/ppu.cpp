@@ -37,7 +37,7 @@ void ppu::update(uint16_t cpuCycles) {
     }
 }
 
-void ppu::processNextLine() {
+void ppu::processNextLine() { //TODO fix state machine so that the method is only ran when not in a vblank
     initProcessNextLine();
     drawBackgroundScanLine();
     //TODO actual "drawing" code
@@ -135,4 +135,8 @@ uint8_t ppu::getTilePixel(uint8_t tileID, uint8_t absolutePixelX, uint8_t absolu
             printf("Unsupported color");
             return 0;
     }
+}
+
+std::array<uint8_t, 160 * 144> ppu::getBytes() { //TODO fix dimensions
+    return bytes;
 }
