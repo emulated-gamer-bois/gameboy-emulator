@@ -108,6 +108,11 @@ private:
     void res(uint8_t bit_nr, uint8_t &reg);
 
     void set(uint8_t bit_nr, uint8_t &reg);
+
+
+    void add_8bit(uint8_t &reg, uint8_t b, bool withCarry);
+
+    void addHL(RegisterPair reg);
 };
 
 

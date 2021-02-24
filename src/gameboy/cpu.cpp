@@ -92,13 +92,28 @@ void CPU::storeAddr(uint16_t addr, uint8_t value) {
  * stores the result in A. Can be done with or without carry.
  */
 void CPU::addA(uint8_t value, bool withCarry) {
-    auto CFlag = withCarry ? F.c : 0;
-    setCFlag(A.high_8, value + CFlag);
-    setHFlag(A.high_8, value + CFlag);
-    A.high_8 += value + CFlag;
-    setZNFlags(A.high_8, false);
+    add_8bit(A.high_8,value,withCarry);
 }
+void CPU::add_8bit(uint8_t &a, uint8_t b, bool withCarry){
 
+    auto CFlag = withCarry ? F.c : 0;
+    setCFlag(a, b + CFlag);
+    setHFlag(a, b + CFlag);
+    a += b + CFlag;
+    setZNFlags(a, false);
+}
+/**
+ * This is ugly as shit, but this seems to more or less be how the gameboy implements it.
+ * https://stackoverflow.com/questions/57958631/game-boy-half-carry-flag-and-16-bit-instructions-especially-opcode-0xe8
+ * */
+void CPU::addHL(RegisterPair reg){
+    auto tempZ = F.z;
+    add_8bit(HL.low_8,reg.low_8,false);
+    auto tempH = F.c;
+    add_8bit(HL.high_8,reg.high_8, true);
+    F.z=tempZ;
+    F.h=tempH;
+}
 /**
  * Makes a number negative by converting it to two complement
  */
@@ -433,7 +448,7 @@ uint8_t CPU::read_and_inc_pc() {
  * @return
  */
 uint16_t CPU::read16_and_inc_pc() {
-    PC += 1;
+    PC += 2;
     return combine_bytes(memory->read(PC - 2), memory->read(PC - 1));
 }
 
@@ -457,8 +472,6 @@ void CPU::execute_instruction() {
             break;
         case 0x01:
             loadIm16(read16_and_inc_pc(),BC);
-
-
             break;
         case 0x02:
             storeAddr(BC.all_16, A.high_8);
@@ -484,6 +497,7 @@ void CPU::execute_instruction() {
             storeAddr(combine_bytes(memory->read(PC), memory->read(PC + 1)) + 1, SP.high_8);
             PC += 2;
             break;
+
         case 0x0A:
             loadImp(BC.all_16, A.high_8);
             break;
@@ -590,7 +604,6 @@ void CPU::execute_instruction() {
             break;
         case 0x31:
             loadIm16(read16_and_inc_pc(), SP);
-            PC += 2;
             break;
         case 0x32:
             storeAddr(HL.all_16, A.high_8);

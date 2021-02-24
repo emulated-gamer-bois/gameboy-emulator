@@ -27,9 +27,9 @@ TEST(CPU, Execute_LD_SP_D16_Instruction) {
     // Disable boot ROM
     mmu->write(0xff50, 0x01);
 
-    mmu->write_GAME_ROM_ONLY_IN_TESTS(0x00, 0x31);
-    mmu->write_GAME_ROM_ONLY_IN_TESTS(0x01, 0xFF);
-    mmu->write_GAME_ROM_ONLY_IN_TESTS(0x02, 0xAA);
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(0x00, 0x31);//pc+3
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(0x01, 0xFF);//pc+1
+    mmu->write_GAME_ROM_ONLY_IN_TESTS(0x02, 0xAA);//pc+1
     cpu->execute_instruction();
 
     ASSERT_EQ(cpu->PC, 0x03);
@@ -150,9 +150,8 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->decrement16(cpu->SP.all_16);
     ASSERT_EQ(cpu->SP.all_16, prevSP - 1);
 
-    cpu->loadIm16(0xDC, 0xFE, cpu->HL);
+    cpu->loadIm16( 0xFE<<8|0xDC, cpu->HL);
     ASSERT_EQ(cpu->HL.all_16, 0xFEDC);
-
     cpu->loadIm8(cpu->HL.low_8, 0xBA);
     ASSERT_EQ(cpu->HL.all_16, 0xFEBA);
 
@@ -280,6 +279,15 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->setA(0xF0);
     cpu->bit(3, cpu->A.high_8);
     ASSERT_EQ(cpu->F.all_8 & 0xE0, 0xA0);
+
+    cpu->HL.all_16=0x0001;
+    cpu->BC.all_16=0xFFFF;
+    auto tempz = cpu->F.z;
+    cpu->addHL(cpu->BC);
+    ASSERT_EQ(cpu->HL.all_16,0x0000);
+    ASSERT_EQ(cpu->F.z,tempz);
+    ASSERT_EQ(cpu->F.h,1);
+    ASSERT_EQ(cpu->F.c,1);
 
 }
 
