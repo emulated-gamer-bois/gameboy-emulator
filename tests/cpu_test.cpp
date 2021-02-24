@@ -150,7 +150,7 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->decrement16(cpu->SP.all_16);
     ASSERT_EQ(cpu->SP.all_16, prevSP - 1);
 
-    cpu->loadIm16( 0xFE<<8|0xDC, cpu->HL);
+    cpu->loadIm16(0xFE << 8 | 0xDC, cpu->HL);
     ASSERT_EQ(cpu->HL.all_16, 0xFEDC);
     cpu->loadIm8(cpu->HL.low_8, 0xBA);
     ASSERT_EQ(cpu->HL.all_16, 0xFEBA);
@@ -280,14 +280,24 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->bit(3, cpu->A.high_8);
     ASSERT_EQ(cpu->F.all_8 & 0xE0, 0xA0);
 
-    cpu->HL.all_16=0x0001;
-    cpu->BC.all_16=0xFFFF;
+    cpu->HL.all_16 = 0x0001;
+    cpu->BC.all_16 = 0xFFFF;
     auto tempz = cpu->F.z;
     cpu->addHL(cpu->BC);
-    ASSERT_EQ(cpu->HL.all_16,0x0000);
-    ASSERT_EQ(cpu->F.z,tempz);
-    ASSERT_EQ(cpu->F.h,1);
-    ASSERT_EQ(cpu->F.c,1);
+    ASSERT_EQ(cpu->HL.all_16, 0x0000);
+    ASSERT_EQ(cpu->F.z, tempz);
+    ASSERT_EQ(cpu->F.h, 1);
+    ASSERT_EQ(cpu->F.c, 1);
+    cpu->F.all_8 = 0;
+    cpu->SP.all_16 = 0xFFFF;
+
+    cpu->addSP(0x01);
+    ASSERT_EQ(cpu->SP.all_16, 0x0000);
+    ASSERT_EQ(cpu->F.z, 0);
+    ASSERT_EQ(cpu->F.n, 0);
+    ASSERT_EQ(cpu->F.h, 1);
+    ASSERT_EQ(cpu->F.c, 1);
+
 
 }
 
@@ -296,17 +306,17 @@ TEST(CPU, sixteen_bit_ops) {
     std::unique_ptr<CPU> cpu(new CPU(0x00, 0xC100, mmu));
     cpu->HL.low_8 = 0xFD;
     cpu->bit(1, cpu->HL.low_8);
-    ASSERT_EQ(cpu->F.n,0);
-    ASSERT_EQ(cpu->F.h,1);
-    ASSERT_EQ(cpu->F.z,1);
+    ASSERT_EQ(cpu->F.n, 0);
+    ASSERT_EQ(cpu->F.h, 1);
+    ASSERT_EQ(cpu->F.z, 1);
     cpu->HL.low_8 = 0;
-    cpu->set(0,cpu->HL.low_8);
-    ASSERT_EQ(cpu->HL.low_8,0x01);
-    cpu->set(5,cpu->HL.low_8);
-    ASSERT_EQ(cpu->HL.low_8,0x21);
-    cpu->res(0,cpu->HL.low_8);
-    ASSERT_EQ(cpu->HL.low_8,0x20);
-    cpu->res(5,cpu->HL.low_8);
-    ASSERT_EQ(cpu->HL.low_8,0x00);
+    cpu->set(0, cpu->HL.low_8);
+    ASSERT_EQ(cpu->HL.low_8, 0x01);
+    cpu->set(5, cpu->HL.low_8);
+    ASSERT_EQ(cpu->HL.low_8, 0x21);
+    cpu->res(0, cpu->HL.low_8);
+    ASSERT_EQ(cpu->HL.low_8, 0x20);
+    cpu->res(5, cpu->HL.low_8);
+    ASSERT_EQ(cpu->HL.low_8, 0x00);
 
 }

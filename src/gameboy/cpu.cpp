@@ -114,6 +114,16 @@ void CPU::addHL(RegisterPair reg){
     F.z=tempZ;
     F.h=tempH;
 }
+void CPU::addSP(int8_t value){
+    // TODO uncertain if im supposed to do 2comp on value here or not.
+    add_8bit(SP.low_8,value,false);
+    auto tempH = F.c;
+    add_8bit(SP.high_8,0,true);
+    F.z=0;
+    F.n=0;
+    F.h = tempH;
+
+}
 /**
  * Makes a number negative by converting it to two complement
  */
@@ -539,6 +549,9 @@ int CPU::execute_instruction() {
             storeAddr(combine_bytes(memory->read(PC), memory->read(PC + 1)) + 1, SP.high_8);
             PC += 2;
             return 5;
+        case 0x09:
+            addHL(BC);
+            return 2;
         case 0x0A:
             loadImp(BC.all_16, A.high_8);
             return 2;
@@ -581,6 +594,9 @@ int CPU::execute_instruction() {
         case 0x18:
             jumpRelative(read_and_inc_pc());
             return 3;
+        case 0x19:
+            addHL(DE);
+            return 2;
         case 0x1A:
             loadImp(DE.all_16, A.high_8);
             return 2;
@@ -629,6 +645,9 @@ int CPU::execute_instruction() {
                 return 3;
             else
                 return 2;
+        case 0x29:
+            addHL(HL);
+            return 2;
         case 0x2A:
             loadImp(HL.all_16, A.high_8);
             increment16(HL.all_16);
@@ -672,6 +691,9 @@ int CPU::execute_instruction() {
                 return 3;
             else
                 return 2;
+        case 0x39:
+            addHL(SP);
+            return 2;
         case 0x3A:
             loadImp(HL.all_16, A.high_8);
             decrement16(HL.all_16);
@@ -1207,9 +1229,15 @@ int CPU::execute_instruction() {
         case 0xE7:
             reset(4);
             return 4;
+        case 0xE8:
+            addSP(read_and_inc_pc());
+            return 4;
         case 0xE9:
             jump(HL.all_16);
             return 1;
+        case 0xEA:
+            memory->write(read16_and_inc_pc(),A.high_8);
+            return 4;
         case 0xEE:
             xorA(read_and_inc_pc());
             return 2;
@@ -1229,6 +1257,9 @@ int CPU::execute_instruction() {
             return 2;
         case 0xF7:
             reset(6);
+            return 4;
+        case 0xFA:
+            memory->write(A.high_8,read16_and_inc_pc());
             return 4;
         case 0xFE:
             compareA(read_and_inc_pc());
@@ -1336,7 +1367,6 @@ int CPU::CB_ops() {
         case 0x1F:
             rr(A.high_8);
             return 2;
-
         case 0x40:
             bit(0, BC.high_8);
             return 2;

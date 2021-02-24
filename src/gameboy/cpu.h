@@ -114,6 +114,8 @@ private:
     void add_8bit(uint8_t &reg, uint8_t b, bool withCarry);
 
     void addHL(RegisterPair reg);
+
+    void addSP(int8_t value);
 };
 
 
