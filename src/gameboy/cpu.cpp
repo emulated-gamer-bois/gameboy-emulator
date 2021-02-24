@@ -296,17 +296,28 @@ void CPU::jump(uint16_t addr) {
 /**
  * Jumps immediately to the specified address if Z is one or zero
  * depending on the if_one parameter
+ * @returns true if it jumps
  */
-void CPU::jumpZ(uint16_t addr, bool if_one) {
-    if (!if_one == !(F.z)) PC = addr;
+bool CPU::jumpZ(uint16_t addr, bool if_one) {
+    if(!if_one == !(F.z)) {
+        PC = addr;
+        return true;
+    }
+    else
+        return false;
 }
 
 /**
  * Jumps immediately to the specified address if C is one or zero
  * depending on the if_one parameter
+ * @returns true if it jumps
  */
-void CPU::jumpC(uint16_t addr, bool if_one) {
-    if (!if_one == !(F.c)) PC = addr;
+bool CPU::jumpC(uint16_t addr, bool if_one) {
+    if (!if_one == !(F.c)) {
+        PC = addr;
+        return true;
+    } else
+        return false;
 }
 
 /**
@@ -319,17 +330,27 @@ void CPU::jumpRelative(int8_t steps) {
 /**
  * Increments PC with the given number of steps if Z is one or zero
  * depending on the if_one parameter
+ * @returns true if it jumps
  */
-void CPU::jumpRelativeZ(int8_t steps, bool if_one) {
-    if (!if_one == !(F.z)) PC += steps;
+bool CPU::jumpRelativeZ(int8_t steps, bool if_one) {
+    if (!if_one == !(F.z)) {
+        PC += steps;
+        return true;
+    } else
+        return false;
 }
 
 /**
  * Increments PC with the given number of steps if C is one or zero
  * depending on the if_one parameter
  */
-void CPU::jumpRelativeC(int8_t steps, bool if_one) {
-    if (!if_one == !(F.c)) PC += steps;
+bool CPU::jumpRelativeC(int8_t steps, bool if_one) {
+   if (!if_one == !(F.c)) {
+        PC += steps;
+        return true;
+    }
+    else
+        return false;
 }
 
 /**
@@ -350,10 +371,15 @@ void CPU::call(uint8_t firstByte, uint8_t secondByte) {
  * @param firstByte fist parameter and the lower byte
  * @param secondByte second parameter the higher byte
  * @param if_one true if Z should be 1, false if Z should be 0
+ * @returns true if subroutine is called
  */
-void CPU::callZ(uint8_t firstByte, uint8_t secondByte, bool if_one) {
-    if (!if_one != !(F.z)) return;
-    call(firstByte, secondByte);
+bool CPU::callZ(uint8_t firstByte, uint8_t secondByte, bool if_one) {
+    if (!if_one != !(F.z))
+        return false;
+    else {
+        call(firstByte, secondByte);
+        return true;
+    }
 }
 
 /**
@@ -363,9 +389,14 @@ void CPU::callZ(uint8_t firstByte, uint8_t secondByte, bool if_one) {
  * @param secondByte second parameter the higher byte
  * @param if_one true if C should be 1, false if C should be 0
  */
-void CPU::callC(uint8_t firstByte, uint8_t secondByte, bool if_one) {
-    if (!if_one != !(F.c)) return;
-    call(firstByte, secondByte);
+bool CPU::callC(uint8_t firstByte, uint8_t secondByte, bool if_one) {
+    if (!if_one != !(F.c))
+        return false;
+    else {
+        call(firstByte, secondByte);
+        return true;
+    }
+
 }
 
 /**
@@ -385,20 +416,30 @@ void CPU::ret(bool from_interrupt) {
  * Return from subroutine if Z is one or zero
  * depending on the if_one parameter
  * @param if_one true if Z should be 1, false if Z should be 0
+ * @returns true if it returns from subroutine
  */
-void CPU::retZ(bool if_one) {
-    if (!if_one != !(F.z)) return;
-    ret(false);
+bool CPU::retZ(bool if_one) {
+    if (!if_one != !(F.z))
+        return false;
+    else {
+        ret(false);
+        return true;
+    }
 }
 
 /**
  * Return from subroutine if C is one or zero
  * depending on the if_one parameter
  * @param if_one true if C should be 1, false if C should be 0
+ * @returns true if it returns from subroutine
  */
-void CPU::retC(bool if_one) {
-    if (!if_one != !(F.c)) return;
-    ret(false);
+bool CPU::retC(bool if_one) {
+   if (!if_one != !(F.c))
+        return false;
+    else {
+        ret(false);
+        return true;
+    }
 }
 
 /**
@@ -464,692 +505,740 @@ uint16_t combine_bytes(uint8_t first_byte, uint8_t second_byte) {
 
 /**
  * Fetches, decodes and executes the instruction at location PC
+ * @returns amount of machine cycles operation takes.
  */
-void CPU::execute_instruction() {
+int CPU::execute_instruction() {
     switch (read_and_inc_pc()) {
         case 0x00:
             nop();
-            break;
+            return 1;
         case 0x01:
             loadIm16(read16_and_inc_pc(),BC);
-            break;
+            return 3;
         case 0x02:
             storeAddr(BC.all_16, A.high_8);
-            break;
+            return 2;
         case 0x03:
             increment16(BC.all_16);
-            break;
+            return 2;
         case 0x04:
             increment8(BC.high_8);
-            break;
+            return 1;
         case 0x05:
             decrement8(BC.high_8);
-            break;
+            return 1;
         case 0x06:
-            loadIm8(BC.high_8, read_and_inc_pc());
-            break;
+            loadIm8(BC.high_8,read_and_inc_pc());
+            return 2;
         case 0x07: //RLCA
             rlc(A.high_8);
-            break;
+            return 1;
         case 0x08:
             //special case, not using read_and_inc PC
             storeAddr(combine_bytes(memory->read(PC), memory->read(PC + 1)), SP.low_8);
             storeAddr(combine_bytes(memory->read(PC), memory->read(PC + 1)) + 1, SP.high_8);
             PC += 2;
-            break;
-
+            return 5;
         case 0x0A:
             loadImp(BC.all_16, A.high_8);
-            break;
+            return 2;
         case 0x0B:
             decrement16(BC.all_16);
-            break;
+            return 2;
         case 0x0C:
             increment8(BC.low_8);
-            break;
+            return 1;
         case 0x0D:
             decrement8(BC.low_8);
-            break;
+            return 1;
         case 0x0E:
             loadIm8(BC.low_8, read_and_inc_pc());
-            break;
+            return 2;        
         case 0x0F: //RRCA
             rrc(A.high_8);
-            break;
+            return 1;
         case 0x11:
             loadIm16(read16_and_inc_pc(), DE);
-            break;
+            return 1;
         case 0x12:
             storeAddr(DE.all_16, A.high_8);
-            break;
+            return 3;
         case 0x13:
             increment16(DE.all_16);
-            break;
+            return 2;
         case 0x14:
             increment8(DE.high_8);
-            break;
+            return 2;
         case 0x15:
             decrement8(DE.high_8);
-            break;
+            return 1;
         case 0x16:
-            loadIm8(DE.high_8, read_and_inc_pc());
-            break;
+            loadIm8( DE.high_8,read_and_inc_pc());
+            return 2;
         case 0x17: //RLA
             rl(A.high_8);
-            break;
+            return 1;
         case 0x18:
             jumpRelative(read_and_inc_pc());
-            break;
+            return 3;
         case 0x1A:
             loadImp(DE.all_16, A.high_8);
-            break;
+            return 2;
         case 0x1B:
             decrement16(DE.all_16);
-            break;
+            return 2;
         case 0x1C:
             increment8(DE.low_8);
-            break;
+            return 1;
         case 0x1D:
             decrement8(DE.low_8);
-            break;
+            return 1;
         case 0x1E:
-            loadIm8(DE.low_8, read_and_inc_pc());
-            break;
+            loadIm8(DE.low_8,read_and_inc_pc());
+            return 2;
         case 0x1F: //RRA
             rr(A.high_8);
-            break;
+            return 1;
         case 0x20:
-            jumpRelativeZ(read_and_inc_pc(), false);
-            break;
+            if(jumpRelativeZ(read_and_inc_pc(), false))
+                return 3;
+            else
+                return 2;
         case 0x21:
+
             loadIm16(read16_and_inc_pc(), HL);
-            break;
+            return 3;
         case 0x22:
             storeAddr(HL.all_16, A.high_8);
             increment16(HL.all_16);
-            break;
+            return 2;
         case 0x23:
             increment16(HL.all_16);
-            break;
+            return 2;
         case 0x24:
             increment8(HL.high_8);
-            break;
+            return 1;
         case 0x25:
             decrement8(HL.high_8);
-            break;
+            return 1;
         case 0x26:
-            loadIm8(HL.high_8, read_and_inc_pc());
-            break;
+            loadIm8(HL.high_8,read_and_inc_pc());
+            return 2;
         case 0x28:
-            jumpRelativeZ(read_and_inc_pc(), true);
-            break;
+            if(jumpRelativeZ(read_and_inc_pc(), true))
+                return 3;
+            else
+                return 2;
         case 0x2A:
             loadImp(HL.all_16, A.high_8);
             increment16(HL.all_16);
-            break;
+            return 2;
         case 0x2B:
             decrement16(HL.all_16);
-            break;
+            return 2;
         case 0x2C:
             increment8(HL.low_8);
-            break;
+            return 1;
         case 0x2D:
             decrement8(HL.low_8);
-            break;
+            return 1;
         case 0x2E:
-            loadIm8(HL.low_8, read_and_inc_pc());
-            break;
+            loadIm8(HL.low_8,read_and_inc_pc());
+            return 2;
         case 0x30:
-            jumpRelativeC(read_and_inc_pc(), false);
-            break;
+            if(jumpRelativeC(read_and_inc_pc(), false))
+                return 3;
+            else
+                return 2;
         case 0x31:
             loadIm16(read16_and_inc_pc(), SP);
-            break;
+            return 3;
         case 0x32:
             storeAddr(HL.all_16, A.high_8);
             decrement16(HL.all_16);
-            break;
+            return 2;
         case 0x33:
             increment16(SP.all_16);
-            break;
+            return 2;
             //TODO 0X34 0X35
         case 0x36:
             storeAddr(HL.all_16, read_and_inc_pc());
-            break;
+            return 3;
         case 0x37: //RLA
             rl(A.high_8);
-            break;
+            return 1;
         case 0x38:
-            jumpRelativeC(read_and_inc_pc(), true);
+            if(jumpRelativeC(read_and_inc_pc(), true))
+                return 3;
+            else
+                return 2;
         case 0x3A:
             loadImp(HL.all_16, A.high_8);
             decrement16(HL.all_16);
-            break;
+            return 2;
         case 0x3B:
             decrement16(SP.all_16);
-            break;
+            return 2;
         case 0x3C:
             increment8(A.high_8);
-            break;
+            return 1;
         case 0x3D:
             decrement8(A.high_8);
-            break;
+            return 1;
         case 0x3E:
-            loadIm8(A.high_8, read_and_inc_pc());
-            break;
+            loadIm8(A.high_8,read_and_inc_pc());
+            return 2;
         case 0x40:
             //This is stoopid.
-            loadIm8(BC.high_8, BC.high_8);
-            break;
+            loadIm8(BC.high_8,BC.high_8);
+            return 1;
         case 0x41:
-            loadIm8(BC.high_8, BC.low_8);
-            break;
+            loadIm8(BC.high_8,BC.low_8);
+            return 1;
         case 0x42:
-            loadIm8(BC.high_8, DE.high_8);
-            break;
+            loadIm8(BC.high_8,DE.high_8);
+            return 1;
         case 0x43:
-            loadIm8(BC.high_8, DE.low_8);
-            break;
+            loadIm8(BC.high_8,DE.low_8);
+            return 1;
         case 0x44:
-            loadIm8(BC.high_8, HL.high_8);
-            break;
+            loadIm8(BC.high_8,HL.high_8);
+            return 1;
         case 0x45:
-            loadIm8(BC.high_8, HL.low_8);
-            break;
+            loadIm8(BC.high_8,HL.low_8);
+            return 1;
         case 0x46:
-            loadIm8(BC.high_8, memory->read(HL.all_16));
-            break;
+            loadIm8(BC.high_8,memory->read(HL.all_16));
+            return 2;
         case 0x47:
-            loadIm8(BC.high_8, A.high_8);
-            break;
+            loadIm8(BC.high_8,A.high_8);
+            return 1;
         case 0x48:
-            loadIm8(BC.low_8, BC.high_8);
-            break;
+            loadIm8(BC.low_8,BC.high_8);
+            return 1;
         case 0x49:
-            loadIm8(BC.low_8, BC.low_8);
-            break;
+            loadIm8(BC.low_8,BC.low_8);
+            return 1;
         case 0x4A:
-            loadIm8(BC.low_8, DE.high_8);
-            break;
+            loadIm8(BC.low_8,DE.high_8);
+            return 1;
         case 0x4B:
-            loadIm8(BC.low_8, DE.low_8);
-            break;
+            loadIm8(BC.low_8,DE.low_8);
+            return 1;
         case 0x4C:
-            loadIm8(BC.low_8, HL.high_8);
-            break;
+            loadIm8(BC.low_8,HL.high_8);
+            return 1;
         case 0x4D:
-            loadIm8(BC.low_8, HL.low_8);
-            break;
+            loadIm8(BC.low_8,HL.low_8);
+            return 1;
         case 0x4E:
-            loadIm8(BC.low_8, memory->read(HL.all_16));
-            break;
+            loadIm8(BC.low_8,memory->read(HL.all_16));
+            return 2;
         case 0x4F:
-            loadIm8(BC.low_8, A.high_8);
-            break;
+            loadIm8(BC.low_8,A.high_8);
+            return 1;
         case 0x50:
-            loadIm8(DE.high_8, BC.high_8);
-            break;
+            loadIm8(DE.high_8,BC.high_8);
+            return 1;
         case 0x51:
-            loadIm8(DE.high_8, BC.low_8);
-            break;
+            loadIm8(DE.high_8,BC.low_8);
+            return 1;
         case 0x52:
-            loadIm8(DE.high_8, DE.high_8);
-            break;
+            loadIm8(DE.high_8,DE.high_8);
+            return 1;
         case 0x53:
-            loadIm8(DE.high_8, DE.low_8);
-            break;
+            loadIm8(DE.high_8,DE.low_8);
+            return 1;
         case 0x54:
-            loadIm8(DE.high_8, HL.high_8);
-            break;
+            loadIm8(DE.high_8,HL.high_8);
+            return 1;
         case 0x55:
-            loadIm8(DE.high_8, HL.low_8);
-            break;
+            loadIm8(DE.high_8,HL.low_8);
+            return 1;
         case 0x56:
-            loadIm8(DE.high_8, memory->read(HL.all_16));
-            break;
+            loadIm8(DE.high_8,memory->read(HL.all_16));
+            return 2;
         case 0x57:
-            loadIm8(DE.high_8, A.high_8);
-            break;
+            loadIm8(DE.high_8,A.high_8);
+            return 1;
         case 0x58:
-            loadIm8(DE.low_8, BC.high_8);
-            break;
+            loadIm8(DE.low_8,BC.high_8);
+            return 1;
         case 0x59:
-            loadIm8(DE.low_8, BC.low_8);
-            break;
+            loadIm8(DE.low_8,BC.low_8);
+            return 1;
         case 0x5A:
-            loadIm8(DE.low_8, DE.high_8);
-            break;
+            loadIm8(DE.low_8,DE.high_8);
+            return 1;
         case 0x5B:
-            loadIm8(DE.low_8, DE.low_8);
-            break;
+            loadIm8(DE.low_8,DE.low_8);
+            return 1;
         case 0x5C:
-            loadIm8(DE.low_8, HL.high_8);
-            break;
+            loadIm8(DE.low_8,HL.high_8);
+            return 1;
         case 0x5D:
-            loadIm8(DE.low_8, HL.low_8);
-            break;
+            loadIm8(DE.low_8,HL.low_8);
+            return 1;
         case 0x5E:
-            loadIm8(DE.low_8, memory->read(HL.all_16));
-            break;
+            loadIm8(DE.low_8,memory->read(HL.all_16));
+            return 2;
         case 0x5F:
-            loadIm8(BC.low_8, A.high_8);
-            break;
+            loadIm8(BC.low_8,A.high_8);
+            return 1;
         case 0x60:
-            loadIm8(HL.high_8, BC.high_8);
-            break;
+            loadIm8(HL.high_8,BC.high_8);
+            return 1;
         case 0x61:
-            loadIm8(HL.high_8, BC.low_8);
-            break;
+            loadIm8(HL.high_8,BC.low_8);
+            return 1;
         case 0x62:
-            loadIm8(HL.high_8, DE.high_8);
-            break;
+            loadIm8(HL.high_8,DE.high_8);
+            return 1;
         case 0x63:
-            loadIm8(HL.high_8, DE.low_8);
-            break;
+            loadIm8(HL.high_8,DE.low_8);
+            return 1;
         case 0x64:
-            loadIm8(HL.high_8, HL.high_8);
-            break;
+            loadIm8(HL.high_8,HL.high_8);
+            return 1;
         case 0x65:
-            loadIm8(HL.high_8, HL.low_8);
-            break;
+            loadIm8(HL.high_8,HL.low_8);
+            return 1;
         case 0x66:
-            loadIm8(HL.high_8, memory->read(HL.all_16));
-            break;
+            loadIm8(HL.high_8,memory->read(HL.all_16));
+            return 2;
         case 0x67:
-            loadIm8(HL.high_8, A.high_8);
-            break;
+            loadIm8(HL.high_8,A.high_8);
+            return 1;
         case 0x68:
-            loadIm8(HL.low_8, BC.high_8);
-            break;
+            loadIm8(HL.low_8,BC.high_8);
+            return 1;
         case 0x69:
-            loadIm8(HL.low_8, BC.low_8);
-            break;
+            loadIm8(HL.low_8,BC.low_8);
+            return 1;
         case 0x6A:
-            loadIm8(HL.low_8, DE.high_8);
-            break;
+            loadIm8(HL.low_8,DE.high_8);
+            return 1;
         case 0x6B:
-            loadIm8(HL.low_8, DE.low_8);
-            break;
+            loadIm8(HL.low_8,DE.low_8);
+            return 1;
         case 0x6C:
-            loadIm8(HL.low_8, HL.high_8);
-            break;
+            loadIm8(HL.low_8,HL.high_8);
+            return 1;
         case 0x6D:
-            loadIm8(HL.low_8, HL.low_8);
-            break;
+            loadIm8(HL.low_8,HL.low_8);
+            return 1;
         case 0x6E:
-            loadIm8(HL.low_8, memory->read(HL.all_16));
-            break;
+            loadIm8(HL.low_8,memory->read(HL.all_16));
+            return 2;
         case 0x6F:
-            loadIm8(HL.low_8, A.high_8);
-            break;
+            loadIm8(HL.low_8,A.high_8);
+            return 1;
         case 0x70:
-            storeAddr(HL.all_16, BC.high_8);
-            break;
+            storeAddr(HL.all_16,BC.high_8);
+            return 2;
         case 0x71:
-            storeAddr(HL.all_16, BC.low_8);
-            break;
+            storeAddr(HL.all_16,BC.low_8);
+            return 2;
         case 0x72:
-            storeAddr(HL.all_16, DE.high_8);
-            break;
+            storeAddr(HL.all_16,DE.high_8);
+            return 2;
         case 0x73:
-            storeAddr(HL.all_16, DE.low_8);
-            break;
+            storeAddr(HL.all_16,DE.low_8);
+            return 2;
         case 0x74:
-            storeAddr(HL.all_16, HL.high_8);
-            break;
+            storeAddr(HL.all_16,HL.high_8);
+            return 2;
         case 0x75:
-            storeAddr(HL.all_16, HL.low_8);
-            break;
+            storeAddr(HL.all_16,HL.low_8);
+            return 2;
         case 0x77:
-            storeAddr(HL.all_16, A.high_8);
-            break;
+            storeAddr(HL.all_16,A.high_8);
+            return 2;
         case 0x78:
-            loadIm8(A.high_8, BC.high_8);
-            break;
+            loadIm8(A.high_8,BC.high_8);
+            return 1;
         case 0x79:
-            loadIm8(A.high_8, BC.low_8);
-            break;
+            loadIm8(A.high_8,BC.low_8);
+            return 1;
         case 0x7A:
-            loadIm8(A.high_8, DE.high_8);
-            break;
+            loadIm8(A.high_8,DE.high_8);
+            return 1;
         case 0x7B:
-            loadIm8(A.high_8, DE.low_8);
-            break;
+            loadIm8(A.high_8,DE.low_8);
+            return 1;
         case 0x7C:
-            loadIm8(A.high_8, HL.high_8);
-            break;
+            loadIm8(A.high_8,HL.high_8);
+            return 1;
         case 0x7D:
-            loadIm8(A.high_8, HL.low_8);
-            break;
+            loadIm8(A.high_8,HL.low_8);
+            return 1;
         case 0x7E:
-            loadIm8(A.high_8, memory->read(HL.all_16));
-            break;
+            loadIm8(A.high_8,memory->read(HL.all_16));
+            return 2;
         case 0x7F:
-            loadIm8(A.high_8, A.high_8);
-            break;
+            loadIm8(A.high_8,A.high_8);
+            return 1;
         case 0x80:
             addA(BC.high_8, false);
-            break;
+            return 1;
         case 0x81:
             addA(BC.low_8, false);
-            break;
+            return 1;
         case 0x82:
             addA(DE.high_8, false);
-            break;
+            return 1;
         case 0x83:
             addA(DE.low_8, false);
-            break;
+            return 1;
         case 0x84:
             addA(HL.high_8, false);
-            break;
+            return 1;
         case 0x85:
             addA(HL.low_8, false);
-            break;
+            return 1;
         case 0x86:
             addA(memory->read(HL.all_16), false);
-            break;
+            return 2;
         case 0x87:
             addA(A.high_8, false);
-            break;
+            return 1;
         case 0x88:
             addA(BC.high_8, true);
-            break;
+            return 2;
         case 0x89:
             addA(BC.low_8, true);
-            break;
+            return 2;
         case 0x8A:
             addA(DE.high_8, true);
-            break;
+            return 2;
         case 0x8B:
             addA(DE.low_8, true);
-            break;
+            return 2;
         case 0x8C:
             addA(HL.high_8, true);
-            break;
+            return 2;
         case 0x8D:
             addA(HL.low_8, true);
-            break;
+            return 2;
         case 0x8E:
             addA(memory->read(HL.all_16), true);
+            return 2;
         case 0x8F:
             addA(A.high_8, true);
-            break;
+            return 2;
         case 0x90:
             subA(BC.high_8, false);
-            break;
+            return 1;
         case 0x91:
             subA(BC.low_8, false);
-            break;
+            return 1;
         case 0x92:
             subA(DE.high_8, false);
-            break;
+            return 1;
         case 0x93:
             subA(DE.low_8, false);
-            break;
+            return 1;
         case 0x94:
             subA(HL.high_8, false);
-            break;
+            return 1;
         case 0x95:
             subA(HL.low_8, false);
-            break;
+            return 1;
         case 0x96:
             subA(memory->read(HL.all_16), false);
-            break;
+            return 2;
         case 0x97:
             subA(A.high_8, false);
-            break;
+            return 1;
         case 0x98:
             subA(BC.high_8, true);
-            break;
+            return 1;
         case 0x99:
             subA(BC.low_8, true);
-            break;
+            return 1;
         case 0x9A:
             subA(DE.high_8, true);
-            break;
+            return 1;
         case 0x9B:
             subA(DE.low_8, true);
-            break;
+            return 1;
         case 0x9C:
             subA(HL.high_8, true);
             break;
         case 0x9D:
             subA(HL.low_8, true);
-            break;
+            return 1;
         case 0x9E:
             subA(memory->read(HL.all_16), true);
-            break;
+            return 2;
         case 0x9F:
             subA(A.high_8, true);
-            break;
+            return 1;
         case 0xA0:
             andA(BC.high_8);
-            break;
+            return 1;
         case 0xA1:
             andA(BC.low_8);
-            break;
+            return 1;
         case 0xA2:
             andA(DE.high_8);
-            break;
+            return 1;
         case 0xA3:
             andA(DE.low_8);
-            break;
+            return 1;
         case 0xA4:
             andA(HL.high_8);
-            break;
+            return 1;
         case 0xA5:
             andA(HL.low_8);
-            break;
+            return 1;
         case 0xA6:
             andA(memory->read(HL.all_16));
-            break;
+            return 2;
         case 0xA7:
             andA(A.high_8);
-            break;
+            return 1;
         case 0xA8:
             xorA(BC.high_8);
-            break;
+            return 1;
         case 0xA9:
             xorA(BC.low_8);
-            break;
+            return 1;
         case 0xAA:
             xorA(DE.high_8);
-            break;
+            return 1;
         case 0xAB:
             xorA(DE.low_8);
-            break;
+            return 1;
         case 0xAC:
             xorA(HL.high_8);
-            break;
+            return 1;
         case 0xAD:
             xorA(HL.low_8);
-            break;
+            return 1;
         case 0xAE:
             xorA(memory->read(HL.all_16));
-            break;
+            return 2;
         case 0xAF:
             xorA(A.high_8);
-            break;
+            return 1;
         case 0xB0:
             orA(BC.high_8);
-            break;
+            return 1;
         case 0xB1:
             orA(BC.low_8);
-            break;
+            return 1;
         case 0xB2:
             orA(DE.high_8);
-            break;
+            return 1;
         case 0xB3:
             orA(DE.low_8);
-            break;
+            return 1;
         case 0xB4:
             orA(HL.high_8);
-            break;
+            return 1;
         case 0xB5:
             orA(HL.low_8);
-            break;
+            return 1;
         case 0xB6:
             orA(memory->read(HL.all_16));
-            break;
+            return 2;
         case 0xB7:
             orA(A.high_8);
-            break;
+            return 1;
         case 0xB8:
             compareA(BC.high_8);
-            break;
+            return 1;
         case 0xB9:
             compareA(BC.low_8);
-            break;
+            return 1;
         case 0xBA:
             compareA(DE.high_8);
-            break;
+            return 1;
         case 0xBB:
             compareA(DE.low_8);
-            break;
+            return 1;
         case 0xBC:
             compareA(HL.high_8);
-            break;
+            return 1;
         case 0xBD:
             compareA(HL.low_8);
-            break;
+            return 1;
         case 0xBE:
             compareA(memory->read(HL.all_16));
-            break;
+            return 2;
         case 0xBF:
             compareA(A.high_8);
-            break;
+            return 1;
         case 0xC0:
-            retZ(false);
-            break;
+            if(retZ(false))
+                return 5;
+            else
+                return 2;
         case 0xC1:
             popReg(BC);
-            break;
+            return 3;
         case 0xC2:
-            jumpZ(read16_and_inc_pc(), false);
-            break;
+            if(jumpZ(read16_and_inc_pc(), false))
+                return 4;
+            else
+                return 3;
         case 0xC3:
             jump(read16_and_inc_pc());
-            break;
+            return 4;
         case 0xC4:
-            callZ(memory->read(PC), memory->read(PC + 1), false);
-            PC += 2;
-            break;
+            if(callZ(memory->read(PC), memory->read(PC+1), false)) {
+                PC += 2;
+                return 6;
+            }
+            else {
+                PC += 2;
+                return 3;
+            }
         case 0xC5:
             pushReg(BC);
-            break;
+            return 4;
         case 0xC6:
-            addA(read_and_inc_pc(), false);
-            break;
+            addA(read_and_inc_pc(),false);
+            return 2;
         case 0xC7:
             reset(0);
-            break;
+            return 4;
         case 0xC8:
-            retZ(true);
-            break;
+            if(retZ(true))
+                return 5;
+            else
+                return 2;
         case 0xC9:
             ret(false);
-            break;
+            return 4;
         case 0xCA:
-            jumpZ(read16_and_inc_pc(), true);
-            break;
+            if(jumpZ(read16_and_inc_pc(), true))
+                return 4;
+            else
+                return 3;
         case 0xCC:
-            callZ(memory->read(PC), memory->read(PC + 1), true);
-            PC += 2;
-            break;
+            if(callZ(memory->read(PC), memory->read(PC+1), true)) {
+                PC += 2;
+                return 6;
+            }
+            else {
+                PC +=2;
+                return 3;
+            }
         case 0xCD:
             call(memory->read(PC), memory->read(PC + 1));
             PC += 2;
-            break;
+            return 6;
         case 0xCE:
-            addA(read_and_inc_pc(), true);
-            break;
+            addA(read_and_inc_pc(),true);
+            return 2;
         case 0xCF:
             reset(1);
-            break;
+            return 4;
         case 0xD0:
-            retC(false);
-            break;
+            if(retC(false))
+                return 5;
+            else
+                return 2;
         case 0xD1:
             popReg(DE);
-            break;
+            return 3;
         case 0xD2:
-            jumpC(read16_and_inc_pc(), false);
-            break;
+            if(jumpC(read16_and_inc_pc(), false))
+                return 4;
+            else
+                return 3;
         case 0xD4:
-            callC(memory->read(PC), memory->read(PC + 1), false);
-            PC += 2;
-            break;
+            if(callC(memory->read(PC), memory->read(PC+1), false)) {
+                PC += 2;
+                return 6;
+            }
+            else {
+                PC += 2;
+                return 3;
+            }
         case 0xD5:
             pushReg(DE);
-            break;
+            return 4;
         case 0xD6:
-            subA(read_and_inc_pc(), false);
-            break;
+            subA(read_and_inc_pc(),false);
+            return 2;
         case 0xD7:
             reset(2);
-            break;
+            return 4;
         case 0xD8:
-            retC(true);
-            break;
+            if(retC(true))
+                return 5;
+            else
+                return 2;
         case 0xD9:
             ret(true);
-            break;
+            return 4;
         case 0xDA:
-            jumpC(read16_and_inc_pc(), true);
-            break;
+            if(jumpC(read16_and_inc_pc(), true))
+                return 4;
+            else
+                return 3;
         case 0xDC:
-            callC(memory->read(PC), memory->read(PC + 1), true);
-            PC += 2;
-            break;
+            if(callC(memory->read(PC), memory->read(PC+1), true)) {
+                PC += 2;
+                return 6;
+            }
+            else {
+                PC += 2;
+                return 3;
+            }
         case 0xDE:
-            subA(read_and_inc_pc(), true);
-            break;
+            subA(read_and_inc_pc(),true);
+            return 2;
         case 0xDF:
-            reset(2);
-            break;
+            reset(3);
+            return 4;
         case 0xE1:
             popReg(HL);
-            break;
+            return 3;
         case 0xE5:
             pushReg(HL);
-            break;
+            return 4;
         case 0xE6:
             andA(read_and_inc_pc());
-            break;
+            return 2;
         case 0xE7:
-            reset(3);
-            break;
+            reset(4);
+            return 4;
         case 0xE9:
             jump(HL.all_16);
-            break;
+            return 1;
         case 0xEE:
             xorA(read_and_inc_pc());
-            break;
+            return 2;
         case 0xEF:
             reset(5);
-            break;
+            return 4;
         case 0xF1:
             popReg(A);
             F.all_8 = A.low_8;
-            break;
+            return 3;
         case 0xF5:
             A.low_8 = F.all_8;
             pushReg(A);
-            break;
+            return 4;
         case 0xF6:
             orA(read_and_inc_pc());
-            break;
+            return 2;
         case 0xF7:
             reset(6);
-            break;
+            return 4;
         case 0xFE:
             compareA(read_and_inc_pc());
-            break;
+            return 2;
         case 0xFF:
             reset(7);
+            return 4;
         default:
             nop();
-            break;
+            return 1;
     }
 
 

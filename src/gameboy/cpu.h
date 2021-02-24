@@ -22,8 +22,9 @@ public:
 
     /**
      * Fetches, decodes and executes the instruction at location PC
+     * @returns amount of machine cycles operation takes.
      */
-    void execute_instruction();
+    int execute_instruction();
 
 private:
     //Registers
@@ -78,19 +79,19 @@ private:
     //Jump (aka JP)   = Jump to the specified address
     //Jump Relative (aka JR) = Jump a specified number of steps from PC
     void jump(uint16_t addr);
-    void jumpZ(uint16_t addr, bool if_one);
-    void jumpC(uint16_t addr, bool if_one);
+    bool jumpZ(uint16_t addr, bool if_one);
+    bool jumpC(uint16_t addr, bool if_one);
     void jumpRelative(int8_t steps);
-    void jumpRelativeZ(int8_t steps, bool if_one);
-    void jumpRelativeC(int8_t steps, bool if_one);
+    bool jumpRelativeZ(int8_t steps, bool if_one);
+    bool jumpRelativeC(int8_t steps, bool if_one);
 
     //Call subroutines and return
     void ret(bool from_interrupt);
-    void retZ(bool if_one);
-    void retC(bool if_one);
+    bool retZ(bool if_one);
+    bool retC(bool if_one);
     void call(uint8_t firstByte, uint8_t secondByte);
-    void callZ(uint8_t firstByte, uint8_t secondByte, bool if_one);
-    void callC(uint8_t firstByte, uint8_t secondByte, bool if_one);
+    bool callZ(uint8_t firstByte, uint8_t secondByte, bool if_one);
+    bool callC(uint8_t firstByte, uint8_t secondByte, bool if_one);
 
     //Other
     void reset(uint8_t nth_byte);
