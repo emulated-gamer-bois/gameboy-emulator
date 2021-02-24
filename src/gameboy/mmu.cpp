@@ -31,6 +31,12 @@ MMU::MMU() {
 
     // No buttons pressed by default
     this->io_joypad = 0xff;
+
+    // Timer default values
+    timer_divider = 0;
+    timer_counter = 0;
+    timer_modulo = 0;
+    timer_control = 0;
 }
 
 uint8_t MMU::read(uint16_t addr) {
@@ -187,6 +193,21 @@ void MMU::write_io(uint16_t addr, uint8_t data) {
         this->io_joypad_select = data;
     } else if (addr == INTERRUPT_FLAG) {
         this->interrupt_flag = data;
+    } else if (TIMER_DIVIDER <= addr && addr <= TIMER_CONTROL) {
+        switch (addr) {
+            case TIMER_DIVIDER:
+                this->timer_divider = 0;
+                break;
+            case TIMER_COUNTER:
+                this->timer_counter = ((uint16_t)data << 8);
+                break;
+            case TIMER_MODULO:
+                this->timer_modulo = data;
+                break;
+            case TIMER_CONTROL:
+                this->timer_control = data & 0b111;
+                break;
+        }
     }
 }
 
@@ -199,10 +220,53 @@ uint8_t MMU::read_io(uint16_t addr) {
         }
     } else if (addr == INTERRUPT_FLAG) {
         return this->interrupt_flag & (0x1f);
+    } else if (TIMER_DIVIDER <= addr && addr <= TIMER_CONTROL) {
+        switch (addr) {
+            case TIMER_DIVIDER:
+                return (uint8_t)(this->timer_divider >> 8);
+            case TIMER_COUNTER:
+                return this->timer_counter;
+            case TIMER_MODULO:
+                return this->timer_modulo;
+            case TIMER_CONTROL:
+                return this->timer_control & 0b111;
+        }
     }
     return 0;
 }
 
+// Timer functions
+// Cycles is @ 1,048,576Hz
+void MMU::timer_update(uint16_t cycles) {
+    // Timer activated
+    if (this->timer_control & (1 << 0)) {
+        // Increase divider
+        uint16_t old_divider = this->timer_divider;
+        this->timer_divider += (cycles*4);
+
+        // Timer speed
+        uint8_t speed = this->timer_control & 0b11;
+        const uint16_t speed_mask[] = {0xfc00, 0xfff0, 0xffc0, 0xff00};
+        const uint8_t speed_offs[] = {10, 4, 6, 8};
+
+        uint16_t mask = speed_mask[speed];
+        uint8_t offs = speed_offs[speed];
+
+        // Check for counter overflow
+        // Increase counter
+        uint8_t increase_counter = (((this->timer_divider & mask) - (old_divider & mask)) >> offs);
+        if ((uint16_t)(this->timer_counter + increase_counter) > 0xff) {
+            // Add modulo
+            this->timer_counter += (this->timer_modulo + increase_counter);
+            // Raise interrupt request for Timer interrupt
+            this->interrupt_flag = this->interrupt_flag | (1 << 2);
+        } else {
+          this->timer_counter += increase_counter;
+        }
+    }
+}
+
+// Joypad functions
 void MMU::joypad_release(uint8_t button) {
     auto temp = this->io_joypad;
     this->io_joypad = temp | (1 << button);

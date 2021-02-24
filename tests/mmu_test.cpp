@@ -81,6 +81,47 @@ TEST(MMU, joypad){
     ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1101);
 }
 
+TEST(MMU, timer){
+    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
+
+    // Disable boot ROM
+    mmu->write(0xff50, 0x01);
+
+    // Activate and set timer speed to 65,536Hz
+    // (Speed: 65,536Hz require 4 1MHz cycles to increase counter)
+    mmu->write(0xff07, 0b101);
+    ASSERT_EQ(mmu->read(0xff07), 0b101);
+    ASSERT_EQ(mmu->read(0xff05), 0);
+
+    // Should not increase counter
+    mmu->timer_update(3);
+    ASSERT_EQ(mmu->read(0xff05), 0);
+
+    // Reset divider
+    mmu->write(0xff04, 123);
+
+    // Should still not increase counter due to divider reset
+    mmu->timer_update(3);
+    ASSERT_EQ(mmu->read(0xff05), 0);
+
+    // Should increase counter
+    mmu->timer_update(1);
+    ASSERT_EQ(mmu->read(0xff05), 1);
+
+    // Should increase counter to 0xff
+    mmu->timer_update(4*(0xff)-1);
+    ASSERT_EQ(mmu->read(0xff05), 0xff);
+
+    // Set modulo to 0x55
+    mmu->write(0xff06, 0x55);
+
+    // Should raise interrupt request flag
+    // Counter should be 0x55
+    mmu->timer_update(4);
+    ASSERT_EQ(mmu->read(0xff0f), (1 << 2));
+    ASSERT_EQ(mmu->read(0xff05), 0x55);
+}
+
 //TEST(MMU, load_rom){
 //    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
 //    mmu->disable_boot_rom();

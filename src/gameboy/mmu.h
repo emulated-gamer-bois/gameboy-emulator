@@ -36,6 +36,10 @@ friend class test_case_name##_##test_name##_Test
 #define IO_DISABLE_BOOT_ROM 0xff50
 #define IO_JOYPAD           0xff00
 #define INTERRUPT_FLAG      0xff0f
+#define TIMER_DIVIDER       0xff04
+#define TIMER_COUNTER       0xff05
+#define TIMER_MODULO        0xff06
+#define TIMER_CONTROL       0xff07
 
 // Joypad constants
 #define JOYPAD_SEL_BUTTONS      0x10
@@ -57,6 +61,7 @@ public:
     void load_rom(std::string filepath);
     void joypad_release(uint8_t button);
     void joypad_press(uint8_t button);
+    void timer_update(uint16_t cycles);
 
 private:
     void write_GAME_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data);
@@ -82,6 +87,10 @@ private:
     uint8_t interrupt_flag;
     uint8_t io_joypad_select;
     uint8_t io_joypad;
+    uint16_t timer_divider;
+    uint8_t timer_counter;
+    uint8_t timer_modulo;
+    uint8_t timer_control;
 
     // Tests using private stuff
     FRIEND_TEST(MMU, read_write);
