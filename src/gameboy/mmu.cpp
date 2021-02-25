@@ -134,12 +134,11 @@ void MMU::disable_boot_rom() {
     this->booting = false;
 }
 
-void MMU::load_rom(std::string filepath) {
+void MMU::load_game_rom(std::string filepath) {
     std::streampos size;
     char *memblock;
-    std::string prefix = "..\\..\\roms\\";
 
-    std::ifstream file (prefix.append(filepath), std::ios::in|std::ios::binary|std::ios::ate);
+    std::ifstream file (filepath, std::ios::in|std::ios::binary|std::ios::ate);
     if (file.is_open())
     {
         // Get file size
@@ -159,6 +158,40 @@ void MMU::load_rom(std::string filepath) {
         std::memcpy(&this->game_rom[this->game_rom.size() - size], &memblock[0], size);
 
         delete[] memblock;
+    }
+    else {
+        std::cout << "Unable to open file: " << filepath << std::endl;
+        // TODO: Error handling
+    }
+}
+
+void MMU::load_boot_rom(std::string filepath) {
+    std::streampos size;
+    char *memblock;
+
+    std::ifstream file (filepath, std::ios::in|std::ios::binary|std::ios::ate);
+    if (file.is_open())
+    {
+        // Get file size
+        size = file.tellg();
+        if ((int)size == 256) {
+            memblock = new char [size];
+
+            // Move seeker to beginning of file
+            file.seekg (0, std::ios::beg);
+            // Read file to buffer
+            file.read (memblock, size);
+            // Close file
+            file.close();
+
+            // Copy data
+            std::memcpy(&this->boot_rom[this->boot_rom.size() - size], &memblock[0], size);
+
+            delete[] memblock;
+        } else {
+            std::cout << "Unable to load boot ROM! File size is not 256 bytes!" << std::endl;
+            // TODO: Error handling
+        }
     }
     else {
         std::cout << "Unable to open file: " << filepath << std::endl;

@@ -25,6 +25,7 @@ public:
      * @returns amount of machine cycles operation takes.
      */
     int execute_instruction();
+    void cpu_dump();
 
 private:
     //Registers

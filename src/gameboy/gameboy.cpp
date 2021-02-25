@@ -10,11 +10,11 @@ GameBoy::GameBoy() {
 }
 
 void GameBoy::step() {
-    uint8_t cycles;
-    // cycles = this->cpu->execute_instruction();
-    //                           TODO: Wait for execute_instruction to return clocks
+    // TODO: Check for interrupts
+    int cycles;
+    cycles = this->cpu->execute_instruction();
     // this->ppu.update(cycles); TODO: Wait for ppu implementation
-    // mmu.timerUpdate(cycles);  TODO: Wait for mmu timer implementation
+    mmu->timer_update(cycles);
 }
 
 uint8_t *GameBoy::getScreen() {
@@ -33,5 +33,17 @@ void GameBoy::joypad_input(uint8_t key, uint8_t action) {
         default:
             std::cout << "Invalid parameter `action` to GameBoy::joypad_input: " << action << std::endl;
             break;
-  }
+    }
+}
+
+void GameBoy::load_game_rom(std::string filepath) {
+    this->mmu->load_game_rom(filepath);
+}
+
+void GameBoy::load_boot_rom(std::string filepath) {
+    this->mmu->load_boot_rom(filepath);
+}
+
+void GameBoy::cpu_dump() {
+    this->cpu->cpu_dump();
 }

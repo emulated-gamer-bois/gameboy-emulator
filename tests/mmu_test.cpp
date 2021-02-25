@@ -122,11 +122,20 @@ TEST(MMU, timer){
     ASSERT_EQ(mmu->read(0xff05), 0x55);
 }
 
-//TEST(MMU, load_rom){
-//    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-//    mmu->disable_boot_rom();
-//    mmu->load_rom("rom.gb");
-//
-//    ASSERT_EQ(mmu->read(0x104), 0xce);
-//    ASSERT_EQ(mmu->read(0x105), 0xed);
-//}
+/*TEST(MMU, load_rom){
+    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
+
+    mmu->load_game_rom("../../roms/game.gb");
+    mmu->load_boot_rom("../../roms/boot.bin");
+
+    // Check data in boot ROM
+    ASSERT_EQ(mmu->read(0x1), 0x50);
+    ASSERT_EQ(mmu->read(0x2), 0xff);
+
+    // Disable boot ROM
+    mmu->write(0xff50, 0x01);
+
+    // Check data in game ROM
+    ASSERT_EQ(mmu->read(0x104), 0xce);
+    ASSERT_EQ(mmu->read(0x105), 0xed);
+}*/
