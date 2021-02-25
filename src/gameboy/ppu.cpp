@@ -3,7 +3,7 @@
 //
 
 #include "ppu.h"
-#include <iostream>
+#include <cassert>
 
 #define LCDC_ADDRESS 0xFF40
 #define STAT_ADDRESS 0xFF41
@@ -99,7 +99,7 @@ uint8_t ppu::getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixe
     return memory->read(bgMapStart + offset);
 }
 
-uint8_t ppu::getTilePixel(uint8_t tileID, uint8_t absolutePixelX, uint8_t absolutePixelY) { //TODO test
+uint8_t ppu::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t absolutePixelY) { //TODO test
     uint16_t tileDataBasePointer;
     uint16_t address;
     if (bgWindowTileDataSelect) {
@@ -120,21 +120,12 @@ uint8_t ppu::getTilePixel(uint8_t tileID, uint8_t absolutePixelX, uint8_t absolu
     uint8_t lowBit = lowByte & (1 << tileX);
     uint8_t highBit = highByte & (1 << tileX);
 
-    uint8_t pixel = (highBit << 1) | lowBit;
+    uint8_t pixelColor = (highBit << 1) | lowBit;
 
-    switch (pixel) {
-        case 0:
-            return BGP & (3 << 0);
-        case 1:
-            return BGP & (3 << 2);
-        case 2:
-            return BGP & (3 << 4);
-        case 3:
-            return BGP & (3 << 6);
-        default:
-            printf("Unsupported color");
-            return 0;
-    }
+    assert(pixelColor >= 0 && pixelColor <= 3); // If not true, there is a bug in the code. Temporary line?
+
+    auto bitmask = 3;
+    return BGP & (bitmask << pixelColor * 2);
 }
 
 std::array<uint8_t, 160 * 144> ppu::getBytes() { //TODO fix dimensions

@@ -70,7 +70,7 @@ class ppu {
     void drawBackgroundScanLine();
     void endProcessNextLine();
     uint8_t getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY);
-    uint8_t getTilePixel(uint8_t id, uint8_t x, uint8_t y);
+    uint8_t getTilePixelColor(uint8_t id, uint8_t x, uint8_t y);
 public:
     explicit ppu(std::shared_ptr<MMU> memory);
     void update(uint16_t cpuCycles);
