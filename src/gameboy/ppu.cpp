@@ -32,6 +32,7 @@ ppu::ppu(std::shared_ptr<MMU> memory) {
 }
 
 void ppu::update(uint16_t cpuCycles) {
+    initRegisters();
     accumulatedCycles += cpuCycles;
     switch(modeFlag) {
         case HBLANK:
@@ -75,18 +76,17 @@ void ppu::update(uint16_t cpuCycles) {
             }
             break;
     }
+    saveRegisters();
 }
 
 void ppu::processNextLine() {
-    initProcessNextLine();
     if (bgWindowDisplayEnable) {
         drawBackgroundScanLine();
     }
     //TODO window and object drawing
-    endProcessNextLine();
 }
 
-void ppu::initProcessNextLine() {
+void ppu::initRegisters() {
     LCDC = memory->read(LCDC_ADDRESS);
     STAT = memory->read(STAT_ADDRESS);
     
@@ -103,25 +103,25 @@ void ppu::initProcessNextLine() {
     DMA = memory->read(DMA_ADDRESS);
 }
 
-void ppu::endProcessNextLine() { //TODO check if anything else needs doing here
+void ppu::saveRegisters() { //TODO check if anything else needs doing here
     memory->write(LCDC_ADDRESS, LCDC);
     memory->write(STAT_ADDRESS, STAT);
 
-    memory->write(LY_ADDRESS, LY); //Increments LY, since we are done processing the current line
+    memory->write(LY_ADDRESS, LY);
 }
 
 void ppu::drawBackgroundScanLine() {
-    uint16_t bgMapStart;
+    uint16_t bgMapStartAddress;
     if (tileMapDisplaySelect) {
-        bgMapStart = BG_WINDOW_MAP1;
+        bgMapStartAddress = BG_WINDOW_MAP1;
     } else {
-        bgMapStart = BG_WINDOW_MAP0;
+        bgMapStartAddress = BG_WINDOW_MAP0;
     }
 
     for (uint8_t x = 0; x < 160; ++x) {
         uint8_t absolutePixelX = (SCX + x) % 256;
         uint8_t absolutePixelY = (SCY + LY) % 256;
-        uint8_t tileID = getTileID(bgMapStart, absolutePixelX, absolutePixelY);
+        uint8_t tileID = getTileID(bgMapStartAddress, absolutePixelX, absolutePixelY);
         uint8_t pixel = getTilePixelColor(tileID, absolutePixelX, absolutePixelY);
         bytes[LY * 160 + x] = pixel;
     }

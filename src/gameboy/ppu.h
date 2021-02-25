@@ -76,9 +76,9 @@ class ppu {
     uint8_t DMA;
 
     void processNextLine();
-    void initProcessNextLine();
+    void initRegisters();
     void drawBackgroundScanLine();
-    void endProcessNextLine();
+    void saveRegisters();
     uint8_t getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY);
     uint8_t getTilePixelColor(uint8_t id, uint8_t x, uint8_t y);
 public:
