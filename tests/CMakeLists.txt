@@ -4,12 +4,6 @@ project( tests )
 add_subdirectory(gtest)
 enable_testing ()
 
-# Must be included each time a library is made
-if (WIN32)
-    string(REPLACE /MD /MT CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
-    string(REPLACE /MDd /MTd CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
-endif ()
-
 # Find pthread library
 find_package (Threads REQUIRED)
 
