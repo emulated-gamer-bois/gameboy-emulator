@@ -241,6 +241,8 @@ void MMU::write_io(uint16_t addr, uint8_t data) {
                 this->timer_control = data & 0b111;
                 break;
         }
+    } else {
+        this->io[addr - IO_START] = data;
     }
 }
 
@@ -264,6 +266,8 @@ uint8_t MMU::read_io(uint16_t addr) {
             case TIMER_CONTROL:
                 return this->timer_control & 0b111;
         }
+    } else {
+        return this->io[addr - IO_START];
     }
     return 0;
 }
