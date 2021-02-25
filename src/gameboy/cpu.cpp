@@ -1232,9 +1232,15 @@ int CPU::execute_instruction() {
         case 0xDF:
             reset(3);
             return 4;
+        case 0xE0:
+            storeAddr(0xFF00 + read_and_inc_pc(), A.high_8);
+            return 3;
         case 0xE1:
             popReg(HL);
             return 3;
+        case 0xE2:
+            storeAddr(0xFF00 + BC.low_8, A.high_8);
+            return 2;
         case 0xE5:
             pushReg(HL);
             return 4;
@@ -1259,10 +1265,16 @@ int CPU::execute_instruction() {
         case 0xEF:
             reset(5);
             return 4;
+        case 0xF0:
+            loadImp(0xFF00 + read_and_inc_pc(), A.high_8);
+            return 3;
         case 0xF1:
             popReg(A);
             F.all_8 = A.low_8;
             return 3;
+        case 0xF2:
+            loadImp(0xFF00 + BC.low_8, A.high_8);
+            return 2;
         case 0xF5:
             A.low_8 = F.all_8;
             pushReg(A);
