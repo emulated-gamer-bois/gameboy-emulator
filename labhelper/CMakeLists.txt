@@ -58,7 +58,7 @@ target_include_directories( labhelper
 target_link_libraries ( labhelper
     PUBLIC
     imgui
-	SDL2::SDL2
+	#SDL2::SDL2
     ${SDL2_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${OPENGL_LIBRARY}

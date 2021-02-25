@@ -148,10 +148,29 @@ void CPU::subA(uint8_t value, bool withCarry) {
     A.high_8 += value;
     setZNFlags(A.high_8, true);
 }
+/**
+* Increment the value stored at address @addr
+ */
+void CPU::incrementAddr(uint16_t addr){
+    uint8_t value = memory->read(addr);
+    setHFlag(value++, 1);
+    memory->write(addr, value);
+    setZNFlags(value, false);
+}
 
 /**
- * Will have to consider the increment and decrement of 16 bit addresses where flags are to be set
- * later as well (HL).
+* Decrement the value stored at address @addr
+ */
+void CPU::decrementAddr(uint16_t addr){
+    uint8_t value = memory->read(addr);
+    setHFlag(value--, -1);
+    memory->write(addr, value);
+    setZNFlags(value, true);
+}
+
+/**
+ * Increment the value of the specified 16 bit register with one.
+ * Does not set flags.
  */
 void CPU::increment16(uint16_t &reg) {
     reg += 1;
@@ -698,7 +717,12 @@ int CPU::execute_instruction() {
         case 0x33:
             increment16(SP.all_16);
             return 2;
-            //TODO 0X34 0X35
+        case 0x34:
+            incrementAddr(HL.all_16);
+            return 3;
+        case 0x35:
+            decrementAddr(HL.all_16);
+            return 3;
         case 0x36:
             storeAddr(HL.all_16, read_and_inc_pc());
             return 3;

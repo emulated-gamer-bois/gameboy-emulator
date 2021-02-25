@@ -51,8 +51,10 @@ private:
     //Register arithmetics
     void addA(uint8_t value, bool withCarry);
     void subA(uint8_t value, bool withCarry);
+    void incrementAddr(uint16_t addr);
     void increment8(uint8_t &reg);
     void increment16(uint16_t &reg);
+    void decrementAddr(uint16_t addr);
     void decrement8(uint8_t &reg);
     void decrement16(uint16_t &reg);
 
@@ -120,6 +122,9 @@ private:
     void sla(uint8_t &reg);
 
     void sra(uint8_t &reg);
+
+
+
 };
 
 
