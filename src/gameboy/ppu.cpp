@@ -26,21 +26,63 @@
 
 ppu::ppu(std::shared_ptr<MMU> memory) {
     this->memory = memory;
-    this->cyclesSinceLastLine = 0;
+    this->accumulatedCycles = 0;
+    this->modeFlag = OAM_SEARCH;
+    bytes.fill(0);
 }
 
 void ppu::update(uint16_t cpuCycles) {
-    cyclesSinceLastLine += cpuCycles;
-    while (cyclesSinceLastLine >= THRESHOLD) {
-        cyclesSinceLastLine -= THRESHOLD;
-        processNextLine();
+    accumulatedCycles += cpuCycles;
+    switch(modeFlag) {
+        case HBLANK:
+            if (accumulatedCycles >= HBLANK_THRESHOLD) {
+                accumulatedCycles -= HBLANK_THRESHOLD;
+                LY++;
+
+                if (LY < 144) {
+                    modeFlag = OAM_SEARCH;
+                } else {
+                    modeFlag = VBLANK;
+                }
+            }
+            break;
+
+        case VBLANK:
+            if (accumulatedCycles >= VBLANK_LINE_THRESHOLD) {
+                accumulatedCycles -= VBLANK_LINE_THRESHOLD;
+                LY++;
+
+                if (LY == 154) {
+                    LY = 0;
+                    bytes.fill(0);
+                    modeFlag = OAM_SEARCH;
+                }
+            }
+            break;
+
+        case OAM_SEARCH:
+            if (accumulatedCycles >= OAM_SEARCH_THRESHOLD) {
+                accumulatedCycles -= OAM_SEARCH_THRESHOLD;
+                modeFlag = SCANLINE_DRAW;
+            }
+            break;
+
+        case SCANLINE_DRAW:
+            if (accumulatedCycles >= SCANLINE_DRAW_THRESHOLD) {
+                accumulatedCycles -= SCANLINE_DRAW_THRESHOLD;
+                processNextLine();
+                modeFlag = HBLANK;
+            }
+            break;
     }
 }
 
-void ppu::processNextLine() { //TODO fix state machine so that the method is only ran when not in a vblank
+void ppu::processNextLine() {
     initProcessNextLine();
-    drawBackgroundScanLine();
-    //TODO actual "drawing" code
+    if (bgWindowDisplayEnable) {
+        drawBackgroundScanLine();
+    }
+    //TODO window and object drawing
     endProcessNextLine();
 }
 
@@ -65,7 +107,7 @@ void ppu::endProcessNextLine() { //TODO check if anything else needs doing here
     memory->write(LCDC_ADDRESS, LCDC);
     memory->write(STAT_ADDRESS, STAT);
 
-    memory->write(LY_ADDRESS, (LY + 1) % LCD_HEIGHT); //Increments LY, since we are done processing the current line
+    memory->write(LY_ADDRESS, LY); //Increments LY, since we are done processing the current line
 }
 
 void ppu::drawBackgroundScanLine() {
@@ -100,27 +142,28 @@ uint8_t ppu::getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixe
 }
 
 uint8_t ppu::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t absolutePixelY) { //TODO test
-    uint16_t tileDataBasePointer;
+    uint16_t startAddress;
     uint16_t address;
+
     if (bgWindowTileDataSelect) {
-        tileDataBasePointer = BG_WINDOW_TILE_DATA1;
-        address = tileID * 16 + tileDataBasePointer;
+        startAddress = BG_WINDOW_TILE_DATA1;
+        address = tileID * 16 + startAddress;
     } else {
-        tileDataBasePointer = BG_WINDOW_TILE_DATA0;
+        startAddress = BG_WINDOW_TILE_DATA0;
         auto signedID = (int8_t)tileID;
-        address = signedID * 16 + tileDataBasePointer;
+        address = signedID * 16 + startAddress;
     }
 
-    uint8_t tileY = absolutePixelY % 8;
-    uint8_t tileX = 7 - (absolutePixelX % 8);
+    auto tilePixelY = absolutePixelY % 8;
+    auto tilePixelX = 7 - (absolutePixelX % 8);
 
-    uint8_t lowByte = memory->read(address + tileY * 2);
-    uint8_t highByte = memory->read(address + tileY * 2 + 1);
+    auto lowByte = memory->read(address + tilePixelY * 2);
+    auto highByte = memory->read(address + tilePixelY * 2 + 1);
 
-    uint8_t lowBit = lowByte & (1 << tileX);
-    uint8_t highBit = highByte & (1 << tileX);
+    auto lowBit = lowByte & (1 << tilePixelX);
+    auto highBit = highByte & (1 << tilePixelX);
 
-    uint8_t pixelColor = (highBit << 1) | lowBit;
+    auto pixelColor = (highBit << 1) | lowBit;
 
     assert(pixelColor >= 0 && pixelColor <= 3); // If not true, there is a bug in the code. Temporary line?
 
@@ -128,6 +171,6 @@ uint8_t ppu::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t a
     return BGP & (bitmask << pixelColor * 2);
 }
 
-std::array<uint8_t, 160 * 144> ppu::getBytes() { //TODO fix dimensions
+std::array<uint8_t, ppu::LCD_WIDTH * ppu::LCD_HEIGHT> ppu::getBytes() {
     return bytes;
 }

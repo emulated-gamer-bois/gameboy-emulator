@@ -10,19 +10,29 @@
 #include "mmu.h"
 
 class ppu {
-    const static uint16_t THRESHOLD = 114; //The time it takes to search for objects, draw the line and HBLANK.
+    const static uint16_t HBLANK_THRESHOLD = 51; //The time it takes to search for objects, draw the line and HBLANK.
+    const static uint16_t VBLANK_LINE_THRESHOLD = 114;
+    const static uint16_t OAM_SEARCH_THRESHOLD = 20;
+    const static uint16_t SCANLINE_DRAW_THRESHOLD = 43;
     const static uint16_t LCD_WIDTH = 160;
     const static uint16_t LCD_HEIGHT = 144;
 
     std::shared_ptr<MMU> memory;
     std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> bytes;
-    uint16_t cyclesSinceLastLine;
+    uint16_t accumulatedCycles;
 
     enum Color {
         BLACK = 0x00,
         DARK_GREY = 0x68,
         LIGHT_GREY = 0xB8,
         WHITE = 0xFF
+    };
+
+    enum Mode {
+        HBLANK,
+        VBLANK,
+        OAM_SEARCH,
+        SCANLINE_DRAW
     };
 
     union {
