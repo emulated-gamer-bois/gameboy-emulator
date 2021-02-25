@@ -1309,6 +1309,9 @@ int CPU::execute_instruction() {
         case 0xF7:
             reset(6);
             return 4;
+        case 0xF9:
+            loadIm16(HL.all_16, SP);
+            return 2;
         case 0xFA:
             memory->write(A.high_8, read16_and_inc_pc());
             return 4;
