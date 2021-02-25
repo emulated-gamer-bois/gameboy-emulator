@@ -520,10 +520,10 @@ void CPU::sra(uint8_t &reg) {
  */
 uint8_t CPU::swapBits(uint8_t value) {
     F.all_8 = 0;
-    F.z = 1;
-
-    uint8_t low4 = value << 4;
-    return (value >> 4) | low4;
+    uint8_t newVal = value << 4;
+    newVal |= (value >> 4);
+    setZNFlags(newVal, false);
+    return newVal;
 }
 
 /**
