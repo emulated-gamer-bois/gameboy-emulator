@@ -1157,6 +1157,8 @@ int CPU::execute_instruction() {
                 return 4;
             else
                 return 3;
+        case 0xCB:
+            return CB_ops();
         case 0xCC:
             if (callZ(memory->read(PC), memory->read(PC + 1), true)) {
                 PC += 2;
