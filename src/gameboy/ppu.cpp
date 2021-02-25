@@ -80,7 +80,7 @@ void ppu::drawBackgroundScanLine() {
         uint8_t absolutePixelX = (SCX + x) % 256;
         uint8_t absolutePixelY = (SCY + LY) % 256;
         uint8_t tileID = getTileID(bgMapStart, absolutePixelX, absolutePixelY);
-        uint8_t pixel = getTilePixel(tileID, absolutePixelX, absolutePixelY);
+        uint8_t pixel = getTilePixelColor(tileID, absolutePixelX, absolutePixelY);
         bytes[LY * 160 + x] = pixel;
     }
 }
