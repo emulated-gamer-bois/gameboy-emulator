@@ -511,6 +511,21 @@ void CPU::sra(uint8_t &reg) {
     setZNFlags(reg,false);
     F.h=0;
 }
+
+/**
+ * Swaps the value of the lower 4 bits (bit 0 to 3) with
+ * the value of the higher 4 bits (bit 4 to 7)
+ * @param value the value which should be swapped
+ * @return the swapped value of 'value'
+ */
+uint8_t CPU::swapBits(uint8_t value) {
+    F.all_8 = 0;
+    F.z = 1;
+
+    uint8_t low4 = value << 4;
+    return (value >> 4) | low4;
+}
+
 /**
  * Reads the two upcoming bytes, returns their combined value and incs PC twice
  * The first byte is the lower byte
@@ -1383,6 +1398,30 @@ int CPU::CB_ops() {
             //TODO 0x1e
         case 0x1F:
             rr(A.high_8);
+            return 2;
+        case 0x30:
+            BC.high_8 = swapBits(BC.high_8);
+            return 2;
+        case 0x31:
+            BC.low_8 = swapBits(BC.low_8);
+            return 2;
+        case 0x32:
+            DE.high_8 = swapBits(DE.high_8);
+            return 2;
+        case 0x33:
+            DE.low_8 = swapBits(DE.low_8);
+            return 2;
+        case 0x34:
+            HL.high_8 = swapBits(HL.high_8);
+            return 2;
+        case 0x35:
+            HL.low_8 = swapBits(HL.low_8);
+            return 2;
+        case 0x36:
+            storeAddr(HL.all_16, swapBits(memory->read(HL.all_16)));
+            return 4;
+        case 0x37:
+            A.high_8 = swapBits(A.high_8);
             return 2;
         case 0x40:
             bit(0, BC.high_8);
