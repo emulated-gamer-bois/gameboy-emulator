@@ -9,6 +9,7 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 
 #include "Application.h" // Implements
 #include "RenderView.h"
+#include "gameboy/gameboy.h"
 
 // TEMP
 #include <fstream> // file reading
@@ -89,7 +90,18 @@ void Application::start() {
 
     TEMP_setTexture("../src/title.pixdata", renderView);
 
+    std::unique_ptr<GameBoy> gameboy = std::make_unique<GameBoy>();
+
+    // gameboy->load_boot_rom("../roms/boot.bin");
+    // gameboy->load_game_rom("../roms/game.gb");
+
+    // gameboy->cpu_dump();
+
     while(!quit) {
+        // Breakpoint here to step through program
+        // gameboy->step();
+        // gameboy->cpu_dump();
+
         //update currentTime
         std::chrono::duration<float> timeSinceStart = std::chrono::system_clock::now() - startTime;
         previousTime = currentTime;
