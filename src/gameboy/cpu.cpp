@@ -231,8 +231,10 @@ void CPU::rlc(uint8_t &reg) {
     auto d7 = (reg & 0x80) >> 0x07;
     reg = (reg << 1) | d7;
 
+    F.all_8 = 0;
     //Sets C flag to d7
     F.c = d7 == 0 ? 0 : 1;
+    F.z = reg == 0 ? 1 : 0;
 }
 
 /**
@@ -242,8 +244,10 @@ void CPU::rl(uint8_t &reg) {
     auto d7 = (reg & 0x80) >> 0x07;
     reg = (reg << 1) | ((F.all_8 >> 4) & 0x01);
 
+    F.all_8 = 0;
     //Sets C flag to d7
     F.c = d7 == 0 ? 0 : 1;
+    F.z = reg == 0 ? 1 : 0;
 }
 
 /**
@@ -1308,6 +1312,7 @@ int CPU::execute_instruction() {
 }
 
 int CPU::CB_ops() {
+    uint8_t tmpVal = 0;
     switch (read_and_inc_pc()) {
         case 0x00:
             rlc(BC.high_8);
@@ -1327,7 +1332,11 @@ int CPU::CB_ops() {
         case 0x05:
             rlc(HL.low_8);
             return 2;
-            //TODO 0X06
+        case 0x06:
+            tmpVal = memory->read(HL.all_16);
+            rlc(tmpVal);
+            storeAddr(HL.all_16, tmpVal);
+            return 4;
         case 0x07:
             rlc(A.high_8);
             return 2;
@@ -1372,7 +1381,11 @@ int CPU::CB_ops() {
         case 0x15:
             rl(HL.low_8);
             return 2;
-            //TODO 0X16
+        case 0x16:
+            tmpVal = memory->read(HL.all_16);
+            rl(tmpVal);
+            storeAddr(HL.all_16, tmpVal);
+            return 4;
         case 0x17:
             rl(A.high_8);
             return 2;
@@ -1634,7 +1647,11 @@ int CPU::CB_ops() {
         case 0x85:
             res(0, HL.low_8);
             return 2;
-            //TODO 0x86
+        case 0x86:
+            tmpVal = memory->read(HL.all_16);
+            res(0, tmpVal);
+            storeAddr(HL.all_16, tmpVal);
+            return 4;
         case 0x87:
             res(0, A.high_8);
             return 2;
@@ -1679,7 +1696,11 @@ int CPU::CB_ops() {
         case 0x95:
             res(2, HL.low_8);
             return 2;
-            //TODO 0x96
+        case 0x96:
+            tmpVal = memory->read(HL.all_16);
+            res(2, tmpVal);
+            storeAddr(HL.all_16, tmpVal);
+            return 4;
         case 0x97:
             res(2, A.high_8);
             return 2;
@@ -1723,7 +1744,11 @@ int CPU::CB_ops() {
         case 0xA5:
             res(4, HL.low_8);
             return 2;
-            //TODO 0x96
+        case 0xA6:
+            tmpVal = memory->read(HL.all_16);
+            res(2, tmpVal);
+            storeAddr(HL.all_16, tmpVal);
+            return 4;
         case 0xA7:
             res(4, A.high_8);
             return 2;
@@ -1767,7 +1792,11 @@ int CPU::CB_ops() {
         case 0xB5:
             res(6, HL.low_8);
             return 2;
-            //TODO 0xB6
+        case 0xB6:
+            tmpVal = memory->read(HL.all_16);
+            res(6, tmpVal);
+            storeAddr(HL.all_16, tmpVal);
+            return 4;
         case 0xB7:
             res(6, A.high_8);
             return 2;
@@ -1812,7 +1841,11 @@ int CPU::CB_ops() {
         case 0xC5:
             set(0, HL.low_8);
             return 2;
-            //TODO 0xC6
+        case 0xC6:
+            tmpVal = memory->read(HL.all_16);
+            set(0, tmpVal);
+            storeAddr(HL.all_16, tmpVal);
+            return 4;
         case 0xC7:
             set(0, A.high_8);
             return 2;
@@ -1856,7 +1889,11 @@ int CPU::CB_ops() {
         case 0xD5:
             set(2, HL.low_8);
             return 2;
-            //TODO 0xD6
+        case 0xD6:
+            tmpVal = memory->read(HL.all_16);
+            set(2, tmpVal);
+            storeAddr(HL.all_16, tmpVal);
+            return 4;
         case 0xD7:
             set(2, A.high_8);
             return 2;
@@ -1901,7 +1938,11 @@ int CPU::CB_ops() {
         case 0xE5:
             set(4, HL.low_8);
             return 2;
-            //TODO 0xE6
+        case 0xE6:
+            tmpVal = memory->read(HL.all_16);
+            set(4, tmpVal);
+            storeAddr(HL.all_16, tmpVal);
+            return 4;
         case 0xE7:
             set(4, A.high_8);
             return 2;
@@ -1945,7 +1986,10 @@ int CPU::CB_ops() {
         case 0xF5:
             set(6, HL.low_8);
             return 2;
-            //TODO 0xD6
+        case 0xF6:
+            tmpVal = memory->read(HL.all_16);
+            set(6, tmpVal);
+            storeAddr(HL.all_16, tmpVal);
         case 0xF7:
             set(6, A.high_8);
             return 2;
