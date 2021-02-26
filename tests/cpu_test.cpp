@@ -369,4 +369,6 @@ TEST(CPU, sixteen_bit_ops) {
     cpu->res(5, cpu->HL.low_8);
     ASSERT_EQ(cpu->HL.low_8, 0x00);
 
+    ASSERT_EQ(cpu->swapBits(0xF0), 0x0F);
+    ASSERT_EQ(cpu->swapBits(0xAB), 0xBA);
 }
