@@ -30,7 +30,7 @@ private:
     //Registers
     uint16_t PC;
     RegisterPair SP;
-    RegisterPair A;
+    uint8_t  A;
     RegisterPair BC;
     RegisterPair DE;
     RegisterPair HL;
@@ -45,7 +45,7 @@ private:
     void setCFlag(uint16_t a,uint16_t b);
 
     //Setting registers
-    void setA(uint8_t val){ A.high_8=val;};
+    void setA(uint8_t val){ A=val;};
     void setB(uint8_t val){ BC.high_8=val;};
 
     //Register arithmetics
