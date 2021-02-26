@@ -21,7 +21,7 @@ void GameBoy::step() {
 uint8_t *GameBoy::getScreen() {
     uint8_t* screenBuffer = nullptr;
     if (ppu->getMode() == PPU::VBLANK) {
-        screenBuffer = ppu->getFrameBuffer();
+        screenBuffer = ppu->getFrameBuffer()->data();
     }
 
     return screenBuffer;
