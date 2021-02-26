@@ -117,16 +117,17 @@ void CPU::addHL(RegisterPair reg) {
     F.h = tempH;
 }
 
-void CPU::addSP(int8_t value) {
+void CPU::addSignedToRegPair(RegisterPair &regPair, int8_t value) {
     // TODO uncertain if im supposed to do 2comp on value here or not.
-    add_8bit(SP.low_8, value, false);
+    add_8bit(regPair.low_8, value, false);
     auto tempH = F.c;
-    add_8bit(SP.high_8, 0, true);
+    add_8bit(regPair.high_8, 0, true);
     F.z = 0;
     F.n = 0;
     F.h = tempH;
 
 }
+
 
 /**
  * Makes a number negative by converting it to two complement
@@ -148,10 +149,29 @@ void CPU::subA(uint8_t value, bool withCarry) {
     A.high_8 += value;
     setZNFlags(A.high_8, true);
 }
+/**
+* Increment the value stored at address @addr
+ */
+void CPU::incrementAddr(uint16_t addr){
+    uint8_t value = memory->read(addr);
+    setHFlag(value++, 1);
+    memory->write(addr, value);
+    setZNFlags(value, false);
+}
 
 /**
- * Will have to consider the increment and decrement of 16 bit addresses where flags are to be set
- * later as well (HL).
+* Decrement the value stored at address @addr
+ */
+void CPU::decrementAddr(uint16_t addr){
+    uint8_t value = memory->read(addr);
+    setHFlag(value--, -1);
+    memory->write(addr, value);
+    setZNFlags(value, true);
+}
+
+/**
+ * Increment the value of the specified 16 bit register with one.
+ * Does not set flags.
  */
 void CPU::increment16(uint16_t &reg) {
     reg += 1;
@@ -717,7 +737,12 @@ int CPU::execute_instruction() {
         case 0x33:
             increment16(SP.all_16);
             return 2;
-            //TODO 0X34 0X35
+        case 0x34:
+            incrementAddr(HL.all_16);
+            return 3;
+        case 0x35:
+            decrementAddr(HL.all_16);
+            return 3;
         case 0x36:
             storeAddr(HL.all_16, read_and_inc_pc());
             return 3;
@@ -1253,9 +1278,15 @@ int CPU::execute_instruction() {
         case 0xDF:
             reset(3);
             return 4;
+        case 0xE0:
+            storeAddr(0xFF00 + read_and_inc_pc(), A.high_8);
+            return 3;
         case 0xE1:
             popReg(HL);
             return 3;
+        case 0xE2:
+            storeAddr(0xFF00 + BC.low_8, A.high_8);
+            return 2;
         case 0xE5:
             pushReg(HL);
             return 4;
@@ -1266,7 +1297,7 @@ int CPU::execute_instruction() {
             reset(4);
             return 4;
         case 0xE8:
-            addSP(read_and_inc_pc());
+            addSignedToRegPair(SP, read_and_inc_pc());
             return 4;
         case 0xE9:
             jump(HL.all_16);
@@ -1280,10 +1311,16 @@ int CPU::execute_instruction() {
         case 0xEF:
             reset(5);
             return 4;
+        case 0xF0:
+            loadImp(0xFF00 + read_and_inc_pc(), A.high_8);
+            return 3;
         case 0xF1:
             popReg(A);
             F.all_8 = A.low_8;
             return 3;
+        case 0xF2:
+            loadImp(0xFF00 + BC.low_8, A.high_8);
+            return 2;
         case 0xF5:
             A.low_8 = F.all_8;
             pushReg(A);
@@ -1294,6 +1331,13 @@ int CPU::execute_instruction() {
         case 0xF7:
             reset(6);
             return 4;
+        case 0xF8:
+            HL = SP;
+            addSignedToRegPair(HL, read_and_inc_pc());
+            return 3;
+        case 0xF9:
+            loadIm16(HL.all_16, SP);
+            return 2;
         case 0xFA:
             memory->write(A.high_8, read16_and_inc_pc());
             return 4;

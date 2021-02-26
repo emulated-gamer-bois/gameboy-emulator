@@ -133,7 +133,20 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->A.high_8, val - 1);
     ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x70); //H, C, N set
 
-    int8_t prevB = cpu->BC.high_8;
+    uint16_t addr = 0xC123;
+    uint8_t data = 137;
+    mmu->write(addr, data);
+    uint8_t prevVal = mmu->read(addr);
+    cpu->incrementAddr(addr);
+    uint8_t newVal = mmu->read(addr);
+    ASSERT_EQ(prevVal + 1, newVal);
+
+    prevVal = mmu->read(addr);
+    cpu->decrementAddr(addr);
+    newVal = mmu->read(addr);
+    ASSERT_EQ(prevVal - 1, newVal);
+
+    uint8_t prevB = cpu->BC.high_8;
     cpu->increment8(cpu->BC.high_8);
     ASSERT_EQ(cpu->BC.high_8, prevB + 1);
 
@@ -291,7 +304,7 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->F.all_8 = 0;
     cpu->SP.all_16 = 0xFFFF;
 
-    cpu->addSP(0x01);
+    cpu->addSignedToRegPair(cpu->SP, 0x01);
     ASSERT_EQ(cpu->SP.all_16, 0x0000);
     ASSERT_EQ(cpu->F.z, 0);
     ASSERT_EQ(cpu->F.n, 0);

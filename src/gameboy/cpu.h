@@ -51,13 +51,15 @@ private:
     //Register arithmetics
     void addA(uint8_t value, bool withCarry);
     void subA(uint8_t value, bool withCarry);
+    void incrementAddr(uint16_t addr);
     void increment8(uint8_t &reg);
     void increment16(uint16_t &reg);
+    void decrementAddr(uint16_t addr);
     void decrement8(uint8_t &reg);
     void decrement16(uint16_t &reg);
     void add_8bit(uint8_t &reg, uint8_t b, bool withCarry);
     void addHL(RegisterPair reg);
-    void addSP(int8_t value);
+    void addSignedToRegPair(RegisterPair &regPair, int8_t value);
 
     //Bitwise operations
     void andA(uint8_t value);
@@ -115,6 +117,7 @@ private:
     FRIEND_TEST(CPU, Execute_LD_SP_D16_Instruction);
     FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);
     FRIEND_TEST(CPU, sixteen_bit_ops);
+
 
 };
 
