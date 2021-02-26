@@ -304,7 +304,7 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->F.all_8 = 0;
     cpu->SP.all_16 = 0xFFFF;
 
-    cpu->addSP(0x01);
+    cpu->addSignedToRegPair(cpu->SP, 0x01);
     ASSERT_EQ(cpu->SP.all_16, 0x0000);
     ASSERT_EQ(cpu->F.z, 0);
     ASSERT_EQ(cpu->F.n, 0);

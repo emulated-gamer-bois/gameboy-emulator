@@ -117,16 +117,17 @@ void CPU::addHL(RegisterPair reg) {
     F.h = tempH;
 }
 
-void CPU::addSP(int8_t value) {
+void CPU::addSignedToRegPair(RegisterPair &regPair, int8_t value) {
     // TODO uncertain if im supposed to do 2comp on value here or not.
-    add_8bit(SP.low_8, value, false);
+    add_8bit(regPair.low_8, value, false);
     auto tempH = F.c;
-    add_8bit(SP.high_8, 0, true);
+    add_8bit(regPair.high_8, 0, true);
     F.z = 0;
     F.n = 0;
     F.h = tempH;
 
 }
+
 
 /**
  * Makes a number negative by converting it to two complement
@@ -1275,7 +1276,7 @@ int CPU::execute_instruction() {
             reset(4);
             return 4;
         case 0xE8:
-            addSP(read_and_inc_pc());
+            addSignedToRegPair(SP, read_and_inc_pc());
             return 4;
         case 0xE9:
             jump(HL.all_16);
@@ -1309,6 +1310,10 @@ int CPU::execute_instruction() {
         case 0xF7:
             reset(6);
             return 4;
+        case 0xF8:
+            HL = SP;
+            addSignedToRegPair(HL, read_and_inc_pc());
+            return 3;
         case 0xF9:
             loadIm16(HL.all_16, SP);
             return 2;
