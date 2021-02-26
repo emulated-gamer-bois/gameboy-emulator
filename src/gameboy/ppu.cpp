@@ -28,7 +28,7 @@ ppu::ppu(std::shared_ptr<MMU> memory) {
     this->memory = memory;
     this->accumulatedCycles = 0;
     this->modeFlag = OAM_SEARCH;
-    bytes.fill(0);
+    frameBuffer.fill(0);
 }
 
 void ppu::update(uint16_t cpuCycles) {
@@ -55,7 +55,7 @@ void ppu::update(uint16_t cpuCycles) {
 
                 if (LY == 154) { //If the VBLANK should end: Reset LY and clear frame buffer
                     LY = 0;
-                    bytes.fill(0);
+                    frameBuffer.fill(0);
                     modeFlag = OAM_SEARCH;
                 }
             }
