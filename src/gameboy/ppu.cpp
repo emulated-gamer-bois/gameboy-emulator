@@ -172,6 +172,6 @@ uint8_t ppu::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t a
     return BGP & (bitmask << pixelColor * 2);
 }
 
-std::array<uint8_t, ppu::LCD_WIDTH * ppu::LCD_HEIGHT> ppu::getFrameBuffer() {
-    return frameBuffer;
+uint8_t* ppu::getFrameBuffer() {
+    return frameBuffer.data();
 }
