@@ -4,7 +4,7 @@
 
 #include <memory>
 #include "gtest/gtest.h"
-#include "../src/gameboy/cpu.h"
+#include "../src/gameboy/CPU.h"
 
 TEST(CPU, Execute_NOP_Instruction) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();

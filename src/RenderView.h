@@ -29,6 +29,7 @@ public:
     RenderView(int screenMultiplier, Palette palette);
     RenderView();
 
+    void initGL();
     void render() const;
     void setScreenTexture(uint8_t textureData[]);
     void setPalette(Palette palette);

@@ -2,23 +2,29 @@
 // Created by algot on 2021-02-23.
 //
 
-#include "gameboy.h"
+#include "GameBoy.h"
 
 GameBoy::GameBoy() {
     this->mmu = std::make_shared<MMU>();
     this->cpu = std::make_unique<CPU>(0x0000, 0xFFFE, mmu);
+    this->ppu = std::make_unique<PPU>(mmu);
 }
 
 void GameBoy::step() {
     // TODO: Check for interrupts
     int cycles;
     cycles = this->cpu->execute_instruction();
-    // this->ppu.update(cycles); TODO: Wait for ppu implementation
+    ppu->update(cycles);
     mmu->timer_update(cycles);
 }
 
 uint8_t *GameBoy::getScreen() {
-    return nullptr;
+    uint8_t* screenBuffer = nullptr;
+    if (ppu->getMode() == PPU::VBLANK) {
+        screenBuffer = ppu->getFrameBuffer();
+    }
+
+    return screenBuffer;
 }
 
 void GameBoy::joypad_input(uint8_t key, uint8_t action) {

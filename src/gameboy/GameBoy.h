@@ -2,12 +2,12 @@
 // Created by algot on 2021-02-23.
 //
 
-#ifndef LAME_BOY_SRC_GAMEBOY_GAMEBOY_H_
-#define LAME_BOY_SRC_GAMEBOY_GAMEBOY_H_
+#pragma once
 
 #include <memory>
-#include "cpu.h"
-#include "mmu.h"
+#include "CPU.h"
+#include "MMU.h"
+#include "PPU.h"
 
 #define JOYPAD_RELEASE 0
 #define JOYPAD_PRESS   1
@@ -25,8 +25,5 @@ public:
 private:
     std::shared_ptr<MMU> mmu;
     std::unique_ptr<CPU> cpu;
-
-    // std::unique_ptr<GPU> ...... TODO: Wait for ppu implementation
+    std::unique_ptr<PPU> ppu;
 };
-
-#endif //LAME_BOY_SRC_GAMEBOY_GAMEBOY_H_

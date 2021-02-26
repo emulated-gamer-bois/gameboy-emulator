@@ -2,7 +2,7 @@
 // Created by riddarvid on 2/23/21.
 //
 
-#include "ppu.h"
+#include "PPU.h"
 #include <cassert>
 
 #define LCDC_ADDRESS 0xFF40
@@ -24,17 +24,17 @@
 #define BG_WINDOW_TILE_DATA0 0x9000
 #define BG_WINDOW_TILE_DATA1 0x8000
 
-ppu::ppu(std::shared_ptr<MMU> memory) {
+PPU::PPU(std::shared_ptr<MMU> memory) {
     this->memory = memory;
     this->accumulatedCycles = 0;
     this->modeFlag = OAM_SEARCH;
     frameBuffer.fill(0);
 }
 
-void ppu::update(uint16_t cpuCycles) {
+void PPU::update(uint16_t cpuCycles) {
     initRegisters();
     accumulatedCycles += cpuCycles;
-    switch(modeFlag) { //depending on which mode the ppu is in
+    switch(modeFlag) { //depending on which mode the PPU is in
         case HBLANK:
             if (accumulatedCycles >= HBLANK_THRESHOLD) {
                 accumulatedCycles -= HBLANK_THRESHOLD;
@@ -79,14 +79,14 @@ void ppu::update(uint16_t cpuCycles) {
     saveRegisters();
 }
 
-void ppu::processNextLine() {
+void PPU::processNextLine() {
     if (bgWindowDisplayEnable) {
         drawBackgroundScanLine();
     }
     //TODO window and object drawing
 }
 
-void ppu::initRegisters() {
+void PPU::initRegisters() {
     LCDC = memory->read(LCDC_ADDRESS);
     STAT = memory->read(STAT_ADDRESS);
     
@@ -103,14 +103,14 @@ void ppu::initRegisters() {
     DMA = memory->read(DMA_ADDRESS);
 }
 
-void ppu::saveRegisters() { //TODO check if anything else needs doing here
+void PPU::saveRegisters() { //TODO check if anything else needs doing here
     memory->write(LCDC_ADDRESS, LCDC);
     memory->write(STAT_ADDRESS, STAT);
 
     memory->write(LY_ADDRESS, LY);
 }
 
-void ppu::drawBackgroundScanLine() {
+void PPU::drawBackgroundScanLine() {
     uint16_t bgMapStartAddress;
     if (tileMapDisplaySelect) {
         bgMapStartAddress = BG_WINDOW_MAP1;
@@ -135,14 +135,14 @@ void ppu::drawBackgroundScanLine() {
  * @param pixelAbsoluteY
  * @return The ID of the tile containing the target pixel
  */
-uint8_t ppu::getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY) {
+uint8_t PPU::getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY) {
     uint16_t tileAbsoluteX = pixelAbsoluteX / 8; //Divide by 8 since the width and height of a tile is 8
     uint16_t tileAbsoluteY = pixelAbsoluteY / 8;
     uint16_t offset = tileAbsoluteY * 32 + tileAbsoluteX; //Convert from 2D matrix to array index
     return memory->read(bgMapStart + offset);
 }
 
-uint8_t ppu::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t absolutePixelY) { //TODO test
+uint8_t PPU::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t absolutePixelY) { //TODO test
     uint16_t startAddress;
     uint16_t address;
 
@@ -172,6 +172,10 @@ uint8_t ppu::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t a
     return BGP & (bitmask << pixelColor * 2);
 }
 
-uint8_t* ppu::getFrameBuffer() {
+uint8_t* PPU::getFrameBuffer() {
     return frameBuffer.data();
+}
+
+uint8_t PPU::getMode() const {
+    return modeFlag;
 }

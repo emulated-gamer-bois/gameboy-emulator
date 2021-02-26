@@ -2,14 +2,13 @@
 // Created by riddarvid on 2/23/21.
 //
 
-#ifndef LAME_BOY_PPU_H
-#define LAME_BOY_PPU_H
+#pragma once
 
 #include <memory>
 #include <cstdint>
-#include "mmu.h"
+#include "MMU.h"
 
-class ppu {
+class PPU {
     const static uint16_t HBLANK_THRESHOLD = 51; //The time it takes to search for objects, draw the line and HBLANK.
     const static uint16_t VBLANK_LINE_THRESHOLD = 114;
     const static uint16_t OAM_SEARCH_THRESHOLD = 20;
@@ -26,13 +25,6 @@ class ppu {
         DARK_GREY = 0x68,
         LIGHT_GREY = 0xB8,
         WHITE = 0xFF
-    };
-
-    enum Mode {
-        HBLANK,
-        VBLANK,
-        OAM_SEARCH,
-        SCANLINE_DRAW
     };
 
     union {
@@ -82,10 +74,15 @@ class ppu {
     uint8_t getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY);
     uint8_t getTilePixelColor(uint8_t id, uint8_t x, uint8_t y);
 public:
-    explicit ppu(std::shared_ptr<MMU> memory);
+    enum Mode {
+        HBLANK,
+        VBLANK,
+        OAM_SEARCH,
+        SCANLINE_DRAW
+    };
+
+    explicit PPU(std::shared_ptr<MMU> memory);
     void update(uint16_t cpuCycles);
     uint8_t* getFrameBuffer();
+    uint8_t getMode() const;
 };
-
-
-#endif //LAME_BOY_PPU_H

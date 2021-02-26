@@ -2,15 +2,14 @@
 // Created by davidm on 2021-02-12.
 //
 
-#ifndef LAME_BOY_CPU_H
-#define LAME_BOY_CPU_H
+#pragma once
 
 #include <iostream>
 #include <cstdint>
 #include <memory>
 #include <cstdint>
-#include "register_pair.h"
-#include "mmu.h"
+#include "RegisterPair.h"
+#include "MMU.h"
 #include "Flags.h"
 
 #define FRIEND_TEST(test_case_name, test_name)\
@@ -122,6 +121,3 @@ private:
 
     void sra(uint8_t &reg);
 };
-
-
-#endif //LAME_BOY_CPU_H

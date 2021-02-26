@@ -5,7 +5,11 @@ using namespace glm;
 RenderView::RenderView(int screenMultiplier, Palette palette) {
     this->screenMultiplier = screenMultiplier;
     this->palette = palette;
+}
 
+RenderView::RenderView() : RenderView(4, PALETTE_POCKET) {}
+
+void RenderView::initGL() {
     // Initialize screen quad.
     screenVertices[0] = {-1.0f, -1.0f};
     screenVertices[1] = {1.0f, -1.0f};
@@ -30,8 +34,6 @@ RenderView::RenderView(int screenMultiplier, Palette palette) {
                                                        false);
     fxShaderProgram = 0; // TO-DO Implement post process fx
 }
-
-RenderView::RenderView() : RenderView(4, PALETTE_POCKET) {}
 
 void RenderView::render() const {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

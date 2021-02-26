@@ -9,7 +9,12 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 
 #include "Application.h" // Implements
 #include "RenderView.h"
-#include "gameboy/gameboy.h"
+#include "gameboy/GameBoy.h"
+
+#define CONTROLLER_UP SDLK_w
+#define CONTROLLER_DOWN SDLK_s
+#define CONTROLLER_LEFT SDLK_a
+#define CONTROLLER_RIGHT SDLK_d
 
 // TEMP
 #include <fstream> // file reading
@@ -17,6 +22,10 @@ void TEMP_setTexture(const char* filename, RenderView& rv);
 // END TEMP
 
 const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
+
+Application::Application() {
+    quit = false;
+}
 
 /*
  * This function initializes sdl, creates a window and gets a OpenGL context. If an error occurs in this function
@@ -79,10 +88,8 @@ void Application::terminateSDL() {
  */
 void Application::start() {
     initSDL();
+    renderView.initGL();
 
-    RenderView renderView;
-
-    bool quit = false;
     auto startTime = std::chrono::system_clock::now();
     float currentTime = 0.0f;
     float previousTime = 0.0f;
@@ -123,32 +130,32 @@ void Application::start() {
         // Swap front and back buffer. This frame will now been displayed.
         SDL_GL_SwapWindow(window);
 
-        // Check if it is time to quit or not
-        {
-            SDL_Event event;
-            while (SDL_PollEvent(&event)) {
-                switch (event.type) {
-                    case SDL_QUIT:
-                        quit = true;
-                        break;
-                    case SDL_KEYDOWN:
-                        switch( event.key.keysym.sym ){
-                            case SDLK_1:
-                                renderView.setPalette(PALETTE_POCKET);
-                                break;
-                            case SDLK_2:
-                                renderView.setPalette(PALETTE_DMG);
-                                break;
-                            case SDLK_3:
-                                renderView.setPalette(PALETTE_DMG_SMOOTH);
-                                break;
-                        }
-                }
-            }
-        }
+        handleSDLEvents();
     }
 
     terminateSDL();
+}
+
+void Application::handleSDLEvents() {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+            case SDL_QUIT:
+                quit = true;
+                break;
+            case SDL_KEYDOWN:
+                switch( event.key.keysym.sym ){
+                    case CONTROLLER_LEFT:
+                        renderView.setPalette(PALETTE_DMG_SMOOTH);
+                    case CONTROLLER_RIGHT:
+                        renderView.setPalette(PALETTE_DMG_SMOOTH);
+                    case CONTROLLER_UP:
+                        renderView.setPalette(PALETTE_DMG_SMOOTH);
+                    case CONTROLLER_DOWN:
+                        renderView.setPalette(PALETTE_DMG_SMOOTH);
+                }
+        }
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////

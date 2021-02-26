@@ -8,6 +8,7 @@
 
 #include <SDL.h>
 #include <string>
+#include "RenderView.h"
 
 class Application {
 private:
@@ -17,10 +18,15 @@ private:
     // SDL related
     SDL_Window* window; // Application claims no ownership of this pointer.
     SDL_GLContext glContext;
+    RenderView renderView;
 
+    bool quit;
+
+    void handleSDLEvents();
     void initSDL();
     void terminateSDL();
 
 public:
+    Application();
     void start();
 };

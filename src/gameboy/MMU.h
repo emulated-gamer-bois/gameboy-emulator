@@ -2,8 +2,7 @@
 // Created by algot on 2021-02-15.
 //
 
-#ifndef LAME_BOY_MMU_H
-#define LAME_BOY_MMU_H
+#pragma once
 
 #include <cstdint>
 #include <array>
@@ -100,5 +99,3 @@ private:
     FRIEND_TEST(CPU, Execute_LD_SP_D16_Instruction);
     FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);
 };
-
-#endif //LAME_BOY_MMU_H
