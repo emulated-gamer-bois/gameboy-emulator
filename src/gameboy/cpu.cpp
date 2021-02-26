@@ -1213,8 +1213,8 @@ int CPU::execute_instruction() {
                 return 3;
             }
         case 0xCD:
-            call(memory->read(PC), memory->read(PC + 1));
             PC += 2;
+            call(memory->read(PC-2), memory->read(PC - 1));
             return 6;
         case 0xCE:
             addA(read_and_inc_pc(), true);
