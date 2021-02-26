@@ -10,7 +10,7 @@
 #include <memory>
 #include <cstdint>
 #include "register_pair.h"
-#include "mmu.h"
+#include "MMU.h"
 #include "Flags.h"
 
 #define FRIEND_TEST(test_case_name, test_name)\

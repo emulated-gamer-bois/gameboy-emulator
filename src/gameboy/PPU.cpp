@@ -2,39 +2,21 @@
 // Created by riddarvid on 2/23/21.
 //
 
-#include "ppu.h"
+#include "PPU.h"
 #include <cassert>
 
-#define LCDC_ADDRESS 0xFF40
-#define STAT_ADDRESS 0xFF41
-#define SCY_ADDRESS 0xFF42
-#define SCX_ADDRESS 0xFF43
-#define LY_ADDRESS 0xFF44
-#define LYC_ADDRESS 0xFF45
-#define DMA_ADDRESS 0xFF46
-#define BGP_ADDRESS 0xFF47
-#define OBP0_ADDRESS 0xFF48
-#define OBP1_ADDRESS 0xFF49
-#define WY_ADDRESS 0xFF4A
-#define WX_ADDRESS 0xFF4B
-
-#define BG_WINDOW_MAP0 0x9800
-#define BG_WINDOW_MAP1 0x9C00
-
-#define BG_WINDOW_TILE_DATA0 0x9000
-#define BG_WINDOW_TILE_DATA1 0x8000
-
-ppu::ppu(std::shared_ptr<MMU> memory) {
+PPU::PPU(std::shared_ptr<MMU> memory) {
     this->memory = memory;
     this->accumulatedCycles = 0;
     this->modeFlag = OAM_SEARCH;
+    saveRegisters();
     frameBuffer.fill(0);
 }
 
-void ppu::update(uint16_t cpuCycles) {
+void PPU::update(uint16_t cpuCycles) {
     initRegisters();
     accumulatedCycles += cpuCycles;
-    switch(modeFlag) { //depending on which mode the ppu is in
+    switch(modeFlag) { //depending on which mode the PPU is in
         case HBLANK:
             if (accumulatedCycles >= HBLANK_THRESHOLD) {
                 accumulatedCycles -= HBLANK_THRESHOLD;
@@ -55,13 +37,16 @@ void ppu::update(uint16_t cpuCycles) {
 
                 if (LY == 154) { //If the VBLANK should end: Reset LY and clear frame buffer
                     LY = 0;
-                    frameBuffer.fill(0);
+                    //frameBuffer.fill(0);
                     modeFlag = OAM_SEARCH;
                 }
             }
             break;
 
         case OAM_SEARCH:
+            if (LY == 0) {
+                frameBuffer.fill(0);
+            }
             if (accumulatedCycles >= OAM_SEARCH_THRESHOLD) {
                 accumulatedCycles -= OAM_SEARCH_THRESHOLD;
                 modeFlag = SCANLINE_DRAW;
@@ -79,14 +64,14 @@ void ppu::update(uint16_t cpuCycles) {
     saveRegisters();
 }
 
-void ppu::processNextLine() {
+void PPU::processNextLine() {
     if (bgWindowDisplayEnable) {
         drawBackgroundScanLine();
     }
     //TODO window and object drawing
 }
 
-void ppu::initRegisters() {
+void PPU::initRegisters() {
     LCDC = memory->read(LCDC_ADDRESS);
     STAT = memory->read(STAT_ADDRESS);
     
@@ -103,14 +88,14 @@ void ppu::initRegisters() {
     DMA = memory->read(DMA_ADDRESS);
 }
 
-void ppu::saveRegisters() { //TODO check if anything else needs doing here
+void PPU::saveRegisters() { //TODO check if anything else needs doing here
     memory->write(LCDC_ADDRESS, LCDC);
     memory->write(STAT_ADDRESS, STAT);
 
     memory->write(LY_ADDRESS, LY);
 }
 
-void ppu::drawBackgroundScanLine() {
+void PPU::drawBackgroundScanLine() {
     uint16_t bgMapStartAddress;
     if (tileMapDisplaySelect) {
         bgMapStartAddress = BG_WINDOW_MAP1;
@@ -135,14 +120,14 @@ void ppu::drawBackgroundScanLine() {
  * @param pixelAbsoluteY
  * @return The ID of the tile containing the target pixel
  */
-uint8_t ppu::getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY) {
+uint8_t PPU::getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY) {
     uint16_t tileAbsoluteX = pixelAbsoluteX / 8; //Divide by 8 since the width and height of a tile is 8
     uint16_t tileAbsoluteY = pixelAbsoluteY / 8;
     uint16_t offset = tileAbsoluteY * 32 + tileAbsoluteX; //Convert from 2D matrix to array index
     return memory->read(bgMapStart + offset);
 }
 
-uint8_t ppu::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t absolutePixelY) { //TODO test
+uint8_t PPU::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t absolutePixelY) { //TODO test
     uint16_t startAddress;
     uint16_t address;
 
@@ -156,22 +141,70 @@ uint8_t ppu::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t a
     }
 
     auto tilePixelY = absolutePixelY % 8;
-    auto tilePixelX = absolutePixelX % 8;
+    auto tilePixelX = 7 - (absolutePixelX % 8);
 
-    auto lowByte = memory->read(address + tilePixelY * 2);
-    auto highByte = memory->read(address + tilePixelY * 2 + 1);
+    uint8_t lowByte = memory->read(address + tilePixelY * 2);
+    uint8_t highByte = memory->read(address + tilePixelY * 2 + 1);
 
-    auto lowBit = (lowByte >> tilePixelX) & 1;
-    auto highBit = (highByte >> tilePixelX) & 1;
+    uint8_t lowBit = (lowByte >> tilePixelX) & 1;
+    uint8_t highBit = (highByte >> tilePixelX) & 1;
 
-    auto pixelColor = (highBit << 1) | lowBit;
+    uint8_t pixelColor = (highBit << 1) | lowBit;
 
     assert(pixelColor >= 0 && pixelColor <= 3); // If not true, there is a bug in the code. Temporary line?
 
-    auto bitmask = 3;
-    return BGP & (bitmask << pixelColor * 2);
+    uint8_t bitmask = 3;
+    return ((BGP >> (2 * pixelColor)) & bitmask);
 }
 
-std::array<uint8_t, ppu::LCD_WIDTH * ppu::LCD_HEIGHT> ppu::getFrameBuffer() {
-    return frameBuffer;
+std::array<uint8_t, PPU::LCD_WIDTH * PPU::LCD_HEIGHT> *PPU::getFrameBuffer() {
+    return &frameBuffer;
+}
+
+void PPU::loadMapTESTING_ONLY(uint8_t tileMap, uint16_t mapPosition, uint8_t tileID) {
+    uint16_t mapAddress;
+    if (tileMap == 0) {
+        mapAddress = BG_WINDOW_MAP0 + mapPosition;
+    } else if (tileMap == 1) {
+        mapAddress = BG_WINDOW_MAP1 + mapPosition;
+    } else {
+        exit(1);
+    }
+    memory->write(mapAddress, tileID);
+}
+
+void PPU::loadTileDataTESTING_ONLY(std::array<char, 64> & tile, uint8_t tileID, uint8_t tileSet) {
+    uint16_t tileDataAddress;
+    if (tileSet == 0) {
+        auto signedID = (int8_t)tileID;
+        tileDataAddress = BG_WINDOW_TILE_DATA0 + signedID * 16;
+    } else if (tileSet == 1) {
+        tileDataAddress = BG_WINDOW_TILE_DATA1 + tileID * 16;
+    }
+
+    for (int y = 0; y < 8; ++y) {
+        uint8_t highByte = 0;
+        uint8_t lowByte = 0;
+        for (int x = 0; x < 8; ++x) {
+            char current = tile.at(y * 8 + x);
+            switch (current) {
+                case 'W':
+                    break;
+                case 'L':
+                    lowByte |= 1 << (7 - x);
+                    break;
+                case 'D':
+                    highByte |= 1 << (7 - x);
+                    break;
+                case 'B':
+                    lowByte |= 1 << (7 - x);
+                    highByte |= 1 << (7 - x);
+                    break;
+                default:
+                    exit(1);
+            }
+        }
+        memory->write(tileDataAddress + y * 2, lowByte);
+        memory->write(tileDataAddress + y * 2 + 1, highByte);
+    }
 }

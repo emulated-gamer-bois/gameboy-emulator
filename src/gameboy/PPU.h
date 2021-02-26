@@ -7,15 +7,45 @@
 
 #include <memory>
 #include <cstdint>
-#include "mmu.h"
+#include "MMU.h"
 
-class ppu {
+#define LCDC_ADDRESS 0xFF40
+#define STAT_ADDRESS 0xFF41
+#define SCY_ADDRESS 0xFF42
+#define SCX_ADDRESS 0xFF43
+#define LY_ADDRESS 0xFF44
+#define LYC_ADDRESS 0xFF45
+#define DMA_ADDRESS 0xFF46
+#define BGP_ADDRESS 0xFF47
+#define OBP0_ADDRESS 0xFF48
+#define OBP1_ADDRESS 0xFF49
+#define WY_ADDRESS 0xFF4A
+#define WX_ADDRESS 0xFF4B
+
+#define BG_WINDOW_MAP0 0x9800
+#define BG_WINDOW_MAP1 0x9C00
+
+#define BG_WINDOW_TILE_DATA0 0x9000
+#define BG_WINDOW_TILE_DATA1 0x8000
+
+#define FRIEND_TEST(test_case_name, test_name)\
+friend class test_case_name##_##test_name##_Test
+
+class PPU {
+public:
+    const static uint16_t LCD_HEIGHT = 144;
+    const static uint16_t LCD_WIDTH = 160;
+
+    explicit PPU(std::shared_ptr<MMU> memory);
+    void update(uint16_t cpuCycles);
+    std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> *getFrameBuffer();
+    void loadTileDataTESTING_ONLY(std::array<char, 64> & tile, uint8_t tileID, uint8_t tileSet); //For tests
+    void loadMapTESTING_ONLY(uint8_t tileMap, uint16_t mapPosition, uint8_t tileID);
+private:
     const static uint16_t HBLANK_THRESHOLD = 51; //The time it takes to search for objects, draw the line and HBLANK.
     const static uint16_t VBLANK_LINE_THRESHOLD = 114;
     const static uint16_t OAM_SEARCH_THRESHOLD = 20;
     const static uint16_t SCANLINE_DRAW_THRESHOLD = 43;
-    const static uint16_t LCD_WIDTH = 160;
-    const static uint16_t LCD_HEIGHT = 144;
 
     std::shared_ptr<MMU> memory;
     std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> frameBuffer;
@@ -36,7 +66,7 @@ class ppu {
     };
 
     union {
-        struct {
+        struct { //bits 0-7
             unsigned int bgWindowDisplayEnable: 1;
             unsigned int objectDisplayEnable: 1;
             unsigned int objectSize : 1;
@@ -81,10 +111,7 @@ class ppu {
     void saveRegisters();
     uint8_t getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY);
     uint8_t getTilePixelColor(uint8_t id, uint8_t x, uint8_t y);
-public:
-    explicit ppu(std::shared_ptr<MMU> memory);
-    void update(uint16_t cpuCycles);
-    std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> getFrameBuffer();
+
 };
 
 

@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "../src/gameboy/mmu.h"
+#include "../src/gameboy/MMU.h"
 
 TEST(MMU, read_write){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();

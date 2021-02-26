@@ -6,8 +6,8 @@
 #define LAME_BOY_SRC_GAMEBOY_GAMEBOY_H_
 
 #include <memory>
-#include "cpu.h"
-#include "mmu.h"
+#include "CPU.h"
+#include "MMU.h"
 
 #define JOYPAD_RELEASE 0
 #define JOYPAD_PRESS   1
@@ -26,7 +26,7 @@ private:
     std::shared_ptr<MMU> mmu;
     std::unique_ptr<CPU> cpu;
 
-    // std::unique_ptr<GPU> ...... TODO: Wait for ppu implementation
+    // std::unique_ptr<GPU> ...... TODO: Wait for PPU implementation
 };
 
 #endif //LAME_BOY_SRC_GAMEBOY_GAMEBOY_H_

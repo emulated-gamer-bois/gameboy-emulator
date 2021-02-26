@@ -2,7 +2,7 @@
 // Created by algot on 2021-02-15.
 //
 
-#include "mmu.h"
+#include "MMU.h"
 #include <iostream>
 #include <fstream>
 #include <string>

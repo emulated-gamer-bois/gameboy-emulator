@@ -2,8 +2,8 @@
 // Created by davidm on 2021-02-12.
 //
 
-#include "cpu.h"
-#include "mmu.h"
+#include "CPU.h"
+#include "MMU.h"
 #include <iostream> // cpu_dump
 #include <iomanip> // cpu_dump
 

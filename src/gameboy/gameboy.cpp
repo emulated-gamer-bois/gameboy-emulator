@@ -13,7 +13,7 @@ void GameBoy::step() {
     // TODO: Check for interrupts
     int cycles;
     cycles = this->cpu->execute_instruction();
-    // this->ppu.update(cycles); TODO: Wait for ppu implementation
+    // this->PPU.update(cycles); TODO: Wait for PPU implementation
     mmu->timer_update(cycles);
 }
 
