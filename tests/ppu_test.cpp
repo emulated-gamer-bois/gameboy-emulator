@@ -5,6 +5,7 @@
 #include <iostream>
 #include <gtest/gtest.h>
 #include "../src/gameboy/PPU.h"
+#include "../src/gameboy/CPU.h"
 #include <array>
 #include <cstring>
 
@@ -224,6 +225,15 @@ void printScreen(std::unique_ptr<PPU> & ppu) {
     printf("\n\n");
 }
 
+void printAllTiles(std::unique_ptr<PPU> & ppu) {
+    for (int y = 0; y < 12; ++y) {
+        for (int x = 0; x < 20; ++x) {
+            ppu->loadMapTESTING_ONLY(0, y * 20 + x, y * 20 + x);
+        }
+    }
+    printScreen(ppu);
+}
+
 void bufferFrame(std::unique_ptr<PPU> & ppu) {
     int cycles = 0;
     while (cycles <= 114 * 144) {
@@ -272,6 +282,46 @@ TEST(PPU, Read_single_tile_no_scrolling) {
     std::array<char, 64> startTile = getGTile();
     ppu->loadTileDataTESTING_ONLY(startTile, 0, 1);
     ppu->loadMapTESTING_ONLY(0, 0, 0);
+
+    bufferFrame(ppu);
+    printTile00(ppu);
+    assertTile00(ppu, startTile);
+}
+
+TEST(PPU, Tile_map_1) {
+    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
+    std::unique_ptr<PPU> ppu = std::make_unique<PPU>(mmu);
+
+    //Set LCDC to use tile map 1 and 8000 addressing mode
+    mmu->write(LCDC_ADDRESS, 0x99);
+
+    //Set pallet so that 0=white, 1=light grey, 2=dark grey, 3=black
+    mmu->write(BGP_ADDRESS, 0xE4);
+
+    //Set data of tile 0 in 8000 addressing mode to a test tile:
+    std::array<char, 64> startTile = getGTile();
+    ppu->loadTileDataTESTING_ONLY(startTile, 0, 1);
+    ppu->loadMapTESTING_ONLY(1, 0, 0);
+
+    bufferFrame(ppu);
+    printTile00(ppu);
+    assertTile00(ppu, startTile);
+}
+
+TEST(PPU, Tile_set_0) {
+    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
+    std::unique_ptr<PPU> ppu = std::make_unique<PPU>(mmu);
+
+    //Set LCDC to use tile map 0 and 9000 addressing mode
+    mmu->write(LCDC_ADDRESS, 0x89);
+
+    //Set pallet so that 0=white, 1=light grey, 2=dark grey, 3=black
+    mmu->write(BGP_ADDRESS, 0xE4);
+
+    //Set data of tile 0 in 9000 addressing mode to a test tile:
+    std::array<char, 64> startTile = getGTile();
+    ppu->loadTileDataTESTING_ONLY(startTile, 129, 0);
+    ppu->loadMapTESTING_ONLY(1, 0, 129);
 
     bufferFrame(ppu);
     printTile00(ppu);

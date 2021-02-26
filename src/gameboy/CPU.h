@@ -117,6 +117,6 @@ private:
     FRIEND_TEST(CPU, Execute_LD_SP_D16_Instruction);
     FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);
     FRIEND_TEST(CPU, sixteen_bit_ops);
-
+    FRIEND_TEST(PPU, Print_test_rom);
 
 };
