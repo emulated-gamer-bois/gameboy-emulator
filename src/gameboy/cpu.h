@@ -11,7 +11,7 @@
 #include <cstdint>
 #include "register_pair.h"
 #include "mmu.h"
-#include "Flags.h"
+#include "flags.h"
 
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test

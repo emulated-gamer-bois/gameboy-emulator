@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 #include "../src/gameboy/register_pair.h"
-#include "../src/gameboy/Flags.h"
+#include "../src/gameboy/flags.h"
 
 TEST(REGISTER_PAIR, READ_WRITE) {
     RegisterPair reg;
