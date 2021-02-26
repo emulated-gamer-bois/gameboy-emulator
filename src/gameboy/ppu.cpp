@@ -28,21 +28,21 @@ ppu::ppu(std::shared_ptr<MMU> memory) {
     this->memory = memory;
     this->accumulatedCycles = 0;
     this->modeFlag = OAM_SEARCH;
-    bytes.fill(0);
+    frameBuffer.fill(0);
 }
 
 void ppu::update(uint16_t cpuCycles) {
     initRegisters();
     accumulatedCycles += cpuCycles;
-    switch(modeFlag) {
+    switch(modeFlag) { //depending on which mode the ppu is in
         case HBLANK:
             if (accumulatedCycles >= HBLANK_THRESHOLD) {
                 accumulatedCycles -= HBLANK_THRESHOLD;
                 LY++;
 
-                if (LY < 144) {
+                if (LY < 144) { //If we still have lines to draw
                     modeFlag = OAM_SEARCH;
-                } else {
+                } else { //If we have drawn the entire screen
                     modeFlag = VBLANK;
                 }
             }
@@ -53,9 +53,9 @@ void ppu::update(uint16_t cpuCycles) {
                 accumulatedCycles -= VBLANK_LINE_THRESHOLD;
                 LY++;
 
-                if (LY == 154) {
+                if (LY == 154) { //If the VBLANK should end: Reset LY and clear frame buffer
                     LY = 0;
-                    bytes.fill(0);
+                    frameBuffer.fill(0);
                     modeFlag = OAM_SEARCH;
                 }
             }
@@ -118,12 +118,13 @@ void ppu::drawBackgroundScanLine() {
         bgMapStartAddress = BG_WINDOW_MAP0;
     }
 
-    for (uint8_t x = 0; x < 160; ++x) {
+    for (uint8_t x = 0; x < 160; ++x) { //For each pixel in the current row, find the correct tile ID, then the
+                                        //correct pixel in that tile
         uint8_t absolutePixelX = (SCX + x) % 256;
         uint8_t absolutePixelY = (SCY + LY) % 256;
         uint8_t tileID = getTileID(bgMapStartAddress, absolutePixelX, absolutePixelY);
         uint8_t pixel = getTilePixelColor(tileID, absolutePixelX, absolutePixelY);
-        bytes[LY * 160 + x] = pixel;
+        frameBuffer[LY * 160 + x] = pixel;
     }
 }
 
@@ -135,9 +136,9 @@ void ppu::drawBackgroundScanLine() {
  * @return The ID of the tile containing the target pixel
  */
 uint8_t ppu::getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY) {
-    uint16_t tileAbsoluteX = pixelAbsoluteX / 8;
+    uint16_t tileAbsoluteX = pixelAbsoluteX / 8; //Divide by 8 since the width and height of a tile is 8
     uint16_t tileAbsoluteY = pixelAbsoluteY / 8;
-    uint16_t offset = tileAbsoluteY * 32 + tileAbsoluteX;
+    uint16_t offset = tileAbsoluteY * 32 + tileAbsoluteX; //Convert from 2D matrix to array index
     return memory->read(bgMapStart + offset);
 }
 
@@ -145,7 +146,7 @@ uint8_t ppu::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t a
     uint16_t startAddress;
     uint16_t address;
 
-    if (bgWindowTileDataSelect) {
+    if (bgWindowTileDataSelect) { //Find the address of the tile with id tileID, depending on addressing mode
         startAddress = BG_WINDOW_TILE_DATA1;
         address = tileID * 16 + startAddress;
     } else {
@@ -155,13 +156,13 @@ uint8_t ppu::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t a
     }
 
     auto tilePixelY = absolutePixelY % 8;
-    auto tilePixelX = 7 - (absolutePixelX % 8);
+    auto tilePixelX = absolutePixelX % 8;
 
     auto lowByte = memory->read(address + tilePixelY * 2);
     auto highByte = memory->read(address + tilePixelY * 2 + 1);
 
-    auto lowBit = lowByte & (1 << tilePixelX);
-    auto highBit = highByte & (1 << tilePixelX);
+    auto lowBit = (lowByte >> tilePixelX) & 1;
+    auto highBit = (highByte >> tilePixelX) & 1;
 
     auto pixelColor = (highBit << 1) | lowBit;
 
@@ -171,6 +172,6 @@ uint8_t ppu::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t a
     return BGP & (bitmask << pixelColor * 2);
 }
 
-std::array<uint8_t, ppu::LCD_WIDTH * ppu::LCD_HEIGHT> ppu::getBytes() {
-    return bytes;
+std::array<uint8_t, ppu::LCD_WIDTH * ppu::LCD_HEIGHT> ppu::getFrameBuffer() {
+    return frameBuffer;
 }

@@ -18,7 +18,7 @@ class ppu {
     const static uint16_t LCD_HEIGHT = 144;
 
     std::shared_ptr<MMU> memory;
-    std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> bytes;
+    std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> frameBuffer;
     uint16_t accumulatedCycles;
 
     enum Color {
@@ -84,7 +84,7 @@ class ppu {
 public:
     explicit ppu(std::shared_ptr<MMU> memory);
     void update(uint16_t cpuCycles);
-    std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> getBytes();
+    std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> getFrameBuffer();
 };
 
 
