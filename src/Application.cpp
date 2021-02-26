@@ -15,6 +15,10 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 #define CONTROLLER_DOWN SDLK_s
 #define CONTROLLER_LEFT SDLK_a
 #define CONTROLLER_RIGHT SDLK_d
+#define CONTROLLER_A SDLK_f
+#define CONTROLLER_B SDLK_g
+#define CONTROLLER_START SDLK_h
+#define CONTROLLER_SELECT SDLK_j
 
 // TEMP
 #include <fstream> // file reading
@@ -97,7 +101,7 @@ void Application::start() {
 
     TEMP_setTexture("../src/title.pixdata", renderView);
 
-    std::unique_ptr<GameBoy> gameboy = std::make_unique<GameBoy>();
+    this->gameboy = std::make_unique<GameBoy>();
 
     // gameboy->load_boot_rom("../roms/boot.bin");
     // gameboy->load_game_rom("../roms/game.gb");
@@ -146,13 +150,73 @@ void Application::handleSDLEvents() {
             case SDL_KEYDOWN:
                 switch( event.key.keysym.sym ){
                     case CONTROLLER_LEFT:
+                        this->gameboy->joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
+                        break;
                     case CONTROLLER_RIGHT:
+                        this->gameboy->joypad_input(JOYPAD_RIGHT, JOYPAD_PRESS);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
+                        break;
                     case CONTROLLER_UP:
+                        this->gameboy->joypad_input(JOYPAD_UP, JOYPAD_PRESS);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
+                        break;
                     case CONTROLLER_DOWN:
+                        this->gameboy->joypad_input(JOYPAD_DOWN, JOYPAD_PRESS);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
+                        break;
+                    case CONTROLLER_A:
+                        this->gameboy->joypad_input(JOYPAD_A, JOYPAD_PRESS);
+                        renderView.setPalette(PALETTE_DMG_SMOOTH);
+                        break;
+                    case CONTROLLER_B:
+                        this->gameboy->joypad_input(JOYPAD_B, JOYPAD_PRESS);
+                        renderView.setPalette(PALETTE_DMG_SMOOTH);
+                        break;
+                    case CONTROLLER_START:
+                        this->gameboy->joypad_input(JOYPAD_START, JOYPAD_PRESS);
+                        renderView.setPalette(PALETTE_DMG_SMOOTH);
+                        break;
+                    case CONTROLLER_SELECT:
+                        this->gameboy->joypad_input(JOYPAD_SELECT, JOYPAD_PRESS);
+                        renderView.setPalette(PALETTE_DMG_SMOOTH);
+                        break;
+                }
+                break;
+            case SDL_KEYUP:
+                switch( event.key.keysym.sym ){
+                    case CONTROLLER_LEFT:
+                        this->gameboy->joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
+                        renderView.setPalette(PALETTE_DMG);
+                        break;
+                    case CONTROLLER_RIGHT:
+                        this->gameboy->joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
+                        renderView.setPalette(PALETTE_DMG);
+                        break;
+                    case CONTROLLER_UP:
+                        this->gameboy->joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
+                        renderView.setPalette(PALETTE_DMG);
+                        break;
+                    case CONTROLLER_DOWN:
+                        this->gameboy->joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
+                        renderView.setPalette(PALETTE_DMG);
+                        break;
+                    case CONTROLLER_A:
+                        this->gameboy->joypad_input(JOYPAD_A, JOYPAD_RELEASE);
+                        renderView.setPalette(PALETTE_DMG_SMOOTH);
+                        break;
+                    case CONTROLLER_B:
+                        this->gameboy->joypad_input(JOYPAD_B, JOYPAD_RELEASE);
+                        renderView.setPalette(PALETTE_DMG_SMOOTH);
+                        break;
+                    case CONTROLLER_START:
+                        this->gameboy->joypad_input(JOYPAD_START, JOYPAD_RELEASE);
+                        renderView.setPalette(PALETTE_DMG_SMOOTH);
+                        break;
+                    case CONTROLLER_SELECT:
+                        this->gameboy->joypad_input(JOYPAD_SELECT, JOYPAD_RELEASE);
+                        renderView.setPalette(PALETTE_DMG_SMOOTH);
+                        break;
                 }
         }
     }

@@ -9,6 +9,7 @@
 #include <SDL.h>
 #include <string>
 #include "RenderView.h"
+#include "gameboy/gameboy.h"
 
 class Application {
 private:
@@ -19,6 +20,8 @@ private:
     SDL_Window* window; // Application claims no ownership of this pointer.
     SDL_GLContext glContext;
     RenderView renderView;
+
+    std::unique_ptr<GameBoy> gameboy;
 
     bool quit;
 

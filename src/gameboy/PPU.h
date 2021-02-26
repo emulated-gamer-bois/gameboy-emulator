@@ -73,6 +73,8 @@ class PPU {
     void saveRegisters();
     uint8_t getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY);
     uint8_t getTilePixelColor(uint8_t id, uint8_t x, uint8_t y);
+
+    bool readyToDraw;
 public:
     enum Mode {
         HBLANK,
@@ -80,7 +82,7 @@ public:
         OAM_SEARCH,
         SCANLINE_DRAW
     };
-
+    bool getReadyToDraw() const;
     explicit PPU(std::shared_ptr<MMU> memory);
     void update(uint16_t cpuCycles);
     uint8_t* getFrameBuffer();

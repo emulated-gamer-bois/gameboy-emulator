@@ -20,6 +20,7 @@ public:
     void joypad_input(uint8_t key, uint8_t action);
     void load_game_rom(std::string filepath);
     void load_boot_rom(std::string filepath);
+    bool readyToDraw() const;
     void cpu_dump();
 
 private:

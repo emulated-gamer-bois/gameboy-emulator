@@ -53,3 +53,7 @@ void GameBoy::load_boot_rom(std::string filepath) {
 void GameBoy::cpu_dump() {
     this->cpu->cpu_dump();
 }
+
+bool GameBoy::readyToDraw() const {
+    return this->ppu->getReadyToDraw();
+}

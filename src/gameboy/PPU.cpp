@@ -29,6 +29,7 @@ PPU::PPU(std::shared_ptr<MMU> memory) {
     this->accumulatedCycles = 0;
     this->modeFlag = OAM_SEARCH;
     frameBuffer.fill(0);
+    this->readyToDraw = false;
 }
 
 void PPU::update(uint16_t cpuCycles) {
@@ -57,6 +58,8 @@ void PPU::update(uint16_t cpuCycles) {
                     LY = 0;
                     frameBuffer.fill(0);
                     modeFlag = OAM_SEARCH;
+                    // If leaving VBLANK we are ready to draw the screen
+                    readyToDraw = true;
                 }
             }
             break;
@@ -65,6 +68,10 @@ void PPU::update(uint16_t cpuCycles) {
             if (accumulatedCycles >= OAM_SEARCH_THRESHOLD) {
                 accumulatedCycles -= OAM_SEARCH_THRESHOLD;
                 modeFlag = SCANLINE_DRAW;
+                // Set readyToDraw to false as fast as possible after set to true
+                if (LY == 0) {
+                    readyToDraw = false;
+                }
             }
             break;
 
@@ -178,4 +185,8 @@ uint8_t* PPU::getFrameBuffer() {
 
 uint8_t PPU::getMode() const {
     return modeFlag;
+}
+
+bool PPU::getReadyToDraw() const {
+    return this->readyToDraw;
 }
