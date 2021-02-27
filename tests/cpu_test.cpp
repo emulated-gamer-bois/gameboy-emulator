@@ -52,10 +52,16 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->F.z, 0);
     ASSERT_EQ(cpu->F.n, 1);
 
-    cpu->setHFlag(0x0F, 0x01);
+    cpu->setHFlag(0x0F, 0x01, false);
     ASSERT_EQ(cpu->F.h, 1);
 
-    cpu->setHFlag(0x0D, 0x01);
+    cpu->setHFlag(0x0D, 0x01, false);
+    ASSERT_EQ(cpu->F.h, 0);
+
+    cpu->setHFlag(0x10, 0x01, true);
+    ASSERT_EQ(cpu->F.h, 1);
+
+    cpu->setHFlag(0xF3, 0x11, true);
     ASSERT_EQ(cpu->F.h, 0);
 
     cpu->setCFlag(0xFF, 0x01);
@@ -107,7 +113,7 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->setB(8);
     cpu->subA(cpu->BC.high_8, false);
     ASSERT_EQ(0x00, cpu->A);
-    ASSERT_EQ(cpu->F.all_8 & 0xF0, 0xF0); // All flags set
+    ASSERT_EQ(cpu->F.all_8 & 0xF0, 0xD0); // H-flag not set
 
     cpu->setA(255);
     cpu->setB(1);
@@ -131,7 +137,7 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     val = cpu->A - cpu->BC.high_8;
     cpu->subA(cpu->BC.high_8, true);
     ASSERT_EQ(cpu->A, val - 1);
-    ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x70); //H, C, N set
+    ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x50); //C, N set
 
     uint16_t addr = 0xC123;
     uint8_t data = 137;
@@ -150,10 +156,10 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->increment8(cpu->BC.high_8);
     ASSERT_EQ(cpu->BC.high_8, prevB + 1);
 
-    prevB = cpu->BC.high_8;
+    cpu->BC.high_8 = 0x10;
     cpu->decrement8(cpu->BC.high_8);
-    ASSERT_EQ(cpu->BC.high_8, prevB - 1);
-    ASSERT_EQ(cpu->F.all_8 & 0x40, 0x40);
+    ASSERT_EQ(cpu->BC.high_8, 0x0F);
+    ASSERT_EQ(cpu->F.all_8 & 0xE0, 0x60);
 
     uint16_t prevSP = cpu->SP.all_16;
     cpu->increment16(cpu->SP.all_16);
@@ -178,7 +184,7 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
 
     cpu->setA(0xAB);
     cpu->compareA(0xAB);
-    ASSERT_EQ(cpu->F.all_8 & 0xF0, 0xF0);
+    ASSERT_EQ(cpu->F.all_8 & 0xF0, 0xD0);
 
     cpu->compareA(0xA0);
     ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x50);

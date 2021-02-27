@@ -37,12 +37,14 @@ void CPU::setZNFlags(uint8_t newValue, bool subtraction) {
  * @param a parameter 1 in addition
  * @param b parameter 2 in addition
  */
-void CPU::setHFlag(uint8_t a, uint8_t b) {
-    // Sets the H flag if carry from bit 3 to bit 4
-
-    F.h = (((a & 0x0F) + (b & 0x0F)) & 0x10) == 0x10 ? 1 : 0;
-
-
+void CPU::setHFlag(uint8_t a, uint8_t b, bool subtraction) {
+    if(subtraction) {
+        // Sets the H flag if carry from bit 4 to bit 3
+        F.h = ((a & 0x0F) - (b & 0x0F)) < 0 ? 1 : 0;
+    } else {
+        // Sets the H flag if carry from bit 3 to bit 4
+        F.h = (((a & 0x0F) + (b & 0x0F)) & 0x10) == 0x10 ? 1 : 0;
+    }
 }
 
 /**
@@ -96,10 +98,9 @@ void CPU::addA(uint8_t value, bool withCarry) {
 }
 
 void CPU::add_8bit(uint8_t &a, uint8_t b, bool withCarry) {
-
     auto CFlag = withCarry ? F.c : 0;
     setCFlag(a, b + CFlag);
-    setHFlag(a, b + CFlag);
+    setHFlag(a, b + CFlag, false);
     a += b + CFlag;
     setZNFlags(a, false);
 }
@@ -125,7 +126,6 @@ void CPU::addSignedToRegPair(RegisterPair &regPair, int8_t value) {
     F.z = 0;
     F.n = 0;
     F.h = tempH;
-
 }
 
 
@@ -143,9 +143,9 @@ uint8_t twosComp(uint8_t value) {
  */
 void CPU::subA(uint8_t value, bool withCarry) {
     auto CFlag = withCarry ? F.c : 0;
+    setHFlag(A, value + CFlag, true);
     value = twosComp(value + CFlag);
     setCFlag(A, value);
-    setHFlag(A, value);
     A += value;
     setZNFlags(A, true);
 }
@@ -154,7 +154,7 @@ void CPU::subA(uint8_t value, bool withCarry) {
  */
 void CPU::incrementAddr(uint16_t addr){
     uint8_t value = memory->read(addr);
-    setHFlag(value++, 1);
+    setHFlag(value++, 1, false);
     memory->write(addr, value);
     setZNFlags(value, false);
 }
@@ -164,7 +164,7 @@ void CPU::incrementAddr(uint16_t addr){
  */
 void CPU::decrementAddr(uint16_t addr){
     uint8_t value = memory->read(addr);
-    setHFlag(value--, -1);
+    setHFlag(value--, 1, true);
     memory->write(addr, value);
     setZNFlags(value, true);
 }
@@ -182,7 +182,7 @@ void CPU::increment16(uint16_t &reg) {
  */
 void CPU::increment8(uint8_t &reg) {
     setZNFlags(reg + 1, false);
-    setHFlag(reg, 0x1);
+    setHFlag(reg, 0x1, false);
     reg += 1;
 }
 
@@ -198,7 +198,7 @@ void CPU::decrement16(uint16_t &reg) {
  */
 void CPU::decrement8(uint8_t &addr) {
     setZNFlags(addr - 1, true);
-    setHFlag(addr, twosComp(0x1));
+    setHFlag(addr, 1, true);
     addr -= 1;
 }
 
@@ -299,9 +299,9 @@ void CPU::rr(uint8_t &reg) {
  * the result is not saved
  */
 void CPU::compareA(uint8_t value) {
+    setHFlag(A, value, true);
     value = twosComp(value);
     setCFlag(A, value);
-    setHFlag(A, value);
     setZNFlags(A + value, true);
 }
 

@@ -40,8 +40,8 @@ private:
     std::shared_ptr<MMU> memory;
 
     //Flag management
-    void setZNFlags(uint8_t, bool);
-    void setHFlag(uint8_t a, uint8_t b);
+    void setZNFlags(uint8_t value, bool subtraction);
+    void setHFlag(uint8_t a, uint8_t b, bool subtraction);
     void setCFlag(uint16_t a,uint16_t b);
 
     //Setting registers
