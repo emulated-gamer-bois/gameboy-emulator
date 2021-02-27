@@ -12,19 +12,14 @@ GameBoy::GameBoy() {
 
 void GameBoy::step() {
     // TODO: Check for interrupts
-    int cycles;
+    int cycles = 0;
     cycles = this->cpu->execute_instruction();
     ppu->update(cycles);
     mmu->timer_update(cycles);
 }
 
 uint8_t *GameBoy::getScreen() {
-    uint8_t* screenBuffer = nullptr;
-    if (ppu->getMode() == PPU::VBLANK) {
-        screenBuffer = ppu->getFrameBuffer()->data();
-    }
-
-    return screenBuffer;
+    return ppu->getFrameBuffer()->data();
 }
 
 void GameBoy::joypad_input(uint8_t key, uint8_t action) {

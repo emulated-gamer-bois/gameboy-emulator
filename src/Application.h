@@ -20,14 +20,15 @@ private:
     SDL_Window* window; // Application claims no ownership of this pointer.
     SDL_GLContext glContext;
     RenderView renderView;
+    GameBoy gameBoy;
 
-    std::unique_ptr<GameBoy> gameboy;
+    bool running;
 
-    bool quit;
-
-    void handleSDLEvents();
     void initSDL();
     void terminateSDL();
+    void handleSDLEvents();
+
+    void updateSDLWindowSize();
 
 public:
     Application();

@@ -4,6 +4,7 @@
 
 #include "PPU.h"
 #include <cassert>
+#include <iostream>
 
 PPU::PPU(std::shared_ptr<MMU> memory) {
     this->memory = memory;
@@ -116,6 +117,8 @@ void PPU::drawBackgroundScanLine() {
         uint8_t absolutePixelY = (SCY + LY) % 256;
         uint8_t tileID = getTileID(bgMapStartAddress, absolutePixelX, absolutePixelY);
         uint8_t pixel = getTilePixelColor(tileID, absolutePixelX, absolutePixelY);
+        std::cout << "---------------------------" << std::endl;
+        std::cout << "LY - " << (int) LY << " | x - " << (int) x << " | index - " << (LY * 160 + x) << " | arrSize - " << frameBuffer.size() << std::endl;
         frameBuffer[LY * 160 + x] = pixel;
     }
 }

@@ -6,6 +6,7 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 */
 
 #include <chrono> // std::chrono::system_clock::now()
+#include <thread> // sleep
 
 #include "Application.h" // Implements
 #include "RenderView.h"
@@ -28,7 +29,7 @@ void TEMP_setTexture(const char* filename, RenderView& rv);
 const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
 
 Application::Application() {
-    quit = false;
+    running = true;
 }
 
 /*
@@ -94,47 +95,49 @@ void Application::start() {
     initSDL();
     renderView.initGL();
 
+    float fps = 60.0f;
+    float frameTime = 1000 / fps;
+
     auto startTime = std::chrono::system_clock::now();
-    float currentTime = 0.0f;
-    float previousTime = 0.0f;
-    float deltaTime = 0.0f;
+    std::chrono::duration<float> currentTime = startTime - startTime;
+    std::chrono::duration<float> previousTime;
+    std::chrono::duration<float> elapsedTime;
 
     TEMP_setTexture("../src/title.pixdata", renderView);
-
-    this->gameboy = std::make_unique<GameBoy>();
 
     // gameboy->load_boot_rom("../roms/boot.bin");
     // gameboy->load_game_rom("../roms/game.gb");
 
     // gameboy->cpu_dump();
 
-    while(!quit) {
-        // Breakpoint here to step through program
-        // gameboy->step();
-        // gameboy->cpu_dump();
-
-        //update currentTime
-        std::chrono::duration<float> timeSinceStart = std::chrono::system_clock::now() - startTime;
+    while(running) {
         previousTime = currentTime;
-        currentTime = timeSinceStart.count();
-        deltaTime = currentTime - previousTime;
 
-        // Resize window to the size of the render view if needed.
-        {
-            int w, h;
-            SDL_GetWindowSize(window, &w, &h);
-            if (w != renderView.getWidth() || h != renderView.getHeight()) {
-                SDL_SetWindowSize(window, renderView.getWidth(), renderView.getHeight());
-            }
+        while (!this->gameBoy.readyToDraw()) {
+            this->handleSDLEvents();
+            this->gameBoy.step();
         }
 
+        // Resize window to the size of the render view if needed.
+        this->updateSDLWindowSize();
         // render to window
-        renderView.render();
+        //this->renderView.setScreenTexture(this->gameBoy.getScreen());
+        this->renderView.render();
 
         // Swap front and back buffer. This frame will now been displayed.
         SDL_GL_SwapWindow(window);
 
-        handleSDLEvents();
+        //update currentTime
+        currentTime = std::chrono::system_clock::now() - startTime;
+        elapsedTime = currentTime - previousTime;
+
+        std::cout << "------------------------------" << std::endl;
+        std::cout << elapsedTime.count() << std::endl;
+
+        if (elapsedTime.count() < frameTime) {
+            std::this_thread::sleep_for(std::chrono::milliseconds((int)(frameTime - elapsedTime.count())));
+        }
+
     }
 
     terminateSDL();
@@ -145,40 +148,40 @@ void Application::handleSDLEvents() {
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_QUIT:
-                quit = true;
+                running = false;
                 break;
             case SDL_KEYDOWN:
                 switch( event.key.keysym.sym ){
                     case CONTROLLER_LEFT:
-                        this->gameboy->joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
+                        gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_RIGHT:
-                        this->gameboy->joypad_input(JOYPAD_RIGHT, JOYPAD_PRESS);
+                        gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_PRESS);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_UP:
-                        this->gameboy->joypad_input(JOYPAD_UP, JOYPAD_PRESS);
+                        gameBoy.joypad_input(JOYPAD_UP, JOYPAD_PRESS);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_DOWN:
-                        this->gameboy->joypad_input(JOYPAD_DOWN, JOYPAD_PRESS);
+                        gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_PRESS);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_A:
-                        this->gameboy->joypad_input(JOYPAD_A, JOYPAD_PRESS);
+                        gameBoy.joypad_input(JOYPAD_A, JOYPAD_PRESS);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_B:
-                        this->gameboy->joypad_input(JOYPAD_B, JOYPAD_PRESS);
+                        gameBoy.joypad_input(JOYPAD_B, JOYPAD_PRESS);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_START:
-                        this->gameboy->joypad_input(JOYPAD_START, JOYPAD_PRESS);
+                        gameBoy.joypad_input(JOYPAD_START, JOYPAD_PRESS);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_SELECT:
-                        this->gameboy->joypad_input(JOYPAD_SELECT, JOYPAD_PRESS);
+                        gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_PRESS);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                 }
@@ -186,39 +189,48 @@ void Application::handleSDLEvents() {
             case SDL_KEYUP:
                 switch( event.key.keysym.sym ){
                     case CONTROLLER_LEFT:
-                        this->gameboy->joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
+                        gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
                         renderView.setPalette(PALETTE_DMG);
                         break;
                     case CONTROLLER_RIGHT:
-                        this->gameboy->joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
+                        gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
                         renderView.setPalette(PALETTE_DMG);
                         break;
                     case CONTROLLER_UP:
-                        this->gameboy->joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
+                        gameBoy.joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
                         renderView.setPalette(PALETTE_DMG);
                         break;
                     case CONTROLLER_DOWN:
-                        this->gameboy->joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
+                        gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
                         renderView.setPalette(PALETTE_DMG);
                         break;
                     case CONTROLLER_A:
-                        this->gameboy->joypad_input(JOYPAD_A, JOYPAD_RELEASE);
+                        gameBoy.joypad_input(JOYPAD_A, JOYPAD_RELEASE);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_B:
-                        this->gameboy->joypad_input(JOYPAD_B, JOYPAD_RELEASE);
+                        gameBoy.joypad_input(JOYPAD_B, JOYPAD_RELEASE);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_START:
-                        this->gameboy->joypad_input(JOYPAD_START, JOYPAD_RELEASE);
+                        gameBoy.joypad_input(JOYPAD_START, JOYPAD_RELEASE);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_SELECT:
-                        this->gameboy->joypad_input(JOYPAD_SELECT, JOYPAD_RELEASE);
+                        gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_RELEASE);
                         renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                 }
         }
+    }
+}
+
+void Application::updateSDLWindowSize() {
+    int width;
+    int height;
+    SDL_GetWindowSize(window, &width, &height);
+    if (width != renderView.getWidth() || height != renderView.getHeight()) {
+        SDL_SetWindowSize(window, renderView.getWidth(), renderView.getHeight());
     }
 }
 
