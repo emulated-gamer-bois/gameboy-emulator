@@ -6,6 +6,22 @@
 #include <cassert>
 
 PPU::PPU(std::shared_ptr<MMU> memory) {
+    SCY = 0;
+    SCX = 0;
+    LY = 0;
+    LYC = 0;
+    WY = 0;
+    WX = 0;
+
+    BGP = 0;
+    OBP0 = 0;
+    OBP1 = 0;
+
+    DMA = 0;
+
+    STAT = 0;
+    LCDC = 0;
+
     this->memory = memory;
     this->accumulatedCycles = 0;
     this->modeFlag = OAM_SEARCH;
