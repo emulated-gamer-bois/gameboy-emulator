@@ -105,7 +105,7 @@ void Application::start() {
 
     TEMP_setTexture("../src/title.pixdata", renderView);
 
-    // gameboy->load_boot_rom("../roms/boot.bin");
+    this->gameBoy.load_boot_rom("../roms/boot_infinite_loop.bin");
     // gameboy->load_game_rom("../roms/game.gb");
 
     // gameboy->cpu_dump();
@@ -113,10 +113,10 @@ void Application::start() {
     while(running) {
         previousTime = currentTime;
 
-        while (!this->gameBoy.readyToDraw()) {
+        do {
             this->handleSDLEvents();
             this->gameBoy.step();
-        }
+        } while (!this->gameBoy.readyToDraw());
 
         // Resize window to the size of the render view if needed.
         this->updateSDLWindowSize();
@@ -131,8 +131,8 @@ void Application::start() {
         currentTime = std::chrono::system_clock::now() - startTime;
         elapsedTime = currentTime - previousTime;
 
-        std::cout << "------------------------------" << std::endl;
-        std::cout << elapsedTime.count() << std::endl;
+        //std::cout << "------------------------------" << std::endl;
+        //std::cout << elapsedTime.count() << std::endl;
 
         if (elapsedTime.count() < frameTime) {
             std::this_thread::sleep_for(std::chrono::milliseconds((int)(frameTime - elapsedTime.count())));

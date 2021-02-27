@@ -7,6 +7,22 @@
 #include <iostream>
 
 PPU::PPU(std::shared_ptr<MMU> memory) {
+    SCY = 0;
+    SCX = 0;
+    LY = 0;
+    LYC = 0;
+    WY = 0;
+    WX = 0;
+
+    BGP = 0;
+    OBP0 = 0;
+    OBP1 = 0;
+
+    DMA = 0;
+
+    STAT = 0;
+    LCDC = 0;
+
     this->memory = memory;
     this->accumulatedCycles = 0;
     this->modeFlag = OAM_SEARCH;
@@ -117,8 +133,6 @@ void PPU::drawBackgroundScanLine() {
         uint8_t absolutePixelY = (SCY + LY) % 256;
         uint8_t tileID = getTileID(bgMapStartAddress, absolutePixelX, absolutePixelY);
         uint8_t pixel = getTilePixelColor(tileID, absolutePixelX, absolutePixelY);
-        std::cout << "---------------------------" << std::endl;
-        std::cout << "LY - " << (int) LY << " | x - " << (int) x << " | index - " << (LY * 160 + x) << " | arrSize - " << frameBuffer.size() << std::endl;
         frameBuffer[LY * 160 + x] = pixel;
     }
 }
