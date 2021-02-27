@@ -260,7 +260,7 @@ void assertTile00(std::unique_ptr<PPU> & ppu, std::array<char, 64> tile) {
 
 TEST(PPU, Read_single_tile_no_scrolling) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<PPU> ppu = std::make_unique<PPU>(mmu);
+    std::unique_ptr<PPU> ppu( new PPU(mmu));
 
     //Set LCDC to use tile map 0 and 8000 addressing mode
     mmu->write(LCDC_ADDRESS, 0xB3);
@@ -280,7 +280,7 @@ TEST(PPU, Read_single_tile_no_scrolling) {
 
 TEST(PPU, Read_single_tile_scrolling_x) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<PPU> ppu = std::make_unique<PPU>(mmu);
+    std::unique_ptr<PPU> ppu( new PPU(mmu));
 
     //Set LCDC to use tile map 0 and 8000 addressing mode
     mmu->write(LCDC_ADDRESS, 0xB3);
@@ -312,7 +312,7 @@ TEST(PPU, Read_single_tile_scrolling_x) {
 
 TEST(PPU, Many_tiles) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<PPU> ppu = std::make_unique<PPU>(mmu);
+    std::unique_ptr<PPU> ppu( new PPU(mmu));
 
     //Set LCDC to use tile map 0 and 8000 addressing mode
     mmu->write(LCDC_ADDRESS, 0xB3);
