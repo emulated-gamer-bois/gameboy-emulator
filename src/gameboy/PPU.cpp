@@ -4,7 +4,6 @@
 
 #include "PPU.h"
 #include <cassert>
-#include <iostream>
 
 PPU::PPU(std::shared_ptr<MMU> memory) {
     SCY = 0;
@@ -127,13 +126,14 @@ void PPU::drawBackgroundScanLine() {
         bgMapStartAddress = BG_WINDOW_MAP0;
     }
 
-    for (uint8_t x = 0; x < 160; ++x) { //For each pixel in the current row, find the correct tile ID, then the
-                                        //correct pixel in that tile
+    //For each pixel in the current row, find the correct tile ID, then the
+    //correct pixel in that tile
+    for (uint8_t x = 0; x < 160; ++x) {
         uint8_t absolutePixelX = (SCX + x) % 256;
         uint8_t absolutePixelY = (SCY + LY) % 256;
         uint8_t tileID = getTileID(bgMapStartAddress, absolutePixelX, absolutePixelY);
         uint8_t pixel = getTilePixelColor(tileID, absolutePixelX, absolutePixelY);
-        frameBuffer[LY * 160 + x] = pixel;
+        frameBuffer[LY * 160 + x] = 0xFF - (pixel * 0x55); // Change color range to [0, 255] and invert colors.
     }
 }
 

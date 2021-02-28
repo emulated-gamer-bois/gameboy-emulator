@@ -60,13 +60,6 @@ private:
     std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> frameBuffer;
     uint16_t accumulatedCycles;
 
-    enum Color {
-        BLACK = 0x00,
-        DARK_GREY = 0x68,
-        LIGHT_GREY = 0xB8,
-        WHITE = 0xFF
-    };
-
     union {
         struct { //bits 0-7
             unsigned int bgWindowDisplayEnable: 1;
