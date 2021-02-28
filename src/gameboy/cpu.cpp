@@ -643,6 +643,7 @@ int CPU::execute_instruction() {
             return 2;
         case 0x0F: //RRCA
             rrc(A);
+            F.z = 0; //Special case
             return 1;
         case 0x11:
             loadIm16(read16_and_inc_pc(), DE);
@@ -688,6 +689,7 @@ int CPU::execute_instruction() {
             return 2;
         case 0x1F: //RRA
             rr(A);
+            F.Z = 0; // Special case
             return 1;
         case 0x20:
             if (jumpRelativeZ(read_and_inc_pc(), false))
