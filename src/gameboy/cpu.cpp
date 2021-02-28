@@ -292,12 +292,10 @@ void CPU::rrc(uint8_t &reg) {
  */
 void CPU::rr(uint8_t &reg) {
     auto d0 = reg & 0x01;
-    auto d7 = reg & 0x80;
     reg = (reg >> 1) | ((F.all_8 << 3) & 0x80);
 
-    //Sets C flag to d7
-    F.c = d7 == 0 ? 0 : 1;
-//    AF.low_8 = (AF.low_8 & 0xEF) | (d0 << 4);
+    //Sets C flag to d0
+    F.c = d0;
 }
 
 /**
