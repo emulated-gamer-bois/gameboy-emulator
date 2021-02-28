@@ -51,10 +51,16 @@ void CPU::setHFlag(uint8_t a, uint8_t b, bool subtraction) {
  * Sets C flag if there is a carry between bit 7 and bit 8
  * @param a parameter 1 in addition
  * @param b parameter 2 in addition
+ * @param subtraction if the operation executed is subtraction
  */
-void CPU::setCFlag(uint16_t a, uint16_t b) {
+void CPU::setCFlag(uint16_t a, uint16_t b, bool subtraction) {
     // Sets the C flag if overflow
-    F.c = (a + b) > 0xFF ? 1 : 0;
+    if(subtraction) {
+        //Inverted C flag if using subtraction
+        F.c = (a + b) > 0xFF ? 0 : 1;
+    } else {
+        F.c = (a + b) > 0xFF ? 1 : 0;
+    }
 }
 
 /**
@@ -99,7 +105,7 @@ void CPU::addA(uint8_t value, bool withCarry) {
 
 void CPU::add_8bit(uint8_t &a, uint8_t b, bool withCarry) {
     auto CFlag = withCarry ? F.c : 0;
-    setCFlag(a, b + CFlag);
+    setCFlag(a, b + CFlag, false);
     setHFlag(a, b + CFlag, false);
     a += b + CFlag;
     setZNFlags(a, false);
@@ -145,7 +151,7 @@ void CPU::subA(uint8_t value, bool withCarry) {
     auto CFlag = withCarry ? F.c : 0;
     setHFlag(A, value + CFlag, true);
     value = twosComp(value + CFlag);
-    setCFlag(A, value);
+    setCFlag(A, value, true);
     A += value;
     setZNFlags(A, true);
 }
@@ -301,7 +307,7 @@ void CPU::rr(uint8_t &reg) {
 void CPU::compareA(uint8_t value) {
     setHFlag(A, value, true);
     value = twosComp(value);
-    setCFlag(A, value);
+    setCFlag(A, value, true);
     setZNFlags(A + value, true);
 }
 
