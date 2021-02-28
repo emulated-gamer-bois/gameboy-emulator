@@ -884,7 +884,7 @@ int CPU::execute_instruction() {
             loadIm8(DE.low_8, memory->read(HL.all_16));
             return 2;
         case 0x5F:
-            loadIm8(BC.low_8, A);
+            loadIm8(DE.low_8, A);
             return 1;
         case 0x60:
             loadIm8(HL.high_8, BC.high_8);
