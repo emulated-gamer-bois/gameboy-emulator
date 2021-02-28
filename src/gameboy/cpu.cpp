@@ -292,8 +292,11 @@ void CPU::rrc(uint8_t &reg) {
  */
 void CPU::rr(uint8_t &reg) {
     auto d0 = reg & 0x01;
-    reg = (reg >> 1) | ((F.all_8 << 3) & 0x80);
+    reg >>= 1;
+    reg |= (F.all_8 << 3) & 0x80;
 
+    setZNFlags(reg, false);
+    F.h = 0;
     //Sets C flag to d0
     F.c = d0;
 }
@@ -531,6 +534,7 @@ void CPU::sla(uint8_t &reg) {
     setZNFlags(reg,false);
     F.h=0;
 }
+
 void CPU::sra(uint8_t &reg) {
     auto b7 = (reg & 0x80) ;
     F.c = reg & 0x01;
@@ -538,6 +542,13 @@ void CPU::sra(uint8_t &reg) {
     reg |= b7;
     setZNFlags(reg,false);
     F.h=0;
+}
+
+void CPU::srl(uint8_t &reg) {
+    F.c = reg & 0x1;
+    reg >>= 1;
+    F.h = 0;
+    setZNFlags(reg, false);
 }
 
 /**
@@ -1465,6 +1476,58 @@ int CPU::CB_ops() {
         case 0x1F:
             rr(A);
             return 2;
+        case 0x20:
+            sla(BC.high_8);
+            return 2;
+        case 0x21:
+            sla(BC.low_8);
+            return 2;
+        case 0x22:
+            sla(DE.high_8);
+            return 2;
+        case 0x23:
+            sla(DE.low_8);
+            return 2;
+        case 0x24:
+            sla(HL.high_8);
+            return 2;
+        case 0x25:
+            sla(HL.low_8);
+            return 2;
+        case 0x26:
+            tmpVal = memory->read(HL.all_16);
+            sla(tmpVal);
+            memory->write(HL.all_16, tmpVal);
+            return 4;
+        case 0x27:
+            sla(A);
+            return 2;
+        case 0x28:
+            sra(BC.high_8);
+            return 2;
+        case 0x29:
+            sra(BC.low_8);
+            return 2;
+        case 0x2A:
+            sra(DE.high_8);
+            return 2;
+        case 0x2B:
+            sra(DE.low_8);
+            return 2;
+        case 0x2C:
+            sra(HL.high_8);
+            return 2;
+        case 0x2D:
+            sra(HL.low_8);
+            return 2;
+        case 0x2E:
+            tmpVal = memory->read(HL.all_16);
+            sra(tmpVal);
+            memory->write(HL.all_16, tmpVal);
+            return 4;
+        case 0x2F:
+            sra(A);
+            return 2;
         case 0x30:
             BC.high_8 = swapBits(BC.high_8);
             return 2;
@@ -1488,6 +1551,32 @@ int CPU::CB_ops() {
             return 4;
         case 0x37:
             A = swapBits(A);
+            return 2;
+        case 0x38:
+            srl(BC.high_8);
+            return 2;
+        case 0x39:
+            srl(BC.low_8);
+            return 2;
+        case 0x3A:
+            srl(DE.high_8);
+            return 2;
+        case 0x3B:
+            srl(DE.low_8);
+            return 2;
+        case 0x3C:
+            srl(HL.high_8);
+            return 2;
+        case 0x3D:
+            srl(HL.low_8);
+            return 2;
+        case 0x3E:
+            tmpVal = memory->read(HL.all_16);
+            srl(tmpVal);
+            memory->write(HL.all_16, tmpVal);
+            return 4;
+        case 0x3F:
+            srl(A);
             return 2;
         case 0x40:
             bit(0, BC.high_8);

@@ -104,6 +104,7 @@ private:
     void res(uint8_t bit_nr, uint8_t &reg);
     void sla(uint8_t &reg);
     void sra(uint8_t &reg);
+    void srl(uint8_t &reg);
     void set(uint8_t bit_nr, uint8_t &reg);
     uint8_t swapBits(uint8_t value);
 

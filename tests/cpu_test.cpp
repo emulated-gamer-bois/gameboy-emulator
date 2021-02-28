@@ -314,49 +314,37 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
 
     cpu->addSignedToRegPair(cpu->SP, 0x01);
     ASSERT_EQ(cpu->SP.all_16, 0x0000);
-    ASSERT_EQ(cpu->F.z, 0);
-    ASSERT_EQ(cpu->F.n, 0);
-    ASSERT_EQ(cpu->F.h, 1);
-    ASSERT_EQ(cpu->F.c, 1);
-
+    ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x30);
 
     cpu->BC.high_8=0xFF;
     cpu->F.all_8=0;
     cpu->sla(cpu->BC.high_8);
     ASSERT_EQ(cpu->BC.high_8,0xFE);
-    ASSERT_EQ(cpu->F.z, 0);
-    ASSERT_EQ(cpu->F.n, 0);
-    ASSERT_EQ(cpu->F.h, 0);
-    ASSERT_EQ(cpu->F.c, 1);
+    ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x10);
 
     cpu->BC.high_8=0xC8;
     cpu->F.all_8=0;
     cpu->sla(cpu->BC.high_8);
     ASSERT_EQ(cpu->BC.high_8,0x90);
-    ASSERT_EQ(cpu->F.z, 0);
-    ASSERT_EQ(cpu->F.n, 0);
-    ASSERT_EQ(cpu->F.h, 0);
-    ASSERT_EQ(cpu->F.c, 1);
+    ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x10);
 
     cpu->BC.high_8=0xD8;
     cpu->F.all_8=0;
     cpu->sra(cpu->BC.high_8);
     ASSERT_EQ(cpu->BC.high_8,0xEC);
-    ASSERT_EQ(cpu->F.z, 0);
-    ASSERT_EQ(cpu->F.n, 0);
-    ASSERT_EQ(cpu->F.h, 0);
-    ASSERT_EQ(cpu->F.c, 0);
+    ASSERT_EQ(cpu->F.all_8 & 0xF0, 0);
 
     cpu->BC.high_8=0x81;
     cpu->F.all_8=0;
     cpu->sra(cpu->BC.high_8);
     ASSERT_EQ(cpu->BC.high_8,0xC0);
-    ASSERT_EQ(cpu->F.z, 0);
-    ASSERT_EQ(cpu->F.n, 0);
-    ASSERT_EQ(cpu->F.h, 0);
-    ASSERT_EQ(cpu->F.c, 1);
+    ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x10);
 
-
+    cpu->BC.high_8=0x81;
+    cpu->F.all_8=0;
+    cpu->srl(cpu->BC.high_8);
+    ASSERT_EQ(cpu->BC.high_8,0x40);
+    ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x10);
 }
 
 TEST(CPU, sixteen_bit_ops) {
