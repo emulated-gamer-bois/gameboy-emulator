@@ -1348,7 +1348,7 @@ int CPU::execute_instruction() {
             loadIm16(HL.all_16, SP);
             return 2;
         case 0xFA:
-            memory->write(A, read16_and_inc_pc());
+            loadImp(read16_and_inc_pc(), A);
             return 4;
         case 0xFE:
             compareA(read_and_inc_pc());
