@@ -1179,11 +1179,10 @@ int CPU::execute_instruction() {
             jump(read16_and_inc_pc());
             return 4;
         case 0xC4:
-            if (callZ(memory->read(PC), memory->read(PC + 1), false)) {
-                PC += 2;
+            PC += 2;
+            if (callZ(memory->read(PC - 2), memory->read(PC - 1), false)) {
                 return 6;
             } else {
-                PC += 2;
                 return 3;
             }
         case 0xC5:
@@ -1211,11 +1210,10 @@ int CPU::execute_instruction() {
         case 0xCB:
             return CB_ops();
         case 0xCC:
-            if (callZ(memory->read(PC), memory->read(PC + 1), true)) {
-                PC += 2;
+            PC += 2;
+            if (callZ(memory->read(PC - 2), memory->read(PC - 1), true)) {
                 return 6;
             } else {
-                PC += 2;
                 return 3;
             }
         case 0xCD:
@@ -1242,11 +1240,10 @@ int CPU::execute_instruction() {
             else
                 return 3;
         case 0xD4:
-            if (callC(memory->read(PC), memory->read(PC + 1), false)) {
-                PC += 2;
+            PC += 2;
+            if (callC(memory->read(PC - 2), memory->read(PC - 1), false)) {
                 return 6;
             } else {
-                PC += 2;
                 return 3;
             }
         case 0xD5:
@@ -1272,11 +1269,10 @@ int CPU::execute_instruction() {
             else
                 return 3;
         case 0xDC:
-            if (callC(memory->read(PC), memory->read(PC + 1), true)) {
-                PC += 2;
+            PC += 2;
+            if (callC(memory->read(PC - 2), memory->read(PC - 1), true)) {
                 return 6;
             } else {
-                PC += 2;
                 return 3;
             }
         case 0xDE:
