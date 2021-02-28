@@ -689,7 +689,7 @@ int CPU::execute_instruction() {
             return 2;
         case 0x1F: //RRA
             rr(A);
-            F.Z = 0; // Special case
+            F.z = 0; // Special case
             return 1;
         case 0x20:
             if (jumpRelativeZ(read_and_inc_pc(), false))
