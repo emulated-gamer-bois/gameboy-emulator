@@ -52,16 +52,16 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->F.z, 0);
     ASSERT_EQ(cpu->F.n, 1);
 
-    cpu->setHFlag(0x0F, 0x01, false);
+    cpu->setHFlag(0x0F, 0x01, false, 0);
     ASSERT_EQ(cpu->F.h, 1);
 
-    cpu->setHFlag(0x0D, 0x01, false);
+    cpu->setHFlag(0x0D, 0x01, false, 0);
     ASSERT_EQ(cpu->F.h, 0);
 
-    cpu->setHFlag(0x10, 0x01, true);
+    cpu->setHFlag(0x10, 0x01, true, 0);
     ASSERT_EQ(cpu->F.h, 1);
 
-    cpu->setHFlag(0xF3, 0x11, true);
+    cpu->setHFlag(0xF3, 0x11, true, 0);
     ASSERT_EQ(cpu->F.h, 0);
 
     cpu->setCFlag(0xFF, 0x01, false);
@@ -348,6 +348,12 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->A = 0;
     cpu->compareA(0);
     ASSERT_EQ(cpu->F.all_8 & 0xF0, 0xC0);
+
+    cpu->HL.all_16 = 0x1;
+    cpu->SP.all_16 = 0x7FFF;
+    cpu->addHL(cpu->SP);
+    ASSERT_EQ(cpu->HL.all_16, 0x8000);
+    ASSERT_EQ(cpu->F.all_8 & 0x70, 0x20);
 }
 
 TEST(CPU, sixteen_bit_ops) {

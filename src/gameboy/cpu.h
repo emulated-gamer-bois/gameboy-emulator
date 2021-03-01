@@ -41,7 +41,7 @@ private:
 
     //Flag management
     void setZNFlags(uint8_t value, bool subtraction);
-    void setHFlag(uint8_t a, uint8_t b, bool subtraction);
+    void setHFlag(uint8_t a, uint8_t b, bool subtraction, uint8_t cFlag);
     void setCFlag(uint16_t a,uint16_t b, bool subtraction);
 
     //Setting registers
