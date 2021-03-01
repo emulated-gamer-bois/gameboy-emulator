@@ -118,20 +118,16 @@ void CPU::add_8bit(uint8_t &a, uint8_t b, bool withCarry) {
 void CPU::addHL(RegisterPair reg) {
     auto tempZ = F.z;
     add_8bit(HL.low_8, reg.low_8, false);
-    auto tempH = F.c;
     add_8bit(HL.high_8, reg.high_8, true);
     F.z = tempZ;
-    F.h = tempH;
+    F.n = 0;
 }
 
 void CPU::addSignedToRegPair(RegisterPair &regPair, int8_t value) {
-    // TODO uncertain if im supposed to do 2comp on value here or not.
     add_8bit(regPair.low_8, value, false);
-    auto tempH = F.c;
     add_8bit(regPair.high_8, 0, true);
     F.z = 0;
     F.n = 0;
-    F.h = tempH;
 }
 
 

@@ -301,14 +301,13 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->bit(3, cpu->A);
     ASSERT_EQ(cpu->F.all_8 & 0xE0, 0xA0);
 
-    cpu->HL.all_16 = 0x0001;
-    cpu->BC.all_16 = 0xFFFF;
+    cpu->HL.all_16 = 0x4C00;
     auto tempz = cpu->F.z;
-    cpu->addHL(cpu->BC);
-    ASSERT_EQ(cpu->HL.all_16, 0x0000);
+    cpu->addHL(cpu->HL);
+    ASSERT_EQ(cpu->HL.all_16, 0x9800);
     ASSERT_EQ(cpu->F.z, tempz);
     ASSERT_EQ(cpu->F.h, 1);
-    ASSERT_EQ(cpu->F.c, 1);
+    ASSERT_EQ(cpu->F.c, 0);
     cpu->F.all_8 = 0;
     cpu->SP.all_16 = 0xFFFF;
 
