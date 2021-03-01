@@ -67,7 +67,7 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->setCFlag(0xFF, 0x01, false);
     ASSERT_EQ(cpu->F.c, 1);
 
-    cpu->setCFlag(0xFF, 0x01, true);
+    cpu->setCFlag(0xFF, 0x81, true);
     ASSERT_EQ(cpu->F.c, 0);
 
     cpu->orA(0x55);
@@ -344,6 +344,10 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->srl(cpu->BC.high_8);
     ASSERT_EQ(cpu->BC.high_8,0x40);
     ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x10);
+
+    cpu->A = 0;
+    cpu->compareA(0);
+    ASSERT_EQ(cpu->F.all_8 & 0xF0, 0xC0);
 }
 
 TEST(CPU, sixteen_bit_ops) {

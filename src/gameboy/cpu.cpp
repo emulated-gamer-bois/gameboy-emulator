@@ -132,10 +132,10 @@ void CPU::addSignedToRegPair(RegisterPair &regPair, int8_t value) {
 
 
 /**
- * Makes a number negative by converting it to two complement
+ * Makes a 8-bit number negative by converting it to two complement
  */
-uint8_t twosComp(uint8_t value) {
-    return ~value + 1;
+uint16_t twosComp8(uint16_t value) {
+    return (value ^ 0xFF) + 1;
 }
 
 /**
@@ -146,9 +146,8 @@ uint8_t twosComp(uint8_t value) {
 void CPU::subA(uint8_t value, bool withCarry) {
     auto CFlag = withCarry ? F.c : 0;
     setHFlag(A, value + CFlag, true);
-    value = twosComp(value + CFlag);
-    setCFlag(A, value, true);
-    A += value;
+    setCFlag(A, twosComp8(value + CFlag), true);
+    A += twosComp8(value + CFlag);
     setZNFlags(A, true);
 }
 /**
@@ -303,9 +302,8 @@ void CPU::rr(uint8_t &reg) {
  */
 void CPU::compareA(uint8_t value) {
     setHFlag(A, value, true);
-    value = twosComp(value);
-    setCFlag(A, value, true);
-    setZNFlags(A + value, true);
+    setCFlag(A, twosComp8(value), true);
+    setZNFlags(A + twosComp8(value), true);
 }
 
 
