@@ -2,8 +2,7 @@
 // Created by algot on 2021-02-15.
 //
 
-#ifndef LAME_BOY_MMU_H
-#define LAME_BOY_MMU_H
+#pragma once
 
 #include <cstdint>
 #include <array>
@@ -35,6 +34,11 @@ friend class test_case_name##_##test_name##_Test
 #define ADDR_SPACE_END      0xffff
 #define IO_DISABLE_BOOT_ROM 0xff50
 #define IO_JOYPAD           0xff00
+#define INTERRUPT_FLAG      0xff0f
+#define TIMER_DIVIDER       0xff04
+#define TIMER_COUNTER       0xff05
+#define TIMER_MODULO        0xff06
+#define TIMER_CONTROL       0xff07
 
 // Joypad constants
 #define JOYPAD_SEL_BUTTONS      0x10
@@ -53,9 +57,11 @@ public:
     MMU();
     uint8_t read(uint16_t addr);
     void write(uint16_t addr, uint8_t data);
-    void load_rom(std::string filepath);
+    void load_game_rom(std::string filepath);
+    void load_boot_rom(std::string filepath);
     void joypad_release(uint8_t button);
     void joypad_press(uint8_t button);
+    void timer_update(uint16_t cycles);
 
 private:
     void write_GAME_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data);
@@ -78,8 +84,13 @@ private:
 
     bool booting;
     uint8_t interrupt_enable;
+    uint8_t interrupt_flag;
     uint8_t io_joypad_select;
     uint8_t io_joypad;
+    uint16_t timer_divider;
+    uint8_t timer_counter;
+    uint8_t timer_modulo;
+    uint8_t timer_control;
 
     // Tests using private stuff
     FRIEND_TEST(MMU, read_write);
@@ -88,5 +99,3 @@ private:
     FRIEND_TEST(CPU, Execute_LD_SP_D16_Instruction);
     FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);
 };
-
-#endif //LAME_BOY_MMU_H

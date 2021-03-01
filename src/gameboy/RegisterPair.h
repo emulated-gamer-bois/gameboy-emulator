@@ -2,8 +2,7 @@
 // Created by davidm on 2021-02-14.
 //
 
-#ifndef LAME_BOY_REGISTER_PAIR_H
-#define LAME_BOY_REGISTER_PAIR_H
+#pragma once
 
 #include <cstdint>
 
@@ -14,5 +13,3 @@ union RegisterPair {
     };
     uint16_t all_16;
 };
-
-#endif //LAME_BOY_REGISTER_PAIR_H

@@ -2,16 +2,15 @@
 // Created by davidm on 2021-02-12.
 //
 
-#ifndef LAME_BOY_CPU_H
-#define LAME_BOY_CPU_H
+#pragma once
 
 #include <iostream>
 #include <cstdint>
 #include <memory>
 #include <cstdint>
-#include "register_pair.h"
-#include "mmu.h"
-#include "flags.h"
+#include "RegisterPair.h"
+#include "MMU.h"
+#include "Flags.h"
 
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
@@ -25,6 +24,7 @@ public:
      * @returns amount of machine cycles operation takes.
      */
     int execute_instruction();
+    void cpu_dump();
 
 private:
     //Registers
@@ -118,9 +118,6 @@ private:
     FRIEND_TEST(CPU, Execute_LD_SP_D16_Instruction);
     FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);
     FRIEND_TEST(CPU, sixteen_bit_ops);
-
+    FRIEND_TEST(PPU, Print_test_rom);
 
 };
-
-
-#endif //LAME_BOY_CPU_H

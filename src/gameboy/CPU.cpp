@@ -2,8 +2,10 @@
 // Created by davidm on 2021-02-12.
 //
 
-#include "cpu.h"
-#include "mmu.h"
+#include "CPU.h"
+#include "MMU.h"
+#include <iostream> // cpu_dump
+#include <iomanip> // cpu_dump
 
 uint16_t combine_bytes(uint8_t first_byte, uint8_t second_byte);
 
@@ -16,6 +18,18 @@ CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
     DE.all_16 = 0x00;
     HL.all_16 = 0x00;
     F.all_8 = 0x0;
+}
+
+void CPU::cpu_dump() {
+    std::cout << "=---------------------------=" << std::endl;
+    std::cout << "A: 0x" << std::hex << (int)this->A << std::endl;
+    std::cout << "BC: 0x" << std::hex << this->BC.all_16 << std::endl;
+    std::cout << "DE: 0x" << std::hex << this->DE.all_16 << std::endl;
+    std::cout << "HL: 0x" << std::hex << this->HL.all_16 << std::endl;
+    std::cout << "F: 0x" << std::hex << (int)this->F.all_8 << std::endl;
+    std::cout << "PC: 0x" << std::hex << this->PC << std::endl;
+    std::cout << "SP: 0x" << std::hex << this->SP.all_16 << std::endl;
+    std::cout << "=---------------------------=" << std::endl;
 }
 
 void nop() {}
