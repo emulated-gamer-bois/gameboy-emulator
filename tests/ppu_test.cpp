@@ -9,6 +9,7 @@
 #include <cstring>
 #include <memory>
 
+
 std::array<char, 64> getWhiteTile() {
     char tileData[8][8] = {
             {'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'},
