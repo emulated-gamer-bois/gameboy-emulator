@@ -9,7 +9,7 @@
 #include <SDL.h>
 #include <string>
 #include "RenderView.h"
-#include "gameboy/gameboy.h"
+#include "gameboy/GameBoy.h"
 
 class Application {
 private:
