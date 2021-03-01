@@ -8,28 +8,31 @@
 
 #include <SDL.h>
 #include <string>
+#include <chrono> // time
+#include <thread> // sleep
+
 #include "RenderView.h"
 #include "gameboy/GameBoy.h"
+#include "gameboy/Definitions.h"
 
 class Application {
-private:
-    const static int DEFAULT_WINDOW_WIDTH = 160;
-    const static int DEFAULT_WINDOW_HEIGHT = 144;
-    const static std::string DEFAULT_WINDOW_CAPTION;
-    // SDL related
-    SDL_Window* window; // Application claims no ownership of this pointer.
-    SDL_GLContext glContext;
-    RenderView renderView;
-
-    std::unique_ptr<GameBoy> gameboy;
-
-    bool quit;
-
-    void handleSDLEvents();
-    void initSDL();
-    void terminateSDL();
-
 public:
     Application();
     void start();
+
+private:
+    const static std::string DEFAULT_WINDOW_CAPTION;
+
+    SDL_Window* window;
+    SDL_GLContext glContext;
+    RenderView renderView;
+    GameBoy gameBoy;
+
+    bool running;
+
+    void init();
+    void initSDL();
+    void terminateSDL();
+    void handleSDLEvents();
+    void updateSDLWindowSize();
 };

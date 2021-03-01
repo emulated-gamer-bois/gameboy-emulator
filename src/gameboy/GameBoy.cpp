@@ -12,19 +12,14 @@ GameBoy::GameBoy() {
 
 void GameBoy::step() {
     // TODO: Check for interrupts
-    int cycles;
+    int cycles = 0;
     cycles = this->cpu->execute_instruction();
-    ppu->update(cycles);
-    mmu->timer_update(cycles);
+    this->ppu->update(cycles);
+    this->mmu->timer_update(cycles);
 }
 
 uint8_t *GameBoy::getScreen() {
-    uint8_t* screenBuffer = nullptr;
-    if (ppu->getMode() == PPU::VBLANK) {
-        screenBuffer = ppu->getFrameBuffer()->data();
-    }
-
-    return screenBuffer;
+    return this->ppu->getFrameBuffer()->data();
 }
 
 void GameBoy::joypad_input(uint8_t key, uint8_t action) {
@@ -35,7 +30,6 @@ void GameBoy::joypad_input(uint8_t key, uint8_t action) {
         case JOYPAD_RELEASE:
             this->mmu->joypad_release(key);
             break;
-
         default:
             std::cout << "Invalid parameter `action` to GameBoy::joypad_input: " << action << std::endl;
             break;

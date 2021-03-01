@@ -10,11 +10,10 @@
 #include <labhelper.h> // includes glew.h and glm.hpp
 
 #include "Palette.h"
+#include "gameboy/Definitions.h"
 
 class RenderView {
 private:
-    const static int GAME_BOY_LCD_WIDTH = 160;
-    const static int GAME_BOY_LCD_HEIGHT = 144;
     const static int VERTEX_AMOUNT = 6;
 
     int screenMultiplier;

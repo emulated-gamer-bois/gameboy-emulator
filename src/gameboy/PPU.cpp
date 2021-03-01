@@ -126,8 +126,9 @@ void PPU::drawBackgroundScanLine() {
         bgMapStartAddress = BG_WINDOW_MAP0;
     }
 
-    for (uint8_t x = 0; x < 160; ++x) { //For each pixel in the current row, find the correct tile ID, then the
-                                        //correct pixel in that tile
+    //For each pixel in the current row, find the correct tile ID, then the
+    //correct pixel in that tile
+    for (uint8_t x = 0; x < 160; ++x) {
         uint8_t absolutePixelX = (SCX + x) % 256;
         uint8_t absolutePixelY = (SCY + LY) % 256;
         uint8_t tileID = getTileID(bgMapStartAddress, absolutePixelX, absolutePixelY);
@@ -180,7 +181,7 @@ uint8_t PPU::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t a
     return ((BGP >> (2 * pixelColor)) & bitmask);
 }
 
-std::array<uint8_t, PPU::LCD_WIDTH * PPU::LCD_HEIGHT>* PPU::getFrameBuffer() {
+std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>* PPU::getFrameBuffer() {
     return &frameBuffer;
 }
 

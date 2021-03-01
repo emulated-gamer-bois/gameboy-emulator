@@ -4,9 +4,10 @@
 
 #pragma once
 
-#include <memory>
-#include <cstdint>
+#include <memory> // smart pointers
+#include <cstdint> // uint8_t and uint16_t
 #include "MMU.h"
+#include "Definitions.h" // LCD_WIDTH and LCD_HEIGHT
 
 #define LCDC_ADDRESS 0xFF40
 #define STAT_ADDRESS 0xFF41
@@ -32,9 +33,6 @@ friend class test_case_name##_##test_name##_Test
 
 class PPU {
 public:
-    const static uint16_t LCD_HEIGHT = 144;
-    const static uint16_t LCD_WIDTH = 160;
-
     explicit PPU(std::shared_ptr<MMU> memory);
     void update(uint16_t cpuCycles);
 
@@ -57,13 +55,6 @@ private:
     std::shared_ptr<MMU> memory;
     std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> frameBuffer;
     uint16_t accumulatedCycles;
-
-    enum Color {
-        BLACK = 0x00,
-        DARK_GREY = 0x68,
-        LIGHT_GREY = 0xB8,
-        WHITE = 0xFF
-    };
 
     union {
         struct { //bits 0-7
