@@ -133,7 +133,7 @@ void PPU::drawBackgroundScanLine() {
         uint8_t absolutePixelY = (SCY + LY) % 256;
         uint8_t tileID = getTileID(bgMapStartAddress, absolutePixelX, absolutePixelY);
         uint8_t pixel = getTilePixelColor(tileID, absolutePixelX, absolutePixelY);
-        frameBuffer[LY * 160 + x] = 0xFF - (pixel * 0x55); // Change color range to [0, 255] and invert colors.
+        frameBuffer[LY * 160 + x] = pixel;
     }
 }
 
@@ -181,7 +181,7 @@ uint8_t PPU::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t a
     return ((BGP >> (2 * pixelColor)) & bitmask);
 }
 
-std::array<uint8_t, PPU::LCD_WIDTH * PPU::LCD_HEIGHT>* PPU::getFrameBuffer() {
+std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>* PPU::getFrameBuffer() {
     return &frameBuffer;
 }
 
