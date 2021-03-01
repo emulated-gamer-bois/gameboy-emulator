@@ -50,23 +50,33 @@ void CPU::setZNFlags(uint8_t newValue, bool subtraction) {
  * Sets H flag if there is a carry between bit 3 and bit 4
  * @param a parameter 1 in addition
  * @param b parameter 2 in addition
+ * @param subtraction if subtraction is performed
+ * @param cFlag the value of the C flag, 0 if the cFlag is not used
  */
-void CPU::setHFlag(uint8_t a, uint8_t b) {
-    // Sets the H flag if carry from bit 3 to bit 4
-
-    F.h = (((a & 0x0F) + (b & 0x0F)) & 0x10) == 0x10 ? 1 : 0;
-
-
+void CPU::setHFlag(uint8_t a, uint8_t b, bool subtraction, uint8_t cFlag) {
+    if(subtraction) {
+        // Sets the H flag if carry from bit 4 to bit 3
+        F.h = ((a & 0x0F) - (b & 0x0F) - cFlag) < 0 ? 1 : 0;
+    } else {
+        // Sets the H flag if carry from bit 3 to bit 4
+        F.h = (((a & 0x0F) + (b & 0x0F) + cFlag) & 0x10) == 0x10 ? 1 : 0;
+    }
 }
 
 /**
  * Sets C flag if there is a carry between bit 7 and bit 8
  * @param a parameter 1 in addition
  * @param b parameter 2 in addition
+ * @param subtraction if the operation executed is subtraction
  */
-void CPU::setCFlag(uint16_t a, uint16_t b) {
+void CPU::setCFlag(uint16_t a, uint16_t b, bool subtraction) {
     // Sets the C flag if overflow
-    F.c = (a + b) > 0xFF ? 1 : 0;
+    if(subtraction) {
+        //Inverted C flag if using subtraction
+        F.c = (a + b) > 0xFF ? 0 : 1;
+    } else {
+        F.c = (a + b) > 0xFF ? 1 : 0;
+    }
 }
 
 /**
@@ -110,10 +120,9 @@ void CPU::addA(uint8_t value, bool withCarry) {
 }
 
 void CPU::add_8bit(uint8_t &a, uint8_t b, bool withCarry) {
-
     auto CFlag = withCarry ? F.c : 0;
-    setCFlag(a, b + CFlag);
-    setHFlag(a, b + CFlag);
+    setCFlag(a, b + CFlag, false);
+    setHFlag(a, b, false, CFlag);
     a += b + CFlag;
     setZNFlags(a, false);
 }
@@ -125,29 +134,24 @@ void CPU::add_8bit(uint8_t &a, uint8_t b, bool withCarry) {
 void CPU::addHL(RegisterPair reg) {
     auto tempZ = F.z;
     add_8bit(HL.low_8, reg.low_8, false);
-    auto tempH = F.c;
     add_8bit(HL.high_8, reg.high_8, true);
     F.z = tempZ;
-    F.h = tempH;
+    F.n = 0;
 }
 
 void CPU::addSignedToRegPair(RegisterPair &regPair, int8_t value) {
-    // TODO uncertain if im supposed to do 2comp on value here or not.
     add_8bit(regPair.low_8, value, false);
-    auto tempH = F.c;
     add_8bit(regPair.high_8, 0, true);
     F.z = 0;
     F.n = 0;
-    F.h = tempH;
-
 }
 
 
 /**
- * Makes a number negative by converting it to two complement
+ * Makes a 8-bit number negative by converting it to two complement
  */
-uint8_t twosComp(uint8_t value) {
-    return ~value + 1;
+uint16_t twosComp8(uint16_t value) {
+    return (value ^ 0xFF) + 1;
 }
 
 /**
@@ -157,10 +161,9 @@ uint8_t twosComp(uint8_t value) {
  */
 void CPU::subA(uint8_t value, bool withCarry) {
     auto CFlag = withCarry ? F.c : 0;
-    value = twosComp(value + CFlag);
-    setCFlag(A, value);
-    setHFlag(A, value);
-    A += value;
+    setHFlag(A, value, true, CFlag);
+    setCFlag(A, twosComp8(value + CFlag), true);
+    A += twosComp8(value + CFlag);
     setZNFlags(A, true);
 }
 /**
@@ -168,7 +171,7 @@ void CPU::subA(uint8_t value, bool withCarry) {
  */
 void CPU::incrementAddr(uint16_t addr){
     uint8_t value = memory->read(addr);
-    setHFlag(value++, 1);
+    setHFlag(value++, 1, false, 0);
     memory->write(addr, value);
     setZNFlags(value, false);
 }
@@ -178,7 +181,7 @@ void CPU::incrementAddr(uint16_t addr){
  */
 void CPU::decrementAddr(uint16_t addr){
     uint8_t value = memory->read(addr);
-    setHFlag(value--, -1);
+    setHFlag(value--, 1, true, 0);
     memory->write(addr, value);
     setZNFlags(value, true);
 }
@@ -196,7 +199,7 @@ void CPU::increment16(uint16_t &reg) {
  */
 void CPU::increment8(uint8_t &reg) {
     setZNFlags(reg + 1, false);
-    setHFlag(reg, 0x1);
+    setHFlag(reg, 0x1, false, 0);
     reg += 1;
 }
 
@@ -212,7 +215,7 @@ void CPU::decrement16(uint16_t &reg) {
  */
 void CPU::decrement8(uint8_t &addr) {
     setZNFlags(addr - 1, true);
-    setHFlag(addr, twosComp(0x1));
+    setHFlag(addr, 1, true, 0);
     addr -= 1;
 }
 
@@ -300,12 +303,13 @@ void CPU::rrc(uint8_t &reg) {
  */
 void CPU::rr(uint8_t &reg) {
     auto d0 = reg & 0x01;
-    auto d7 = reg & 0x80;
-    reg = (reg >> 1) | ((F.all_8 << 3) & 0x80);
+    reg >>= 1;
+    reg |= (F.all_8 << 3) & 0x80;
 
-    //Sets C flag to d7
-    F.c = d7 == 0 ? 0 : 1;
-//    AF.low_8 = (AF.low_8 & 0xEF) | (d0 << 4);
+    setZNFlags(reg, false);
+    F.h = 0;
+    //Sets C flag to d0
+    F.c = d0;
 }
 
 /**
@@ -313,10 +317,9 @@ void CPU::rr(uint8_t &reg) {
  * the result is not saved
  */
 void CPU::compareA(uint8_t value) {
-    value = twosComp(value);
-    setCFlag(A, value);
-    setHFlag(A, value);
-    setZNFlags(A + value, true);
+    setHFlag(A, value, true, 0);
+    setCFlag(A, twosComp8(value), true);
+    setZNFlags(A + twosComp8(value), true);
 }
 
 
@@ -541,6 +544,7 @@ void CPU::sla(uint8_t &reg) {
     setZNFlags(reg,false);
     F.h=0;
 }
+
 void CPU::sra(uint8_t &reg) {
     auto b7 = (reg & 0x80) ;
     F.c = reg & 0x01;
@@ -548,6 +552,13 @@ void CPU::sra(uint8_t &reg) {
     reg |= b7;
     setZNFlags(reg,false);
     F.h=0;
+}
+
+void CPU::srl(uint8_t &reg) {
+    F.c = reg & 0x1;
+    reg >>= 1;
+    F.h = 0;
+    setZNFlags(reg, false);
 }
 
 /**
@@ -642,6 +653,7 @@ int CPU::execute_instruction() {
             return 2;
         case 0x0F: //RRCA
             rrc(A);
+            F.z = 0; //Special case
             return 1;
         case 0x11:
             loadIm16(read16_and_inc_pc(), DE);
@@ -687,6 +699,7 @@ int CPU::execute_instruction() {
             return 2;
         case 0x1F: //RRA
             rr(A);
+            F.z = 0; // Special case
             return 1;
         case 0x20:
             if (jumpRelativeZ(read_and_inc_pc(), false))
@@ -883,7 +896,7 @@ int CPU::execute_instruction() {
             loadIm8(DE.low_8, memory->read(HL.all_16));
             return 2;
         case 0x5F:
-            loadIm8(BC.low_8, A);
+            loadIm8(DE.low_8, A);
             return 1;
         case 0x60:
             loadIm8(HL.high_8, BC.high_8);
@@ -1187,11 +1200,10 @@ int CPU::execute_instruction() {
             jump(read16_and_inc_pc());
             return 4;
         case 0xC4:
-            if (callZ(memory->read(PC), memory->read(PC + 1), false)) {
-                PC += 2;
+            PC += 2;
+            if (callZ(memory->read(PC - 2), memory->read(PC - 1), false)) {
                 return 6;
             } else {
-                PC += 2;
                 return 3;
             }
         case 0xC5:
@@ -1219,11 +1231,10 @@ int CPU::execute_instruction() {
         case 0xCB:
             return CB_ops();
         case 0xCC:
-            if (callZ(memory->read(PC), memory->read(PC + 1), true)) {
-                PC += 2;
+            PC += 2;
+            if (callZ(memory->read(PC - 2), memory->read(PC - 1), true)) {
                 return 6;
             } else {
-                PC += 2;
                 return 3;
             }
         case 0xCD:
@@ -1250,11 +1261,10 @@ int CPU::execute_instruction() {
             else
                 return 3;
         case 0xD4:
-            if (callC(memory->read(PC), memory->read(PC + 1), false)) {
-                PC += 2;
+            PC += 2;
+            if (callC(memory->read(PC - 2), memory->read(PC - 1), false)) {
                 return 6;
             } else {
-                PC += 2;
                 return 3;
             }
         case 0xD5:
@@ -1280,11 +1290,10 @@ int CPU::execute_instruction() {
             else
                 return 3;
         case 0xDC:
-            if (callC(memory->read(PC), memory->read(PC + 1), true)) {
-                PC += 2;
+            PC += 2;
+            if (callC(memory->read(PC - 2), memory->read(PC - 1), true)) {
                 return 6;
             } else {
-                PC += 2;
                 return 3;
             }
         case 0xDE:
@@ -1356,7 +1365,7 @@ int CPU::execute_instruction() {
             loadIm16(HL.all_16, SP);
             return 2;
         case 0xFA:
-            memory->write(A, read16_and_inc_pc());
+            loadImp(read16_and_inc_pc(), A);
             return 4;
         case 0xFE:
             compareA(read_and_inc_pc());
@@ -1479,6 +1488,58 @@ int CPU::CB_ops() {
         case 0x1F:
             rr(A);
             return 2;
+        case 0x20:
+            sla(BC.high_8);
+            return 2;
+        case 0x21:
+            sla(BC.low_8);
+            return 2;
+        case 0x22:
+            sla(DE.high_8);
+            return 2;
+        case 0x23:
+            sla(DE.low_8);
+            return 2;
+        case 0x24:
+            sla(HL.high_8);
+            return 2;
+        case 0x25:
+            sla(HL.low_8);
+            return 2;
+        case 0x26:
+            tmpVal = memory->read(HL.all_16);
+            sla(tmpVal);
+            memory->write(HL.all_16, tmpVal);
+            return 4;
+        case 0x27:
+            sla(A);
+            return 2;
+        case 0x28:
+            sra(BC.high_8);
+            return 2;
+        case 0x29:
+            sra(BC.low_8);
+            return 2;
+        case 0x2A:
+            sra(DE.high_8);
+            return 2;
+        case 0x2B:
+            sra(DE.low_8);
+            return 2;
+        case 0x2C:
+            sra(HL.high_8);
+            return 2;
+        case 0x2D:
+            sra(HL.low_8);
+            return 2;
+        case 0x2E:
+            tmpVal = memory->read(HL.all_16);
+            sra(tmpVal);
+            memory->write(HL.all_16, tmpVal);
+            return 4;
+        case 0x2F:
+            sra(A);
+            return 2;
         case 0x30:
             BC.high_8 = swapBits(BC.high_8);
             return 2;
@@ -1502,6 +1563,32 @@ int CPU::CB_ops() {
             return 4;
         case 0x37:
             A = swapBits(A);
+            return 2;
+        case 0x38:
+            srl(BC.high_8);
+            return 2;
+        case 0x39:
+            srl(BC.low_8);
+            return 2;
+        case 0x3A:
+            srl(DE.high_8);
+            return 2;
+        case 0x3B:
+            srl(DE.low_8);
+            return 2;
+        case 0x3C:
+            srl(HL.high_8);
+            return 2;
+        case 0x3D:
+            srl(HL.low_8);
+            return 2;
+        case 0x3E:
+            tmpVal = memory->read(HL.all_16);
+            srl(tmpVal);
+            memory->write(HL.all_16, tmpVal);
+            return 4;
+        case 0x3F:
+            srl(A);
             return 2;
         case 0x40:
             bit(0, BC.high_8);
