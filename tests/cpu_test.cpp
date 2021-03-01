@@ -63,64 +63,64 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
 
 
     cpu->orA(0x55);
-    ASSERT_EQ(cpu->A.high_8, 0x55);
+    ASSERT_EQ(cpu->A, 0x55);
 
     cpu->xorA(0x04);
-    ASSERT_EQ(cpu->A.high_8, 0x51);
+    ASSERT_EQ(cpu->A, 0x51);
 
     cpu->andA(0x4F);
-    ASSERT_EQ(cpu->A.high_8, 0x41);
+    ASSERT_EQ(cpu->A, 0x41);
 
-    cpu->rlc(cpu->A.high_8);
-    ASSERT_EQ(cpu->A.high_8, 0x82);
+    cpu->rlc(cpu->A);
+    ASSERT_EQ(cpu->A, 0x82);
     ASSERT_EQ(cpu->F.c, 0);
 
 
-    cpu->rlc(cpu->A.high_8);
-    ASSERT_EQ(cpu->A.high_8, 0x05);
+    cpu->rlc(cpu->A);
+    ASSERT_EQ(cpu->A, 0x05);
     ASSERT_EQ(cpu->F.c, 1);
 
 
-    cpu->rl(cpu->A.high_8);
-    ASSERT_EQ(cpu->A.high_8, 0x0B);
+    cpu->rl(cpu->A);
+    ASSERT_EQ(cpu->A, 0x0B);
     ASSERT_EQ(cpu->F.c, 0);
 
 
-    cpu->rrc(cpu->A.high_8);
-    ASSERT_EQ(cpu->A.high_8, 0x85);
+    cpu->rrc(cpu->A);
+    ASSERT_EQ(cpu->A, 0x85);
     ASSERT_EQ(cpu->F.c, 1);
 
 
-    cpu->rr(cpu->A.high_8);
-    ASSERT_EQ(cpu->A.high_8, 0xC2);
+    cpu->rr(cpu->A);
+    ASSERT_EQ(cpu->A, 0xC2);
     ASSERT_EQ(cpu->F.c, 1);
 
 
     cpu->setA(0x05);
     cpu->setB(0x0E);
-    uint8_t val = cpu->A.high_8 + cpu->BC.high_8;
+    uint8_t val = cpu->A + cpu->BC.high_8;
     cpu->addA(cpu->BC.high_8, false);
-    ASSERT_EQ(cpu->A.high_8, val);
+    ASSERT_EQ(cpu->A, val);
     ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x20); // Only H-flag set.
 
     cpu->setA(8);
     cpu->setB(8);
     cpu->subA(cpu->BC.high_8, false);
-    ASSERT_EQ(0x00, cpu->A.high_8);
+    ASSERT_EQ(0x00, cpu->A);
     ASSERT_EQ(cpu->F.all_8 & 0xF0, 0xF0); // All flags set
 
     cpu->setA(255);
     cpu->setB(1);
-    val = cpu->A.high_8 + cpu->BC.high_8;
+    val = cpu->A + cpu->BC.high_8;
     cpu->addA(cpu->BC.high_8, false);
-    ASSERT_EQ(cpu->A.high_8, val);
+    ASSERT_EQ(cpu->A, val);
     ASSERT_EQ(cpu->F.all_8, 0xB0); //Z,H and C.
 
     cpu->setA(15);
     cpu->setB(5);
-    val = cpu->A.high_8 + cpu->BC.high_8;
+    val = cpu->A + cpu->BC.high_8;
     cpu->addA(cpu->BC.high_8, true);
-    ASSERT_EQ(cpu->A.high_8, val + 1);
+    ASSERT_EQ(cpu->A, val + 1);
     ASSERT_EQ(cpu->F.all_8, 0x20); // Only H flag.
 
     //setting C-flag for next test.
@@ -128,12 +128,25 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
 
     cpu->setA(10);
     cpu->setB(5);
-    val = cpu->A.high_8 - cpu->BC.high_8;
+    val = cpu->A - cpu->BC.high_8;
     cpu->subA(cpu->BC.high_8, true);
-    ASSERT_EQ(cpu->A.high_8, val - 1);
+    ASSERT_EQ(cpu->A, val - 1);
     ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x70); //H, C, N set
 
-    int8_t prevB = cpu->BC.high_8;
+    uint16_t addr = 0xC123;
+    uint8_t data = 137;
+    mmu->write(addr, data);
+    uint8_t prevVal = mmu->read(addr);
+    cpu->incrementAddr(addr);
+    uint8_t newVal = mmu->read(addr);
+    ASSERT_EQ(prevVal + 1, newVal);
+
+    prevVal = mmu->read(addr);
+    cpu->decrementAddr(addr);
+    newVal = mmu->read(addr);
+    ASSERT_EQ(prevVal - 1, newVal);
+
+    uint8_t prevB = cpu->BC.high_8;
     cpu->increment8(cpu->BC.high_8);
     ASSERT_EQ(cpu->BC.high_8, prevB + 1);
 
@@ -274,10 +287,10 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->PC, prevPC);
 
     cpu->setA(0xF0);
-    cpu->bit(7, cpu->A.high_8);
+    cpu->bit(7, cpu->A);
     ASSERT_EQ(cpu->F.all_8 & 0xE0, 0x20);
     cpu->setA(0xF0);
-    cpu->bit(3, cpu->A.high_8);
+    cpu->bit(3, cpu->A);
     ASSERT_EQ(cpu->F.all_8 & 0xE0, 0xA0);
 
     cpu->HL.all_16 = 0x0001;
@@ -291,7 +304,7 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->F.all_8 = 0;
     cpu->SP.all_16 = 0xFFFF;
 
-    cpu->addSP(0x01);
+    cpu->addSignedToRegPair(cpu->SP, 0x01);
     ASSERT_EQ(cpu->SP.all_16, 0x0000);
     ASSERT_EQ(cpu->F.z, 0);
     ASSERT_EQ(cpu->F.n, 0);
@@ -356,4 +369,6 @@ TEST(CPU, sixteen_bit_ops) {
     cpu->res(5, cpu->HL.low_8);
     ASSERT_EQ(cpu->HL.low_8, 0x00);
 
+    ASSERT_EQ(cpu->swapBits(0xF0), 0x0F);
+    ASSERT_EQ(cpu->swapBits(0xAB), 0xBA);
 }

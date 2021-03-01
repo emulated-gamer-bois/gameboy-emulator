@@ -35,8 +35,6 @@ class PPU {
 public:
     explicit PPU(std::shared_ptr<MMU> memory);
     void update(uint16_t cpuCycles);
-    void loadTileDataTESTING_ONLY(std::array<char, 64> & tile, uint8_t tileID, uint8_t tileSet); //For tests
-    void loadMapTESTING_ONLY(uint8_t tileMap, uint16_t mapPosition, uint8_t tileID);
 
     enum Mode {
         HBLANK,

@@ -30,7 +30,7 @@ private:
     //Registers
     uint16_t PC;
     RegisterPair SP;
-    RegisterPair A;
+    uint8_t  A;
     RegisterPair BC;
     RegisterPair DE;
     RegisterPair HL;
@@ -45,16 +45,21 @@ private:
     void setCFlag(uint16_t a,uint16_t b);
 
     //Setting registers
-    void setA(uint8_t val){ A.high_8=val;};
+    void setA(uint8_t val){ A=val;};
     void setB(uint8_t val){ BC.high_8=val;};
 
     //Register arithmetics
     void addA(uint8_t value, bool withCarry);
     void subA(uint8_t value, bool withCarry);
+    void incrementAddr(uint16_t addr);
     void increment8(uint8_t &reg);
     void increment16(uint16_t &reg);
+    void decrementAddr(uint16_t addr);
     void decrement8(uint8_t &reg);
     void decrement16(uint16_t &reg);
+    void add_8bit(uint8_t &reg, uint8_t b, bool withCarry);
+    void addHL(RegisterPair reg);
+    void addSignedToRegPair(RegisterPair &regPair, int8_t value);
 
     //Bitwise operations
     void andA(uint8_t value);
@@ -93,10 +98,18 @@ private:
     bool callZ(uint8_t firstByte, uint8_t secondByte, bool if_one);
     bool callC(uint8_t firstByte, uint8_t secondByte, bool if_one);
 
+    //16 bit operations
+    int CB_ops();
+    void bit(uint8_t bit_nr, uint8_t value);
+    void res(uint8_t bit_nr, uint8_t &reg);
+    void sla(uint8_t &reg);
+    void sra(uint8_t &reg);
+    void set(uint8_t bit_nr, uint8_t &reg);
+    uint8_t swapBits(uint8_t value);
+
     //Other
     void reset(uint8_t nth_byte);
     void compareA(uint8_t value);
-    void bit(uint8_t bit_nr, uint8_t value);
     uint8_t read_and_inc_pc();
     uint16_t read16_and_inc_pc();
 
@@ -104,20 +117,6 @@ private:
     FRIEND_TEST(CPU, Execute_LD_SP_D16_Instruction);
     FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);
     FRIEND_TEST(CPU, sixteen_bit_ops);
-    int CB_ops();
+    FRIEND_TEST(PPU, Print_test_rom);
 
-    void res(uint8_t bit_nr, uint8_t &reg);
-
-    void set(uint8_t bit_nr, uint8_t &reg);
-
-
-    void add_8bit(uint8_t &reg, uint8_t b, bool withCarry);
-
-    void addHL(RegisterPair reg);
-
-    void addSP(int8_t value);
-
-    void sla(uint8_t &reg);
-
-    void sra(uint8_t &reg);
 };

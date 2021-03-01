@@ -19,6 +19,7 @@ add_executable(tests
         tests.cpp
         cpu_test.cpp
         register_pair_test.cpp
-        mmu_test.cpp ppu_test.cpp)
+        mmu_test.cpp
+        ppu_test.cpp)
 
 target_link_libraries(${PROJECT_NAME} gameboy )
