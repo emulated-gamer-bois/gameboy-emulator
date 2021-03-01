@@ -153,9 +153,57 @@ std::array<char, 64> getGScrolledXOnceTile() {
     return tile;
 }
 
-void fillBackground(std::unique_ptr<PPU> & ppu, uint8_t tileMap, uint8_t tileID) {
+void loadMap(std::shared_ptr<MMU> & mmu, uint8_t tileMap, uint16_t mapPosition, uint8_t tileID) {
+    uint16_t mapAddress;
+    if (tileMap == 0) {
+        mapAddress = BG_WINDOW_MAP0 + mapPosition;
+    } else if (tileMap == 1) {
+        mapAddress = BG_WINDOW_MAP1 + mapPosition;
+    } else {
+        exit(1);
+    }
+    mmu->write(mapAddress, tileID);
+}
+
+void loadTileData(std::shared_ptr<MMU> & mmu, std::array<char, 64> & tile, uint8_t tileID, uint8_t tileSet) {
+    uint16_t tileDataAddress;
+    if (tileSet == 0) {
+        auto signedID = (int8_t)tileID;
+        tileDataAddress = BG_WINDOW_TILE_DATA0 + signedID * 16;
+    } else if (tileSet == 1) {
+        tileDataAddress = BG_WINDOW_TILE_DATA1 + tileID * 16;
+    }
+
+    for (int y = 0; y < 8; ++y) {
+        uint8_t highByte = 0;
+        uint8_t lowByte = 0;
+        for (int x = 0; x < 8; ++x) {
+            char current = tile.at(y * 8 + x);
+            switch (current) {
+                case 'W':
+                    break;
+                case 'L':
+                    lowByte |= 1 << (7 - x);
+                    break;
+                case 'D':
+                    highByte |= 1 << (7 - x);
+                    break;
+                case 'B':
+                    lowByte |= 1 << (7 - x);
+                    highByte |= 1 << (7 - x);
+                    break;
+                default:
+                    exit(1);
+            }
+        }
+        mmu->write(tileDataAddress + y * 2, lowByte);
+        mmu->write(tileDataAddress + y * 2 + 1, highByte);
+    }
+}
+
+void fillBackground(std::shared_ptr<MMU> & mmu, uint8_t tileMap, uint8_t tileID) {
     for (int i = 0; i < 32 * 32; ++i) {
-        ppu->loadMapTESTING_ONLY(tileMap, i, tileID);
+        loadMap(mmu, tileMap, i, tileID);
     }
 }
 
@@ -225,10 +273,10 @@ void printScreen(std::unique_ptr<PPU> & ppu) {
     printf("\n\n");
 }
 
-void printAllTiles(std::unique_ptr<PPU> & ppu) {
+void printAllTiles(std::shared_ptr<MMU> & mmu, std::unique_ptr<PPU> & ppu) {
     for (int y = 0; y < 12; ++y) {
         for (int x = 0; x < 20; ++x) {
-            ppu->loadMapTESTING_ONLY(0, y * 20 + x, y * 20 + x);
+            loadMap(mmu, 0, y * 20 + x, y * 20 + x);
         }
     }
     printScreen(ppu);
@@ -280,8 +328,8 @@ TEST(PPU, Read_single_tile_no_scrolling) {
 
     //Set data of tile 0 in 8000 addressing mode to a test tile:
     std::array<char, 64> startTile = getGTile();
-    ppu->loadTileDataTESTING_ONLY(startTile, 0, 1);
-    ppu->loadMapTESTING_ONLY(0, 0, 0);
+    loadTileData(mmu, startTile, 0, 1);
+    loadMap(mmu, 0, 0, 0);
 
     bufferFrame(ppu);
     printTile00(ppu);
@@ -300,8 +348,8 @@ TEST(PPU, Tile_map_1) {
 
     //Set data of tile 0 in 8000 addressing mode to a test tile:
     std::array<char, 64> startTile = getGTile();
-    ppu->loadTileDataTESTING_ONLY(startTile, 0, 1);
-    ppu->loadMapTESTING_ONLY(1, 0, 0);
+    loadTileData(mmu, startTile, 0, 1);
+    loadMap(mmu, 1, 0, 0);
 
     bufferFrame(ppu);
     printTile00(ppu);
@@ -320,8 +368,8 @@ TEST(PPU, Tile_set_0) {
 
     //Set data of tile 0 in 9000 addressing mode to a test tile:
     std::array<char, 64> startTile = getGTile();
-    ppu->loadTileDataTESTING_ONLY(startTile, 129, 0);
-    ppu->loadMapTESTING_ONLY(1, 0, 129);
+    loadTileData(mmu, startTile, 129, 0);
+    loadMap(mmu, 1, 0, 129);
 
     bufferFrame(ppu);
     printTile00(ppu);
@@ -345,12 +393,12 @@ TEST(PPU, Read_single_tile_scrolling_x) {
     //set tile 1 in 8000 addressing mode to a white tile
     std::array<char, 64> startTile = getGTile();
     std::array<char, 64> whiteTile = getWhiteTile();
-    ppu->loadTileDataTESTING_ONLY(startTile, 0, 1);
-    ppu->loadTileDataTESTING_ONLY(whiteTile, 1, 1);
+    loadTileData(mmu, startTile, 0, 1);
+    loadTileData(mmu, whiteTile, 1, 1);
 
     //Set the tile at (0, 0) to the start tile, set tiles at (0, 1) and (1, 0) to white
-    fillBackground(ppu, 0, 1);
-    ppu->loadMapTESTING_ONLY(0, 0, 0);
+    fillBackground(mmu, 0, 1);
+    loadMap(mmu, 0, 0, 0);
 
     std::array<char, 64> targetTile = getGScrolledXOnceTile();
 
@@ -380,19 +428,19 @@ TEST(PPU, Many_tiles) {
     std::array<char, 64> yTile = getYTile();
 
     //Load tile data
-    ppu->loadTileDataTESTING_ONLY(whiteTile, 0, 1);
-    ppu->loadTileDataTESTING_ONLY(gTile, 1, 1);
-    ppu->loadTileDataTESTING_ONLY(aTile, 2, 1);
-    ppu->loadTileDataTESTING_ONLY(mTile, 3, 1);
-    ppu->loadTileDataTESTING_ONLY(eTile, 4, 1);
-    ppu->loadTileDataTESTING_ONLY(bTile, 5, 1);
-    ppu->loadTileDataTESTING_ONLY(oTile, 6, 1);
-    ppu->loadTileDataTESTING_ONLY(yTile, 7, 1);
+    loadTileData(mmu, whiteTile, 0, 1);
+    loadTileData(mmu, gTile, 1, 1);
+    loadTileData(mmu, aTile, 2, 1);
+    loadTileData(mmu, mTile, 3, 1);
+    loadTileData(mmu, eTile, 4, 1);
+    loadTileData(mmu, bTile, 5, 1);
+    loadTileData(mmu, oTile, 6, 1);
+    loadTileData(mmu, yTile, 7, 1);
 
     //Load map
-    fillBackground(ppu, 0, 0);
+    fillBackground(mmu, 0, 0);
     for (int i = 0; i < 7; ++i) {
-        ppu->loadMapTESTING_ONLY(0, i, i + 1);
+        loadMap(mmu, 0, i, i + 1);
     }
 
     bufferFrame(ppu);
