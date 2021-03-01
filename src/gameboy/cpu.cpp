@@ -572,16 +572,19 @@ void CPU::daa() {
     F.z = (A == 0) ? 1 : 0; // the usual z flag
     F.h = 0; // h flag is always cleared
 }
-void CPU::cpl(){
-    A=~A;
-    F.n=1;
-    F.h=1;
+
+void CPU::cpl() {
+    A = ~A;
+    F.n = 1;
+    F.h = 1;
 }
-void CPU::ccf(){
+
+void CPU::ccf() {
     F.c = !F.c;
-    F.n=0;
-    F.h=0;
+    F.n = 0;
+    F.h = 0;
 }
+
 /**
  * Swaps the value of the lower 4 bits (bit 0 to 3) with
  * the value of the higher 4 bits (bit 4 to 7)
@@ -747,6 +750,9 @@ int CPU::execute_instruction() {
         case 0x26:
             loadIm8(HL.high_8, read_and_inc_pc());
             return 2;
+        case 0x27:
+            daa();
+            return 1;
         case 0x28:
             if (jumpRelativeZ(read_and_inc_pc(), true))
                 return 3;
@@ -771,6 +777,9 @@ int CPU::execute_instruction() {
         case 0x2E:
             loadIm8(HL.low_8, read_and_inc_pc());
             return 2;
+        case 0x2F:
+            cpl();
+            return 1;
         case 0x30:
             if (jumpRelativeC(read_and_inc_pc(), false))
                 return 3;
@@ -822,6 +831,9 @@ int CPU::execute_instruction() {
         case 0x3E:
             loadIm8(A, read_and_inc_pc());
             return 2;
+        case 0x3F:
+            ccf();
+            return 1;
         case 0x40:
             //This is stoopid.
             loadIm8(BC.high_8, BC.high_8);
