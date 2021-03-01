@@ -315,34 +315,34 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->SP.all_16, 0x0000);
     ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x30);
 
-    cpu->BC.high_8=0xFF;
-    cpu->F.all_8=0;
+    cpu->BC.high_8 = 0xFF;
+    cpu->F.all_8 = 0;
     cpu->sla(cpu->BC.high_8);
-    ASSERT_EQ(cpu->BC.high_8,0xFE);
+    ASSERT_EQ(cpu->BC.high_8, 0xFE);
     ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x10);
 
-    cpu->BC.high_8=0xC8;
-    cpu->F.all_8=0;
+    cpu->BC.high_8 = 0xC8;
+    cpu->F.all_8 = 0;
     cpu->sla(cpu->BC.high_8);
-    ASSERT_EQ(cpu->BC.high_8,0x90);
+    ASSERT_EQ(cpu->BC.high_8, 0x90);
     ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x10);
 
-    cpu->BC.high_8=0xD8;
-    cpu->F.all_8=0;
+    cpu->BC.high_8 = 0xD8;
+    cpu->F.all_8 = 0;
     cpu->sra(cpu->BC.high_8);
-    ASSERT_EQ(cpu->BC.high_8,0xEC);
+    ASSERT_EQ(cpu->BC.high_8, 0xEC);
     ASSERT_EQ(cpu->F.all_8 & 0xF0, 0);
 
-    cpu->BC.high_8=0x81;
-    cpu->F.all_8=0;
+    cpu->BC.high_8 = 0x81;
+    cpu->F.all_8 = 0;
     cpu->sra(cpu->BC.high_8);
-    ASSERT_EQ(cpu->BC.high_8,0xC0);
+    ASSERT_EQ(cpu->BC.high_8, 0xC0);
     ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x10);
 
-    cpu->BC.high_8=0x81;
-    cpu->F.all_8=0;
+    cpu->BC.high_8 = 0x81;
+    cpu->F.all_8 = 0;
     cpu->srl(cpu->BC.high_8);
-    ASSERT_EQ(cpu->BC.high_8,0x40);
+    ASSERT_EQ(cpu->BC.high_8, 0x40);
     ASSERT_EQ(cpu->F.all_8 & 0xF0, 0x10);
 
     cpu->A = 0;
@@ -354,6 +354,22 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->addHL(cpu->SP);
     ASSERT_EQ(cpu->HL.all_16, 0x8000);
     ASSERT_EQ(cpu->F.all_8 & 0x70, 0x20);
+
+    cpu->A = 0x66;
+    cpu->addA(0x66, false);
+    ASSERT_EQ(cpu->A,0xCC);
+    cpu->daa();
+    ASSERT_EQ(cpu->A,0x32);
+    cpu->A = 0xF5;
+    cpu->subA(0x60,false);
+    ASSERT_EQ(cpu->A,0x95);
+    cpu->daa();
+    ASSERT_EQ(cpu->A,0x95);
+    cpu->addA(0x60,false);
+    cpu->daa();
+    ASSERT_EQ(cpu->A,0x55);
+
+
 }
 
 TEST(CPU, sixteen_bit_ops) {

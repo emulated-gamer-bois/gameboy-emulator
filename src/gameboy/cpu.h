@@ -120,6 +120,7 @@ private:
     FRIEND_TEST(CPU, sixteen_bit_ops);
 
 
+    void daa();
 };
 
 

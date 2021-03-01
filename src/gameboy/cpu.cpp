@@ -40,7 +40,7 @@ void CPU::setZNFlags(uint8_t newValue, bool subtraction) {
  * @param cFlag the value of the C flag, 0 if the cFlag is not used
  */
 void CPU::setHFlag(uint8_t a, uint8_t b, bool subtraction, uint8_t cFlag) {
-    if(subtraction) {
+    if (subtraction) {
         // Sets the H flag if carry from bit 4 to bit 3
         F.h = ((a & 0x0F) - (b & 0x0F) - cFlag) < 0 ? 1 : 0;
     } else {
@@ -57,7 +57,7 @@ void CPU::setHFlag(uint8_t a, uint8_t b, bool subtraction, uint8_t cFlag) {
  */
 void CPU::setCFlag(uint16_t a, uint16_t b, bool subtraction) {
     // Sets the C flag if overflow
-    if(subtraction) {
+    if (subtraction) {
         //Inverted C flag if using subtraction
         F.c = (a + b) > 0xFF ? 0 : 1;
     } else {
@@ -152,10 +152,11 @@ void CPU::subA(uint8_t value, bool withCarry) {
     A += twosComp8(value + CFlag);
     setZNFlags(A, true);
 }
+
 /**
 * Increment the value stored at address @addr
  */
-void CPU::incrementAddr(uint16_t addr){
+void CPU::incrementAddr(uint16_t addr) {
     uint8_t value = memory->read(addr);
     setHFlag(value++, 1, false, 0);
     memory->write(addr, value);
@@ -165,7 +166,7 @@ void CPU::incrementAddr(uint16_t addr){
 /**
 * Decrement the value stored at address @addr
  */
-void CPU::decrementAddr(uint16_t addr){
+void CPU::decrementAddr(uint16_t addr) {
     uint8_t value = memory->read(addr);
     setHFlag(value--, 1, true, 0);
     memory->write(addr, value);
@@ -527,17 +528,17 @@ void CPU::sla(uint8_t &reg) {
     F.c = reg >> 7;
     reg = reg << 1;
     reg &= 0xFE;
-    setZNFlags(reg,false);
-    F.h=0;
+    setZNFlags(reg, false);
+    F.h = 0;
 }
 
 void CPU::sra(uint8_t &reg) {
-    auto b7 = (reg & 0x80) ;
+    auto b7 = (reg & 0x80);
     F.c = reg & 0x01;
     reg = reg >> 1;
     reg |= b7;
-    setZNFlags(reg,false);
-    F.h=0;
+    setZNFlags(reg, false);
+    F.h = 0;
 }
 
 void CPU::srl(uint8_t &reg) {
@@ -545,6 +546,31 @@ void CPU::srl(uint8_t &reg) {
     reg >>= 1;
     F.h = 0;
     setZNFlags(reg, false);
+}
+
+/**
+ * Is only used after addition or subtraction, is used to convert register A to Binary Coded Decimal(BCD).
+ * This is done by first checking if the previous operation was addition or subtraction.
+ * If it was addition, we check either if there is a carry, which indicates overflow(meaning that the value has passed 15, and is now misrepresenting the actual value it should represent, for example 18 --> should display 8, but shows 2 due to overflowing.
+ * Or if the value of A>0x99, we simply check if the numerical value of the upper nibble is 10 or more, and it needs correction.
+ * If it on the other hand is subtraction, the only time a value > 9 can be shown is if one of the carries occurred as this means that there was a borrow and the numbers need correction.
+ * By correction I mean + or - with the values 0x60 or 0x06. This is due to 0xF-0x9=0x6, which is the correction needed to transform the values to BCD.
+ * Credits to AWJ @ https://forums.nesdev.com/viewtopic.php?t=15944
+ * */
+void CPU::daa() {
+    if (!F.n) {
+        if (F.c || A > 0x99) {
+            A += 0x60;
+            F.c = 1;
+        }
+        if (F.h || (A & 0x0f) > 0x09) { A += 0x6; }
+    } else {  // after a subtraction, only adjust if (half-)carry occurred
+        if (F.c) { A -= 0x60; }
+        if (F.h) { A -= 0x6; }
+    }
+// these flags are always updated
+    F.z = (A == 0) ? 1 : 0; // the usual z flag
+    F.h = 0; // h flag is always cleared
 }
 
 /**
@@ -1225,7 +1251,7 @@ int CPU::execute_instruction() {
             }
         case 0xCD:
             PC += 2;
-            call(memory->read(PC-2), memory->read(PC - 1));
+            call(memory->read(PC - 2), memory->read(PC - 1));
             return 6;
         case 0xCE:
             addA(read_and_inc_pc(), true);
