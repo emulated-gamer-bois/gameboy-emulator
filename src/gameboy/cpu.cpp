@@ -572,7 +572,16 @@ void CPU::daa() {
     F.z = (A == 0) ? 1 : 0; // the usual z flag
     F.h = 0; // h flag is always cleared
 }
-
+void CPU::cpl(){
+    A=~A;
+    F.n=1;
+    F.h=1;
+}
+void CPU::ccf(){
+    F.c = !F.c;
+    F.n=0;
+    F.h=0;
+}
 /**
  * Swaps the value of the lower 4 bits (bit 0 to 3) with
  * the value of the higher 4 bits (bit 4 to 7)

@@ -357,17 +357,36 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
 
     cpu->A = 0x66;
     cpu->addA(0x66, false);
-    ASSERT_EQ(cpu->A,0xCC);
+    ASSERT_EQ(cpu->A, 0xCC);
     cpu->daa();
-    ASSERT_EQ(cpu->A,0x32);
+    ASSERT_EQ(cpu->A, 0x32);
     cpu->A = 0xF5;
-    cpu->subA(0x60,false);
-    ASSERT_EQ(cpu->A,0x95);
+    cpu->subA(0x60, false);
+    ASSERT_EQ(cpu->A, 0x95);
     cpu->daa();
-    ASSERT_EQ(cpu->A,0x95);
-    cpu->addA(0x60,false);
+    ASSERT_EQ(cpu->A, 0x95);
+    cpu->addA(0x60, false);
     cpu->daa();
-    ASSERT_EQ(cpu->A,0x55);
+    ASSERT_EQ(cpu->A, 0x55);
+
+    cpu->F.c = 1;
+    cpu->F.h=1;
+    cpu->F.n=1;
+    cpu->ccf();
+    ASSERT_EQ(cpu->F.c, 0);
+    cpu->ccf();
+    cpu->F.h=0;
+    cpu->F.n=0;
+    ASSERT_EQ(cpu->F.c, 1);
+    cpu->A=0x00;
+    cpu->cpl();
+    cpu->F.h=1;
+    cpu->F.n=1;
+    ASSERT_EQ(cpu->A,0xFF);
+    cpu->A=0xFF;
+    cpu->cpl();
+    ASSERT_EQ(cpu->A,0x00);
+
 
 
 }

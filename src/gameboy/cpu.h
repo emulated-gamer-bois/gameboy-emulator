@@ -121,6 +121,10 @@ private:
 
 
     void daa();
+
+    void cpl();
+
+    void ccf();
 };
 
 
