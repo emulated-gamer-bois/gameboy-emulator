@@ -5,9 +5,9 @@
 #include <iostream>
 #include <gtest/gtest.h>
 #include "../src/gameboy/PPU.h"
-#include "../src/gameboy/CPU.h"
 #include <array>
 #include <cstring>
+#include <memory>
 
 std::array<char, 64> getWhiteTile() {
     char tileData[8][8] = {
