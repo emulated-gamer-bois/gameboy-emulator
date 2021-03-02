@@ -3,6 +3,7 @@
 //
 
 #include "PPU.h"
+#include "Definitions.h"
 #include <cassert>
 
 PPU::PPU(std::shared_ptr<MMU> memory) {
@@ -43,6 +44,9 @@ void PPU::update(uint16_t cpuCycles) {
                     modeFlag = OAM_SEARCH;
                 } else { //If we have drawn the entire screen
                     modeFlag = VBLANK;
+                    uint8_t interruptFlags = memory->read(INTERRUPT_FLAG);
+                    interruptFlags |= 1;
+                    memory->write(INTERRUPT_FLAG, interruptFlags);
                 }
             }
             break;
