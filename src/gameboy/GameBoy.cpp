@@ -16,8 +16,16 @@ void GameBoy::step() {
     this->mmu->timer_update(cycles);
 }
 
-uint8_t *GameBoy::getScreen() {
-    return this->ppu->getFrameBuffer()->data();
+std::unique_ptr<uint8_t[]> GameBoy::getScreenTexture() {
+    auto ppuFrameBuffer = this->ppu->getFrameBuffer();
+    auto texture = std::make_unique<uint8_t[]>(ppuFrameBuffer->size());
+
+    for (int i = 0; i < ppuFrameBuffer->size(); i++) {
+        //texture[i] = 0xFF - (ppuFrameBuffer->at(i) * 0x55);
+        texture[i] = (i % 4) * 0x55;
+    }
+
+    return texture;
 }
 
 void GameBoy::joypad_input(uint8_t key, uint8_t action) {

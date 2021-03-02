@@ -57,7 +57,7 @@ void Application::start() {
 
         // Prepare for rendering, render and swap buffer.
         this->updateSDLWindowSize();
-        this->renderView.setScreenTexture(this->gameBoy.getScreen());
+        this->renderView.setScreenTexture(this->gameBoy.getScreenTexture().get());
         this->renderView.render();
         SDL_GL_SwapWindow(this->window);
         this->gameBoy.confirmDraw();
