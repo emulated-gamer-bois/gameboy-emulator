@@ -24,11 +24,9 @@ public:
      * Fetches, decodes and executes the instruction at location PC
      * @returns amount of machine cycles operation takes.
      */
-    int execute_instruction();
-    void cpu_dump();
+    int update();
 
-    bool isInterrupted();
-    void handleInterrupts();
+    void cpu_dump();
 private:
     //Registers
     uint16_t PC;
@@ -43,6 +41,11 @@ private:
     unsigned int IME : 1;
     //Memory
     std::shared_ptr<MMU> memory;
+
+    //Update related functions
+    int execute_instruction();
+    bool isInterrupted();
+    void handleInterrupts();
 
     //Flag management
     void setZNFlags(uint8_t value, bool subtraction);

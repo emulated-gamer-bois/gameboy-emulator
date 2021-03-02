@@ -11,13 +11,7 @@ GameBoy::GameBoy() {
 }
 
 void GameBoy::step() {
-    int cycles;
-    if (cpu->isInterrupted()) {
-        cpu->handleInterrupts();
-        cycles = 5;
-    } else {
-        cycles = this->cpu->execute_instruction();
-    }
+    int cycles = this->cpu->update();
     this->ppu->update(cycles);
     this->mmu->timer_update(cycles);
 }

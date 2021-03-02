@@ -33,6 +33,17 @@ void CPU::cpu_dump() {
     std::cout << "=---------------------------=" << std::endl;
 }
 
+int CPU::update() {
+    int cycles;
+    if (this->isInterrupted()) {
+        this->handleInterrupts();
+        cycles = 5;
+    } else {
+        cycles = this->execute_instruction();
+    }
+    return cycles;
+}
+
 void nop() {}
 
 /**
