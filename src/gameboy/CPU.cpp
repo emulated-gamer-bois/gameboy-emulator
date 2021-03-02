@@ -18,6 +18,7 @@ CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
     DE.all_16 = 0x00;
     HL.all_16 = 0x00;
     F.all_8 = 0x0;
+    IME = 0;
 }
 
 void CPU::cpu_dump() {
@@ -454,14 +455,15 @@ bool CPU::callC(uint8_t firstByte, uint8_t secondByte, bool if_one) {
 
 /**
  * Return from a subroutine by setting PC with
- * the two latest values on the stack
+ * the two latest values on the stack.
+ * Resets IME flag to 1 if returning from interrupt.
  * @param from_interrupt if the subroutine returns from interrupt
  */
 void CPU::ret(bool from_interrupt) {
     PC = memory->read(SP.all_16++);
     PC |= memory->read(SP.all_16++) << 0x08;
     if (from_interrupt) {
-        //TODO: Reset the interrupt flag
+        IME = 1;
     }
 }
 
@@ -1346,6 +1348,9 @@ int CPU::execute_instruction() {
         case 0xF2:
             loadImp(0xFF00 + BC.low_8, A);
             return 2;
+        case 0xF3:
+            IME = 0;
+            return 1;
         case 0xF5:
             tmpReg.high_8 = A;
             tmpReg.low_8 = F.all_8;
@@ -1367,6 +1372,9 @@ int CPU::execute_instruction() {
         case 0xFA:
             loadImp(read16_and_inc_pc(), A);
             return 4;
+        case 0xFB:
+            IME = 1;
+            return 1;
         case 0xFE:
             compareA(read_and_inc_pc());
             return 2;
