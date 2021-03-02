@@ -18,15 +18,17 @@ CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
     DE.all_16 = 0x00;
     HL.all_16 = 0x00;
     F.all_8 = 0x0;
+    stop = false;
+    halt = false;
 }
 
 void CPU::cpu_dump() {
     std::cout << "=---------------------------=" << std::endl;
-    std::cout << "A: 0x" << std::hex << (int)this->A << std::endl;
+    std::cout << "A: 0x" << std::hex << (int) this->A << std::endl;
     std::cout << "BC: 0x" << std::hex << this->BC.all_16 << std::endl;
     std::cout << "DE: 0x" << std::hex << this->DE.all_16 << std::endl;
     std::cout << "HL: 0x" << std::hex << this->HL.all_16 << std::endl;
-    std::cout << "F: 0x" << std::hex << (int)this->F.all_8 << std::endl;
+    std::cout << "F: 0x" << std::hex << (int) this->F.all_8 << std::endl;
     std::cout << "PC: 0x" << std::hex << this->PC << std::endl;
     std::cout << "SP: 0x" << std::hex << this->SP.all_16 << std::endl;
     std::cout << "=---------------------------=" << std::endl;
@@ -585,6 +587,52 @@ void CPU::daa() {
 // these flags are always updated
     F.z = (A == 0) ? 1 : 0; // the usual z flag
     F.h = 0; // h flag is always cleared
+}
+
+/**
+ * IE=0xffff
+ * P1=0xff00
+ * */
+void CPU::stop_op() {
+    auto IE = memory->read(0xffff);
+    loadIm8(BC.high_8, IE); // Save IE
+    memory->write(0xffff, 0x00); //clear IE
+    memory->write(0xff00, 0x00);
+    stop = true;
+
+}
+
+void CPU::return_from_stop() {
+    loadIm8(A, BC.high_8);
+    memory->write(0xffff, A);
+    stop = false;
+}
+
+bool CPU::getStop() {
+    return stop;
+}
+
+bool CPU::getHalt() {
+    return halt;
+}
+/**
+ * IE=0xffff
+ * P1=0xff00
+ * IF=0xFF0F
+ *
+ * */
+void CPU::halt_op() {
+    //if(IME){
+    halt = true;
+
+    // }
+    //else if (mmu->read(IE & IF & 0x1F){
+    //HALT MODE ENTERED
+    halt=true;
+    //}else{
+    //HALT bug should occurr but has not been implemented.
+
+    //}
 }
 
 void CPU::cpl() {
@@ -2249,3 +2297,5 @@ int CPU::CB_ops() {
     }
     return 0;
 }
+
+
