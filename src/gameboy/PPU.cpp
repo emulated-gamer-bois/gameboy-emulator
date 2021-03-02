@@ -72,10 +72,6 @@ void PPU::update(uint16_t cpuCycles) {
             if (accumulatedCycles >= OAM_SEARCH_THRESHOLD) {
                 accumulatedCycles -= OAM_SEARCH_THRESHOLD;
                 modeFlag = SCANLINE_DRAW;
-                // Set readyToDraw to false as fast as possible after set to true
-                if (LY == 0) {
-                    readyToDraw = false;
-                }
             }
             break;
 
@@ -216,10 +212,6 @@ bool PPU::meetsStatConditions() {
     return false;
 }
 
-bool PPU::getReadyToDraw() const {
-    return this->readyToDraw;
-}
-
 void PPU::vBlankInterrupt() {
     uint8_t interruptFlags = memory->read(INTERRUPT_FLAG);
     interruptFlags |= (1 << 0);
@@ -230,4 +222,12 @@ void PPU::statInterrupt() {
     uint8_t interruptFlags = memory->read(INTERRUPT_FLAG);
     interruptFlags |= (1 << 1);
     memory->write(INTERRUPT_FLAG, interruptFlags);
+}
+
+bool PPU::isReadyToDraw() const {
+    return this->readyToDraw;
+}
+
+void PPU::confirmDraw() {
+    this->readyToDraw = false;
 }

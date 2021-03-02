@@ -48,6 +48,10 @@ void GameBoy::cpu_dump() {
     this->cpu->cpu_dump();
 }
 
-bool GameBoy::readyToDraw() const {
-    return this->ppu->getReadyToDraw();
+bool GameBoy::isReadyToDraw() const {
+    return this->ppu->isReadyToDraw();
+}
+
+void GameBoy::confirmDraw() {
+    this->ppu->confirmDraw();
 }

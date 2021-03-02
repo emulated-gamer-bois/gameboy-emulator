@@ -43,7 +43,8 @@ public:
         SCANLINE_DRAW
     };
 
-    bool getReadyToDraw() const;
+    bool isReadyToDraw() const;
+    void confirmDraw();
     std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>* getFrameBuffer();
     uint8_t getMode() const;
 private:
