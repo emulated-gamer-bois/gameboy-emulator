@@ -2,8 +2,8 @@
 // Created by isaaklindgren on 2021-02-23.
 //
 
-#ifndef LAME_BOY_FLAGS_H
-#define LAME_BOY_FLAGS_H
+#pragma once
+
 union Flags {
     struct {
     /**
@@ -21,4 +21,3 @@ union Flags {
     };
     uint8_t all_8;
 };
-#endif //LAME_BOY_FLAGS_H

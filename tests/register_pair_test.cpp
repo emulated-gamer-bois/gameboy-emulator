@@ -3,8 +3,8 @@
 //
 
 #include "gtest/gtest.h"
-#include "../src/gameboy/register_pair.h"
-#include "../src/gameboy/flags.h"
+#include "../src/gameboy/RegisterPair.h"
+#include "../src/gameboy/Flags.h"
 
 TEST(REGISTER_PAIR, READ_WRITE) {
     RegisterPair reg;

@@ -23,8 +23,10 @@ if(NOT TRAVIS)
         Application.h
         Application.cpp
         Palette.h
+        Timer.h
+        Timer.cpp
         )
 
-    target_link_libraries ( ${PROJECT_NAME} labhelper )
+    target_link_libraries ( ${PROJECT_NAME} labhelper gameboy )
     config_build_output()
 endif()

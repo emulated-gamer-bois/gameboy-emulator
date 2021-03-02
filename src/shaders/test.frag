@@ -5,9 +5,9 @@ in vec2 texCoord;
 
 layout (binding = 0) uniform sampler2D screenTex;
 
-const float C1_MAX = 0.205f;
-const float C2_MAX = 0.565f;
-const float C3_MAX = 0.86f;
+const float C1_MAX = 0.25f;
+const float C2_MAX = 0.50f;
+const float C3_MAX = 0.75f;
 
 uniform vec3 c1;
 uniform vec3 c2;

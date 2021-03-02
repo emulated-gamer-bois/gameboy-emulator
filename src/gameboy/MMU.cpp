@@ -2,7 +2,7 @@
 // Created by algot on 2021-02-15.
 //
 
-#include "mmu.h"
+#include "MMU.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -26,9 +26,17 @@ MMU::MMU() {
     this->booting = true;
     // Enable all interrupts by default
     this->interrupt_enable = 0b11111;
+    // No interrupt requests by default
+    this->interrupt_flag = 0;
 
     // No buttons pressed by default
     this->io_joypad = 0xff;
+
+    // Timer default values
+    timer_divider = 0;
+    timer_counter = 0;
+    timer_modulo = 0;
+    timer_control = 0;
 }
 
 uint8_t MMU::read(uint16_t addr) {
@@ -126,12 +134,11 @@ void MMU::disable_boot_rom() {
     this->booting = false;
 }
 
-void MMU::load_rom(std::string filepath) {
+void MMU::load_game_rom(std::string filepath) {
     std::streampos size;
     char *memblock;
-    std::string prefix = "..\\..\\roms\\";
 
-    std::ifstream file (prefix.append(filepath), std::ios::in|std::ios::binary|std::ios::ate);
+    std::ifstream file (filepath, std::ios::in|std::ios::binary|std::ios::ate);
     if (file.is_open())
     {
         // Get file size
@@ -151,6 +158,40 @@ void MMU::load_rom(std::string filepath) {
         std::memcpy(&this->game_rom[this->game_rom.size() - size], &memblock[0], size);
 
         delete[] memblock;
+    }
+    else {
+        std::cout << "Unable to open file: " << filepath << std::endl;
+        // TODO: Error handling
+    }
+}
+
+void MMU::load_boot_rom(std::string filepath) {
+    std::streampos size;
+    char *memblock;
+
+    std::ifstream file (filepath, std::ios::in|std::ios::binary|std::ios::ate);
+    if (file.is_open())
+    {
+        // Get file size
+        size = file.tellg();
+        if ((int)size == 256) {
+            memblock = new char [size];
+
+            // Move seeker to beginning of file
+            file.seekg (0, std::ios::beg);
+            // Read file to buffer
+            file.read (memblock, size);
+            // Close file
+            file.close();
+
+            // Copy data
+            std::memcpy(&this->boot_rom[this->boot_rom.size() - size], &memblock[0], size);
+
+            delete[] memblock;
+        } else {
+            std::cout << "Unable to load boot ROM! File size is not 256 bytes!" << std::endl;
+            // TODO: Error handling
+        }
     }
     else {
         std::cout << "Unable to open file: " << filepath << std::endl;
@@ -183,6 +224,25 @@ void MMU::write_io(uint16_t addr, uint8_t data) {
         if (data != 0) this->disable_boot_rom();
     } else if (addr == IO_JOYPAD) {
         this->io_joypad_select = data;
+    } else if (addr == INTERRUPT_FLAG) {
+        this->interrupt_flag = data;
+    } else if (TIMER_DIVIDER <= addr && addr <= TIMER_CONTROL) {
+        switch (addr) {
+            case TIMER_DIVIDER:
+                this->timer_divider = 0;
+                break;
+            case TIMER_COUNTER:
+                this->timer_counter = ((uint16_t)data << 8);
+                break;
+            case TIMER_MODULO:
+                this->timer_modulo = data;
+                break;
+            case TIMER_CONTROL:
+                this->timer_control = data & 0b111;
+                break;
+        }
+    } else {
+        this->io[addr - IO_START] = data;
     }
 }
 
@@ -193,10 +253,57 @@ uint8_t MMU::read_io(uint16_t addr) {
         } else {
             return ((this->io_joypad >> 4) & 0xf);
         }
+    } else if (addr == INTERRUPT_FLAG) {
+        return this->interrupt_flag & (0x1f);
+    } else if (TIMER_DIVIDER <= addr && addr <= TIMER_CONTROL) {
+        switch (addr) {
+            case TIMER_DIVIDER:
+                return (uint8_t)(this->timer_divider >> 8);
+            case TIMER_COUNTER:
+                return this->timer_counter;
+            case TIMER_MODULO:
+                return this->timer_modulo;
+            case TIMER_CONTROL:
+                return this->timer_control & 0b111;
+        }
+    } else {
+        return this->io[addr - IO_START];
     }
     return 0;
 }
 
+// Timer functions
+// Cycles is @ 1,048,576Hz
+void MMU::timer_update(uint16_t cycles) {
+    // Timer activated
+    if (this->timer_control & (1 << 0)) {
+        // Increase divider
+        uint16_t old_divider = this->timer_divider;
+        this->timer_divider += (cycles*4);
+
+        // Timer speed
+        uint8_t speed = this->timer_control & 0b11;
+        const uint16_t speed_mask[] = {0xfc00, 0xfff0, 0xffc0, 0xff00};
+        const uint8_t speed_offs[] = {10, 4, 6, 8};
+
+        uint16_t mask = speed_mask[speed];
+        uint8_t offs = speed_offs[speed];
+
+        // Check for counter overflow
+        // Increase counter
+        uint8_t increase_counter = (((this->timer_divider & mask) - (old_divider & mask)) >> offs);
+        if ((uint16_t)(this->timer_counter + increase_counter) > 0xff) {
+            // Add modulo
+            this->timer_counter += (this->timer_modulo + increase_counter);
+            // Raise interrupt request for Timer interrupt
+            this->interrupt_flag = this->interrupt_flag | (1 << 2);
+        } else {
+          this->timer_counter += increase_counter;
+        }
+    }
+}
+
+// Joypad functions
 void MMU::joypad_release(uint8_t button) {
     auto temp = this->io_joypad;
     this->io_joypad = temp | (1 << button);
@@ -205,4 +312,8 @@ void MMU::joypad_release(uint8_t button) {
 void MMU::joypad_press(uint8_t button) {
     uint8_t temp = this->io_joypad;
     this->io_joypad = (temp & ~(1 << button));
+
+    // Raise interrupt flag
+    temp = this->interrupt_flag;
+    this->interrupt_flag = (temp | (1 << 4));
 }

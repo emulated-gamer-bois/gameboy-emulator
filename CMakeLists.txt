@@ -3,6 +3,12 @@ cmake_minimum_required ( VERSION 3.0.2 )
 project ( lame-boy )
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# All libraries made is static
+if (MSVC)
+    string(REPLACE "/MD" /MT CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+    string(REPLACE "/MDd" /MTd CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
+endif ()
+
 # For windows we use our bundled binaries.
 if(WIN32)
     list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/external/sdl2")
@@ -33,7 +39,7 @@ add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 set ( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 set ( CMAKE_BUILD_TYPE DEBUG )
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()
 
 # Excludes graphics code if tests are run in travis
