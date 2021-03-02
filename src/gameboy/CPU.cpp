@@ -33,6 +33,10 @@ void CPU::cpu_dump() {
     std::cout << "=---------------------------=" << std::endl;
 }
 
+bool CPU::interruptsEnabled() const {
+    return IME == 1;
+}
+
 void nop() {}
 
 /**
@@ -2210,3 +2214,5 @@ int CPU::CB_ops() {
     }
     return 0;
 }
+
+

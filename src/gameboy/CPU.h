@@ -26,6 +26,7 @@ public:
     int execute_instruction();
     void cpu_dump();
 
+    bool interruptsEnabled() const;
 private:
     //Registers
     uint16_t PC;

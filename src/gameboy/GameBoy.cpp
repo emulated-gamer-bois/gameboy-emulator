@@ -11,9 +11,13 @@ GameBoy::GameBoy() {
 }
 
 void GameBoy::step() {
-    // TODO: Check for interrupts
-    int cycles = 0;
-    cycles = this->cpu->execute_instruction();
+    int cycles;
+    if (interrupted()) {
+        handleInterrupts();
+        cycles = 5;
+    } else {
+        cycles = this->cpu->execute_instruction();
+    }
     this->ppu->update(cycles);
     this->mmu->timer_update(cycles);
 }
@@ -54,4 +58,17 @@ bool GameBoy::isReadyToDraw() const {
 
 void GameBoy::confirmDraw() {
     this->ppu->confirmDraw();
+}
+
+bool GameBoy::interrupted() {
+    if (cpu->interruptsEnabled()) {
+        uint8_t flags = mmu->read(INTERRUPT_FLAG);
+        uint8_t mask = mmu->read(INTERRUPT_ENABLE);
+        return flags & mask;
+    }
+    return false;
+}
+
+void GameBoy::handleInterrupts() {
+    //TODO
 }
