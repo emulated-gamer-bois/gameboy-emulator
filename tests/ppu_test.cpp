@@ -5,6 +5,7 @@
 #include <iostream>
 #include <gtest/gtest.h>
 #include "../src/gameboy/PPU.h"
+#include "../src/gameboy/gameboy.h"
 #include <array>
 #include <cstring>
 #include <memory>
@@ -446,4 +447,16 @@ TEST(PPU, Many_tiles) {
 
     bufferFrame(ppu);
     printScreen(ppu);
+}
+
+TEST(PPU, g_tile_rom) {
+    GameBoy gb;
+    gb.load_boot_rom("../../roms/gb/boot_g_tile.gb");
+    while (gb.cpu->PC != 0x24) {
+        //gb.cpu_dump();
+        gb.cpu->execute_instruction();
+    }
+
+    bufferFrame(gb.ppu);
+    printScreen((std::unique_ptr<PPU> &) gb.ppu);
 }
