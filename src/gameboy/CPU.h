@@ -36,6 +36,8 @@ private:
     RegisterPair HL;
     //Flags
     Flags F;
+    //Interrupt Master Enable flag
+    unsigned int IME : 1;
     //Memory
     std::shared_ptr<MMU> memory;
 
