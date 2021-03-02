@@ -39,6 +39,8 @@ private:
     RegisterPair HL;
     //Flags
     Flags F;
+    //Interrupt Master Enable flag
+    unsigned int IME : 1;
     //Memory
     std::shared_ptr<MMU> memory;
     //Clock handling
@@ -64,6 +66,7 @@ private:
     void add_8bit(uint8_t &reg, uint8_t b, bool withCarry);
     void addHL(RegisterPair reg);
     void addSignedToRegPair(RegisterPair &regPair, int8_t value);
+    void daa();
 
     //Bitwise operations
     void andA(uint8_t value);
@@ -121,7 +124,6 @@ private:
     uint16_t read16_and_inc_pc();
     void stop_op();
     void halt_op();
-    void daa();
     FRIEND_TEST(CPU, Execute_NOP_Instruction);
     FRIEND_TEST(CPU, Execute_LD_SP_D16_Instruction);
     FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);

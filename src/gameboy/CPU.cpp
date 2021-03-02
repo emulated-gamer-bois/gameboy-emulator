@@ -6,6 +6,7 @@
 #include "MMU.h"
 #include <iostream> // cpu_dump
 #include <iomanip> // cpu_dump
+#include "Definitions.h"
 
 uint16_t combine_bytes(uint8_t first_byte, uint8_t second_byte);
 
@@ -20,6 +21,7 @@ CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
     F.all_8 = 0x0;
     stop = false;
     halt = false;
+    IME = 0;
 }
 
 void CPU::cpu_dump() {
@@ -457,14 +459,15 @@ bool CPU::callC(uint8_t firstByte, uint8_t secondByte, bool if_one) {
 
 /**
  * Return from a subroutine by setting PC with
- * the two latest values on the stack
+ * the two latest values on the stack.
+ * Resets IME flag to 1 if returning from interrupt.
  * @param from_interrupt if the subroutine returns from interrupt
  */
 void CPU::ret(bool from_interrupt) {
     PC = memory->read(SP.all_16++);
     PC |= memory->read(SP.all_16++) << 0x08;
     if (from_interrupt) {
-        //TODO: Reset the interrupt flag
+        IME = 1;
     }
 }
 
@@ -594,10 +597,10 @@ void CPU::daa() {
  * P1=0xff00
  * */
 void CPU::stop_op() {
-    auto IE = memory->read(0xffff);
-    loadIm8(BC.high_8, IE); // Save IE
-    memory->write(0xffff, 0x00); //clear IE
-    memory->write(0xff00, 0x00);
+
+    loadIm8(BC.high_8, memory->read(IE)); // Save IE
+    memory->write(IE, 0x00); //clear IE
+    memory->write(P1, memory->read(P1) & 0xF0);
     stop = true;
 
 }
@@ -615,24 +618,15 @@ bool CPU::getStop() {
 bool CPU::getHalt() {
     return halt;
 }
-/**
- * IE=0xffff
- * P1=0xff00
- * IF=0xFF0F
- *
- * */
+
 void CPU::halt_op() {
-    //if(IME){
-    halt = true;
-
-    // }
-    //else if (mmu->read(IE & IF & 0x1F){
-    //HALT MODE ENTERED
-    halt=true;
-    //}else{
-    //HALT bug should occurr but has not been implemented.
-
-    //}
+    if (IME) {
+        halt = true;
+    } else if (memory->read(IE & IF & 0x1F)) {
+        //HALT MODE ENTERED
+        halt = true;
+    }
+    //TODO If none of these happen the halt bug should occur.
 }
 
 void CPU::cpl() {
@@ -740,6 +734,11 @@ int CPU::execute_instruction() {
         case 0x0F: //RRCA
             rrc(A);
             F.z = 0; //Special case
+            return 1;
+        case 0x10:
+            stop_op();
+            //Says it should take 2 bytes.
+            PC++;
             return 1;
         case 0x11:
             loadIm16(read16_and_inc_pc(), DE);
@@ -1059,6 +1058,9 @@ int CPU::execute_instruction() {
         case 0x75:
             storeAddr(HL.all_16, HL.low_8);
             return 2;
+        case 0x76:
+            halt_op();
+            return 1;
         case 0x77:
             storeAddr(HL.all_16, A);
             return 2;
@@ -1441,6 +1443,9 @@ int CPU::execute_instruction() {
         case 0xF2:
             loadImp(0xFF00 + BC.low_8, A);
             return 2;
+        case 0xF3:
+            IME = 0;
+            return 1;
         case 0xF5:
             tmpReg.high_8 = A;
             tmpReg.low_8 = F.all_8;
@@ -1462,6 +1467,9 @@ int CPU::execute_instruction() {
         case 0xFA:
             loadImp(read16_and_inc_pc(), A);
             return 4;
+        case 0xFB:
+            IME = 1;
+            return 1;
         case 0xFE:
             compareA(read_and_inc_pc());
             return 2;
