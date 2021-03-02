@@ -593,8 +593,8 @@ void CPU::daa() {
 }
 
 /**
- * IE=0xffff
- * P1=0xff00
+ * Stops all execution. Is cancelled if any button is pressed. Resets IE flags, and sets all IO ports (P10-P13) to low.
+ *
  * */
 void CPU::stop_op() {
 
@@ -618,7 +618,11 @@ bool CPU::getStop() {
 bool CPU::getHalt() {
     return halt;
 }
-
+/**
+ * Stops system clock(aka CPU), is reset after IE and and IF flags are set in bitwise pairs.
+ * Simply continues after halt is over.
+ *
+ * */
 void CPU::halt_op() {
     if (IME) {
         halt = true;
