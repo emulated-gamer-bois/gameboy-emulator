@@ -143,7 +143,7 @@ void CPU::addSignedToRegPair(RegisterPair &regPair, int8_t value) {
     add_8bit(regPair.low_8, value, false);
     auto tmpH = F.h;
     auto tmpC = F.c;
-    add_8bit(regPair.high_8, 0, true);
+    add_8bit(regPair.high_8, value & 0x80 ? 0xFF : 0x00, true);
     F.z = 0;
     F.n = 0;
     F.h = tmpH;
