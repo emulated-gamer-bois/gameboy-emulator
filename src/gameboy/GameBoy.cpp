@@ -12,8 +12,8 @@ GameBoy::GameBoy() {
 
 void GameBoy::step() {
     int cycles;
-    if (interrupted()) {
-        handleInterrupts();
+    if (cpu->isInterrupted()) {
+        cpu->handleInterrupts();
         cycles = 5;
     } else {
         cycles = this->cpu->execute_instruction();
@@ -60,15 +60,14 @@ void GameBoy::confirmDraw() {
     this->ppu->confirmDraw();
 }
 
-bool GameBoy::interrupted() {
-    if (cpu->interruptsEnabled()) {
-        uint8_t flags = mmu->read(INTERRUPT_FLAG);
-        uint8_t mask = mmu->read(INTERRUPT_ENABLE);
-        return flags & mask;
-    }
-    return false;
-}
-
 void GameBoy::handleInterrupts() {
-    //TODO
+    uint8_t flags = mmu->read(INTERRUPT_FLAG);
+    uint8_t mask = mmu->read(INTERRUPT_ENABLE);
+    uint8_t maskedFlags = flags & mask;
+    if (maskedFlags & (1 << 0)) { //V-Blank interrupt
+
+    } else if (maskedFlags & (1 << 1)) { //STAT interrupt
+
+    }
+    //TODO remaining interrupts
 }

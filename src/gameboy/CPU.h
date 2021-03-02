@@ -11,6 +11,7 @@
 #include "RegisterPair.h"
 #include "MMU.h"
 #include "Flags.h"
+#include "Definitions.h"
 
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
@@ -26,7 +27,8 @@ public:
     int execute_instruction();
     void cpu_dump();
 
-    bool interruptsEnabled() const;
+    bool isInterrupted();
+    void handleInterrupts();
 private:
     //Registers
     uint16_t PC;

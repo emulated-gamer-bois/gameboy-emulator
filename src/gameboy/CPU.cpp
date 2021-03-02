@@ -33,10 +33,6 @@ void CPU::cpu_dump() {
     std::cout << "=---------------------------=" << std::endl;
 }
 
-bool CPU::interruptsEnabled() const {
-    return IME == 1;
-}
-
 void nop() {}
 
 /**
@@ -2213,6 +2209,40 @@ int CPU::CB_ops() {
 
     }
     return 0;
+}
+
+bool CPU::isInterrupted() {
+    if (IME) {
+        uint8_t flags = memory->read(INTERRUPT_FLAG);
+        uint8_t mask = memory->read(INTERRUPT_ENABLE);
+        return flags & mask;
+    }
+    return false;
+}
+
+void CPU::handleInterrupts() {
+    IME = 0;
+
+    uint8_t PC_high_byte = PC >> 8;
+    uint8_t PC_low_byte = PC & 0xFF;
+    memory->write(--SP.all_16, PC_high_byte);
+    memory->write(--SP.all_16, PC_low_byte);
+
+    uint8_t flags = memory->read(INTERRUPT_FLAG);
+    uint8_t mask = memory->read(INTERRUPT_ENABLE);
+    uint8_t maskedFlags = flags & mask;
+
+    uint16_t interruptVector = PC;
+
+    if (maskedFlags & V_BLANK_IF_BIT) {
+        memory->write(INTERRUPT_FLAG, flags & ~V_BLANK_IF_BIT);
+        interruptVector = 40;
+    } else if (maskedFlags & STAT_IF_BIT) {
+        memory->write(INTERRUPT_FLAG, flags & ~STAT_IF_BIT);
+        interruptVector = 48;
+    }
+    //TODO remaining interrupts
+    PC = interruptVector;
 }
 
 
