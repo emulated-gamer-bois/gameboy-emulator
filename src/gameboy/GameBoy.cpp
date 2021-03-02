@@ -22,7 +22,7 @@ std::unique_ptr<uint8_t[]> GameBoy::getScreenTexture() {
 
     for (int i = 0; i < ppuFrameBuffer->size(); i++) {
         //texture[i] = 0xFF - (ppuFrameBuffer->at(i) * 0x55);
-        texture[i] = (i % 4) * 0x55;
+        texture[i] = 0xFF - (i % 4) * 0x55;
     }
 
     return texture;
@@ -60,16 +60,4 @@ bool GameBoy::isReadyToDraw() const {
 
 void GameBoy::confirmDraw() {
     this->ppu->confirmDraw();
-}
-
-void GameBoy::handleInterrupts() {
-    uint8_t flags = mmu->read(INTERRUPT_FLAG);
-    uint8_t mask = mmu->read(INTERRUPT_ENABLE);
-    uint8_t maskedFlags = flags & mask;
-    if (maskedFlags & (1 << 0)) { //V-Blank interrupt
-
-    } else if (maskedFlags & (1 << 1)) { //STAT interrupt
-
-    }
-    //TODO remaining interrupts
 }

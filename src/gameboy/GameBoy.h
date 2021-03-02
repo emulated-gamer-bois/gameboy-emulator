@@ -29,7 +29,4 @@ private:
     std::shared_ptr<MMU> mmu;
     std::unique_ptr<CPU> cpu;
     std::unique_ptr<PPU> ppu;
-
-    bool interrupted();
-    void handleInterrupts();
 };
