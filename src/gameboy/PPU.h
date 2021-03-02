@@ -76,7 +76,7 @@ private:
             unsigned int coincidenceFlag: 1;
             unsigned int hBlankInterruptEnable : 1;
             unsigned int vBlankInterruptEnable : 1;
-            unsigned int oamBlankInterruptEnable : 1;
+            unsigned int oamInterruptEnable : 1;
             unsigned int lycEqualsLyInterruptEnable : 1;
             unsigned int UNUSED : 1;
         };
@@ -96,6 +96,10 @@ private:
 
     uint8_t DMA;
 
+    bool meetsStatConditions();
+    void vBlankInterrupt();
+    void statInterrupt();
+
     void processNextLine();
     void initRegisters();
     void drawBackgroundScanLine();
@@ -104,4 +108,5 @@ private:
     uint8_t getTilePixelColor(uint8_t id, uint8_t x, uint8_t y);
 
     bool readyToDraw;
+    bool anyStatConditionLastUpdate;
 };
