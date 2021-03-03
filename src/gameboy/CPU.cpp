@@ -22,6 +22,7 @@ CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
     stop = false;
     halt = false;
     IME = 0;
+
 }
 
 void CPU::cpu_dump() {
@@ -598,9 +599,9 @@ void CPU::daa() {
  * */
 void CPU::stop_op() {
 
-    loadIm8(BC.high_8, memory->read(IE)); // Save IE
-    memory->write(IE, 0x00); //clear IE
-    memory->write(P1, memory->read(P1) & 0xF0);
+    loadIm8(BC.high_8, memory->read(INTERRUPT_ENABLE)); // Save IE
+    memory->write(INTERRUPT_ENABLE, 0x00); //clear IE
+    memory->write(IO_START, memory->read(IO_START) & 0xF0);
     stop = true;
 
 }
@@ -626,7 +627,7 @@ bool CPU::getHalt() {
 void CPU::halt_op() {
     if (IME) {
         halt = true;
-    } else if (memory->read(IE & IF & 0x1F)) {
+    } else if (memory->read(INTERRUPT_ENABLE & INTERRUPT_FLAG & 0x1F)) {
         //HALT MODE ENTERED
         halt = true;
     }
