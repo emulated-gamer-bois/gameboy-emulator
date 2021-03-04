@@ -298,8 +298,10 @@ void CPU::rrc(uint8_t &reg) {
     auto d0 = reg & 0x01;
     reg = (reg >> 1) | (d0 << 7);
 
+    F.all_8 = 0;
     //Sets C flag to d0
     F.c = d0 == 0 ? 0 : 1;
+    F.z = reg ? 0 : 1;
 }
 
 /**
@@ -630,6 +632,7 @@ int CPU::execute_instruction() {
             return 2;
         case 0x07: //RLCA
             rlc(A);
+            F.z = 0;
             return 1;
         case 0x08:
             //special case, not using read_and_inc PC
@@ -657,7 +660,7 @@ int CPU::execute_instruction() {
             return 2;
         case 0x0F: //RRCA
             rrc(A);
-            F.z = 0; //Special case
+            F.all_8 &= 0x10;
             return 1;
         case 0x11:
             loadIm16(read16_and_inc_pc(), DE);
@@ -679,6 +682,7 @@ int CPU::execute_instruction() {
             return 2;
         case 0x17: //RLA
             rl(A);
+            F.z = 0;
             return 1;
         case 0x18:
             jumpRelative(read_and_inc_pc());
@@ -778,8 +782,9 @@ int CPU::execute_instruction() {
         case 0x36:
             storeAddr(HL.all_16, read_and_inc_pc());
             return 3;
-        case 0x37: //RLA
-            rl(A);
+        case 0x37:
+            F.all_8 &= 0x80;
+            F.c = 1;
             return 1;
         case 0x38:
             if (jumpRelativeC(read_and_inc_pc(), true))
