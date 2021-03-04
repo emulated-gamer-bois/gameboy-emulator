@@ -73,7 +73,7 @@ void CPU::setCFlag(uint16_t a, uint16_t b, bool subtraction) {
     // Sets the C flag if overflow
     if(subtraction) {
         //Inverted C flag if using subtraction
-        F.c = (a + b) > 0xFF ? 0 : 1;
+        F.c = (a + b) & 0x100 ? 0 : 1;
     } else {
         F.c = (a + b) > 0xFF ? 1 : 0;
     }
