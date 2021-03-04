@@ -1352,7 +1352,7 @@ int CPU::execute_instruction() {
             return 2;
         case 0xF5:
             tmpReg.high_8 = A;
-            tmpReg.low_8 = F.all_8;
+            tmpReg.low_8 = F.all_8 & 0xF0;
             pushReg(tmpReg);
             return 4;
         case 0xF6:
