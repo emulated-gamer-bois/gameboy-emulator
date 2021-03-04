@@ -85,7 +85,7 @@ void CPU::setCFlag(uint16_t a, uint16_t b, bool subtraction) {
     // Sets the C flag if overflow
     if(subtraction) {
         //Inverted C flag if using subtraction
-        F.c = (a + b) > 0xFF ? 0 : 1;
+        F.c = (a + b) & 0x100 ? 0 : 1;
     } else {
         F.c = (a + b) > 0xFF ? 1 : 0;
     }
@@ -153,9 +153,13 @@ void CPU::addHL(RegisterPair reg) {
 
 void CPU::addSignedToRegPair(RegisterPair &regPair, int8_t value) {
     add_8bit(regPair.low_8, value, false);
-    add_8bit(regPair.high_8, 0, true);
+    auto tmpH = F.h;
+    auto tmpC = F.c;
+    add_8bit(regPair.high_8, value & 0x80 ? 0xFF : 0x00, true);
     F.z = 0;
     F.n = 0;
+    F.h = tmpH;
+    F.c = tmpC;
 }
 
 
