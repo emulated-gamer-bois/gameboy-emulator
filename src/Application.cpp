@@ -78,8 +78,8 @@ void Application::init() {
     this->renderView.initGL();
 
     // TEMP ------------------------------------------------------------------------------------------------------------
-    TEMP_setTexture("../src/title.pixdata", this->renderView);
-    this->gameBoy.load_boot_rom("../roms/boot_infinite_loop.bin");
+    this->gameBoy.load_boot_rom("../roms/dmg_boot.bin");
+    this->gameBoy.load_game_rom("../roms/cpu_instrs/individual/03-op sp,hl.gb");
     // END TEMP --------------------------------------------------------------------------------------------------------
 }
 

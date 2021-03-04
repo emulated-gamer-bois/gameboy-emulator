@@ -2247,10 +2247,10 @@ void CPU::handleInterrupts() {
 
     if (maskedFlags & V_BLANK_IF_BIT) {
         memory->write(INTERRUPT_FLAG, flags & ~V_BLANK_IF_BIT);
-        interruptVector = 40;
+        interruptVector = 0x40;
     } else if (maskedFlags & STAT_IF_BIT) {
         memory->write(INTERRUPT_FLAG, flags & ~STAT_IF_BIT);
-        interruptVector = 48;
+        interruptVector = 0x48;
     }
     //TODO remaining interrupts
     PC = interruptVector;
