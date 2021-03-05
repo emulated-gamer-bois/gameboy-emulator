@@ -3,6 +3,7 @@
 //
 
 #include "PPU.h"
+#include "Definitions.h"
 #include <cassert>
 
 PPU::PPU(std::shared_ptr<MMU> memory) {
@@ -28,6 +29,7 @@ PPU::PPU(std::shared_ptr<MMU> memory) {
     saveRegisters();
     frameBuffer.fill(0);
     this->readyToDraw = false;
+    this->anyStatConditionLastUpdate = false;
 }
 
 void PPU::update(uint16_t cpuCycles) {
@@ -43,6 +45,7 @@ void PPU::update(uint16_t cpuCycles) {
                     modeFlag = OAM_SEARCH;
                 } else { //If we have drawn the entire screen
                     modeFlag = VBLANK;
+                    vBlankInterrupt();
                 }
             }
             break;
@@ -80,6 +83,13 @@ void PPU::update(uint16_t cpuCycles) {
             }
             break;
     }
+    bool meetsStatConditionsCurrent = meetsStatConditions();
+    if (!anyStatConditionLastUpdate) {
+        if (meetsStatConditionsCurrent) {
+            statInterrupt();
+        }
+    }
+    anyStatConditionLastUpdate = meetsStatConditionsCurrent;
     saveRegisters();
 }
 
@@ -183,6 +193,35 @@ std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>* PPU::getFrameBuffer() {
 
 uint8_t PPU::getMode() const {
     return modeFlag;
+}
+
+bool PPU::meetsStatConditions() {
+    if (lycEqualsLyInterruptEnable && LY == LYC) {
+        coincidenceFlag = 1;
+        return true;
+    }
+    if (oamInterruptEnable && modeFlag == OAM_SEARCH) {
+        return true;
+    }
+    if (vBlankInterruptEnable && modeFlag == VBLANK) {
+        return true;
+    }
+    if (hBlankInterruptEnable && modeFlag == HBLANK) {
+        return true;
+    }
+    return false;
+}
+
+void PPU::vBlankInterrupt() {
+    uint8_t interruptFlags = memory->read(INTERRUPT_FLAG);
+    interruptFlags |= (1 << 0);
+    memory->write(INTERRUPT_FLAG, interruptFlags);
+}
+
+void PPU::statInterrupt() {
+    uint8_t interruptFlags = memory->read(INTERRUPT_FLAG);
+    interruptFlags |= (1 << 1);
+    memory->write(INTERRUPT_FLAG, interruptFlags);
 }
 
 bool PPU::isReadyToDraw() const {

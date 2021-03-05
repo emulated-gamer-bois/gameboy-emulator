@@ -11,11 +11,22 @@ GameBoy::GameBoy() {
 }
 
 void GameBoy::step() {
-    // TODO: Check for interrupts
-    int cycles = 0;
-    cycles = this->cpu->execute_instruction();
-    this->ppu->update(cycles);
-    this->mmu->timer_update(cycles);
+    if (!this->cpu->getStop()) {
+        // TODO: Check for interrupts
+        int cycles = 0;
+        if (!this->cpu->getHalt()) {
+            cycles = this->cpu->execute_instruction();
+
+        }else if(mmu->read(0xffff) & mmu->read(0xFF0F) & 0x1f){
+
+        }
+        this->ppu->update(cycles);
+        this->mmu->timer_update(cycles);
+    } else if (mmu->read(0xFFFF)) {
+        cpu->return_from_stop();
+    }
+
+
 }
 
 uint8_t *GameBoy::getScreen() {
