@@ -241,6 +241,16 @@ void MMU::write_io(uint16_t addr, uint8_t data) {
                 this->timer_control = data & 0b111;
                 break;
         }
+    } else if (addr == DMA_TRANSFER) {
+        std::cout << "DMA: data:" << (uint8_t)data;
+        if (0x00 <= data && data <= 0xf1) {
+            uint16_t start_addr = (data << 8);
+            for (uint8_t i = 0; i <= 0x9f; i++) {
+                this->write(0xfe00 + i, this->read(start_addr+i));
+            }
+        } else {
+            std::cout << "Tried to use DMA transfer with invalid input: " << data << std::endl;
+        }
     } else {
         this->io[addr - IO_START] = data;
     }
