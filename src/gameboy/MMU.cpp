@@ -92,6 +92,7 @@ void MMU::write(uint16_t addr, uint8_t data) {
             std::cout << "Tried to write to ROM at address: " << addr << std::endl;
             // TODO: Error handling
             // TODO: could write to ROM addresses when bankswitching is implemented
+            break;
 
             //Video RAM
         case VRAM_START:
