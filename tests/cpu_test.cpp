@@ -354,6 +354,11 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->addHL(cpu->SP);
     ASSERT_EQ(cpu->HL.all_16, 0x8000);
     ASSERT_EQ(cpu->F.all_8 & 0x70, 0x20);
+
+    cpu->setA(0);
+    cpu->F.c = 1;
+    cpu->subA(0xFF, true);
+    ASSERT_EQ(cpu->F.c, 1);
 }
 
 TEST(CPU, sixteen_bit_ops) {

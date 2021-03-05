@@ -50,16 +50,17 @@ void Application::start() {
         timer.tick();
 
         // Update emulation
-        do {
+        while (!this->gameBoy.isReadyToDraw()) {
             this->handleSDLEvents();
             this->gameBoy.step();
-        } while (!this->gameBoy.readyToDraw());
+        }
 
         // Prepare for rendering, render and swap buffer.
         this->updateSDLWindowSize();
-        this->renderView.setScreenTexture(this->gameBoy.getScreen());
+        this->renderView.setScreenTexture(this->gameBoy.getScreenTexture().get());
         this->renderView.render();
         SDL_GL_SwapWindow(this->window);
+        this->gameBoy.confirmDraw();
 
         // Time application to 60Hz
         float msSinceTick = timer.msSinceTick();
@@ -77,8 +78,8 @@ void Application::init() {
     this->renderView.initGL();
 
     // TEMP ------------------------------------------------------------------------------------------------------------
-    TEMP_setTexture("../src/title.pixdata", this->renderView);
-    this->gameBoy.load_boot_rom("../roms/boot_infinite_loop.bin");
+    this->gameBoy.load_boot_rom("../roms/dmg_boot.bin");
+    this->gameBoy.load_game_rom("../roms/cpu_instrs/individual/03-op sp,hl.gb");
     // END TEMP --------------------------------------------------------------------------------------------------------
 }
 

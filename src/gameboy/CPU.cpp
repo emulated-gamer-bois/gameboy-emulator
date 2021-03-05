@@ -18,6 +18,7 @@ CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
     DE.all_16 = 0x00;
     HL.all_16 = 0x00;
     F.all_8 = 0x0;
+    IME = 0;
 }
 
 void CPU::cpu_dump() {
@@ -30,6 +31,17 @@ void CPU::cpu_dump() {
     std::cout << "PC: 0x" << std::hex << this->PC << std::endl;
     std::cout << "SP: 0x" << std::hex << this->SP.all_16 << std::endl;
     std::cout << "=---------------------------=" << std::endl;
+}
+
+int CPU::update() {
+    int cycles;
+    if (this->isInterrupted()) {
+        this->handleInterrupts();
+        cycles = 5;
+    } else {
+        cycles = this->execute_instruction();
+    }
+    return cycles;
 }
 
 void nop() {}
@@ -73,7 +85,7 @@ void CPU::setCFlag(uint16_t a, uint16_t b, bool subtraction) {
     // Sets the C flag if overflow
     if(subtraction) {
         //Inverted C flag if using subtraction
-        F.c = (a + b) > 0xFF ? 0 : 1;
+        F.c = (a + b) & 0x100 ? 0 : 1;
     } else {
         F.c = (a + b) > 0xFF ? 1 : 0;
     }
@@ -141,9 +153,13 @@ void CPU::addHL(RegisterPair reg) {
 
 void CPU::addSignedToRegPair(RegisterPair &regPair, int8_t value) {
     add_8bit(regPair.low_8, value, false);
-    add_8bit(regPair.high_8, 0, true);
+    auto tmpH = F.h;
+    auto tmpC = F.c;
+    add_8bit(regPair.high_8, value & 0x80 ? 0xFF : 0x00, true);
     F.z = 0;
     F.n = 0;
+    F.h = tmpH;
+    F.c = tmpC;
 }
 
 
@@ -454,14 +470,15 @@ bool CPU::callC(uint8_t firstByte, uint8_t secondByte, bool if_one) {
 
 /**
  * Return from a subroutine by setting PC with
- * the two latest values on the stack
+ * the two latest values on the stack.
+ * Resets IME flag to 1 if returning from interrupt.
  * @param from_interrupt if the subroutine returns from interrupt
  */
 void CPU::ret(bool from_interrupt) {
     PC = memory->read(SP.all_16++);
     PC |= memory->read(SP.all_16++) << 0x08;
     if (from_interrupt) {
-        //TODO: Reset the interrupt flag
+        IME = 1;
     }
 }
 
@@ -1346,6 +1363,9 @@ int CPU::execute_instruction() {
         case 0xF2:
             loadImp(0xFF00 + BC.low_8, A);
             return 2;
+        case 0xF3:
+            IME = 0;
+            return 1;
         case 0xF5:
             tmpReg.high_8 = A;
             tmpReg.low_8 = F.all_8;
@@ -1367,6 +1387,9 @@ int CPU::execute_instruction() {
         case 0xFA:
             loadImp(read16_and_inc_pc(), A);
             return 4;
+        case 0xFB:
+            IME = 1;
+            return 1;
         case 0xFE:
             compareA(read_and_inc_pc());
             return 2;
@@ -2202,3 +2225,39 @@ int CPU::CB_ops() {
     }
     return 0;
 }
+
+bool CPU::isInterrupted() {
+    if (IME) {
+        uint8_t flags = memory->read(INTERRUPT_FLAG);
+        uint8_t mask = memory->read(INTERRUPT_ENABLE);
+        return flags & mask;
+    }
+    return false;
+}
+
+void CPU::handleInterrupts() {
+    IME = 0;
+
+    uint8_t PC_high_byte = PC >> 8;
+    uint8_t PC_low_byte = PC & 0xFF;
+    memory->write(--SP.all_16, PC_high_byte);
+    memory->write(--SP.all_16, PC_low_byte);
+
+    uint8_t flags = memory->read(INTERRUPT_FLAG);
+    uint8_t mask = memory->read(INTERRUPT_ENABLE);
+    uint8_t maskedFlags = flags & mask;
+
+    uint16_t interruptVector = PC;
+
+    if (maskedFlags & V_BLANK_IF_BIT) {
+        memory->write(INTERRUPT_FLAG, flags & ~V_BLANK_IF_BIT);
+        interruptVector = 0x40;
+    } else if (maskedFlags & STAT_IF_BIT) {
+        memory->write(INTERRUPT_FLAG, flags & ~STAT_IF_BIT);
+        interruptVector = 0x48;
+    }
+    //TODO remaining interrupts
+    PC = interruptVector;
+}
+
+

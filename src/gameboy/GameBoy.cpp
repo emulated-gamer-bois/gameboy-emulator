@@ -11,15 +11,20 @@ GameBoy::GameBoy() {
 }
 
 void GameBoy::step() {
-    // TODO: Check for interrupts
-    int cycles = 0;
-    cycles = this->cpu->execute_instruction();
+    int cycles = this->cpu->update();
     this->ppu->update(cycles);
     this->mmu->timer_update(cycles);
 }
 
-uint8_t *GameBoy::getScreen() {
-    return this->ppu->getFrameBuffer()->data();
+std::unique_ptr<uint8_t[]> GameBoy::getScreenTexture() {
+    auto ppuFrameBuffer = this->ppu->getFrameBuffer();
+    auto texture = std::make_unique<uint8_t[]>(ppuFrameBuffer->size());
+
+    for (int i = 0; i < ppuFrameBuffer->size(); i++) {
+        texture[i] = 0xFF - (ppuFrameBuffer->at(i) * 0x55);
+    }
+
+    return texture;
 }
 
 void GameBoy::joypad_input(uint8_t key, uint8_t action) {
@@ -48,6 +53,10 @@ void GameBoy::cpu_dump() {
     this->cpu->cpu_dump();
 }
 
-bool GameBoy::readyToDraw() const {
-    return this->ppu->getReadyToDraw();
+bool GameBoy::isReadyToDraw() const {
+    return this->ppu->isReadyToDraw();
+}
+
+void GameBoy::confirmDraw() {
+    this->ppu->confirmDraw();
 }

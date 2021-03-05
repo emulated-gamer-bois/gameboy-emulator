@@ -39,6 +39,7 @@ friend class test_case_name##_##test_name##_Test
 #define TIMER_COUNTER       0xff05
 #define TIMER_MODULO        0xff06
 #define TIMER_CONTROL       0xff07
+#define DMA_TRANSFER        0xff46
 
 // Joypad constants
 #define JOYPAD_SEL_BUTTONS      0x10
