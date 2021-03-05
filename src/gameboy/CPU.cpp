@@ -525,8 +525,7 @@ void CPU::bit(uint8_t bit_nr, uint8_t value) {
  * Reset bit_nr in reg.
  * * */
 void CPU::res(uint8_t bit_nr, uint8_t &reg) {
-    reg = reg & (~0x01 << bit_nr);
-
+    reg = reg & ~(0x01 << bit_nr);
 }
 
 /**
