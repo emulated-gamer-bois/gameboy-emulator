@@ -25,6 +25,9 @@ public:
      */
     int execute_instruction();
     void cpu_dump();
+    bool getStop();
+    bool getHalt();
+    void return_from_stop();
 
 private:
     //Registers
@@ -36,14 +39,17 @@ private:
     RegisterPair HL;
     //Flags
     Flags F;
+    //Interrupt Master Enable flag
+    unsigned int IME : 1;
     //Memory
     std::shared_ptr<MMU> memory;
-
+    //Clock handling
+    bool stop;
+    bool halt;
     //Flag management
     void setZNFlags(uint8_t value, bool subtraction);
     void setHFlag(uint8_t a, uint8_t b, bool subtraction, uint8_t cFlag);
     void setCFlag(uint16_t a,uint16_t b, bool subtraction);
-
     //Setting registers
     void setA(uint8_t val){ A=val;};
     void setB(uint8_t val){ BC.high_8=val;};
@@ -60,6 +66,7 @@ private:
     void add_8bit(uint8_t &reg, uint8_t b, bool withCarry);
     void addHL(RegisterPair reg);
     void addSignedToRegPair(RegisterPair &regPair, int8_t value);
+    void daa();
 
     //Bitwise operations
     void andA(uint8_t value);
@@ -69,6 +76,8 @@ private:
     void rl(uint8_t &reg);
     void rrc(uint8_t &reg);
     void rr(uint8_t &reg);
+    void cpl();
+    void ccf();
 
     //Read and write memory
     void storeAddr(uint16_t addr, uint8_t value);
@@ -113,11 +122,13 @@ private:
     void compareA(uint8_t value);
     uint8_t read_and_inc_pc();
     uint16_t read16_and_inc_pc();
-
+    void stop_op();
+    void halt_op();
     FRIEND_TEST(CPU, Execute_NOP_Instruction);
     FRIEND_TEST(CPU, Execute_LD_SP_D16_Instruction);
     FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);
     FRIEND_TEST(CPU, sixteen_bit_ops);
     FRIEND_TEST(PPU, Print_test_rom);
+
 
 };
