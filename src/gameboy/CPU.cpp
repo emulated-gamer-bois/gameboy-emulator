@@ -1915,7 +1915,7 @@ int CPU::CB_ops() {
             return 2;
         case 0xA6:
             tmpVal = memory->read(HL.all_16);
-            res(2, tmpVal);
+            res(4, tmpVal);
             storeAddr(HL.all_16, tmpVal);
             return 4;
         case 0xA7:
@@ -2177,6 +2177,7 @@ int CPU::CB_ops() {
             tmpVal = memory->read(HL.all_16);
             set(6, tmpVal);
             storeAddr(HL.all_16, tmpVal);
+            return 4;
         case 0xF7:
             set(6, A);
             return 2;
