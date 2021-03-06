@@ -25,13 +25,10 @@ public:
      * @returns amount of machine cycles operation takes.
      */
     int update();
-// =======
-//     int execute_instruction();
-//     void cpu_dump();
-//     bool getStop();
-//     bool getHalt();
-//     void return_from_stop();
-// >>>>>>> cpu-bug-fixes
+
+    bool getStop();
+    bool getHalt();
+    void return_from_stop();
 
     void cpu_dump();
 private:
@@ -54,11 +51,10 @@ private:
     bool isInterrupted();
     void handleInterrupts();
 
-// =======
-//     //Clock handling
-//     bool stop;
-//     bool halt;
-// >>>>>>> cpu-bug-fixes
+     //Clock handling
+     bool stop;
+     bool halt;
+
     //Flag management
     void setZNFlags(uint8_t value, bool subtraction);
     void setHFlag(uint8_t a, uint8_t b, bool subtraction, uint8_t cFlag);
