@@ -355,6 +355,11 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     ASSERT_EQ(cpu->HL.all_16, 0x8000);
     ASSERT_EQ(cpu->F.all_8 & 0x70, 0x20);
 
+    cpu->setA(0);
+    cpu->F.c = 1;
+    cpu->subA(0xFF, true);
+    ASSERT_EQ(cpu->F.c, 1);
+  
     cpu->A = 0x66;
     cpu->addA(0x66, false);
     ASSERT_EQ(cpu->A, 0xCC);
@@ -386,9 +391,6 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     cpu->A=0xFF;
     cpu->cpl();
     ASSERT_EQ(cpu->A,0x00);
-
-
-
 }
 
 TEST(CPU, sixteen_bit_ops) {
