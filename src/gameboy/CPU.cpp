@@ -2255,6 +2255,15 @@ void CPU::handleInterrupts() {
     } else if (maskedFlags & STAT_IF_BIT) {
         memory->write(INTERRUPT_FLAG, flags & ~STAT_IF_BIT);
         interruptVector = 0x48;
+    } else if (maskedFlags & TIMER_IF_BIT) {
+        memory->write(INTERRUPT_FLAG, flags & ~TIMER_IF_BIT);
+        interruptVector = 0x50;
+    } else if (maskedFlags & SERIAL_IF_BIT) {
+        memory->write(INTERRUPT_FLAG, flags & ~SERIAL_IF_BIT);
+        interruptVector = 0x58;
+    } else if (maskedFlags & CONTROLLER_IF_BIT) {
+        memory->write(INTERRUPT_FLAG, flags & ~CONTROLLER_IF_BIT);
+        interruptVector = 0x60;
     }
     //TODO remaining interrupts
     PC = interruptVector;
