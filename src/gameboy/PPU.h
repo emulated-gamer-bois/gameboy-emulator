@@ -6,9 +6,11 @@
 
 #include <memory> // smart pointers
 #include <cstdint> // uint8_t and uint16_t
-#include "MMU.h"
-#include "Definitions.h" // LCD_WIDTH and LCD_HEIGHT
 
+#include "Definitions.h" // LCD_WIDTH and LCD_HEIGHT
+#include "MMU.h"
+
+// Register addresses
 #define LCDC_ADDRESS 0xFF40
 #define STAT_ADDRESS 0xFF41
 #define SCY_ADDRESS 0xFF42
@@ -22,9 +24,11 @@
 #define WY_ADDRESS 0xFF4A
 #define WX_ADDRESS 0xFF4B
 
+// Tilemap memory block modes.
 #define BG_WINDOW_MAP0 0x9800
 #define BG_WINDOW_MAP1 0x9C00
 
+// Tileset memory bock modes.
 #define BG_WINDOW_TILE_DATA0 0x9000
 #define BG_WINDOW_TILE_DATA1 0x8000
 
@@ -34,7 +38,18 @@ friend class test_case_name##_##test_name##_Test
 class PPU {
 public:
     explicit PPU(std::shared_ptr<MMU> memory);
+
     void update(uint16_t cpuCycles);
+
+    const std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>* getFrameBuffer() const;
+    bool isReadyToDraw() const;
+    void confirmDraw();
+
+private:
+    const static uint16_t HBLANK_THRESHOLD = 51; //The time it takes to search for objects, draw the line and HBLANK.
+    const static uint16_t VBLANK_LINE_THRESHOLD = 114;
+    const static uint16_t OAM_SEARCH_THRESHOLD = 20;
+    const static uint16_t SCANLINE_DRAW_THRESHOLD = 43;
 
     enum Mode {
         HBLANK,
@@ -43,20 +58,7 @@ public:
         SCANLINE_DRAW
     };
 
-    bool isReadyToDraw() const;
-    void confirmDraw();
-    std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>* getFrameBuffer();
-    uint8_t getMode() const;
-private:
-    const static uint16_t HBLANK_THRESHOLD = 51; //The time it takes to search for objects, draw the line and HBLANK.
-    const static uint16_t VBLANK_LINE_THRESHOLD = 114;
-    const static uint16_t OAM_SEARCH_THRESHOLD = 20;
-    const static uint16_t SCANLINE_DRAW_THRESHOLD = 43;
-
-    std::shared_ptr<MMU> memory;
-    std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> frameBuffer;
-    uint16_t accumulatedCycles;
-
+    // LCD control register
     union {
         struct { //bits 0-7
             unsigned int bgWindowDisplayEnable: 1;
@@ -71,6 +73,7 @@ private:
         uint8_t LCDC;
     };
 
+    // LCD status register
     union {
         struct {
             unsigned int modeFlag: 2;
@@ -84,30 +87,35 @@ private:
         uint8_t STAT;
     };
 
+    // Misc registers
     uint8_t SCY;
     uint8_t SCX;
     uint8_t LY;
     uint8_t LYC;
     uint8_t WY;
     uint8_t WX;
-
     uint8_t BGP;
     uint8_t OBP0;
     uint8_t OBP1;
-
     uint8_t DMA;
 
-    bool meetsStatConditions();
-    void vBlankInterrupt();
-    void statInterrupt();
+    std::shared_ptr<MMU> memory;
+    std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> frameBuffer;
+    uint16_t accumulatedCycles;
+    bool readyToDraw;
+    bool anyStatConditionLastUpdate;
 
     void processNextLine();
-    void initRegisters();
     void drawBackgroundScanLine();
+    void initRegisters();
     void saveRegisters();
+
+    // MMU reading functions.
     uint8_t getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY);
     uint8_t getTilePixelColor(uint8_t id, uint8_t x, uint8_t y);
 
-    bool readyToDraw;
-    bool anyStatConditionLastUpdate;
+    // Interrupt related functions.
+    bool meetsStatConditions() const;
+    void vBlankInterrupt();
+    void statInterrupt();
 };
