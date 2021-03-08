@@ -10,6 +10,10 @@
 
 
 MMU::MMU() {
+    this->reset();
+}
+
+void MMU::reset() {
     // Reset arrays to 0
     this->boot_rom.fill(0x00);
     this->vram.fill(0x00);
@@ -21,7 +25,7 @@ MMU::MMU() {
     this->game_rom.resize(0x8000);
 
     //this->xram.resize(0x4000);              // Not used in simple games.
-                                              // Size depends on info in game rom header.
+    // Size depends on info in game rom header.
 
     this->booting = true;
     // Enable all interrupts by default
@@ -33,10 +37,10 @@ MMU::MMU() {
     this->io_joypad = 0xff;
 
     // Timer default values
-    timer_divider = 0;
-    timer_counter = 0;
-    timer_modulo = 0;
-    timer_control = 0;
+    this->timer_divider = 0;
+    this->timer_counter = 0;
+    this->timer_modulo = 0;
+    this->timer_control = 0;
 }
 
 uint8_t MMU::read(uint16_t addr) {
@@ -135,7 +139,7 @@ void MMU::disable_boot_rom() {
     this->booting = false;
 }
 
-void MMU::load_game_rom(std::string filepath) {
+bool MMU::load_game_rom(std::string filepath) {
     std::streampos size;
     char *memblock;
 
@@ -159,14 +163,16 @@ void MMU::load_game_rom(std::string filepath) {
         std::memcpy(&this->game_rom[this->game_rom.size() - size], &memblock[0], size);
 
         delete[] memblock;
+        // TODO: Maybe check for file size
     }
     else {
-        std::cout << "Unable to open file: " << filepath << std::endl;
-        // TODO: Error handling
+        std::cout << "Unable to open game ROM: " << filepath << std::endl;
+        return false;
     }
+    return true;
 }
 
-void MMU::load_boot_rom(std::string filepath) {
+bool MMU::load_boot_rom(std::string filepath) {
     std::streampos size;
     char *memblock;
 
@@ -191,13 +197,16 @@ void MMU::load_boot_rom(std::string filepath) {
             delete[] memblock;
         } else {
             std::cout << "Unable to load boot ROM! File size is not 256 bytes!" << std::endl;
-            // TODO: Error handling
+            disable_boot_rom();
+            return false;
         }
     }
     else {
-        std::cout << "Unable to open file: " << filepath << std::endl;
-        // TODO: Error handling
+        std::cout << "Unable to open boot ROM: " << filepath << std::endl;
+        disable_boot_rom();
+        return false;
     }
+    return true;
 }
 
 // ONLY TO BE USED IN TESTS. CAN WRITE TO GAME ROM

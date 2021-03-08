@@ -56,10 +56,11 @@ friend class test_case_name##_##test_name##_Test
 class MMU {
 public:
     MMU();
+    void reset();
     uint8_t read(uint16_t addr);
     void write(uint16_t addr, uint8_t data);
-    void load_game_rom(std::string filepath);
-    void load_boot_rom(std::string filepath);
+    bool load_game_rom(std::string filepath);
+    bool load_boot_rom(std::string filepath);
     void joypad_release(uint8_t button);
     void joypad_press(uint8_t button);
     void timer_update(uint16_t cycles);

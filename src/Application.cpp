@@ -78,8 +78,7 @@ void Application::init() {
     this->renderView.initGL();
 
     // TEMP ------------------------------------------------------------------------------------------------------------
-    this->gameBoy.load_boot_rom("../roms/gb/boot_lameboy.gb");
-    this->gameBoy.load_game_rom("../roms/cpu_instrs/individual/03-op sp,hl.gb");
+    this->gameBoy.load_rom("../roms/dmg_boot.bin", "../roms/cpu_instrs/individual/02-interrupts.gb");
     // END TEMP --------------------------------------------------------------------------------------------------------
 }
 

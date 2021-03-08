@@ -19,7 +19,7 @@ friend class test_case_name##_##test_name##_Test
 class CPU {
 public:
     CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> memory);
-
+    void reset();
     /**
      * Fetches, decodes and executes the instruction at location PC
      * @returns amount of machine cycles operation takes.
@@ -29,6 +29,7 @@ public:
     bool getStop();
     bool getHalt();
     void return_from_stop();
+    void skipBootRom();
 
     void cpu_dump();
 private:
