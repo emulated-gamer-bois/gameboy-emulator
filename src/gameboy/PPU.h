@@ -39,6 +39,7 @@ class PPU {
 public:
     explicit PPU(std::shared_ptr<MMU> memory);
 
+    void reset();
     void update(uint16_t cpuCycles);
 
     const std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>* getFrameBuffer() const;

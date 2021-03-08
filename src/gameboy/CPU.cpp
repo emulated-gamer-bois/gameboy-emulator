@@ -21,6 +21,17 @@ CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
     IME = 0;
 }
 
+void CPU::reset() {
+    this->PC = 0x0000;
+    this->SP.all_16 = 0xFFFE;
+    A = 0x00;
+    BC.all_16 = 0x00;
+    DE.all_16 = 0x00;
+    HL.all_16 = 0x00;
+    F.all_8 = 0x0;
+    IME = 0;
+}
+
 void CPU::cpu_dump() {
     std::cout << "=---------------------------=" << std::endl;
     std::cout << "A: 0x" << std::hex << (int)this->A << std::endl;
@@ -42,6 +53,10 @@ int CPU::update() {
         cycles = this->execute_instruction();
     }
     return cycles;
+}
+
+void CPU::skipBootRom() {
+    this->PC = 0x0100;
 }
 
 void nop() {}
@@ -2265,7 +2280,6 @@ void CPU::handleInterrupts() {
         memory->write(INTERRUPT_FLAG, flags & ~CONTROLLER_IF_BIT);
         interruptVector = 0x60;
     }
-    //TODO remaining interrupts
     PC = interruptVector;
 }
 

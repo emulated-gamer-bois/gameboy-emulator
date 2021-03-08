@@ -7,6 +7,11 @@
 #include <cassert>
 
 PPU::PPU(std::shared_ptr<MMU> memory) {
+    this->memory = memory;
+    reset();
+}
+
+void PPU::reset() {
     this->SCY = 0;
     this->SCX = 0;
     this->LY = 0;
@@ -20,7 +25,6 @@ PPU::PPU(std::shared_ptr<MMU> memory) {
     this->STAT = 0;
     this->LCDC = 0;
 
-    this->memory = memory;
     this->accumulatedCycles = 0;
     this->modeFlag = OAM_SEARCH;
     this->readyToDraw = false;
