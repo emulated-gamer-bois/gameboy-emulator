@@ -65,10 +65,15 @@ int CPU::update() {
     }*/
 
     if (this->isInterrupted()) {
+        if(halt){
+            std::cout<< "Halt set omw to interrupt"<< std::endl;
+
+        }
         return this->handleInterrupts();
     }
 
     if (this->halt) {
+        std::cout<< "Halt set"<< std::endl;
         return 1;
     }
 
@@ -672,9 +677,9 @@ bool CPU::getHalt() {
  *
  * */
 void CPU::halt_op() {
-    if (IME != 0x0000) {
+    if (IME) {
         halt = true;
-    } else if (memory->read(INTERRUPT_ENABLE & INTERRUPT_FLAG & 0x1F)) {
+    } else if (memory->read(INTERRUPT_ENABLE & INTERRUPT_FLAG & 0x1F) == 0) {
         //HALT MODE ENTERED
         halt = true;
     }
@@ -2397,7 +2402,12 @@ int CPU::handleInterrupts() {
         memory->write(INTERRUPT_FLAG, flags & ~STAT_IF_BIT);
         interruptVector = 0x48;
     } else if (maskedFlags & TIMER_IF_BIT) {
-        memory->write(INTERRUPT_FLAG, flags & ~TIMER_IF_BIT);
+        if(halt){
+            memory->write(INTERRUPT_FLAG, flags);
+
+        }else{
+            memory->write(INTERRUPT_FLAG, flags & ~TIMER_IF_BIT);
+        }
         std::cout << (int)memory->read(INTERRUPT_FLAG) << std::endl;
         interruptVector = 0x50;
     } else if (maskedFlags & SERIAL_IF_BIT) {
