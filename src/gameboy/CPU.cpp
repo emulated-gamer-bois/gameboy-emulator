@@ -6,6 +6,7 @@
 #include "MMU.h"
 #include <iostream> // cpu_dump
 #include <iomanip> // cpu_dump
+#include "Definitions.h"
 
 uint16_t combine_bytes(uint8_t first_byte, uint8_t second_byte);
 
@@ -18,7 +19,10 @@ CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
     DE.all_16 = 0x00;
     HL.all_16 = 0x00;
     F.all_8 = 0x0;
+    stop = false;
+    halt = false;
     IME = 0;
+
 }
 
 void CPU::reset() {
@@ -34,25 +38,41 @@ void CPU::reset() {
 
 void CPU::cpu_dump() {
     std::cout << "=---------------------------=" << std::endl;
-    std::cout << "A: 0x" << std::hex << (int)this->A << std::endl;
+    std::cout << "A: 0x" << std::hex << (int) this->A << std::endl;
     std::cout << "BC: 0x" << std::hex << this->BC.all_16 << std::endl;
     std::cout << "DE: 0x" << std::hex << this->DE.all_16 << std::endl;
     std::cout << "HL: 0x" << std::hex << this->HL.all_16 << std::endl;
-    std::cout << "F: 0x" << std::hex << (int)this->F.all_8 << std::endl;
+    std::cout << "F: 0x" << std::hex << (int) this->F.all_8 << std::endl;
     std::cout << "PC: 0x" << std::hex << this->PC << std::endl;
     std::cout << "SP: 0x" << std::hex << this->SP.all_16 << std::endl;
     std::cout << "=---------------------------=" << std::endl;
 }
 
 int CPU::update() {
-    int cycles;
+    /*if (!this->cpu->getStop()) {
+        // TODO: Check for interrupts
+        int cycles = 0;
+        if (!this->cpu->getHalt()) {
+            cycles = this->cpu->execute_instruction();
+
+        }else if(mmu->read(0xffff) & mmu->read(0xFF0F) & 0x1f){
+
+        }
+        this->ppu->update(cycles);
+        this->mmu->timer_update(cycles);
+    } else if (mmu->read(0xFFFF)) {
+        cpu->return_from_stop();
+    }*/
+
     if (this->isInterrupted()) {
-        this->handleInterrupts();
-        cycles = 5;
-    } else {
-        cycles = this->execute_instruction();
+        return this->handleInterrupts();
     }
-    return cycles;
+
+    if (this->halt) {
+        return 1;
+    }
+
+    return this->execute_instruction();
 }
 
 void CPU::skipBootRom() {
@@ -81,7 +101,7 @@ void CPU::setZNFlags(uint8_t newValue, bool subtraction) {
  * @param cFlag the value of the C flag, 0 if the cFlag is not used
  */
 void CPU::setHFlag(uint8_t a, uint8_t b, bool subtraction, uint8_t cFlag) {
-    if(subtraction) {
+    if (subtraction) {
         // Sets the H flag if carry from bit 4 to bit 3
         F.h = ((a & 0x0F) - (b & 0x0F) - cFlag) < 0 ? 1 : 0;
     } else {
@@ -98,7 +118,7 @@ void CPU::setHFlag(uint8_t a, uint8_t b, bool subtraction, uint8_t cFlag) {
  */
 void CPU::setCFlag(uint16_t a, uint16_t b, bool subtraction) {
     // Sets the C flag if overflow
-    if(subtraction) {
+    if (subtraction) {
         //Inverted C flag if using subtraction
         F.c = (a + b) & 0x100 ? 0 : 1;
     } else {
@@ -197,10 +217,11 @@ void CPU::subA(uint8_t value, bool withCarry) {
     A += twosComp8(value + CFlag);
     setZNFlags(A, true);
 }
+
 /**
 * Increment the value stored at address @addr
  */
-void CPU::incrementAddr(uint16_t addr){
+void CPU::incrementAddr(uint16_t addr) {
     uint8_t value = memory->read(addr);
     setHFlag(value++, 1, false, 0);
     memory->write(addr, value);
@@ -210,7 +231,7 @@ void CPU::incrementAddr(uint16_t addr){
 /**
 * Decrement the value stored at address @addr
  */
-void CPU::decrementAddr(uint16_t addr){
+void CPU::decrementAddr(uint16_t addr) {
     uint8_t value = memory->read(addr);
     setHFlag(value--, 1, true, 0);
     memory->write(addr, value);
@@ -325,8 +346,10 @@ void CPU::rrc(uint8_t &reg) {
     auto d0 = reg & 0x01;
     reg = (reg >> 1) | (d0 << 7);
 
+    F.all_8 = 0;
     //Sets C flag to d0
     F.c = d0 == 0 ? 0 : 1;
+    F.z = reg ? 0 : 1;
 }
 
 /**
@@ -551,8 +574,7 @@ void CPU::bit(uint8_t bit_nr, uint8_t value) {
  * Reset bit_nr in reg.
  * * */
 void CPU::res(uint8_t bit_nr, uint8_t &reg) {
-    reg = reg & (~0x01 << bit_nr);
-
+    reg = reg & ~(0x01 << bit_nr);
 }
 
 /**
@@ -573,17 +595,17 @@ void CPU::sla(uint8_t &reg) {
     F.c = reg >> 7;
     reg = reg << 1;
     reg &= 0xFE;
-    setZNFlags(reg,false);
-    F.h=0;
+    setZNFlags(reg, false);
+    F.h = 0;
 }
 
 void CPU::sra(uint8_t &reg) {
-    auto b7 = (reg & 0x80) ;
+    auto b7 = (reg & 0x80);
     F.c = reg & 0x01;
     reg = reg >> 1;
     reg |= b7;
-    setZNFlags(reg,false);
-    F.h=0;
+    setZNFlags(reg, false);
+    F.h = 0;
 }
 
 void CPU::srl(uint8_t &reg) {
@@ -591,6 +613,84 @@ void CPU::srl(uint8_t &reg) {
     reg >>= 1;
     F.h = 0;
     setZNFlags(reg, false);
+}
+
+/**
+ * Is only used after addition or subtraction, is used to convert register A to Binary Coded Decimal(BCD).
+ * This is done by first checking if the previous operation was addition or subtraction.
+ * If it was addition, we check either if there is a carry, which indicates overflow(meaning that the value has passed 15, and is now misrepresenting the actual value it should represent, for example 18 --> should display 8, but shows 2 due to overflowing.
+ * Or if the value of A>0x99, we simply check if the numerical value of the upper nibble is 10 or more, and it needs correction.
+ * If it on the other hand is subtraction, the only time a value > 9 can be shown is if one of the carries occurred as this means that there was a borrow and the numbers need correction.
+ * By correction I mean + or - with the values 0x60 or 0x06. This is due to 0xF-0x9=0x6, which is the correction needed to transform the values to BCD.
+ * Credits to AWJ @ https://forums.nesdev.com/viewtopic.php?t=15944
+ * */
+void CPU::daa() {
+    if (!F.n) {
+        if (F.c || A > 0x99) {
+            A += 0x60;
+            F.c = 1;
+        }
+        if (F.h || (A & 0x0f) > 0x09) { A += 0x6; }
+    } else {  // after a subtraction, only adjust if (half-)carry occurred
+        if (F.c) { A -= 0x60; }
+        if (F.h) { A -= 0x6; }
+    }
+// these flags are always updated
+    F.z = (A == 0) ? 1 : 0; // the usual z flag
+    F.h = 0; // h flag is always cleared
+}
+
+/**
+ * Stops all execution. Is cancelled if any button is pressed. Resets IE flags, and sets all IO ports (P10-P13) to low.
+ *
+ * */
+void CPU::stop_op() {
+
+    loadIm8(BC.high_8, memory->read(INTERRUPT_ENABLE)); // Save IE
+    memory->write(INTERRUPT_ENABLE, 0x00); //clear IE
+    memory->write(IO_START, memory->read(IO_START) & 0xF0);
+    stop = true;
+
+}
+
+void CPU::return_from_stop() {
+    loadIm8(A, BC.high_8);
+    memory->write(0xffff, A);
+    stop = false;
+}
+
+bool CPU::getStop() {
+    return stop;
+}
+
+bool CPU::getHalt() {
+    return halt;
+}
+/**
+ * Stops system clock(aka CPU), is reset after IE and and IF flags are set in bitwise pairs.
+ * Simply continues after halt is over.
+ *
+ * */
+void CPU::halt_op() {
+    if (IME != 0x0000) {
+        halt = true;
+    } else if (memory->read(INTERRUPT_ENABLE & INTERRUPT_FLAG & 0x1F)) {
+        //HALT MODE ENTERED
+        halt = true;
+    }
+    //TODO If none of these happen the halt bug should occur.
+}
+
+void CPU::cpl() {
+    A = ~A;
+    F.n = 1;
+    F.h = 1;
+}
+
+void CPU::ccf() {
+    F.c = !F.c;
+    F.n = 0;
+    F.h = 0;
 }
 
 /**
@@ -658,6 +758,7 @@ int CPU::execute_instruction() {
             return 2;
         case 0x07: //RLCA
             rlc(A);
+            F.z = 0;
             return 1;
         case 0x08:
             //special case, not using read_and_inc PC
@@ -685,7 +786,12 @@ int CPU::execute_instruction() {
             return 2;
         case 0x0F: //RRCA
             rrc(A);
-            F.z = 0; //Special case
+            F.all_8 &= 0x10;
+            return 1;
+        case 0x10:
+            stop_op();
+            //Says it should take 2 bytes.
+            PC++;
             return 1;
         case 0x11:
             loadIm16(read16_and_inc_pc(), DE);
@@ -707,6 +813,7 @@ int CPU::execute_instruction() {
             return 2;
         case 0x17: //RLA
             rl(A);
+            F.z = 0;
             return 1;
         case 0x18:
             jumpRelative(read_and_inc_pc());
@@ -758,6 +865,9 @@ int CPU::execute_instruction() {
         case 0x26:
             loadIm8(HL.high_8, read_and_inc_pc());
             return 2;
+        case 0x27:
+            daa();
+            return 1;
         case 0x28:
             if (jumpRelativeZ(read_and_inc_pc(), true))
                 return 3;
@@ -782,6 +892,9 @@ int CPU::execute_instruction() {
         case 0x2E:
             loadIm8(HL.low_8, read_and_inc_pc());
             return 2;
+        case 0x2F:
+            cpl();
+            return 1;
         case 0x30:
             if (jumpRelativeC(read_and_inc_pc(), false))
                 return 3;
@@ -806,8 +919,9 @@ int CPU::execute_instruction() {
         case 0x36:
             storeAddr(HL.all_16, read_and_inc_pc());
             return 3;
-        case 0x37: //RLA
-            rl(A);
+        case 0x37:
+            F.all_8 &= 0x80;
+            F.c = 1;
             return 1;
         case 0x38:
             if (jumpRelativeC(read_and_inc_pc(), true))
@@ -833,6 +947,9 @@ int CPU::execute_instruction() {
         case 0x3E:
             loadIm8(A, read_and_inc_pc());
             return 2;
+        case 0x3F:
+            ccf();
+            return 1;
         case 0x40:
             //This is stoopid.
             loadIm8(BC.high_8, BC.high_8);
@@ -996,6 +1113,9 @@ int CPU::execute_instruction() {
         case 0x75:
             storeAddr(HL.all_16, HL.low_8);
             return 2;
+        case 0x76:
+            halt_op();
+            return 1;
         case 0x77:
             storeAddr(HL.all_16, A);
             return 2;
@@ -1271,7 +1391,7 @@ int CPU::execute_instruction() {
             }
         case 0xCD:
             PC += 2;
-            call(memory->read(PC-2), memory->read(PC - 1));
+            call(memory->read(PC - 2), memory->read(PC - 1));
             return 6;
         case 0xCE:
             addA(read_and_inc_pc(), true);
@@ -1383,7 +1503,7 @@ int CPU::execute_instruction() {
             return 1;
         case 0xF5:
             tmpReg.high_8 = A;
-            tmpReg.low_8 = F.all_8;
+            tmpReg.low_8 = F.all_8 & 0xF0;
             pushReg(tmpReg);
             return 4;
         case 0xF6:
@@ -1945,7 +2065,7 @@ int CPU::CB_ops() {
             return 2;
         case 0xA6:
             tmpVal = memory->read(HL.all_16);
-            res(2, tmpVal);
+            res(4, tmpVal);
             storeAddr(HL.all_16, tmpVal);
             return 4;
         case 0xA7:
@@ -2207,6 +2327,7 @@ int CPU::CB_ops() {
             tmpVal = memory->read(HL.all_16);
             set(6, tmpVal);
             storeAddr(HL.all_16, tmpVal);
+            return 4;
         case 0xF7:
             set(6, A);
             return 2;
@@ -2247,10 +2368,15 @@ bool CPU::isInterrupted() {
         uint8_t mask = memory->read(INTERRUPT_ENABLE);
         return flags & mask;
     }
+    if (this->halt) {
+        return true;
+    }
     return false;
 }
 
-void CPU::handleInterrupts() {
+int CPU::handleInterrupts() {
+    int cycles = 5;
+
     IME = 0;
 
     uint8_t PC_high_byte = PC >> 8;
@@ -2272,6 +2398,7 @@ void CPU::handleInterrupts() {
         interruptVector = 0x48;
     } else if (maskedFlags & TIMER_IF_BIT) {
         memory->write(INTERRUPT_FLAG, flags & ~TIMER_IF_BIT);
+        std::cout << (int)memory->read(INTERRUPT_FLAG) << std::endl;
         interruptVector = 0x50;
     } else if (maskedFlags & SERIAL_IF_BIT) {
         memory->write(INTERRUPT_FLAG, flags & ~SERIAL_IF_BIT);
@@ -2281,6 +2408,12 @@ void CPU::handleInterrupts() {
         interruptVector = 0x60;
     }
     PC = interruptVector;
-}
 
+    if (this->halt) {
+        this->halt = false;
+        cycles++;
+    }
+
+    return cycles;
+}
 
