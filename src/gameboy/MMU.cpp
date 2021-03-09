@@ -316,7 +316,7 @@ void MMU::timer_update(uint16_t cycles) {
             // Add modulo
             this->timer_counter += (this->timer_modulo + increase_counter);
             // Raise interrupt request for Timer interrupt
-            std::cout << "MMU Timer" << std::endl;
+          //  std::cout << "MMU Timer" << std::endl;
             this->interrupt_flag = this->interrupt_flag | (1 << 2);
         } else {
           this->timer_counter += increase_counter;

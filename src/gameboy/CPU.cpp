@@ -65,15 +65,11 @@ int CPU::update() {
     }*/
 
     if (this->isInterrupted()) {
-        if(halt){
-            std::cout<< "Halt set omw to interrupt"<< std::endl;
 
-        }
         return this->handleInterrupts();
     }
 
     if (this->halt) {
-        std::cout<< "Halt set"<< std::endl;
         return 1;
     }
 
@@ -671,6 +667,7 @@ bool CPU::getStop() {
 bool CPU::getHalt() {
     return halt;
 }
+
 /**
  * Stops system clock(aka CPU), is reset after IE and and IF flags are set in bitwise pairs.
  * Simply continues after halt is over.
@@ -2368,20 +2365,23 @@ int CPU::CB_ops() {
 }
 
 bool CPU::isInterrupted() {
-    if (IME) {
-        uint8_t flags = memory->read(INTERRUPT_FLAG);
-        uint8_t mask = memory->read(INTERRUPT_ENABLE);
+    uint8_t flags = memory->read(INTERRUPT_FLAG);
+    uint8_t mask = memory->read(INTERRUPT_ENABLE);
+    if (IME || halt) {
         return flags & mask;
     }
-    if (this->halt) {
-        return true;
-    }
+
+
     return false;
 }
 
 int CPU::handleInterrupts() {
     int cycles = 5;
-
+    if (this->halt) {
+        this->halt = false;
+        cycles++;
+    }
+    if(IME){
     IME = 0;
 
     uint8_t PC_high_byte = PC >> 8;
@@ -2402,13 +2402,7 @@ int CPU::handleInterrupts() {
         memory->write(INTERRUPT_FLAG, flags & ~STAT_IF_BIT);
         interruptVector = 0x48;
     } else if (maskedFlags & TIMER_IF_BIT) {
-        if(halt){
-            memory->write(INTERRUPT_FLAG, flags);
-
-        }else{
-            memory->write(INTERRUPT_FLAG, flags & ~TIMER_IF_BIT);
-        }
-        std::cout << (int)memory->read(INTERRUPT_FLAG) << std::endl;
+        memory->write(INTERRUPT_FLAG, flags & ~TIMER_IF_BIT);
         interruptVector = 0x50;
     } else if (maskedFlags & SERIAL_IF_BIT) {
         memory->write(INTERRUPT_FLAG, flags & ~SERIAL_IF_BIT);
@@ -2419,11 +2413,7 @@ int CPU::handleInterrupts() {
     }
     PC = interruptVector;
 
-    if (this->halt) {
-        this->halt = false;
-        cycles++;
     }
-
     return cycles;
 }
 
