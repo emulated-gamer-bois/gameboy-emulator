@@ -49,23 +49,7 @@ void CPU::cpu_dump() {
 }
 
 int CPU::update() {
-    /*if (!this->cpu->getStop()) {
-        // TODO: Check for interrupts
-        int cycles = 0;
-        if (!this->cpu->getHalt()) {
-            cycles = this->cpu->execute_instruction();
-
-        }else if(mmu->read(0xffff) & mmu->read(0xFF0F) & 0x1f){
-
-        }
-        this->ppu->update(cycles);
-        this->mmu->timer_update(cycles);
-    } else if (mmu->read(0xFFFF)) {
-        cpu->return_from_stop();
-    }*/
-
     if (this->isInterrupted()) {
-
         return this->handleInterrupts();
     }
 
@@ -2382,37 +2366,36 @@ int CPU::handleInterrupts() {
         cycles++;
     }
     if(IME){
-    IME = 0;
+        IME = 0;
 
-    uint8_t PC_high_byte = PC >> 8;
-    uint8_t PC_low_byte = PC & 0xFF;
-    memory->write(--SP.all_16, PC_high_byte);
-    memory->write(--SP.all_16, PC_low_byte);
+        uint8_t PC_high_byte = PC >> 8;
+        uint8_t PC_low_byte = PC & 0xFF;
+        memory->write(--SP.all_16, PC_high_byte);
+        memory->write(--SP.all_16, PC_low_byte);
 
-    uint8_t flags = memory->read(INTERRUPT_FLAG);
-    uint8_t mask = memory->read(INTERRUPT_ENABLE);
-    uint8_t maskedFlags = flags & mask;
+        uint8_t flags = memory->read(INTERRUPT_FLAG);
+        uint8_t mask = memory->read(INTERRUPT_ENABLE);
+        uint8_t maskedFlags = flags & mask;
 
-    uint16_t interruptVector = PC;
+        uint16_t interruptVector = PC;
 
-    if (maskedFlags & V_BLANK_IF_BIT) {
-        memory->write(INTERRUPT_FLAG, flags & ~V_BLANK_IF_BIT);
-        interruptVector = 0x40;
-    } else if (maskedFlags & STAT_IF_BIT) {
-        memory->write(INTERRUPT_FLAG, flags & ~STAT_IF_BIT);
-        interruptVector = 0x48;
-    } else if (maskedFlags & TIMER_IF_BIT) {
-        memory->write(INTERRUPT_FLAG, flags & ~TIMER_IF_BIT);
-        interruptVector = 0x50;
-    } else if (maskedFlags & SERIAL_IF_BIT) {
-        memory->write(INTERRUPT_FLAG, flags & ~SERIAL_IF_BIT);
-        interruptVector = 0x58;
-    } else if (maskedFlags & CONTROLLER_IF_BIT) {
-        memory->write(INTERRUPT_FLAG, flags & ~CONTROLLER_IF_BIT);
-        interruptVector = 0x60;
-    }
-    PC = interruptVector;
-
+        if (maskedFlags & V_BLANK_IF_BIT) {
+            memory->write(INTERRUPT_FLAG, flags & ~V_BLANK_IF_BIT);
+            interruptVector = 0x40;
+        } else if (maskedFlags & STAT_IF_BIT) {
+            memory->write(INTERRUPT_FLAG, flags & ~STAT_IF_BIT);
+            interruptVector = 0x48;
+        } else if (maskedFlags & TIMER_IF_BIT) {
+            memory->write(INTERRUPT_FLAG, flags & ~TIMER_IF_BIT);
+            interruptVector = 0x50;
+        } else if (maskedFlags & SERIAL_IF_BIT) {
+            memory->write(INTERRUPT_FLAG, flags & ~SERIAL_IF_BIT);
+            interruptVector = 0x58;
+        } else if (maskedFlags & CONTROLLER_IF_BIT) {
+            memory->write(INTERRUPT_FLAG, flags & ~CONTROLLER_IF_BIT);
+            interruptVector = 0x60;
+        }
+        PC = interruptVector;
     }
     return cycles;
 }
