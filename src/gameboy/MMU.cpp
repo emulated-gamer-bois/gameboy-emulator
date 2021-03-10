@@ -41,6 +41,9 @@ void MMU::reset() {
     this->timer_counter = 0;
     this->timer_modulo = 0;
     this->timer_control = 0;
+
+    this->rom_bank_number = 1;
+    this->cartridgeType = 0;
 }
 
 uint8_t MMU::read(uint16_t addr) {
@@ -53,7 +56,23 @@ uint8_t MMU::read(uint16_t addr) {
         case GAME_ROM_START + 0x2000:
         case GAME_ROM_START + 0x4000:
         case GAME_ROM_START + 0x6000:
-            return this->game_rom[addr];
+            if (this->cartridgeType == 1) {
+                if (addr <= 0x3fff) {
+                    return this->game_rom[addr];
+                } else if (addr <= 0x7fff) {
+                    uint8_t target_bank;
+                    if (this->rom_bank_number == 0) {
+                        target_bank = 1;
+                    } else {
+                        target_bank = this->rom_bank_number;
+                    }
+                    uint16_t target = addr - 0x4000;
+                    target += (0x4000 * target_bank);
+                    return this->game_rom[target];
+                }
+            } else {
+                return this->game_rom[addr];
+            }
 
             //Video RAM
         case VRAM_START:
@@ -89,8 +108,10 @@ uint8_t MMU::read(uint16_t addr) {
 void MMU::write(uint16_t addr, uint8_t data) {
     switch(addr & 0xe000) {
             //Boot ROM/Game ROM
-        case GAME_ROM_START:
         case GAME_ROM_START + 0x2000:
+            this->rom_bank_number = 0x1f & data;
+            break;
+        case GAME_ROM_START:
         case GAME_ROM_START + 0x4000:
         case GAME_ROM_START + 0x6000:
             std::cout << "Tried to write to ROM at address: " << addr << std::endl;
@@ -163,6 +184,9 @@ bool MMU::load_game_rom(std::string filepath) {
         std::memcpy(&this->game_rom[this->game_rom.size() - size], &memblock[0], size);
 
         delete[] memblock;
+        this->cartridgeType = this->game_rom[0x147];
+        std::cout << "game rom size: " << size << std::endl;
+        std::cout << "cartridge type: " << (int)this->cartridgeType << std::endl;
         // TODO: Maybe check for file size
     }
     else {
@@ -316,6 +340,7 @@ void MMU::timer_update(uint16_t cycles) {
             // Add modulo
             this->timer_counter += (this->timer_modulo + increase_counter);
             // Raise interrupt request for Timer interrupt
+          //  std::cout << "MMU Timer" << std::endl;
             this->interrupt_flag = this->interrupt_flag | (1 << 2);
         } else {
           this->timer_counter += increase_counter;

@@ -24,14 +24,15 @@ public:
      * Fetches, decodes and executes the instruction at location PC
      * @returns amount of machine cycles operation takes.
      */
+
     int update();
 
-    bool getStop();
-    bool getHalt();
-    void return_from_stop();
     void skipBootRom();
 
     void cpu_dump();
+    bool getStop();
+    void return_from_stop();
+
 private:
     //Registers
     uint16_t PC;
@@ -50,11 +51,11 @@ private:
     //Update related functions
     int execute_instruction();
     bool isInterrupted();
-    void handleInterrupts();
+    int handleInterrupts();
 
-     //Clock handling
-     bool stop;
-     bool halt;
+    //Clock handling
+    bool stop;
+    bool halt;
 
     //Flag management
     void setZNFlags(uint8_t value, bool subtraction);
