@@ -25,6 +25,17 @@ CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
 
 }
 
+void CPU::reset() {
+    this->PC = 0x0000;
+    this->SP.all_16 = 0xFFFE;
+    A = 0x00;
+    BC.all_16 = 0x00;
+    DE.all_16 = 0x00;
+    HL.all_16 = 0x00;
+    F.all_8 = 0x0;
+    IME = 0;
+}
+
 void CPU::cpu_dump() {
     std::cout << "=---------------------------=" << std::endl;
     std::cout << "A: 0x" << std::hex << (int) this->A << std::endl;
@@ -35,6 +46,22 @@ void CPU::cpu_dump() {
     std::cout << "PC: 0x" << std::hex << this->PC << std::endl;
     std::cout << "SP: 0x" << std::hex << this->SP.all_16 << std::endl;
     std::cout << "=---------------------------=" << std::endl;
+}
+
+int CPU::update() {
+    if (this->isInterrupted()) {
+        return this->handleInterrupts();
+    }
+
+    if (this->halt) {
+        return 1;
+    }
+
+    return this->execute_instruction();
+}
+
+void CPU::skipBootRom() {
+    this->PC = 0x0100;
 }
 
 void nop() {}
@@ -621,9 +648,7 @@ bool CPU::getStop() {
     return stop;
 }
 
-bool CPU::getHalt() {
-    return halt;
-}
+
 /**
  * Stops system clock(aka CPU), is reset after IE and and IF flags are set in bitwise pairs.
  * Simply continues after halt is over.
@@ -632,7 +657,7 @@ bool CPU::getHalt() {
 void CPU::halt_op() {
     if (IME) {
         halt = true;
-    } else if (memory->read(INTERRUPT_ENABLE & INTERRUPT_FLAG & 0x1F)) {
+    } else if ((memory->read(INTERRUPT_ENABLE) & memory->read(INTERRUPT_FLAG) & 0x1F) == 0) {
         //HALT MODE ENTERED
         halt = true;
     }
@@ -2320,4 +2345,56 @@ int CPU::CB_ops() {
     return 0;
 }
 
+bool CPU::isInterrupted() {
+    uint8_t flags = memory->read(INTERRUPT_FLAG);
+    uint8_t mask = memory->read(INTERRUPT_ENABLE);
+    if (IME || halt) {
+        return flags & mask;
+    }
+
+
+    return false;
+}
+
+int CPU::handleInterrupts() {
+    int cycles = 0;
+    if (this->halt) {
+        this->halt = false;
+        cycles++;
+    }
+    if(IME){
+        cycles+=5;
+        IME = 0;
+
+        uint8_t PC_high_byte = PC >> 8;
+        uint8_t PC_low_byte = PC & 0xFF;
+        memory->write(--SP.all_16, PC_high_byte);
+        memory->write(--SP.all_16, PC_low_byte);
+
+        uint8_t flags = memory->read(INTERRUPT_FLAG);
+        uint8_t mask = memory->read(INTERRUPT_ENABLE);
+        uint8_t maskedFlags = flags & mask;
+
+        uint16_t interruptVector = PC;
+
+        if (maskedFlags & V_BLANK_IF_BIT) {
+            memory->write(INTERRUPT_FLAG, flags & ~V_BLANK_IF_BIT);
+            interruptVector = 0x40;
+        } else if (maskedFlags & STAT_IF_BIT) {
+            memory->write(INTERRUPT_FLAG, flags & ~STAT_IF_BIT);
+            interruptVector = 0x48;
+        } else if (maskedFlags & TIMER_IF_BIT) {
+            memory->write(INTERRUPT_FLAG, flags & ~TIMER_IF_BIT);
+            interruptVector = 0x50;
+        } else if (maskedFlags & SERIAL_IF_BIT) {
+            memory->write(INTERRUPT_FLAG, flags & ~SERIAL_IF_BIT);
+            interruptVector = 0x58;
+        } else if (maskedFlags & CONTROLLER_IF_BIT) {
+            memory->write(INTERRUPT_FLAG, flags & ~CONTROLLER_IF_BIT);
+            interruptVector = 0x60;
+        }
+        PC = interruptVector;
+    }
+    return cycles;
+}
 

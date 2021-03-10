@@ -57,7 +57,7 @@ void Application::start() {
 
         // Prepare for rendering, render and swap buffer.
         this->updateSDLWindowSize();
-        this->renderView.setScreenTexture(this->gameBoy.getScreen());
+        this->renderView.setScreenTexture(this->gameBoy.getScreenTexture().get());
         this->renderView.render();
         SDL_GL_SwapWindow(this->window);
         this->gameBoy.confirmDraw();
@@ -78,8 +78,7 @@ void Application::init() {
     this->renderView.initGL();
 
     // TEMP ------------------------------------------------------------------------------------------------------------
-    TEMP_setTexture("../src/title.pixdata", this->renderView);
-    this->gameBoy.load_boot_rom("../roms/boot_infinite_loop.bin");
+    this->gameBoy.load_rom("../roms/dmg_boot.bin", "../roms/cpu_instrs/cpu_instrs.gb");
     // END TEMP --------------------------------------------------------------------------------------------------------
 }
 

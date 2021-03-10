@@ -22,3 +22,5 @@ Makefile
 CMakeCache.txt
 *.a
 cmake-build-debug-coverage/
+
+roms/dmg_boot.bin

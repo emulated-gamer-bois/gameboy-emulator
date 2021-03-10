@@ -10,6 +10,10 @@
 
 
 MMU::MMU() {
+    this->reset();
+}
+
+void MMU::reset() {
     // Reset arrays to 0
     this->boot_rom.fill(0x00);
     this->vram.fill(0x00);
@@ -21,7 +25,7 @@ MMU::MMU() {
     this->game_rom.resize(0x8000);
 
     //this->xram.resize(0x4000);              // Not used in simple games.
-                                              // Size depends on info in game rom header.
+    // Size depends on info in game rom header.
 
     this->booting = true;
     // Enable all interrupts by default
@@ -33,10 +37,13 @@ MMU::MMU() {
     this->io_joypad = 0xff;
 
     // Timer default values
-    timer_divider = 0;
-    timer_counter = 0;
-    timer_modulo = 0;
-    timer_control = 0;
+    this->timer_divider = 0;
+    this->timer_counter = 0;
+    this->timer_modulo = 0;
+    this->timer_control = 0;
+
+    this->rom_bank_number = 1;
+    this->cartridgeType = 0;
 }
 
 uint8_t MMU::read(uint16_t addr) {
@@ -49,7 +56,23 @@ uint8_t MMU::read(uint16_t addr) {
         case GAME_ROM_START + 0x2000:
         case GAME_ROM_START + 0x4000:
         case GAME_ROM_START + 0x6000:
-            return this->game_rom[addr];
+            if (this->cartridgeType == 1) {
+                if (addr <= 0x3fff) {
+                    return this->game_rom[addr];
+                } else if (addr <= 0x7fff) {
+                    uint8_t target_bank;
+                    if (this->rom_bank_number == 0) {
+                        target_bank = 1;
+                    } else {
+                        target_bank = this->rom_bank_number;
+                    }
+                    uint16_t target = addr - 0x4000;
+                    target += (0x4000 * target_bank);
+                    return this->game_rom[target];
+                }
+            } else {
+                return this->game_rom[addr];
+            }
 
             //Video RAM
         case VRAM_START:
@@ -85,13 +108,16 @@ uint8_t MMU::read(uint16_t addr) {
 void MMU::write(uint16_t addr, uint8_t data) {
     switch(addr & 0xe000) {
             //Boot ROM/Game ROM
-        case GAME_ROM_START:
         case GAME_ROM_START + 0x2000:
+            this->rom_bank_number = 0x1f & data;
+            break;
+        case GAME_ROM_START:
         case GAME_ROM_START + 0x4000:
         case GAME_ROM_START + 0x6000:
             std::cout << "Tried to write to ROM at address: " << addr << std::endl;
             // TODO: Error handling
             // TODO: could write to ROM addresses when bankswitching is implemented
+            break;
 
             //Video RAM
         case VRAM_START:
@@ -134,7 +160,7 @@ void MMU::disable_boot_rom() {
     this->booting = false;
 }
 
-void MMU::load_game_rom(std::string filepath) {
+bool MMU::load_game_rom(std::string filepath) {
     std::streampos size;
     char *memblock;
 
@@ -158,14 +184,19 @@ void MMU::load_game_rom(std::string filepath) {
         std::memcpy(&this->game_rom[this->game_rom.size() - size], &memblock[0], size);
 
         delete[] memblock;
+        this->cartridgeType = this->game_rom[0x147];
+        std::cout << "game rom size: " << size << std::endl;
+        std::cout << "cartridge type: " << (int)this->cartridgeType << std::endl;
+        // TODO: Maybe check for file size
     }
     else {
-        std::cout << "Unable to open file: " << filepath << std::endl;
-        // TODO: Error handling
+        std::cout << "Unable to open game ROM: " << filepath << std::endl;
+        return false;
     }
+    return true;
 }
 
-void MMU::load_boot_rom(std::string filepath) {
+bool MMU::load_boot_rom(std::string filepath) {
     std::streampos size;
     char *memblock;
 
@@ -190,13 +221,16 @@ void MMU::load_boot_rom(std::string filepath) {
             delete[] memblock;
         } else {
             std::cout << "Unable to load boot ROM! File size is not 256 bytes!" << std::endl;
-            // TODO: Error handling
+            disable_boot_rom();
+            return false;
         }
     }
     else {
-        std::cout << "Unable to open file: " << filepath << std::endl;
-        // TODO: Error handling
+        std::cout << "Unable to open boot ROM: " << filepath << std::endl;
+        disable_boot_rom();
+        return false;
     }
+    return true;
 }
 
 // ONLY TO BE USED IN TESTS. CAN WRITE TO GAME ROM
@@ -240,6 +274,16 @@ void MMU::write_io(uint16_t addr, uint8_t data) {
             case TIMER_CONTROL:
                 this->timer_control = data & 0b111;
                 break;
+        }
+    } else if (addr == DMA_TRANSFER) {
+        std::cout << "DMA: data:" << (uint8_t)data;
+        if (0x00 <= data && data <= 0xf1) {
+            uint16_t start_addr = (data << 8);
+            for (uint8_t i = 0; i <= 0x9f; i++) {
+                this->write(0xfe00 + i, this->read(start_addr+i));
+            }
+        } else {
+            std::cout << "Tried to use DMA transfer with invalid input: " << data << std::endl;
         }
     } else {
         this->io[addr - IO_START] = data;
@@ -296,6 +340,7 @@ void MMU::timer_update(uint16_t cycles) {
             // Add modulo
             this->timer_counter += (this->timer_modulo + increase_counter);
             // Raise interrupt request for Timer interrupt
+          //  std::cout << "MMU Timer" << std::endl;
             this->interrupt_flag = this->interrupt_flag | (1 << 2);
         } else {
           this->timer_counter += increase_counter;

@@ -11,6 +11,7 @@
 #include "RegisterPair.h"
 #include "MMU.h"
 #include "Flags.h"
+#include "Definitions.h"
 
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
@@ -18,15 +19,18 @@ friend class test_case_name##_##test_name##_Test
 class CPU {
 public:
     CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> memory);
-
+    void reset();
     /**
      * Fetches, decodes and executes the instruction at location PC
      * @returns amount of machine cycles operation takes.
      */
-    int execute_instruction();
+
+    int update();
+
+    void skipBootRom();
+
     void cpu_dump();
     bool getStop();
-    bool getHalt();
     void return_from_stop();
 
 private:
@@ -43,9 +47,16 @@ private:
     unsigned int IME : 1;
     //Memory
     std::shared_ptr<MMU> memory;
+
+    //Update related functions
+    int execute_instruction();
+    bool isInterrupted();
+    int handleInterrupts();
+
     //Clock handling
     bool stop;
     bool halt;
+
     //Flag management
     void setZNFlags(uint8_t value, bool subtraction);
     void setHFlag(uint8_t a, uint8_t b, bool subtraction, uint8_t cFlag);

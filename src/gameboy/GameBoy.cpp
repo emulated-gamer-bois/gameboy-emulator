@@ -8,29 +8,28 @@ GameBoy::GameBoy() {
     this->mmu = std::make_shared<MMU>();
     this->cpu = std::make_unique<CPU>(0x0000, 0xFFFE, mmu);
     this->ppu = std::make_unique<PPU>(mmu);
+    this->on = false;
 }
 
 void GameBoy::step() {
-    if (!this->cpu->getStop()) {
-        // TODO: Check for interrupts
-        int cycles = 0;
-        if (!this->cpu->getHalt()) {
-            cycles = this->cpu->execute_instruction();
-
-        }else if(mmu->read(0xffff) & mmu->read(0xFF0F) & 0x1f){
-
-        }
-        this->ppu->update(cycles);
-        this->mmu->timer_update(cycles);
-    } else if (mmu->read(0xFFFF)) {
-        cpu->return_from_stop();
+    if (!this->on) {
+        return;
     }
 
-
+    int cycles = this->cpu->update();
+    this->ppu->update(cycles);
+    this->mmu->timer_update(cycles);
 }
 
-uint8_t *GameBoy::getScreen() {
-    return this->ppu->getFrameBuffer()->data();
+std::unique_ptr<uint8_t[]> GameBoy::getScreenTexture() {
+    auto ppuFrameBuffer = this->ppu->getFrameBuffer();
+    auto texture = std::make_unique<uint8_t[]>(ppuFrameBuffer->size());
+
+    for (int i = 0; i < ppuFrameBuffer->size(); i++) {
+        texture[i] = 0xFF - (ppuFrameBuffer->at(i) * 0x55);
+    }
+
+    return texture;
 }
 
 void GameBoy::joypad_input(uint8_t key, uint8_t action) {
@@ -45,6 +44,16 @@ void GameBoy::joypad_input(uint8_t key, uint8_t action) {
             std::cout << "Invalid parameter `action` to GameBoy::joypad_input: " << action << std::endl;
             break;
     }
+}
+
+void GameBoy::load_rom(std::string bootFilepath, std::string romFilepath) {
+    this->cpu->reset();
+    this->ppu->reset();
+    this->mmu->reset();
+    if (!this->mmu->load_boot_rom(bootFilepath)) {
+        this->cpu->skipBootRom();
+    }
+    on = this->mmu->load_game_rom(romFilepath);
 }
 
 void GameBoy::load_game_rom(std::string filepath) {
