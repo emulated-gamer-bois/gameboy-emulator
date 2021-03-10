@@ -1,5 +1,10 @@
 SECTION "boot", ROM0[$0000]
 Start:
+    ;Disable interrupts
+    di
+    ;Set stack pointer
+    ld sp, $fffe
+
     ;Set LCDC to use tile map 0 and 8000 addressing mode
     ld hl, $ff40
     ld [hl], $b3
