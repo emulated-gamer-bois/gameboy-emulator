@@ -105,7 +105,7 @@ Animation:
     inc hl
     dec [hl]
     dec hl
-    ld c, $1f       ; frame time
+    ld c, $14       ; frame time
 .frame:
     ld a,[$FF00+$44]    ; wait for next frame
     cp $90
