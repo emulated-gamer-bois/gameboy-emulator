@@ -84,6 +84,10 @@ private:
     std::array<uint8_t, 128> io;
     std::array<uint8_t, 128> hram;
 
+    // Fix for Cartridge type 0x01: MBC1 with no RAM or battery
+    uint8_t rom_bank_number;
+    uint8_t cartridgeType;
+
     bool booting;
     uint8_t interrupt_enable;
     uint8_t interrupt_flag;
