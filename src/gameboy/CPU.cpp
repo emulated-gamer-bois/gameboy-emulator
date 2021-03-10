@@ -648,9 +648,6 @@ bool CPU::getStop() {
     return stop;
 }
 
-bool CPU::getHalt() {
-    return halt;
-}
 
 /**
  * Stops system clock(aka CPU), is reset after IE and and IF flags are set in bitwise pairs.
@@ -660,7 +657,7 @@ bool CPU::getHalt() {
 void CPU::halt_op() {
     if (IME) {
         halt = true;
-    } else if (memory->read(INTERRUPT_ENABLE & INTERRUPT_FLAG & 0x1F) == 0) {
+    } else if ((memory->read(INTERRUPT_ENABLE) & memory->read(INTERRUPT_FLAG) & 0x1F) == 0) {
         //HALT MODE ENTERED
         halt = true;
     }
@@ -2360,12 +2357,13 @@ bool CPU::isInterrupted() {
 }
 
 int CPU::handleInterrupts() {
-    int cycles = 5;
+    int cycles = 0;
     if (this->halt) {
         this->halt = false;
         cycles++;
     }
     if(IME){
+        cycles+=5;
         IME = 0;
 
         uint8_t PC_high_byte = PC >> 8;

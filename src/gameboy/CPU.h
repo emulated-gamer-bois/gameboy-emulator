@@ -31,7 +31,6 @@ public:
 
     void cpu_dump();
     bool getStop();
-    bool getHalt();
     void return_from_stop();
 
 private:
