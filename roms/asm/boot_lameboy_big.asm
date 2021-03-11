@@ -217,7 +217,9 @@ TileData:
 
 ;Add padding to file
 ;Disable boot rom
-SECTION "padding", ROM0[$ff-3]
+SECTION "padding", ROM0[$ff-8]
 DisableBoot:
+    ld hl, $ff40
+    ld [hl], $91
     ld a, 1
     ld [$ff00+$50], a
