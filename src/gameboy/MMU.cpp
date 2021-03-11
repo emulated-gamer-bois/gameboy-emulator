@@ -266,7 +266,7 @@ void MMU::write_io(uint16_t addr, uint8_t data) {
                 this->timer_divider = 0;
                 break;
             case TIMER_COUNTER:
-                this->timer_counter = ((uint16_t)data << 8);
+                this->timer_counter = data;
                 break;
             case TIMER_MODULO:
                 this->timer_modulo = data;

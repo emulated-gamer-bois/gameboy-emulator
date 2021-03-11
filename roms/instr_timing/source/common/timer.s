@@ -15,19 +15,19 @@ init_timer:
      lda  IE        ; disable timer interrupt
      and  ~$04
      sta  IE
-     wreg TMA,0     ; max period
-     wreg TAC,$05   ; 262144 Hz
+     wreg TMA,0     ;$06 ; max period
+     wreg TAC,$05   ;$07 ; 262144 Hz
      
      ; Be sure timer doesn't expire
      ; immediately or take too long
-     wreg IF,0
-     wreg TIMA,-20
-     delay 70
-     lda  IF
-     and  $04
-     jp   nz,test_failed
-     lda  IF
-     and  $04
+     wreg IF,0            ;$0F
+     wreg TIMA,-20        ;$05  -20
+     delay 70             ;70   -3 (2)
+     lda  IF              ;3    -2 (1)
+     and  $04             ;2    -2 (3)
+     jp   nz,test_failed  ;3     0 (2)
+     lda  IF              ;3     1 (1)
+     and  $04             ;2     1 (3)
      jp   z,test_failed
 
      pop  af
