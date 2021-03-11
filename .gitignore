@@ -23,4 +23,6 @@ CMakeCache.txt
 *.a
 cmake-build-debug-coverage/
 
+roms/o
+roms/rgbds*
 roms/dmg_boot.bin
