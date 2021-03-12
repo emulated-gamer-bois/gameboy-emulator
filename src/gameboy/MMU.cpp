@@ -48,8 +48,8 @@ void MMU::reset() {
 
 uint8_t MMU::read(uint16_t addr) {
     // Boot ROM / Cartridge
-    if (0x0000 <= addr && addr <= 0x7fff) {
-        if (0x00 <= addr && addr <= 0xff && booting) {
+    if (GAME_ROM_START <= addr && addr <= GAME_ROM_END) {
+        if (BOOT_ROM_START <= addr && addr <= BOOT_ROM_END && booting) {
             return this->boot_rom[addr];
         } else {
             return this->cartridge->read(addr);
@@ -57,76 +57,76 @@ uint8_t MMU::read(uint16_t addr) {
     }
 
     // VRAM
-    if (0x8000 <= addr && addr <= 0x9fff) {
-        return this->vram[addr - 0x8000];
+    if (VRAM_START <= addr && addr <= VRAM_END) {
+        return this->vram[addr - VRAM_START];
     }
 
     // xRAM
-    if (0xa000 <= addr && addr <= 0xbfff) {
+    if (xRAM_START <= addr && addr <= xRAM_END) {
         return this->cartridge->read(addr);
     }
 
     // WRAM
-    if (0xc000 <= addr && addr <= 0xdfff) {
-        return this->ram[addr - 0xc000];
+    if (WRAM_START <= addr && addr <= WRAM_END) {
+        return this->ram[addr - WRAM_START];
     }
 
     // OAM
-    if (0xfe00 <= addr && addr <= 0xfe9f) {
-        return this->oam[addr - 0xfe00];
+    if (OAM_START <= addr && addr <= OAM_END) {
+        return this->oam[addr - OAM_START];
     }
 
     // I/O
-    if (0xff00 <= addr && addr <= 0xff7f) {
+    if (IO_START <= addr && addr <= IO_END) {
         // Joypad
-        if (addr == 0xff00) {
+        if (addr == IO_JOYPAD) {
             return joypad->read(addr);
         }
 
         // Serial Data Transfer TODO: Implement Serial Data Transfer
-        if (0xff01 <= addr && addr <= 0xff02) {
+        if (IO_SERIAL_DATA_START <= addr && addr <= IO_SERIAL_DATA_END) {
             // Supress to prevent console spam
             // std::cout << "Tried to read from Serial Data Transfer device. addr: " << (int)addr << std::endl;
             return 0;
         }
 
         // Timer
-        if (0xff04 <= addr && addr <= 0xff07) {
+        if (IO_TIMER_START <= addr && addr <= IO_TIMER_END) {
             return this->timer->read(addr);
         }
 
         // Interrupt Flag
-        if (addr == 0xff0f) {
+        if (addr == INTERRUPT_FLAG) {
             return this->interrupt_flag;
         }
 
         // Sound TODO: Implement sound
-        if (0xff10 <= addr && addr <= 0xff26) {
+        if (IO_SOUND_START <= addr && addr <= IO_SOUND_END) {
             // Supress to prevent console spam
             // std::cout << "Tried to read from sound device. addr: " << (int)addr << std::endl;
             return 0;
         }
 
         // Waveform RAM TODO: Implement sound
-        if (0xff30 <= addr && addr <= 0xff3f) {
+        if (IO_WAVEFORM_RAM_START <= addr && addr <= IO_WAVEFORM_RAM_END) {
             // Supress to prevent console spam
             // std::cout << "Tried to read Waveform RAM. addr: " << (int)addr << std::endl;
             return 0;
         }
 
         // LCD
-        if (0xff40 <= addr && addr <= 0xff4b) {
+        if (IO_LCD_START <= addr && addr <= IO_LCD_END) {
             return this->ppu->read(addr);
         }
     }
 
     // HRAM
-    if (0xff80 <= addr && addr <= 0xfffe) {
-        return this->hram[addr - 0xff80];
+    if (HRAM_START <= addr && addr <= HRAM_END) {
+        return this->hram[addr - HRAM_START];
     }
 
     // Interrupt Enable
-    if (addr == 0xffff) {
+    if (addr == INTERRUPT_ENABLE) {
         return this->interrupt_enable;
     }
 
@@ -137,84 +137,84 @@ uint8_t MMU::read(uint16_t addr) {
 
 void MMU::write(uint16_t addr, uint8_t data) {
     // Memory Bank Controller
-    if (0x0000 <= addr && addr <= 0x7fff) {
+    if (BOOT_ROM_START <= addr && addr <= BOOT_ROM_END) {
         this->cartridge->write(addr, data);
         return;
     }
 
     // VRAM
-    if (0x8000 <= addr && addr <= 0x9fff) {
-        this->vram[addr - 0x8000] = data;
+    if (VRAM_START <= addr && addr <= VRAM_END) {
+        this->vram[addr - VRAM_START] = data;
         return;
     }
 
     // xRAM
-    if (0xa000 <= addr && addr <= 0xbfff) {
+    if (xRAM_START <= addr && addr <= xRAM_END) {
         this->cartridge->write(addr, data);
         return;
     }
 
     // WRAM
-    if (0xc000 <= addr && addr <= 0xdfff) {
-        this->ram[addr - 0xc000] = data;
+    if (WRAM_START <= addr && addr <= WRAM_END) {
+        this->ram[addr - WRAM_START] = data;
         return;
     }
 
     // OAM
-    if (0xfe00 <= addr && addr <= 0xfe9f) {
-        this->oam[addr - 0xfe00] = data;
+    if (OAM_START <= addr && addr <= OAM_END) {
+        this->oam[addr - OAM_START] = data;
         return;
     }
 
     // IO
-    if (0xff00 <= addr && addr <= 0xff7f) {
+    if (IO_START <= addr && addr <= IO_END) {
         // Joypad
-        if (addr == 0xff00) {
+        if (addr == IO_JOYPAD) {
             this->joypad->write(addr, data);
             return;
         }
 
         // Serial Data Transfer TODO: Implement Serial Data Transfer
-        if (0xff01 <= addr && addr <= 0xff02) {
+        if (IO_SERIAL_DATA_START <= addr && addr <= IO_SERIAL_DATA_END) {
             // Supress to prevent console spam
             // std::cout << "Tried to write to Serial Data Transfer device. addr: " << (int)addr << " data: " << (int)data << std::endl;
             return;
         }
 
         // Timer
-        if (0xff04 <= addr && addr <= 0xff07) {
+        if (IO_TIMER_START <= addr && addr <= IO_TIMER_END) {
             this->timer->write(addr, data);
             return;
         }
 
         // Interrupt Flag
-        if (addr == 0xff0f) {
+        if (addr == INTERRUPT_FLAG) {
             this->interrupt_flag = data;
             return;
         }
 
         // Sound TODO: Implement sound
-        if (0xff10 <= addr && addr <= 0xff26) {
+        if (IO_SOUND_START <= addr && addr <= IO_SOUND_END) {
             // Supress to prevent console spam
             // std::cout << "Tried to write to sound device. addr: " << (int)addr << " data: " << (int)data << std::endl;
             return;
         }
 
         // Waveform RAM TODO: Implement sound
-        if (0xff30 <= addr && addr <= 0xff3f) {
+        if (IO_WAVEFORM_RAM_START <= addr && addr <= IO_WAVEFORM_RAM_END) {
             // Supress to prevent console spam
             // std::cout << "Tried to write to Waveform RAM. addr: " << (int)addr << " data: " << (int)data<< std::endl;
             return;
         }
 
         // LCD
-        if (0xff40 <= addr && addr <= 0xff4b) {
+        if (IO_LCD_START <= addr && addr <= IO_LCD_END) {
             this->ppu->write(addr, data);
             return;
         }
 
         // Disable boot ROM
-        if (addr == 0xff50) {
+        if (addr == IO_DISABLE_BOOT_ROM) {
             this->disable_boot_rom(data);
             return;
         }
@@ -223,13 +223,13 @@ void MMU::write(uint16_t addr, uint8_t data) {
     }
 
     // HRAM
-    if (0xff80 <= addr && addr <= 0xfffe) {
-        this->hram[addr - 0xff80] = data;
+    if (HRAM_START <= addr && addr <= HRAM_END) {
+        this->hram[addr - HRAM_START] = data;
         return;
     }
 
     // Interrupt Enable
-    if (addr == 0xffff) {
+    if (addr == INTERRUPT_ENABLE) {
         this->interrupt_enable = data;
         return;
     }

@@ -5,6 +5,7 @@
 #include "Joypad.h"
 #include "MMU.h"
 #include <iostream>
+#include "Definitions.h"
 
 Joypad::Joypad(std::shared_ptr<MMU> mmu) {
     this->mmu = mmu;
@@ -50,6 +51,6 @@ void Joypad::press(uint8_t button) {
     this->joypad &= ~(1 << button);
 
     // Raise interrupt flag
-    this->mmu->raise_interrupt_flag(1 << 4);
+    this->mmu->raise_interrupt_flag(CONTROLLER_IF_BIT);
 }
 

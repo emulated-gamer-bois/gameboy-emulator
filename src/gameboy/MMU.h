@@ -18,29 +18,37 @@ class Joypad;
 friend class test_case_name##_##test_name##_Test
 
 // Addresses
-#define ADDR_SPACE_START    0x0000
-#define BOOT_ROM_START      0x0000
-#define BOOT_ROM_END        0x00ff
-#define GAME_ROM_START      0x0000
-#define GAME_ROM_END        0x7fff
-#define VRAM_START          0x8000
-#define VRAM_END            0x9fff
-#define xRAM_START          0xa000
-#define xRAM_END            0xbfff
-#define RAM_START           0xc000
-#define RAM_END             0xdfff
-#define OAM_START           0xfe00
-#define OAM_END             0xfe9f
-#define IO_START            0xff00
-#define IO_END              0xff7f
-#define HRAM_START          0xff80
-#define HRAM_END            0xfffe
-#define INTERRUPT_ENABLE    0xffff
-#define ADDR_SPACE_END      0xffff
-#define IO_DISABLE_BOOT_ROM 0xff50
-#define IO_JOYPAD           0xff00
-#define INTERRUPT_FLAG      0xff0f
-#define DMA_TRANSFER        0xff46
+#define BOOT_ROM_START          0x0000
+#define BOOT_ROM_END            0x00ff
+#define GAME_ROM_START          0x0000
+#define GAME_ROM_END            0x7fff
+#define VRAM_START              0x8000
+#define VRAM_END                0x9fff
+#define xRAM_START              0xa000
+#define xRAM_END                0xbfff
+#define WRAM_START              0xc000
+#define WRAM_END                0xdfff
+#define OAM_START               0xfe00
+#define OAM_END                 0xfe9f
+#define IO_START                0xff00
+#define IO_END                  0xff7f
+#define HRAM_START              0xff80
+#define HRAM_END                0xfffe
+#define INTERRUPT_ENABLE        0xffff
+
+#define IO_JOYPAD               0xff00
+#define IO_SERIAL_DATA_START    0xff01
+#define IO_SERIAL_DATA_END      0xff02
+#define IO_TIMER_START          0xff04
+#define IO_TIMER_END            0xff07
+#define INTERRUPT_FLAG          0xff0f
+#define IO_SOUND_START          0xff10
+#define IO_SOUND_END            0xff26
+#define IO_WAVEFORM_RAM_START   0xff30
+#define IO_WAVEFORM_RAM_END     0xff3f
+#define IO_LCD_START            0xff40
+#define IO_LCD_END              0xff4b
+#define IO_DISABLE_BOOT_ROM     0xff50
 
 class MMU {
 public:
