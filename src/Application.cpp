@@ -18,6 +18,7 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 #define CONTROLLER_B SDLK_g
 #define CONTROLLER_START SDLK_h
 #define CONTROLLER_SELECT SDLK_j
+const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
 
 /**
  * Constructor
@@ -103,11 +104,11 @@ void Application::initSDL() {
 
     // Create the window.
     this->window = SDL_CreateWindow(DEFAULT_WINDOW_CAPTION.c_str(),
-                                    SDL_WINDOWPOS_UNDEFINED,
-                                    SDL_WINDOWPOS_UNDEFINED,
-                                    LCD_WIDTH,
-                                    LCD_HEIGHT,
-                                    SDL_WINDOW_OPENGL);
+                                          SDL_WINDOWPOS_UNDEFINED,
+                                          SDL_WINDOWPOS_UNDEFINED,
+                                          LCD_WIDTH,
+                                          LCD_HEIGHT,
+                                          SDL_WINDOW_OPENGL);
     assert(this->window);
 
     // Get gl context and set it to the current context for this window.
@@ -121,7 +122,7 @@ void Application::initSDL() {
     SDL_GL_SetSwapInterval(0);
 
     // Workaround for AMD. Must not be removed.
-    if (!glBindFragDataLocation) {
+    if(!glBindFragDataLocation) {
         glBindFragDataLocation = glBindFragDataLocationEXT;
     }
 }
@@ -145,11 +146,10 @@ void Application::terminateSDL() {
 void Application::gui() {
     // Inform imgui of new frame
     ImGui_ImplSdlGL3_NewFrame(this->window);
-    toolbar();
+       toolbar();
     ImGui::Render();
 
 }
-
 /**
  * Handles SDL Events including keyboard input.
  */
@@ -248,16 +248,19 @@ void Application::updateSDLWindowSize() {
     }
 }
 
-void Application::toolbar() {
+void Application::toolbar(){
     //TODO examplem toolbar, should add actual settings here.
-    if (ImGui::BeginMainMenuBar()) {
-        if (ImGui::BeginMenu("File")) {
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
             if (ImGui::MenuItem("Add", "")) {}
             if (ImGui::MenuItem("Edit", "")) {}
 
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Edit")) {
+        if (ImGui::BeginMenu("Edit"))
+        {
             if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
             if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
             ImGui::Separator();
