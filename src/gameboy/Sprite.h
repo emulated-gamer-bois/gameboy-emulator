@@ -36,6 +36,7 @@ public:
     uint8_t getPaletteNumber() const;
 
     bool hasHigherPriorityThan(const std::shared_ptr<Sprite>& other) const;
+    bool backgroundOverSprite() const;
 
     void print();
 };

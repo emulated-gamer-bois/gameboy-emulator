@@ -101,6 +101,7 @@ private:
     uint8_t OBP1;
     uint8_t DMA;
 
+    std::array<uint8_t, LCD_WIDTH> bgWindowColorIndexesThisLine;
     std::vector<std::shared_ptr<Sprite>> spritesNextScanLine;
     std::shared_ptr<MMU> memory;
     std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> frameBuffer;

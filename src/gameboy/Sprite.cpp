@@ -34,15 +34,26 @@ uint8_t Sprite::getTileID(uint8_t lcdY) const {
 }
 
 uint8_t Sprite::getTileX(uint8_t lcdX) const {
-    return lcdX - (this->x - 8);
+    uint8_t tileX = lcdX - (this->x - 8);
+    if (xFlip) {
+        return 7 - tileX;
+    }
+    return tileX;
 }
 
 uint8_t Sprite::getTileY(uint8_t lcdY) const {
     uint8_t spriteY = lcdY - (this->y - 16);
-    if (spriteY < 8) {
-        return spriteY;
+    if (spriteY >= 8) {
+        spriteY = spriteY - 8;
     }
-    return spriteY - 8;
+    if (yFlip) {
+        spriteY = 7 - spriteY;
+    }
+    return spriteY;
+}
+
+uint8_t Sprite::getPaletteNumber() const {
+    return paletteNumber;
 }
 
 bool Sprite::hasHigherPriorityThan(const std::shared_ptr<Sprite>& other) const {
@@ -52,8 +63,8 @@ bool Sprite::hasHigherPriorityThan(const std::shared_ptr<Sprite>& other) const {
     return this->x < other->x;
 }
 
-uint8_t Sprite::getPaletteNumber() const {
-    return paletteNumber;
+bool Sprite::backgroundOverSprite() const {
+    return bgAndWindowOverOBJ;
 }
 
 void Sprite::print() {

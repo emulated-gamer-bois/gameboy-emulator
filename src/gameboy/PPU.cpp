@@ -33,6 +33,7 @@ void PPU::reset() {
 
     saveRegisters();
     frameBuffer.fill(0);
+    bgWindowColorIndexesThisLine.fill(0);
     spritesNextScanLine.clear();
 }
 
@@ -141,6 +142,7 @@ void PPU::drawBackgroundScanLine() {
         uint8_t colorIndex = getTilePixelColorIndex(bgWindowTileSetSelect, tileID, absolutePixelX % 8, absolutePixelY % 8);
         uint8_t pixel = getColor(BGP, colorIndex);
         frameBuffer[LY * LCD_WIDTH + x] = pixel;
+        bgWindowColorIndexesThisLine[x] = pixel;
     }
 }
 
@@ -165,6 +167,7 @@ void PPU::drawWindowScanLine() {
         uint8_t colorIndex = getTilePixelColorIndex(bgWindowTileSetSelect, tileID, absolutePixelX, absolutePixelY);
         uint8_t pixel = getColor(BGP, colorIndex);
         frameBuffer[LY * LCD_WIDTH + x] = pixel;
+        bgWindowColorIndexesThisLine[x] = pixel;
     }
 }
 
@@ -270,7 +273,9 @@ uint8_t PPU::getTilePixelColorIndex(uint8_t tileSet, uint8_t id, uint8_t x, uint
 }
 
 uint8_t PPU::getSpritePixelColorIndex(const std::shared_ptr<Sprite>& sprite, uint8_t lcdX, uint8_t lcdY) {
-    //TODO ta hänsyn till X flip, Y flip, BG and Window over OBJ
+    if ((sprite->backgroundOverSprite()) && (bgWindowColorIndexesThisLine[lcdX] != 0)) {
+        return 0;
+    }
     uint8_t tileID = sprite->getTileID(lcdY);
     uint8_t tileX = sprite->getTileX(lcdX);
     uint8_t tileY = sprite->getTileY(lcdY);
