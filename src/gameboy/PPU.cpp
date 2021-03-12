@@ -189,13 +189,16 @@ void PPU::confirmDraw() {
 void PPU::processNextLine() {
     if (bgWindowDisplayEnable) {
         drawBackgroundScanLine();
+        if (windowDisplayEnable) {
+            drawWindowScanLine();
+        }
     }
     //TODO window and object drawing
 }
 
 void PPU::drawBackgroundScanLine() {
     uint16_t bgMapStartAddress;
-    if (tileMapDisplaySelect) {
+    if (bgTileMapSelect) {
         bgMapStartAddress = BG_WINDOW_MAP1;
     } else {
         bgMapStartAddress = BG_WINDOW_MAP0;
@@ -212,6 +215,28 @@ void PPU::drawBackgroundScanLine() {
     }
 }
 
+void PPU::drawWindowScanLine() {
+    if (WY > LY) { //Window hasn't begun yet
+        return;
+    }
+    uint16_t windowMapStartAddress;
+    if (windowTileMapSelect) {
+        windowMapStartAddress = BG_WINDOW_MAP1;
+    } else {
+        windowMapStartAddress = BG_WINDOW_MAP0;
+    }
+    int startX = WX - 7;
+    if (startX < 0) {
+        startX = 0;
+    }
+    for (int x = startX; x < 160; ++x) {
+        uint8_t absolutePixelX = (x - startX); //TODO check hardware bug when 0 < WX <= 6 and WX = 166 What is the intended behaviour?
+        uint8_t absolutePixelY = (LY - WY);
+        uint8_t tileID = getTileID(windowMapStartAddress, absolutePixelX, absolutePixelY);
+        uint8_t pixel = getTilePixelColor(tileID, absolutePixelX, absolutePixelY);
+        frameBuffer[LY * 160 + x] = pixel;
+    }
+}
 /**
  *
  * @param bgMapStart
@@ -230,7 +255,7 @@ uint8_t PPU::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t a
     uint16_t startAddress;
     uint16_t address;
 
-    if (bgWindowTileDataSelect) { //Find the address of the tile with id tileID, depending on addressing mode
+    if (bgWindowTileSetSelect) { //Find the address of the tile with id tileID, depending on addressing mode
         startAddress = BG_WINDOW_TILE_DATA1;
         address = tileID * 16 + startAddress;
     } else {

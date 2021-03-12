@@ -71,10 +71,10 @@ private:
             unsigned int bgWindowDisplayEnable: 1;
             unsigned int objectDisplayEnable: 1;
             unsigned int objectSize : 1;
-            unsigned int tileMapDisplaySelect : 1;
-            unsigned int bgWindowTileDataSelect : 1;
+            unsigned int bgTileMapSelect : 1;
+            unsigned int bgWindowTileSetSelect : 1;
             unsigned int windowDisplayEnable : 1;
-            unsigned int windowTileMapDisplaySelect : 1;
+            unsigned int windowTileMapSelect : 1;
             unsigned int lcdDisplayEnable : 1;
         };
         uint8_t LCDC;
@@ -116,6 +116,7 @@ private:
 
     void processNextLine();
     void drawBackgroundScanLine();
+    void drawWindowScanLine();
 
     // MMU reading functions.
     uint8_t getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY);
