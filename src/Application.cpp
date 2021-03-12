@@ -7,6 +7,8 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 
 #include "Application.h"
 #include "Timer.h"
+#include <imgui.h>
+#include "imgui_impl_sdl_gl3.h"
 
 #define CONTROLLER_UP SDLK_w
 #define CONTROLLER_DOWN SDLK_s
@@ -19,7 +21,8 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 
 // TEMP ----------------------------------------------------------------------------------------------------------------
 #include <fstream>
-void TEMP_setTexture(const char* filename, RenderView& rv);
+
+void TEMP_setTexture(const char *filename, RenderView &rv);
 // END TEMP ------------------------------------------------------------------------------------------------------------
 
 const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
@@ -45,7 +48,7 @@ void Application::start() {
 
     Timer timer;
 
-    while(running) {
+    while (running) {
         // Create time stamp.
         timer.tick();
 
@@ -54,11 +57,12 @@ void Application::start() {
             this->handleSDLEvents();
             this->gameBoy.step();
         }
-
         // Prepare for rendering, render and swap buffer.
         this->updateSDLWindowSize();
         this->renderView.setScreenTexture(this->gameBoy.getScreenTexture().get());
         this->renderView.render();
+        //TODO Can add some bools or stuff to enable or disable gui, this is just temporary.
+        gui();
         SDL_GL_SwapWindow(this->window);
         this->gameBoy.confirmDraw();
 
@@ -69,17 +73,22 @@ void Application::start() {
             std::this_thread::sleep_for(std::chrono::milliseconds(msToSleep));
         }
     }
-
-    terminateSDL();
+    terminate();
 }
 
 void Application::init() {
     this->initSDL();
     this->renderView.initGL();
+    ImGui_ImplSdlGL3_Init(window);
 
     // TEMP ------------------------------------------------------------------------------------------------------------
     this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/instr_timing/instr_timing.gb");
     // END TEMP --------------------------------------------------------------------------------------------------------
+}
+
+void Application::terminate() {
+    terminateImGui();
+    terminateSDL();
 }
 
 /*
@@ -125,6 +134,14 @@ void Application::initSDL() {
     }
 }
 
+void Application::terminateImGui() {
+    // If newframe is not ever run before shut down we crash
+    ImGui_ImplSdlGL3_NewFrame(this->window);
+
+    //Destroy imgui
+    ImGui_ImplSdlGL3_Shutdown();
+}
+
 /**
  * Cleans up after SDL.
  */
@@ -133,6 +150,17 @@ void Application::terminateSDL() {
     SDL_Quit();
 }
 
+void Application::gui() {
+    // Inform imgui of new frame
+    ImGui_ImplSdlGL3_NewFrame(this->window);
+
+    // ----------------- Set variables --------------------------
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+                ImGui::GetIO().Framerate);
+    // ----------------------------------------------------------
+    // Render the GUI.
+    ImGui::Render();
+}
 /**
  * Handles SDL Events including keyboard input.
  */
@@ -144,7 +172,7 @@ void Application::handleSDLEvents() {
                 this->running = false;
                 break;
             case SDL_KEYDOWN:
-                switch( event.key.keysym.sym ){
+                switch (event.key.keysym.sym) {
                     case CONTROLLER_LEFT:
                         this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
                         this->renderView.setPalette(PALETTE_DMG_SMOOTH);
@@ -180,7 +208,7 @@ void Application::handleSDLEvents() {
                 }
                 break;
             case SDL_KEYUP:
-                switch( event.key.keysym.sym ){
+                switch (event.key.keysym.sym) {
                     case CONTROLLER_LEFT:
                         this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
                         this->renderView.setPalette(PALETTE_DMG);
@@ -235,21 +263,20 @@ void Application::updateSDLWindowSize() {
 ////                           - TEMPORARY -                         ////
 /////////////////////////////////////////////////////////////////////////
 // Manual memory management, no exception handling and global scope.
-void TEMP_setTexture(const char* filename, RenderView& rv) {
+void TEMP_setTexture(const char *filename, RenderView &rv) {
     int pixelAmount = 23040;
-    char* rgbPixels = new char[pixelAmount * 3];
+    char *rgbPixels = new char[pixelAmount * 3];
 
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (file.is_open()) {
         file.read(rgbPixels, pixelAmount * 3);
         file.close();
-    }
-    else {
+    } else {
         delete[] rgbPixels;
         return;
     }
 
-    auto* redPixels = new uint8_t[pixelAmount];
+    auto *redPixels = new uint8_t[pixelAmount];
     for (int i = 0; i < pixelAmount; i += 1) {
         redPixels[i] = rgbPixels[i * 3];
     }
@@ -259,3 +286,5 @@ void TEMP_setTexture(const char* filename, RenderView& rv) {
     delete[] rgbPixels;
     delete[] redPixels;
 }
+
+

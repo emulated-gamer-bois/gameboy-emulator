@@ -35,4 +35,8 @@ private:
     void terminateSDL();
     void handleSDLEvents();
     void updateSDLWindowSize();
+
+    void terminate();
+    void terminateImGui();
+    void gui();
 };
