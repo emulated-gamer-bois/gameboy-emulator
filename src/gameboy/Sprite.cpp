@@ -23,7 +23,7 @@ bool Sprite::coversLine(uint8_t line, unsigned int objectSize) const {
 }
 
 bool Sprite::containsX(uint8_t lcdX) const {
-    return lcdX > (this->x - 8) && lcdX < this->x;
+    return lcdX >= (this->x - 8) && lcdX < this->x;
 }
 
 uint8_t Sprite::getTileID(uint8_t lcdY) const {
