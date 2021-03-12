@@ -6,8 +6,9 @@ Start:
     ld sp, $fffe
 
     ;Set LCDC to use tile map 0 and 8000 addressing mode
+    ;Window disabled, Sprites disabled
     ld hl, $ff40
-    ld [hl], $b3
+    ld [hl], %10010001
 
     ;Set pallet so that 0=white, 1=light grey, 2=dark grey, 3=black
     ld hl, $ff47
@@ -216,7 +217,9 @@ TileData:
 
 ;Add padding to file
 ;Disable boot rom
-SECTION "padding", ROM0[$ff-3]
+SECTION "padding", ROM0[$ff-8]
 DisableBoot:
+    ld hl, $ff40
+    ld [hl], $91
     ld a, 1
     ld [$ff00+$50], a
