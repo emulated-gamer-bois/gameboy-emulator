@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <cstring> // memcpy
 
 Cartridge::Cartridge() {
     this->reset();
