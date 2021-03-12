@@ -10,6 +10,7 @@
 #include <memory> // smart pointers
 #include <iostream> // cout
 #include <fstream>
+#include <cstring> // memcpy
 
 MMU::MMU() {
     this->reset();
