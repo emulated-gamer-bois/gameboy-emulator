@@ -6,7 +6,6 @@
 
 #include <cstdint>
 #include <memory>
-#include <iostream>
 
 #define JOYPAD                  0xff00
 #define JOYPAD_SEL_BUTTONS      0x10
@@ -25,13 +24,19 @@ class MMU;
 
 class Joypad {
 private:
+    // MMU used to set interrupt flags
     std::shared_ptr<MMU> mmu;
+
+    // Private registers
     uint8_t joypad_select;
     uint8_t joypad;
 public:
-    Joypad(std::shared_ptr<MMU> mmu);
-    void release(uint8_t button);
-    void press(uint8_t button);
+    explicit Joypad(std::shared_ptr<MMU> mmu);
+    void reset();
+
     uint8_t read(uint16_t addr) const;
     void write(uint16_t addr, uint8_t data);
+
+    void release(uint8_t button);
+    void press(uint8_t button);
 };

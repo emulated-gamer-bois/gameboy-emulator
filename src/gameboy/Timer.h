@@ -6,7 +6,6 @@
 
 #include <cstdint>
 #include <memory>
-#include <iostream>
 
 #define TIMER_DIVIDER       0xff04
 #define TIMER_COUNTER       0xff05
@@ -26,7 +25,8 @@ private:
     uint8_t modulo;
     uint8_t control;
 public:
-    Timer(std::shared_ptr<MMU> mmu);
+    explicit Timer(std::shared_ptr<MMU> mmu);
+    void reset();
 
     uint8_t read(uint16_t addr) const;
     void write(uint16_t addr, uint8_t data);

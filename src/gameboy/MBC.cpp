@@ -3,6 +3,7 @@
 //
 
 #include "MBC.h"
+#include <iostream>
 
 // ROM_Only_MBC
 ROM_Only_MBC::ROM_Only_MBC(std::shared_ptr<std::vector<uint8_t>> rom) {

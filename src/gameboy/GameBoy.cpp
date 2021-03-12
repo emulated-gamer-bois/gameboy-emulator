@@ -54,7 +54,9 @@ void GameBoy::joypad_input(uint8_t key, uint8_t action) {
 void GameBoy::load_rom(std::string bootFilepath, std::string romFilepath) {
     this->cpu->reset();
     this->ppu->reset();
-    //this->mmu->reset();
+    this->mmu->reset();
+    this->timer->reset();
+    this->joypad->reset();
     if (!this->mmu->load_boot_rom(bootFilepath)) {
         this->cpu->skipBootRom();
     }

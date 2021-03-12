@@ -6,11 +6,8 @@
 
 #include "Cartridge.h"
 #include <cstdint>
-#include <array>
-#include <vector>
-#include <string>
-#include <iostream>
-#include <fstream>
+#include <array> // array
+#include <string> // string
 
 // Forward declaration
 class PPU;
@@ -59,17 +56,13 @@ public:
 
     bool load_game_rom(std::string filepath);
     bool load_boot_rom(std::string filepath);
-    //void joypad_release(uint8_t button);
-    //void joypad_press(uint8_t button);
-    //void timer_update(uint16_t cycles);
 
 private:
     void write_GAME_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data);
     void write_BOOT_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data);
-    /*void write_io(uint16_t addr, uint8_t data);
-    uint8_t read_io(uint16_t addr);*/
     void disable_boot_rom(uint8_t data);
 
+    // Devices
     std::unique_ptr<Cartridge> cartridge;
     std::shared_ptr<Joypad> joypad;
     std::shared_ptr<Timer> timer;
@@ -80,18 +73,11 @@ private:
     std::array<uint8_t, 8192> vram;
     std::array<uint8_t, 8192> ram;
     std::array<uint8_t, 160> oam;
-    std::array<uint8_t, 128> io;
     std::array<uint8_t, 128> hram;
-
-    // Fix for Cartridge type 0x01: MBC1 with no RAM or battery
-    //uint8_t rom_bank_number;
-    //uint8_t cartridgeType;
 
     bool booting;
     uint8_t interrupt_enable;
     uint8_t interrupt_flag;
-    //uint8_t io_joypad_select;
-    //uint8_t io_joypad;
 
     // Tests using private stuff
     FRIEND_TEST(MMU, read_write);

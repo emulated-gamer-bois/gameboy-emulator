@@ -5,9 +5,8 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
 #include <vector>
-#include <iostream>
+#include <memory>
 
 class MBC {
 public:
@@ -17,9 +16,9 @@ public:
 
 class ROM_Only_MBC : public MBC {
 public:
-    ROM_Only_MBC(std::shared_ptr<std::vector<uint8_t>> rom);
-    uint8_t read(uint16_t addr);
-    void write(uint16_t addr, uint8_t data);
+    explicit ROM_Only_MBC(std::shared_ptr<std::vector<uint8_t>> rom);
+    uint8_t read(uint16_t addr) override;
+    void write(uint16_t addr, uint8_t data) override;
 
 private:
     std::shared_ptr<std::vector<uint8_t>> rom;
@@ -28,8 +27,8 @@ private:
 class MBC1_MBC : public MBC {
 public:
     MBC1_MBC(std::shared_ptr<std::vector<uint8_t>> rom, std::shared_ptr<std::vector<uint8_t>> ram);
-    uint8_t read(uint16_t addr);
-    void write(uint16_t addr, uint8_t data);
+    uint8_t read(uint16_t addr) override;
+    void write(uint16_t addr, uint8_t data) override;
 
 private:
     uint8_t ram_enable;

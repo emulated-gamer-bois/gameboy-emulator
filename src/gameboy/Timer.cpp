@@ -4,10 +4,14 @@
 
 #include "Timer.h"
 #include "MMU.h"
+#include <iostream>
 
 Timer::Timer(std::shared_ptr<MMU> mmu) {
     this->mmu = mmu;
+    this->reset();
+}
 
+void Timer::reset() {
     this->divider = 0;
     this->counter = 0;
     this->modulo = 0;

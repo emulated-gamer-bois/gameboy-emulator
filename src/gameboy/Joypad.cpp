@@ -7,7 +7,10 @@
 
 Joypad::Joypad(std::shared_ptr<MMU> mmu) {
     this->mmu = mmu;
+    this->reset();
+}
 
+void Joypad::reset() {
     // Select direction buttons by default
     this->joypad_select = JOYPAD_SEL_DIRECTIONS;
     this->joypad = 0xff;

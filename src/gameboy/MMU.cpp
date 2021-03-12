@@ -7,16 +7,23 @@
 #include "Timer.h"
 #include "PPU.h"
 
-#include <memory>
+#include <memory> // smart pointers
+#include <iostream> // cout
 
 MMU::MMU() {
     this->reset();
 }
 
 void MMU::link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer) {
-    this->ppu = ppu;
-    this->joypad = joypad;
-    this->timer = timer;
+    if (ppu) {
+        this->ppu = ppu;
+    }
+    if (joypad) {
+        this->joypad = joypad;
+    }
+    if (timer) {
+        this->timer = timer;
+    }
 }
 
 void MMU::reset() {
@@ -25,10 +32,10 @@ void MMU::reset() {
     this->vram.fill(0x00);
     this->ram.fill(0x00);
     this->oam.fill(0x00);
-    this->io.fill(0x00);
     this->hram.fill(0x00);
 
     this->booting = true;
+
     // Enable all interrupts by default
     this->interrupt_enable = 0b11111;
     // No interrupt requests by default
@@ -93,13 +100,15 @@ uint8_t MMU::read(uint16_t addr) {
 
         // Sound TODO: Implement sound
         if (0xff10 <= addr && addr <= 0xff26) {
-            std::cout << "Tried to read from sound device. addr: " << (int)addr << std::endl;
+            // Supress to prevent console spam
+            // std::cout << "Tried to read from sound device. addr: " << (int)addr << std::endl;
             return 0;
         }
 
         // Waveform RAM TODO: Implement sound
         if (0xff30 <= addr && addr <= 0xff3f) {
-            std::cout << "Tried to read Waveform RAM. addr: " << (int)addr << std::endl;
+            // Supress to prevent console spam
+            // std::cout << "Tried to read Waveform RAM. addr: " << (int)addr << std::endl;
             return 0;
         }
 
@@ -291,43 +300,6 @@ void MMU::write_BOOT_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data) {
         std::cout << "Tried to use write_BOOT_ROM_ONLY_IN_TESTS with invalid addr: " << addr << std::endl;
     }
 }
-/*
-void MMU::write_io(uint16_t addr, uint8_t data) {
-    if (addr == IO_DISABLE_BOOT_ROM) {
-        if (data != 0) this->disable_boot_rom();
-    } else if (addr == IO_JOYPAD) {
-        this->joypad->write(addr, data);
-    } else if (addr == INTERRUPT_FLAG) {
-        this->interrupt_flag = data;
-    } else if (TIMER_DIVIDER <= addr && addr <= TIMER_CONTROL) {
-        this->timer->write(addr, data);
-    } else if (addr == DMA_TRANSFER) {
-        std::cout << "DMA: data:" << (uint8_t)data;
-        if (0x00 <= data && data <= 0xf1) {
-            uint16_t start_addr = (data << 8);
-            for (uint8_t i = 0; i <= 0x9f; i++) {
-                this->write(0xfe00 + i, this->read(start_addr+i));
-            }
-        } else {
-            std::cout << "Tried to use DMA transfer with invalid input: " << data << std::endl;
-        }
-    } else {
-        this->io[addr - IO_START] = data;
-    }
-}*/
-/*
-uint8_t MMU::read_io(uint16_t addr) {
-    if (addr == IO_JOYPAD) {
-        this->joypad->read(addr);
-    } else if (addr == INTERRUPT_FLAG) {
-        return this->interrupt_flag & (0x1f);
-    } else if (TIMER_START <= addr && addr <= TIMER_END) {
-        this->timer->read(addr);
-    } else {
-        return this->io[addr - IO_START];
-    }
-    return 0;
-}*/
 
 void MMU::raise_interrupt_flag(uint8_t bitmask) {
     this->interrupt_flag |= bitmask;
