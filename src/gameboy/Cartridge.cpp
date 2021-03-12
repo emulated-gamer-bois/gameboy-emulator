@@ -3,7 +3,8 @@
 //
 
 #include "Cartridge.h"
-
+#include <fstream>
+#include <iostream>
 #include <memory>
 
 Cartridge::Cartridge() {
@@ -17,7 +18,7 @@ void Cartridge::reset() {
 
     this->rom = std::make_shared<std::vector<uint8_t>>(0x8000);
     this->ram = nullptr;
-    this->mbc = nullptr;
+    this->mbc = std::make_unique<ROM_Only_MBC>(this->rom);
 }
 
 uint8_t Cartridge::read(uint16_t addr) const {

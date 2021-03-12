@@ -6,6 +6,8 @@
 
 #include "gtest/gtest.h"
 #include "../src/gameboy/MMU.h"
+#include "../src/gameboy/Joypad.h"
+#include "../src/gameboy/Timer.h"
 
 TEST(MMU, read_write){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
@@ -47,6 +49,8 @@ TEST(MMU, disable_boot_rom){
 
 TEST(MMU, joypad){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
+    std::shared_ptr<Joypad> joypad = std::make_shared<Joypad>(mmu);
+    mmu->link_devices(nullptr, joypad, nullptr);
 
     mmu->write(IO_JOYPAD, JOYPAD_SEL_BUTTONS);
     ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1111);
@@ -54,17 +58,17 @@ TEST(MMU, joypad){
     ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1111);
 
     // Press Left button
-    mmu->joypad_press(JOYPAD_LEFT);
+    joypad->press(JOYPAD_LEFT);
     mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
     ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1101);
 
     // Press Down button
-    mmu->joypad_press(JOYPAD_DOWN);
+    joypad->press(JOYPAD_DOWN);
     mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
     ASSERT_EQ(mmu->read(IO_JOYPAD), 0b0101);
 
     // Press Select button
-    mmu->joypad_press(JOYPAD_SELECT);
+    joypad->press(JOYPAD_SELECT);
     mmu->write(IO_JOYPAD, JOYPAD_SEL_DIRECTIONS);
     ASSERT_EQ(mmu->read(IO_JOYPAD), 0b0101);
 
@@ -72,7 +76,7 @@ TEST(MMU, joypad){
     ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1011);
 
     // Release Down button
-    mmu->joypad_release(JOYPAD_DOWN);
+    joypad->release(JOYPAD_DOWN);
 
     mmu->write(IO_JOYPAD, JOYPAD_SEL_BUTTONS);
     ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1011);
@@ -83,6 +87,8 @@ TEST(MMU, joypad){
 
 TEST(MMU, timer){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
+    std::shared_ptr<Timer> timer = std::make_shared<Timer>(mmu);
+    mmu->link_devices(nullptr, nullptr, timer);
 
     // Disable boot ROM
     mmu->write(0xff50, 0x01);
@@ -94,22 +100,22 @@ TEST(MMU, timer){
     ASSERT_EQ(mmu->read(0xff05), 0);
 
     // Should not increase counter
-    mmu->timer_update(3);
+    timer->update(3);
     ASSERT_EQ(mmu->read(0xff05), 0);
 
     // Reset divider
     mmu->write(0xff04, 123);
 
     // Should still not increase counter due to divider reset
-    mmu->timer_update(3);
+    timer->update(3);
     ASSERT_EQ(mmu->read(0xff05), 0);
 
     // Should increase counter
-    mmu->timer_update(1);
+    timer->update(1);
     ASSERT_EQ(mmu->read(0xff05), 1);
 
     // Should increase counter to 0xff
-    mmu->timer_update(4*(0xff)-1);
+    timer->update(4*(0xff)-1);
     ASSERT_EQ(mmu->read(0xff05), 0xff);
 
     // Set modulo to 0x55
@@ -117,7 +123,7 @@ TEST(MMU, timer){
 
     // Should raise interrupt request flag
     // Counter should be 0x55
-    mmu->timer_update(4);
+    timer->update(4);
     ASSERT_EQ(mmu->read(0xff0f), (1 << 2));
     ASSERT_EQ(mmu->read(0xff05), 0x55);
 }

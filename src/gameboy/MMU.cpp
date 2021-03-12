@@ -9,6 +9,7 @@
 
 #include <memory> // smart pointers
 #include <iostream> // cout
+#include <fstream>
 
 MMU::MMU() {
     this->reset();

@@ -209,7 +209,7 @@ void fillBackground(std::shared_ptr<MMU> & mmu, uint8_t tileMap, uint8_t tileID)
     }
 }
 
-void printTile00(std::unique_ptr<PPU> & ppu) {
+void printTile00(std::shared_ptr<PPU> & ppu) {
     auto frameBuffer = ppu->getFrameBuffer();
     std::string reset     = "\033[0m";
     std::string white     = "\033[1;107m";
@@ -242,7 +242,7 @@ void printTile00(std::unique_ptr<PPU> & ppu) {
     printf("\n\n");
 }
 
-void printScreen(std::unique_ptr<PPU> & ppu) {
+void printScreen(std::shared_ptr<PPU> & ppu) {
     auto frameBuffer = ppu->getFrameBuffer();
     std::string reset     = "\033[0m";
     std::string white     = "\033[1;107m";
@@ -275,7 +275,7 @@ void printScreen(std::unique_ptr<PPU> & ppu) {
     printf("\n\n");
 }
 
-void printAllTiles(std::shared_ptr<MMU> & mmu, std::unique_ptr<PPU> & ppu) {
+void printAllTiles(std::shared_ptr<MMU> & mmu, std::shared_ptr<PPU> & ppu) {
     for (int y = 0; y < 12; ++y) {
         for (int x = 0; x < 20; ++x) {
             loadMap(mmu, 0, y * 20 + x, y * 20 + x);
@@ -284,7 +284,7 @@ void printAllTiles(std::shared_ptr<MMU> & mmu, std::unique_ptr<PPU> & ppu) {
     printScreen(ppu);
 }
 
-void bufferFrame(std::unique_ptr<PPU> & ppu) {
+void bufferFrame(std::shared_ptr<PPU> & ppu) {
     int cycles = 0;
     while (cycles <= 114 * 144) {
         cycles += 4;
@@ -292,7 +292,7 @@ void bufferFrame(std::unique_ptr<PPU> & ppu) {
     }
 }
 
-void assertTile00(std::unique_ptr<PPU> & ppu, std::array<char, 64> tile) {
+void assertTile00(std::shared_ptr<PPU> & ppu, std::array<char, 64> tile) {
     auto frameBuffer = ppu->getFrameBuffer();
     for (int y = 0; y < 8; ++y) {
         for (int x = 0; x < 8; ++x) {
@@ -320,7 +320,8 @@ void assertTile00(std::unique_ptr<PPU> & ppu, std::array<char, 64> tile) {
 
 TEST(PPU, Read_single_tile_no_scrolling) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<PPU> ppu( new PPU(mmu));
+    std::shared_ptr<PPU> ppu( new PPU(mmu));
+    mmu->link_devices(ppu, nullptr, nullptr);
 
     //Set LCDC to use tile map 0 and 8000 addressing mode
     mmu->write(LCDC_ADDRESS, 0xB3);
@@ -340,7 +341,8 @@ TEST(PPU, Read_single_tile_no_scrolling) {
 
 TEST(PPU, Tile_map_1) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<PPU> ppu( new PPU(mmu));
+    std::shared_ptr<PPU> ppu( new PPU(mmu));
+    mmu->link_devices(ppu, nullptr, nullptr);
 
     //Set LCDC to use tile map 1 and 8000 addressing mode
     mmu->write(LCDC_ADDRESS, 0x99);
@@ -360,7 +362,8 @@ TEST(PPU, Tile_map_1) {
 
 TEST(PPU, Tile_set_0) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<PPU> ppu( new PPU(mmu));
+    std::shared_ptr<PPU> ppu( new PPU(mmu));
+    mmu->link_devices(ppu, nullptr, nullptr);
 
     //Set LCDC to use tile map 0 and 9000 addressing mode
     mmu->write(LCDC_ADDRESS, 0x89);
@@ -380,7 +383,8 @@ TEST(PPU, Tile_set_0) {
 
 TEST(PPU, Read_single_tile_scrolling_x) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<PPU> ppu( new PPU(mmu));
+    std::shared_ptr<PPU> ppu( new PPU(mmu));
+    mmu->link_devices(ppu, nullptr, nullptr);
 
     //Set LCDC to use tile map 0 and 8000 addressing mode
     mmu->write(LCDC_ADDRESS, 0xB3);
@@ -412,7 +416,8 @@ TEST(PPU, Read_single_tile_scrolling_x) {
 
 TEST(PPU, Many_tiles) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<PPU> ppu( new PPU(mmu));
+    std::shared_ptr<PPU> ppu( new PPU(mmu));
+    mmu->link_devices(ppu, nullptr, nullptr);
 
     //Set LCDC to use tile map 0 and 8000 addressing mode
     mmu->write(LCDC_ADDRESS, 0xB3);
@@ -458,5 +463,5 @@ TEST(PPU, g_tile_rom) {
     }
 
     bufferFrame(gb.ppu);
-    printScreen((std::unique_ptr<PPU> &) gb.ppu);
+    printScreen((std::shared_ptr<PPU> &) gb.ppu);
 }

@@ -8,8 +8,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <fstream>
-#include <iostream>
 
 class Cartridge {
 private:

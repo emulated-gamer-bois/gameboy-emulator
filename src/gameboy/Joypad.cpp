@@ -4,6 +4,7 @@
 
 #include "Joypad.h"
 #include "MMU.h"
+#include <iostream>
 
 Joypad::Joypad(std::shared_ptr<MMU> mmu) {
     this->mmu = mmu;
