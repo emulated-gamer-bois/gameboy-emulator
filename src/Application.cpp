@@ -147,35 +147,37 @@ void Application::handleSDLEvents() {
                 switch( event.key.keysym.sym ){
                     case CONTROLLER_LEFT:
                         this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
-                        this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_RIGHT:
                         this->gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_PRESS);
-                        this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_UP:
                         this->gameBoy.joypad_input(JOYPAD_UP, JOYPAD_PRESS);
-                        this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_DOWN:
                         this->gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_PRESS);
-                        this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_A:
                         this->gameBoy.joypad_input(JOYPAD_A, JOYPAD_PRESS);
-                        this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_B:
                         this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_PRESS);
-                        this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_START:
                         this->gameBoy.joypad_input(JOYPAD_START, JOYPAD_PRESS);
-                        this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_SELECT:
                         this->gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_PRESS);
+                        break;
+                    // CHOOSE PALETTE
+                    case SDLK_1:
                         this->renderView.setPalette(PALETTE_DMG_SMOOTH);
+                        break;
+                    case SDLK_2:
+                        this->renderView.setPalette(PALETTE_DMG);
+                        break;
+                    case SDLK_3:
+                        this->renderView.setPalette(PALETTE_POCKET);
                         break;
                 }
                 break;
@@ -183,35 +185,27 @@ void Application::handleSDLEvents() {
                 switch( event.key.keysym.sym ){
                     case CONTROLLER_LEFT:
                         this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
-                        this->renderView.setPalette(PALETTE_DMG);
                         break;
                     case CONTROLLER_RIGHT:
                         this->gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
-                        this->renderView.setPalette(PALETTE_DMG);
                         break;
                     case CONTROLLER_UP:
                         this->gameBoy.joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
-                        this->renderView.setPalette(PALETTE_DMG);
                         break;
                     case CONTROLLER_DOWN:
                         this->gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
-                        this->renderView.setPalette(PALETTE_DMG);
                         break;
                     case CONTROLLER_A:
                         this->gameBoy.joypad_input(JOYPAD_A, JOYPAD_RELEASE);
-                        this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_B:
                         this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_RELEASE);
-                        this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_START:
                         this->gameBoy.joypad_input(JOYPAD_START, JOYPAD_RELEASE);
-                        this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                     case CONTROLLER_SELECT:
                         this->gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_RELEASE);
-                        this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                         break;
                 }
                 break;
