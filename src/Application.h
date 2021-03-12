@@ -39,4 +39,6 @@ private:
     void terminate();
     void terminateImGui();
     void gui();
+
+    bool toolbar=false;
 };
