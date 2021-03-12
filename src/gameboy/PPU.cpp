@@ -273,7 +273,7 @@ uint8_t PPU::getTilePixelColorIndex(uint8_t tileSet, uint8_t id, uint8_t x, uint
 }
 
 uint8_t PPU::getSpritePixelColorIndex(const std::shared_ptr<Sprite>& sprite, uint8_t lcdX, uint8_t lcdY) {
-    if ((sprite->backgroundOverSprite()) && (bgWindowColorIndexesThisLine[lcdX] != 0)) {
+    if ((sprite->backgroundOverSprite()) && (bgWindowColorIndexesThisLine[lcdX] != 0)) { //TODO should this be color index 0 or color 0?
         return 0;
     }
     uint8_t tileID = sprite->getTileID(lcdY);
