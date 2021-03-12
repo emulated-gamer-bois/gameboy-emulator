@@ -6,7 +6,7 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 */
 
 #include "Application.h"
-#include "Timer.h"
+#include "AppTimer.h"
 
 #define CONTROLLER_UP SDLK_w
 #define CONTROLLER_DOWN SDLK_s
@@ -43,7 +43,7 @@ void Application::start() {
 
     float frameTime = 1000.f / LCD_REFRESH_RATE;
 
-    Timer timer;
+    AppTimer timer;
 
     while(running) {
         // Create time stamp.

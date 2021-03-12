@@ -6,8 +6,13 @@
 
 GameBoy::GameBoy() {
     this->mmu = std::make_shared<MMU>();
+
+    this->joypad = std::make_shared<Joypad>(this->mmu);
+    this->timer = std::make_shared<Timer>(this->mmu);
+
     this->cpu = std::make_unique<CPU>(0x0000, 0xFFFE, mmu);
-    this->ppu = std::make_unique<PPU>(mmu);
+    this->ppu = std::make_shared<PPU>(mmu);
+    this->mmu->link_devices(this->ppu, this->joypad, this->timer);
     this->on = false;
 }
 
@@ -18,7 +23,7 @@ void GameBoy::step() {
 
     int cycles = this->cpu->update();
     this->ppu->update(cycles);
-    this->mmu->timer_update(cycles);
+    this->timer->update(cycles);
 }
 
 std::unique_ptr<uint8_t[]> GameBoy::getScreenTexture() {
@@ -35,10 +40,10 @@ std::unique_ptr<uint8_t[]> GameBoy::getScreenTexture() {
 void GameBoy::joypad_input(uint8_t key, uint8_t action) {
     switch (action) {
         case JOYPAD_PRESS:
-            this->mmu->joypad_press(key);
+            this->joypad->press(key);
             break;
         case JOYPAD_RELEASE:
-            this->mmu->joypad_release(key);
+            this->joypad->release(key);
             break;
         default:
             std::cout << "Invalid parameter `action` to GameBoy::joypad_input: " << action << std::endl;
@@ -49,7 +54,7 @@ void GameBoy::joypad_input(uint8_t key, uint8_t action) {
 void GameBoy::load_rom(std::string bootFilepath, std::string romFilepath) {
     this->cpu->reset();
     this->ppu->reset();
-    this->mmu->reset();
+    //this->mmu->reset();
     if (!this->mmu->load_boot_rom(bootFilepath)) {
         this->cpu->skipBootRom();
     }

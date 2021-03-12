@@ -4,10 +4,18 @@
 
 #pragma once
 
+#include "Cartridge.h"
 #include <cstdint>
 #include <array>
 #include <vector>
 #include <string>
+#include <iostream>
+#include <fstream>
+
+// Forward declaration
+class PPU;
+class Timer;
+class Joypad;
 
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
@@ -35,23 +43,7 @@ friend class test_case_name##_##test_name##_Test
 #define IO_DISABLE_BOOT_ROM 0xff50
 #define IO_JOYPAD           0xff00
 #define INTERRUPT_FLAG      0xff0f
-#define TIMER_DIVIDER       0xff04
-#define TIMER_COUNTER       0xff05
-#define TIMER_MODULO        0xff06
-#define TIMER_CONTROL       0xff07
 #define DMA_TRANSFER        0xff46
-
-// Joypad constants
-#define JOYPAD_SEL_BUTTONS      0x10
-#define JOYPAD_SEL_DIRECTIONS   0x20
-#define JOYPAD_RIGHT            0
-#define JOYPAD_LEFT             1
-#define JOYPAD_UP               2
-#define JOYPAD_DOWN             3
-#define JOYPAD_A                4
-#define JOYPAD_B                5
-#define JOYPAD_SELECT           6
-#define JOYPAD_START            7
 
 class MMU {
 public:
@@ -59,22 +51,29 @@ public:
     void reset();
     uint8_t read(uint16_t addr);
     void write(uint16_t addr, uint8_t data);
+
+    void raise_interrupt_flag(uint8_t bitmask);
+    void clear_interrupt_flag(uint8_t bitmask);
+
+    void link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer);
+
     bool load_game_rom(std::string filepath);
     bool load_boot_rom(std::string filepath);
-    void joypad_release(uint8_t button);
-    void joypad_press(uint8_t button);
-    void timer_update(uint16_t cycles);
+    //void joypad_release(uint8_t button);
+    //void joypad_press(uint8_t button);
+    //void timer_update(uint16_t cycles);
 
 private:
     void write_GAME_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data);
     void write_BOOT_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data);
-    void write_io(uint16_t addr, uint8_t data);
-    uint8_t read_io(uint16_t addr);
-    void disable_boot_rom();
+    /*void write_io(uint16_t addr, uint8_t data);
+    uint8_t read_io(uint16_t addr);*/
+    void disable_boot_rom(uint8_t data);
 
-    // Using vector for memory with variable size; game_rom and xram.
-    std::vector<uint8_t> game_rom;
-    std::vector<uint8_t> xram;
+    std::unique_ptr<Cartridge> cartridge;
+    std::shared_ptr<Joypad> joypad;
+    std::shared_ptr<Timer> timer;
+    std::shared_ptr<PPU> ppu;
 
     // Using array for memory with fixed size.
     std::array<uint8_t, 256> boot_rom;
@@ -85,18 +84,14 @@ private:
     std::array<uint8_t, 128> hram;
 
     // Fix for Cartridge type 0x01: MBC1 with no RAM or battery
-    uint8_t rom_bank_number;
-    uint8_t cartridgeType;
+    //uint8_t rom_bank_number;
+    //uint8_t cartridgeType;
 
     bool booting;
     uint8_t interrupt_enable;
     uint8_t interrupt_flag;
-    uint8_t io_joypad_select;
-    uint8_t io_joypad;
-    uint16_t timer_divider;
-    uint8_t timer_counter;
-    uint8_t timer_modulo;
-    uint8_t timer_control;
+    //uint8_t io_joypad_select;
+    //uint8_t io_joypad;
 
     // Tests using private stuff
     FRIEND_TEST(MMU, read_write);

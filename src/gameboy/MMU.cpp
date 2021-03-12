@@ -3,14 +3,20 @@
 //
 
 #include "MMU.h"
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <cstring>
+#include "Joypad.h"
+#include "Timer.h"
+#include "PPU.h"
 
+#include <memory>
 
 MMU::MMU() {
     this->reset();
+}
+
+void MMU::link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer) {
+    this->ppu = ppu;
+    this->joypad = joypad;
+    this->timer = timer;
 }
 
 void MMU::reset() {
@@ -22,178 +28,213 @@ void MMU::reset() {
     this->io.fill(0x00);
     this->hram.fill(0x00);
 
-    this->game_rom.resize(0x8000);
-
-    //this->xram.resize(0x4000);              // Not used in simple games.
-    // Size depends on info in game rom header.
-
     this->booting = true;
     // Enable all interrupts by default
     this->interrupt_enable = 0b11111;
     // No interrupt requests by default
     this->interrupt_flag = 0;
 
-    // No buttons pressed by default
-    this->io_joypad = 0xff;
-
-    // Timer default values
-    this->timer_divider = 0;
-    this->timer_counter = 0;
-    this->timer_modulo = 0;
-    this->timer_control = 0;
-
-    this->rom_bank_number = 1;
-    this->cartridgeType = 0;
+    this->cartridge = std::make_unique<Cartridge>();
 }
 
 uint8_t MMU::read(uint16_t addr) {
-    switch(addr & 0xe000) {
-            //Boot ROM/Game ROM
-        case GAME_ROM_START:
-            if(BOOT_ROM_START <= addr && addr <= BOOT_ROM_END && this->booting) {
-                return this->boot_rom[addr];
-            }
-        case GAME_ROM_START + 0x2000:
-        case GAME_ROM_START + 0x4000:
-        case GAME_ROM_START + 0x6000:
-            if (this->cartridgeType == 1) {
-                if (addr <= 0x3fff) {
-                    return this->game_rom[addr];
-                } else if (addr <= 0x7fff) {
-                    uint8_t target_bank;
-                    if (this->rom_bank_number == 0) {
-                        target_bank = 1;
-                    } else {
-                        target_bank = this->rom_bank_number;
-                    }
-                    uint16_t target = addr - 0x4000;
-                    target += (0x4000 * target_bank);
-                    return this->game_rom[target];
-                }
-            } else {
-                return this->game_rom[addr];
-            }
-
-            //Video RAM
-        case VRAM_START:
-            return this->vram[addr - VRAM_START];
-
-            //External RAM
-        case xRAM_START:
-            return this->xram[addr - xRAM_START];
-
-            //Work RAM
-        case RAM_START:
-            return this->ram[addr - RAM_START];
-
-            //OAM / IO / High RAM
-        case 0xe000:
-            if(OAM_START <= addr && addr <= OAM_END) {
-                return this->oam[addr - OAM_START];
-            } else if (IO_START <= addr && addr <= IO_END) {
-                return this->read_io(addr);
-            } else if (HRAM_START <= addr && addr <= HRAM_END) {
-                return this->hram[addr - HRAM_START];
-            } else if (addr == INTERRUPT_ENABLE) {
-                return this->interrupt_enable;
-            }
-
-        default:
-            std::cout << "Tried to read unused memory address: " << addr << std::endl;
-            // TODO: Error handling
+    // Boot ROM / Cartridge
+    if (0x0000 <= addr && addr <= 0x7fff) {
+        if (0x00 <= addr && addr <= 0xff && booting) {
+            return this->boot_rom[addr];
+        } else {
+            return this->cartridge->read(addr);
+        }
     }
+
+    // VRAM
+    if (0x8000 <= addr && addr <= 0x9fff) {
+        return this->vram[addr - 0x8000];
+    }
+
+    // xRAM
+    if (0xa000 <= addr && addr <= 0xbfff) {
+        return this->cartridge->read(addr);
+    }
+
+    // WRAM
+    if (0xc000 <= addr && addr <= 0xdfff) {
+        return this->ram[addr - 0xc000];
+    }
+
+    // OAM
+    if (0xfe00 <= addr && addr <= 0xfe9f) {
+        return this->oam[addr - 0xfe00];
+    }
+
+    // I/O
+    if (0xff00 <= addr && addr <= 0xff7f) {
+        // Joypad
+        if (addr == 0xff00) {
+            return joypad->read(addr);
+        }
+
+        // Serial Data Transfer TODO: Implement Serial Data Transfer
+        if (0xff01 <= addr && addr <= 0xff02) {
+            // Supress to prevent console spam
+            // std::cout << "Tried to read from Serial Data Transfer device. addr: " << (int)addr << std::endl;
+            return 0;
+        }
+
+        // Timer
+        if (0xff04 <= addr && addr <= 0xff07) {
+            return this->timer->read(addr);
+        }
+
+        // Interrupt Flag
+        if (addr == 0xff0f) {
+            return this->interrupt_flag;
+        }
+
+        // Sound TODO: Implement sound
+        if (0xff10 <= addr && addr <= 0xff26) {
+            std::cout << "Tried to read from sound device. addr: " << (int)addr << std::endl;
+            return 0;
+        }
+
+        // Waveform RAM TODO: Implement sound
+        if (0xff30 <= addr && addr <= 0xff3f) {
+            std::cout << "Tried to read Waveform RAM. addr: " << (int)addr << std::endl;
+            return 0;
+        }
+
+        // LCD
+        if (0xff40 <= addr && addr <= 0xff4b) {
+            return this->ppu->read(addr);
+        }
+    }
+
+    // HRAM
+    if (0xff80 <= addr && addr <= 0xfffe) {
+        return this->hram[addr - 0xff80];
+    }
+
+    // Interrupt Enable
+    if (addr == 0xffff) {
+        return this->interrupt_enable;
+    }
+
+    // Address did not match
+    std::cout << "Tried to read unmapped memory address: " << (int)addr << std::endl;
     return 0;
 }
 
 void MMU::write(uint16_t addr, uint8_t data) {
-    switch(addr & 0xe000) {
-            //Boot ROM/Game ROM
-        case GAME_ROM_START + 0x2000:
-            this->rom_bank_number = 0x1f & data;
-            break;
-        case GAME_ROM_START:
-        case GAME_ROM_START + 0x4000:
-        case GAME_ROM_START + 0x6000:
-            std::cout << "Tried to write to ROM at address: " << addr << std::endl;
-            // TODO: Error handling
-            // TODO: could write to ROM addresses when bankswitching is implemented
-            break;
-
-            //Video RAM
-        case VRAM_START:
-            this->vram[addr - VRAM_START] = data;
-            break;
-
-            //External RAM
-        case xRAM_START:
-            this->xram[addr - xRAM_START] = data;
-            break;
-
-            //Work RAM
-        case RAM_START:
-            this->ram[addr - RAM_START] = data;
-            break;
-
-            //OAM / IO / High RAM
-        case 0xe000:
-            if(OAM_START <= addr && addr <= OAM_END) {
-                this->oam[addr - OAM_START] = data;
-                break;
-            } else if (IO_START <= addr && addr <= IO_END) {
-                this->write_io(addr, data);
-                break;
-            } else if (HRAM_START <= addr && addr <= HRAM_END) {
-                this->hram[addr - HRAM_START] = data;
-                break;
-            } else if (addr == INTERRUPT_ENABLE) {
-                this->interrupt_enable = data;
-                break;
-            }
-
-        default:
-            std::cout << "Tried to write to unused memory address: " << addr << std::endl;
-            // TODO: Error handling
+    // Memory Bank Controller
+    if (0x0000 <= addr && addr <= 0x7fff) {
+        this->cartridge->write(addr, data);
+        return;
     }
+
+    // VRAM
+    if (0x8000 <= addr && addr <= 0x9fff) {
+        this->vram[addr - 0x8000] = data;
+        return;
+    }
+
+    // xRAM
+    if (0xa000 <= addr && addr <= 0xbfff) {
+        this->cartridge->write(addr, data);
+        return;
+    }
+
+    // WRAM
+    if (0xc000 <= addr && addr <= 0xdfff) {
+        this->ram[addr - 0xc000] = data;
+        return;
+    }
+
+    // OAM
+    if (0xfe00 <= addr && addr <= 0xfe9f) {
+        this->oam[addr - 0xfe00] = data;
+        return;
+    }
+
+    // IO
+    if (0xff00 <= addr && addr <= 0xff7f) {
+        // Joypad
+        if (addr == 0xff00) {
+            this->joypad->write(addr, data);
+            return;
+        }
+
+        // Serial Data Transfer TODO: Implement Serial Data Transfer
+        if (0xff01 <= addr && addr <= 0xff02) {
+            // Supress to prevent console spam
+            // std::cout << "Tried to write to Serial Data Transfer device. addr: " << (int)addr << " data: " << (int)data << std::endl;
+            return;
+        }
+
+        // Timer
+        if (0xff04 <= addr && addr <= 0xff07) {
+            this->timer->write(addr, data);
+            return;
+        }
+
+        // Interrupt Flag
+        if (addr == 0xff0f) {
+            this->interrupt_flag = data;
+            return;
+        }
+
+        // Sound TODO: Implement sound
+        if (0xff10 <= addr && addr <= 0xff26) {
+            // Supress to prevent console spam
+            // std::cout << "Tried to write to sound device. addr: " << (int)addr << " data: " << (int)data << std::endl;
+            return;
+        }
+
+        // Waveform RAM TODO: Implement sound
+        if (0xff30 <= addr && addr <= 0xff3f) {
+            // Supress to prevent console spam
+            // std::cout << "Tried to write to Waveform RAM. addr: " << (int)addr << " data: " << (int)data<< std::endl;
+            return;
+        }
+
+        // LCD
+        if (0xff40 <= addr && addr <= 0xff4b) {
+            this->ppu->write(addr, data);
+            return;
+        }
+
+        // Disable boot ROM
+        if (addr == 0xff50) {
+            this->disable_boot_rom(data);
+            return;
+        }
+
+        std::cout << "Tried to write to unmapped memory address: " << (int)addr << " data: " << (int)data << std::endl;
+    }
+
+    // HRAM
+    if (0xff80 <= addr && addr <= 0xfffe) {
+        this->hram[addr - 0xff80] = data;
+        return;
+    }
+
+    // Interrupt Enable
+    if (addr == 0xffff) {
+        this->interrupt_enable = data;
+        return;
+    }
+
+    // Address did not match
+    std::cout << "Tried to write to unmapped memory address: " << (int)addr << " data: " << (int)data << std::endl;
 }
 
-void MMU::disable_boot_rom() {
-    this->booting = false;
+void MMU::disable_boot_rom(uint8_t data) {
+    if (data != 0) {
+        this->booting = false;
+    }
 }
 
 bool MMU::load_game_rom(std::string filepath) {
-    std::streampos size;
-    char *memblock;
-
-    std::ifstream file (filepath, std::ios::in|std::ios::binary|std::ios::ate);
-    if (file.is_open())
-    {
-        // Get file size
-        size = file.tellg();
-        memblock = new char [size];
-
-        // Move seeker to beginning of file
-        file.seekg (0, std::ios::beg);
-        // Read file to buffer
-        file.read (memblock, size);
-        // Close file
-        file.close();
-
-        // Resize game_rom to size
-        this->game_rom.resize(size);
-        // Copy data
-        std::memcpy(&this->game_rom[this->game_rom.size() - size], &memblock[0], size);
-
-        delete[] memblock;
-        this->cartridgeType = this->game_rom[0x147];
-        std::cout << "game rom size: " << size << std::endl;
-        std::cout << "cartridge type: " << (int)this->cartridgeType << std::endl;
-        // TODO: Maybe check for file size
-    }
-    else {
-        std::cout << "Unable to open game ROM: " << filepath << std::endl;
-        return false;
-    }
-    return true;
+    return this->cartridge->load_rom(filepath);
 }
 
 bool MMU::load_boot_rom(std::string filepath) {
@@ -221,13 +262,13 @@ bool MMU::load_boot_rom(std::string filepath) {
             delete[] memblock;
         } else {
             std::cout << "Unable to load boot ROM! File size is not 256 bytes!" << std::endl;
-            disable_boot_rom();
+            disable_boot_rom(1);
             return false;
         }
     }
     else {
         std::cout << "Unable to open boot ROM: " << filepath << std::endl;
-        disable_boot_rom();
+        disable_boot_rom(1);
         return false;
     }
     return true;
@@ -236,10 +277,9 @@ bool MMU::load_boot_rom(std::string filepath) {
 // ONLY TO BE USED IN TESTS. CAN WRITE TO GAME ROM
 void MMU::write_GAME_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data) {
     if (GAME_ROM_START <= addr && addr <= GAME_ROM_END) {
-        this->game_rom[addr] = data;
+        this->cartridge->write_TEST(addr, data);
     } else {
         std::cout << "Tried to use write_GAME_ROM_ONLY_IN_TESTS with invalid addr: " << addr << std::endl;
-        // TODO: Error handling
     }
 }
 
@@ -249,32 +289,18 @@ void MMU::write_BOOT_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data) {
         this->boot_rom[addr] = data;
     } else {
         std::cout << "Tried to use write_BOOT_ROM_ONLY_IN_TESTS with invalid addr: " << addr << std::endl;
-        // TODO: Error handling
     }
 }
-
+/*
 void MMU::write_io(uint16_t addr, uint8_t data) {
     if (addr == IO_DISABLE_BOOT_ROM) {
         if (data != 0) this->disable_boot_rom();
     } else if (addr == IO_JOYPAD) {
-        this->io_joypad_select = data;
+        this->joypad->write(addr, data);
     } else if (addr == INTERRUPT_FLAG) {
         this->interrupt_flag = data;
     } else if (TIMER_DIVIDER <= addr && addr <= TIMER_CONTROL) {
-        switch (addr) {
-            case TIMER_DIVIDER:
-                this->timer_divider = 0;
-                break;
-            case TIMER_COUNTER:
-                this->timer_counter = ((uint16_t)data << 8);
-                break;
-            case TIMER_MODULO:
-                this->timer_modulo = data;
-                break;
-            case TIMER_CONTROL:
-                this->timer_control = data & 0b111;
-                break;
-        }
+        this->timer->write(addr, data);
     } else if (addr == DMA_TRANSFER) {
         std::cout << "DMA: data:" << (uint8_t)data;
         if (0x00 <= data && data <= 0xf1) {
@@ -288,77 +314,25 @@ void MMU::write_io(uint16_t addr, uint8_t data) {
     } else {
         this->io[addr - IO_START] = data;
     }
-}
-
+}*/
+/*
 uint8_t MMU::read_io(uint16_t addr) {
     if (addr == IO_JOYPAD) {
-        if ((this->io_joypad_select & JOYPAD_SEL_DIRECTIONS)) {
-            return ((this->io_joypad >> 0) & 0xf);
-        } else {
-            return ((this->io_joypad >> 4) & 0xf);
-        }
+        this->joypad->read(addr);
     } else if (addr == INTERRUPT_FLAG) {
         return this->interrupt_flag & (0x1f);
-    } else if (TIMER_DIVIDER <= addr && addr <= TIMER_CONTROL) {
-        switch (addr) {
-            case TIMER_DIVIDER:
-                return (uint8_t)(this->timer_divider >> 8);
-            case TIMER_COUNTER:
-                return this->timer_counter;
-            case TIMER_MODULO:
-                return this->timer_modulo;
-            case TIMER_CONTROL:
-                return this->timer_control & 0b111;
-        }
+    } else if (TIMER_START <= addr && addr <= TIMER_END) {
+        this->timer->read(addr);
     } else {
         return this->io[addr - IO_START];
     }
     return 0;
+}*/
+
+void MMU::raise_interrupt_flag(uint8_t bitmask) {
+    this->interrupt_flag |= bitmask;
 }
 
-// Timer functions
-// Cycles is @ 1,048,576Hz
-void MMU::timer_update(uint16_t cycles) {
-    // Timer activated
-    if (this->timer_control & (1 << 0)) {
-        // Increase divider
-        uint16_t old_divider = this->timer_divider;
-        this->timer_divider += (cycles*4);
-
-        // Timer speed
-        uint8_t speed = this->timer_control & 0b11;
-        const uint16_t speed_mask[] = {0xfc00, 0xfff0, 0xffc0, 0xff00};
-        const uint8_t speed_offs[] = {10, 4, 6, 8};
-
-        uint16_t mask = speed_mask[speed];
-        uint8_t offs = speed_offs[speed];
-
-        // Check for counter overflow
-        // Increase counter
-        uint8_t increase_counter = (((this->timer_divider & mask) - (old_divider & mask)) >> offs);
-        if ((uint16_t)(this->timer_counter + increase_counter) > 0xff) {
-            // Add modulo
-            this->timer_counter += (this->timer_modulo + increase_counter);
-            // Raise interrupt request for Timer interrupt
-          //  std::cout << "MMU Timer" << std::endl;
-            this->interrupt_flag = this->interrupt_flag | (1 << 2);
-        } else {
-          this->timer_counter += increase_counter;
-        }
-    }
-}
-
-// Joypad functions
-void MMU::joypad_release(uint8_t button) {
-    auto temp = this->io_joypad;
-    this->io_joypad = temp | (1 << button);
-}
-
-void MMU::joypad_press(uint8_t button) {
-    uint8_t temp = this->io_joypad;
-    this->io_joypad = (temp & ~(1 << button));
-
-    // Raise interrupt flag
-    temp = this->interrupt_flag;
-    this->interrupt_flag = (temp | (1 << 4));
+void MMU::clear_interrupt_flag(uint8_t bitmask) {
+    this->interrupt_flag &= ~bitmask;
 }
