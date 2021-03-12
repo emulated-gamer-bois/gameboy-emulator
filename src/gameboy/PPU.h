@@ -9,6 +9,7 @@
 
 #include "Definitions.h" // LCD_WIDTH and LCD_HEIGHT
 #include "MMU.h"
+#include "Sprite.h"
 
 // Register addresses
 #define LCDC_ADDRESS 0xFF40
@@ -100,6 +101,7 @@ private:
     uint8_t OBP1;
     uint8_t DMA;
 
+    std::vector<std::shared_ptr<Sprite>> spritesNextScanLine;
     std::shared_ptr<MMU> memory;
     std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> frameBuffer;
     uint16_t accumulatedCycles;
@@ -109,15 +111,22 @@ private:
     void processNextLine();
     void drawBackgroundScanLine();
     void drawWindowScanLine();
+    void drawObjectScanLine();
+    void loadSpritesNextScanLine();
+    std::shared_ptr<Sprite> loadSprite(int index);
     void initRegisters();
     void saveRegisters();
+    static uint8_t getColor(uint8_t palette, uint8_t colorIndex);
 
     // MMU reading functions.
     uint8_t getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY);
-    uint8_t getTilePixelColor(uint8_t id, uint8_t x, uint8_t y);
+    uint8_t getTilePixelColorIndex(uint8_t tileSet, uint8_t id, uint8_t x, uint8_t y);
+    uint8_t getSpritePixelColorIndex(const std::shared_ptr<Sprite>& sprite, uint8_t x, uint8_t y);
 
     // Interrupt related functions.
     bool meetsStatConditions() const;
     void vBlankInterrupt();
     void statInterrupt();
+
+    std::shared_ptr<Sprite> getHighestPrioritySprite(int lcdX);
 };
