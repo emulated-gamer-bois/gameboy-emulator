@@ -18,32 +18,6 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 #define CONTROLLER_B SDLK_g
 #define CONTROLLER_START SDLK_h
 #define CONTROLLER_SELECT SDLK_j
-static bool show_app_main_menu_bar = false;
-static bool show_app_documents = false;
-
-static bool show_app_console = false;
-static bool show_app_log = false;
-static bool show_app_layout = false;
-static bool show_app_property_editor = false;
-static bool show_app_long_text = false;
-static bool show_app_auto_resize = false;
-static bool show_app_constrained_resize = false;
-static bool show_app_simple_overlay = false;
-static bool show_app_fullscreen = false;
-static bool show_app_window_titles = false;
-static bool show_app_custom_rendering = false;
-
-// Dear ImGui Apps (accessible from the "Tools" menu)
-static bool show_app_metrics = false;
-static bool show_app_style_editor = false;
-static bool show_app_about = false;
-// TEMP ----------------------------------------------------------------------------------------------------------------
-#include <fstream>
-
-void TEMP_setTexture(const char *filename, RenderView &rv);
-// END TEMP ------------------------------------------------------------------------------------------------------------
-
-const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
 
 /**
  * Constructor
@@ -129,11 +103,11 @@ void Application::initSDL() {
 
     // Create the window.
     this->window = SDL_CreateWindow(DEFAULT_WINDOW_CAPTION.c_str(),
-                                          SDL_WINDOWPOS_UNDEFINED,
-                                          SDL_WINDOWPOS_UNDEFINED,
-                                          LCD_WIDTH,
-                                          LCD_HEIGHT,
-                                          SDL_WINDOW_OPENGL);
+                                    SDL_WINDOWPOS_UNDEFINED,
+                                    SDL_WINDOWPOS_UNDEFINED,
+                                    LCD_WIDTH,
+                                    LCD_HEIGHT,
+                                    SDL_WINDOW_OPENGL);
     assert(this->window);
 
     // Get gl context and set it to the current context for this window.
@@ -147,7 +121,7 @@ void Application::initSDL() {
     SDL_GL_SetSwapInterval(0);
 
     // Workaround for AMD. Must not be removed.
-    if(!glBindFragDataLocation) {
+    if (!glBindFragDataLocation) {
         glBindFragDataLocation = glBindFragDataLocationEXT;
     }
 }
@@ -171,37 +145,11 @@ void Application::terminateSDL() {
 void Application::gui() {
     // Inform imgui of new frame
     ImGui_ImplSdlGL3_NewFrame(this->window);
-
-    if(toolbar){
-
-        //ImGui::SetNextWindowPos(ImVec2());
-        ImGui::SetNextWindowSize(ImVec2((float)ImGui::GetWindowSize().x,(float)50));
-        ImGuiWindowFlags window_flags = 0
-
-                                        | ImGuiWindowFlags_NoTitleBar
-                                        | ImGuiWindowFlags_NoResize
-                                        | ImGuiWindowFlags_NoMove
-                                        | ImGuiWindowFlags_NoScrollbar
-                                        | ImGuiWindowFlags_NoSavedSettings
-        ;
-       // ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-        ImGui::Begin("TOOLBAR", NULL, window_flags);
-     //   ImGui::PopStyleVar();
-
-        ImGui::Button("Toolbar goes here", ImVec2(0, 37));
-
-        ImGui::End();
-
-    }
-    // ----------------- Set variables --------------------------
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-                ImGui::GetIO().Framerate);
-    // ----------------------------------------------------------
-    // Render the GUI.
+    toolbar();
     ImGui::Render();
-    toolbar=true;
 
 }
+
 /**
  * Handles SDL Events including keyboard input.
  */
@@ -300,32 +248,27 @@ void Application::updateSDLWindowSize() {
     }
 }
 
-/////////////////////////////////////////////////////////////////////////
-////                           - TEMPORARY -                         ////
-/////////////////////////////////////////////////////////////////////////
-// Manual memory management, no exception handling and global scope.
-void TEMP_setTexture(const char *filename, RenderView &rv) {
-    int pixelAmount = 23040;
-    char *rgbPixels = new char[pixelAmount * 3];
+void Application::toolbar() {
+    //TODO examplem toolbar, should add actual settings here.
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("File")) {
+            if (ImGui::MenuItem("Add", "")) {}
+            if (ImGui::MenuItem("Edit", "")) {}
 
-    std::ifstream file(filename, std::ios::in | std::ios::binary);
-    if (file.is_open()) {
-        file.read(rgbPixels, pixelAmount * 3);
-        file.close();
-    } else {
-        delete[] rgbPixels;
-        return;
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Edit")) {
+            if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+            if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+            ImGui::Separator();
+            if (ImGui::MenuItem("Cut", "CTRL+X")) {}
+            if (ImGui::MenuItem("Copy", "CTRL+C")) {}
+            if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
     }
 
-    auto *redPixels = new uint8_t[pixelAmount];
-    for (int i = 0; i < pixelAmount; i += 1) {
-        redPixels[i] = rgbPixels[i * 3];
-    }
 
-    rv.setScreenTexture(redPixels);
-
-    delete[] rgbPixels;
-    delete[] redPixels;
 }
-
 

@@ -10,7 +10,7 @@
 #include <string>
 #include <chrono> // time
 #include <thread> // sleep
-
+#include "imgui.h"
 #include "RenderView.h"
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
@@ -39,6 +39,5 @@ private:
     void terminate();
     void terminateImGui();
     void gui();
-
-    bool toolbar=false;
+    void toolbar();
 };
