@@ -19,12 +19,6 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 #define CONTROLLER_START SDLK_h
 #define CONTROLLER_SELECT SDLK_j
 
-// TEMP ----------------------------------------------------------------------------------------------------------------
-#include <fstream>
-
-void TEMP_setTexture(const char *filename, RenderView &rv);
-// END TEMP ------------------------------------------------------------------------------------------------------------
-
 const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
 
 /**
@@ -257,34 +251,6 @@ void Application::updateSDLWindowSize() {
     if (width != this->renderView.getWidth() || height != this->renderView.getHeight()) {
         SDL_SetWindowSize(this->window, this->renderView.getWidth(), this->renderView.getHeight());
     }
-}
-
-/////////////////////////////////////////////////////////////////////////
-////                           - TEMPORARY -                         ////
-/////////////////////////////////////////////////////////////////////////
-// Manual memory management, no exception handling and global scope.
-void TEMP_setTexture(const char *filename, RenderView &rv) {
-    int pixelAmount = 23040;
-    char *rgbPixels = new char[pixelAmount * 3];
-
-    std::ifstream file(filename, std::ios::in | std::ios::binary);
-    if (file.is_open()) {
-        file.read(rgbPixels, pixelAmount * 3);
-        file.close();
-    } else {
-        delete[] rgbPixels;
-        return;
-    }
-
-    auto *redPixels = new uint8_t[pixelAmount];
-    for (int i = 0; i < pixelAmount; i += 1) {
-        redPixels[i] = rgbPixels[i * 3];
-    }
-
-    rv.setScreenTexture(redPixels);
-
-    delete[] rgbPixels;
-    delete[] redPixels;
 }
 
 
