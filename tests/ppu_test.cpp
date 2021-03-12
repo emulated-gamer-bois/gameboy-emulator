@@ -323,7 +323,7 @@ TEST(PPU, Read_single_tile_no_scrolling) {
     std::unique_ptr<PPU> ppu( new PPU(mmu));
 
     //Set LCDC to use tile map 0 and 8000 addressing mode
-    mmu->write(LCDC_ADDRESS, 0xB3);
+    mmu->write(LCDC_ADDRESS, 0x91);
 
     //Set pallet so that 0=white, 1=light grey, 2=dark grey, 3=black
     mmu->write(BGP_ADDRESS, 0xE4);
@@ -362,7 +362,7 @@ TEST(PPU, Tile_set_0) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::unique_ptr<PPU> ppu( new PPU(mmu));
 
-    //Set LCDC to use tile map 0 and 9000 addressing mode
+    //Set LCDC to use tile map 1 and 9000 addressing mode
     mmu->write(LCDC_ADDRESS, 0x89);
 
     //Set pallet so that 0=white, 1=light grey, 2=dark grey, 3=black
@@ -383,7 +383,7 @@ TEST(PPU, Read_single_tile_scrolling_x) {
     std::unique_ptr<PPU> ppu( new PPU(mmu));
 
     //Set LCDC to use tile map 0 and 8000 addressing mode
-    mmu->write(LCDC_ADDRESS, 0xB3);
+    mmu->write(LCDC_ADDRESS, 0x91);
 
     //Set pallet so that 0=white, 1=light grey, 2=dark grey, 3=black
     mmu->write(BGP_ADDRESS, 0xE4);
@@ -415,7 +415,7 @@ TEST(PPU, Many_tiles) {
     std::unique_ptr<PPU> ppu( new PPU(mmu));
 
     //Set LCDC to use tile map 0 and 8000 addressing mode
-    mmu->write(LCDC_ADDRESS, 0xB3);
+    mmu->write(LCDC_ADDRESS, 0x91);
 
     //Set pallet so that 0=white, 1=light grey, 2=dark grey, 3=black
     mmu->write(BGP_ADDRESS, 0xE4);
@@ -447,6 +447,25 @@ TEST(PPU, Many_tiles) {
 
     bufferFrame(ppu);
     printScreen(ppu);
+}
+
+TEST(PPU, window) {
+    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
+    std::unique_ptr<PPU> ppu( new PPU(mmu));
+
+    //Set LCDC to use window tile map 0 and 8000 addressing mode with window enabled
+    mmu->write(LCDC_ADDRESS, 0xB1);
+
+    //Set pallet so that 0=white, 1=light grey, 2=dark grey, 3=black
+    mmu->write(BGP_ADDRESS, 0xE4);
+
+    std::array<char, 64> startTile = getGTile();
+    loadTileData(mmu, startTile, 0, 1);
+    loadMap(mmu, 0, 0, 0);
+
+    bufferFrame(ppu);
+    printTile00(ppu);
+    assertTile00(ppu, startTile);
 }
 
 TEST(PPU, g_tile_rom) {
