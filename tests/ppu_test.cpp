@@ -453,8 +453,8 @@ TEST(PPU, window) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::unique_ptr<PPU> ppu( new PPU(mmu));
 
-    //Set LCDC to use window tile map 0 and 8000 addressing mode with window enabled
-    mmu->write(LCDC_ADDRESS, 0xB1);
+    //Set LCDC to use window tile map 0 and 8000 addressing mode with window enabled. BG tile map 1.
+    mmu->write(LCDC_ADDRESS, 0xB9);
 
     //Set pallet so that 0=white, 1=light grey, 2=dark grey, 3=black
     mmu->write(BGP_ADDRESS, 0xE4);
