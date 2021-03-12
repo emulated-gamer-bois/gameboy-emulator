@@ -99,7 +99,6 @@ private:
     uint8_t BGP;
     uint8_t OBP0;
     uint8_t OBP1;
-    uint8_t DMA;
 
     std::array<uint8_t, LCD_WIDTH> bgWindowColorIndexesThisLine;
     std::vector<std::shared_ptr<Sprite>> spritesNextScanLine;

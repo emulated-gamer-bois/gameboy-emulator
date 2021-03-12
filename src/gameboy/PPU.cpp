@@ -4,7 +4,6 @@
 
 #include "PPU.h"
 #include "Definitions.h"
-#include <cassert>
 #include <memory>
 
 PPU::PPU(std::shared_ptr<MMU> memory) {
@@ -22,7 +21,6 @@ void PPU::reset() {
     this->BGP = 0;
     this->OBP0 = 0;
     this->OBP1 = 0;
-    this->DMA = 0;
     this->STAT = 0;
     this->LCDC = 0;
 
@@ -114,14 +112,16 @@ void PPU::confirmDraw() {
 }
 
 void PPU::processNextLine() {
-    if (bgWindowDisplayEnable) {
-        drawBackgroundScanLine();
-        if (windowDisplayEnable) {
-            drawWindowScanLine();
+    if (lcdDisplayEnable) {
+        if (bgWindowDisplayEnable) {
+            drawBackgroundScanLine();
+            if (windowDisplayEnable) {
+                drawWindowScanLine();
+            }
         }
-    }
-    if (objectDisplayEnable) {
-        drawObjectScanLine();
+        if (objectDisplayEnable) {
+            drawObjectScanLine();
+        }
     }
 }
 
@@ -223,7 +223,6 @@ void PPU::initRegisters() {
     BGP = memory->read(BGP_ADDRESS);
     OBP0 = memory->read(OBP0_ADDRESS);
     OBP1 = memory->read(OBP1_ADDRESS);
-    DMA = memory->read(DMA_ADDRESS);
 }
 
 void PPU::saveRegisters() { //TODO check if anything else needs doing here
