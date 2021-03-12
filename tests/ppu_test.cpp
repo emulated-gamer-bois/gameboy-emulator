@@ -456,7 +456,8 @@ TEST(PPU, Many_tiles) {
 
 TEST(PPU, window) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<PPU> ppu( new PPU(mmu));
+    std::shared_ptr<PPU> ppu( new PPU(mmu));
+    mmu->link_devices(ppu, nullptr, nullptr);
 
     //Set LCDC to use window tile map 0 and 8000 addressing mode with window enabled. BG tile map 1.
     mmu->write(LCDC_ADDRESS, 0xB9);
@@ -477,7 +478,6 @@ TEST(PPU, g_tile_rom) {
     GameBoy gb;
     gb.load_boot_rom("../../roms/gb/boot_g_tile.gb");
     while (gb.cpu->PC != 0x34) {
-        //gb.cpu_dump();
         gb.cpu->execute_instruction();
     }
 
