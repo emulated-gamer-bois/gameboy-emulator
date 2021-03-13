@@ -19,12 +19,12 @@ void Timer::reset() {
 }
 
 void Timer::update(uint16_t cycles) {
+    // Always increase divider
+    uint16_t old_divider = this->divider;
+    this->divider += (cycles*4);
+
     // Timer activated
     if (this->control & (1 << 0)) {
-        // Increase divider
-        uint16_t old_divider = this->divider;
-        this->divider += (cycles*4);
-
         // Timer speed
         uint8_t speed = this->control & 0b11;
         const uint16_t speed_mask[] = {0xfc00, 0xfff0, 0xffc0, 0xff00};
