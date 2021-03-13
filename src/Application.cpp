@@ -8,6 +8,7 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 #include "Application.h"
 #include "Timer.h"
 #include <imgui.h>
+#include "FileHelper.h"
 #include "imgui_impl_sdl_gl3.h"
 
 #define CONTROLLER_UP SDLK_w
@@ -127,11 +128,11 @@ void Application::initSDL() {
     }
 }
 
+/**
+ * Cleans up after ImGui.
+ */
 void Application::terminateImGui() {
-    // If newframe is not ever run before shut down we crash
-    ImGui_ImplSdlGL3_NewFrame(this->window);
-
-    //Destroy imgui
+    ImGui_ImplSdlGL3_NewFrame(this->window); // If newframe is not ever run before shut down we crash.
     ImGui_ImplSdlGL3_Shutdown();
 }
 
@@ -146,7 +147,7 @@ void Application::terminateSDL() {
 void Application::gui() {
     // Inform imgui of new frame
     ImGui_ImplSdlGL3_NewFrame(this->window);
-       toolbar();
+    toolbar();
     ImGui::Render();
 
 }
@@ -254,24 +255,15 @@ void Application::toolbar(){
     {
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::MenuItem("Add", "")) {}
+            if (ImGui::MenuItem("Load ROM", "")) {
+                std::cout << FileHelper::openDialog() << std::endl;
+            }
+            ImGui::Separator();
             if (ImGui::MenuItem("Edit", "")) {}
 
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Edit"))
-        {
-            if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-            if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-            ImGui::Separator();
-            if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-            if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-            if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-            ImGui::EndMenu();
-        }
         ImGui::EndMainMenuBar();
     }
-
-
 }
 

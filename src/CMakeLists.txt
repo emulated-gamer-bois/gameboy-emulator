@@ -25,6 +25,8 @@ if(NOT TRAVIS)
         Palette.h
         Timer.h
         Timer.cpp
+        FileHelper.h
+        FileHelper.cpp
         )
 
     target_link_libraries ( ${PROJECT_NAME} labhelper gameboy )
