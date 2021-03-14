@@ -6,7 +6,6 @@
 #include "MMU.h"
 #include "Definitions.h"
 #include <memory>
-#include <cassert>
 #include <iostream>
 
 PPU::PPU(std::shared_ptr<MMU> memory) {
@@ -371,7 +370,7 @@ void PPU::dma_transfer(uint8_t data) {
     if (0x00 <= data && data <= 0xdf) {
         uint16_t start_addr = (data << 8);
         for (uint8_t i = 0; i <= 0x9f; i++) {
-            this->memory->write(OAM_START + i, this->read(start_addr+i));
+            this->memory->write(OAM_START + i, this->memory->read(start_addr+i));
         }
     } else {
         std::cout << "Tried to use DMA transfer with invalid input: " << data << std::endl;
