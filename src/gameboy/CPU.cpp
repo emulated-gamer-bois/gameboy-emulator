@@ -778,16 +778,16 @@ int CPU::execute_instruction() {
             return 1;
         case 0x11:
             loadIm16(read16_and_inc_pc(), DE);
-            return 1;
+            return 3;
         case 0x12:
             storeAddr(DE.all_16, A);
-            return 3;
+            return 2;
         case 0x13:
             increment16(DE.all_16);
             return 2;
         case 0x14:
             increment8(DE.high_8);
-            return 2;
+            return 1;
         case 0x15:
             decrement8(DE.high_8);
             return 1;
@@ -1152,28 +1152,28 @@ int CPU::execute_instruction() {
             return 1;
         case 0x88:
             addA(BC.high_8, true);
-            return 2;
+            return 1;
         case 0x89:
             addA(BC.low_8, true);
-            return 2;
+            return 1;
         case 0x8A:
             addA(DE.high_8, true);
-            return 2;
+            return 1;
         case 0x8B:
             addA(DE.low_8, true);
-            return 2;
+            return 1;
         case 0x8C:
             addA(HL.high_8, true);
-            return 2;
+            return 1;
         case 0x8D:
             addA(HL.low_8, true);
-            return 2;
+            return 1;
         case 0x8E:
             addA(memory->read(HL.all_16), true);
             return 2;
         case 0x8F:
             addA(A, true);
-            return 2;
+            return 1;
         case 0x90:
             subA(BC.high_8, false);
             return 1;
@@ -1212,7 +1212,7 @@ int CPU::execute_instruction() {
             return 1;
         case 0x9C:
             subA(HL.high_8, true);
-            break;
+            return 1;
         case 0x9D:
             subA(HL.low_8, true);
             return 1;
@@ -1751,7 +1751,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x46:
             bit(0, memory->read(HL.all_16));
-            return 4;
+            return 3;
         case 0x47:
             bit(0, A);
             return 2;
@@ -1775,7 +1775,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x4E:
             bit(1, memory->read(HL.all_16));
-            return 4;
+            return 3;
         case 0x4F:
             bit(1, A);
             return 2;
@@ -1799,7 +1799,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x56:
             bit(2, memory->read(HL.all_16));
-            return 4;
+            return 3;
         case 0x57:
             bit(2, A);
             return 2;
@@ -1823,7 +1823,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x5E:
             bit(3, memory->read(HL.all_16));
-            return 4;
+            return 3;
         case 0x5F:
             bit(3, A);
             return 2;
@@ -1847,7 +1847,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x66:
             bit(4, memory->read(HL.all_16));
-            return 4;
+            return 3;
         case 0x67:
             bit(4, A);
             return 2;
@@ -1871,7 +1871,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x6E:
             bit(5, memory->read(HL.all_16));
-            return 4;
+            return 3;
         case 0x6F:
             bit(5, A);
             return 2;
@@ -1895,7 +1895,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x76:
             bit(6, memory->read(HL.all_16));
-            return 4;
+            return 3;
         case 0x77:
             bit(6, A);
             return 2;
@@ -1919,7 +1919,7 @@ int CPU::CB_ops() {
             return 2;
         case 0x7E:
             bit(7, memory->read(HL.all_16));
-            return 4;
+            return 3;
         case 0x7F:
             bit(7, A);
             return 2;
@@ -2378,19 +2378,19 @@ int CPU::handleInterrupts() {
         uint16_t interruptVector = PC;
 
         if (maskedFlags & V_BLANK_IF_BIT) {
-            memory->write(INTERRUPT_FLAG, flags & ~V_BLANK_IF_BIT);
+            memory->clear_interrupt_flag(V_BLANK_IF_BIT);
             interruptVector = 0x40;
         } else if (maskedFlags & STAT_IF_BIT) {
-            memory->write(INTERRUPT_FLAG, flags & ~STAT_IF_BIT);
+            memory->clear_interrupt_flag(STAT_IF_BIT);
             interruptVector = 0x48;
         } else if (maskedFlags & TIMER_IF_BIT) {
-            memory->write(INTERRUPT_FLAG, flags & ~TIMER_IF_BIT);
+            memory->clear_interrupt_flag(TIMER_IF_BIT);
             interruptVector = 0x50;
         } else if (maskedFlags & SERIAL_IF_BIT) {
-            memory->write(INTERRUPT_FLAG, flags & ~SERIAL_IF_BIT);
+            memory->clear_interrupt_flag(SERIAL_IF_BIT);
             interruptVector = 0x58;
         } else if (maskedFlags & CONTROLLER_IF_BIT) {
-            memory->write(INTERRUPT_FLAG, flags & ~CONTROLLER_IF_BIT);
+            memory->clear_interrupt_flag(CONTROLLER_IF_BIT);
             interruptVector = 0x60;
         }
         PC = interruptVector;

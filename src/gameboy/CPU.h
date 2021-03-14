@@ -141,6 +141,4 @@ private:
     FRIEND_TEST(CPU, sixteen_bit_ops);
     FRIEND_TEST(PPU, Print_test_rom);
     FRIEND_TEST(PPU, g_tile_rom);
-
-
 };

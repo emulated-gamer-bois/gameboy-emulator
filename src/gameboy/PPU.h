@@ -6,6 +6,7 @@
 
 #include <memory> // smart pointers
 #include <cstdint> // uint8_t and uint16_t
+#include <array> // frame buffer
 
 #include "Definitions.h" // LCD_WIDTH and LCD_HEIGHT
 #include "MMU.h"
@@ -36,9 +37,15 @@
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
 
+// Forward declaration
+class MMU;
+
 class PPU {
 public:
-    explicit PPU(std::shared_ptr<MMU> memory);
+    explicit PPU(std::shared_ptr<MMU> mmu);
+
+    uint8_t read(uint16_t addr) const;
+    void write(uint16_t addr, uint8_t data);
 
     void reset();
     void update(uint16_t cpuCycles);
@@ -94,6 +101,7 @@ private:
     uint8_t SCX;
     uint8_t LY;
     uint8_t LYC;
+    uint8_t DMA;
     uint8_t WY;
     uint8_t WX;
     uint8_t BGP;
@@ -108,14 +116,14 @@ private:
     bool readyToDraw;
     bool anyStatConditionLastUpdate;
 
+    void dma_transfer(uint8_t data);
+
     void processNextLine();
     void drawBackgroundScanLine();
     void drawWindowScanLine();
     void drawObjectScanLine();
     void loadSpritesNextScanLine();
     std::shared_ptr<Sprite> loadSprite(int index);
-    void initRegisters();
-    void saveRegisters();
     static uint8_t getColor(uint8_t palette, uint8_t colorIndex);
 
     // MMU reading functions.
