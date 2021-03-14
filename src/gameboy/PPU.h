@@ -13,22 +13,22 @@
 #include "Sprite.h"
 
 // Register addresses
-#define LCDC_ADDRESS 0xFF40
-#define STAT_ADDRESS 0xFF41
-#define SCY_ADDRESS 0xFF42
-#define SCX_ADDRESS 0xFF43
-#define LY_ADDRESS 0xFF44
-#define LYC_ADDRESS 0xFF45
-#define DMA_ADDRESS 0xFF46
-#define BGP_ADDRESS 0xFF47
-#define OBP0_ADDRESS 0xFF48
-#define OBP1_ADDRESS 0xFF49
-#define WY_ADDRESS 0xFF4A
-#define WX_ADDRESS 0xFF4B
+#define LCDC_ADDRESS    0xFF40
+#define STAT_ADDRESS    0xFF41
+#define SCY_ADDRESS     0xFF42
+#define SCX_ADDRESS     0xFF43
+#define LY_ADDRESS      0xFF44
+#define LYC_ADDRESS     0xFF45
+#define DMA_ADDRESS     0xFF46
+#define BGP_ADDRESS     0xFF47
+#define OBP0_ADDRESS    0xFF48
+#define OBP1_ADDRESS    0xFF49
+#define WY_ADDRESS      0xFF4A
+#define WX_ADDRESS      0xFF4B
 
 // Tilemap memory block modes.
-#define BG_WINDOW_MAP0 0x9800
-#define BG_WINDOW_MAP1 0x9C00
+#define BG_WINDOW_MAP0  0x9800
+#define BG_WINDOW_MAP1  0x9C00
 
 // Tileset memory bock modes.
 #define BG_WINDOW_TILE_DATA0 0x9000
@@ -37,29 +37,31 @@
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
 
-// Forward declaration
-class MMU;
-
 class PPU {
 public:
     explicit PPU(std::shared_ptr<MMU> mmu);
 
+    //Device methods
     uint8_t read(uint16_t addr) const;
     void write(uint16_t addr, uint8_t data);
 
+    //Drawing methods
     void reset();
     void update(uint16_t cpuCycles);
-
-    const std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>* getFrameBuffer() const;
     bool isReadyToDraw() const;
     void confirmDraw();
-
+    const std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>* getFrameBuffer() const;
 private:
-    const static uint16_t HBLANK_THRESHOLD = 51; //The time it takes to search for objects, draw the line and HBLANK.
+    std::shared_ptr<MMU> memory;
+
+    //The amount of cycles each mode should last
+    const static uint16_t HBLANK_THRESHOLD = 51;
     const static uint16_t VBLANK_LINE_THRESHOLD = 114;
     const static uint16_t OAM_SEARCH_THRESHOLD = 20;
     const static uint16_t SCANLINE_DRAW_THRESHOLD = 43;
+    uint16_t accumulatedCycles;
 
+    //The four modes of the PPU
     enum Mode {
         HBLANK,
         VBLANK,
@@ -69,7 +71,7 @@ private:
 
     // LCD control register
     union {
-        struct { //bits 0-7
+        struct {
             unsigned int bgWindowDisplayEnable: 1;
             unsigned int objectDisplayEnable: 1;
             unsigned int objectSize : 1;
@@ -108,33 +110,36 @@ private:
     uint8_t OBP0;
     uint8_t OBP1;
 
+    //The color indexes of the background and window this scanline. Used to determine priority of sprites
     std::array<uint8_t, LCD_WIDTH> bgWindowColorIndexesThisLine;
     std::vector<std::shared_ptr<Sprite>> spritesNextScanLine;
-    std::shared_ptr<MMU> memory;
     std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> frameBuffer;
-    uint16_t accumulatedCycles;
+
     bool readyToDraw;
     bool anyStatConditionLastUpdate;
 
-    void dma_transfer(uint8_t data);
-
+    //Scanline methods
     void processNextLine();
     void drawBackgroundScanLine();
     void drawWindowScanLine();
     void drawObjectScanLine();
+
+    //Sprite methods
     void loadSpritesNextScanLine();
     std::shared_ptr<Sprite> loadSprite(int index);
+    std::shared_ptr<Sprite> getHighestPrioritySprite(int lcdX);
+    uint8_t getSpritePixelColorIndex(const std::shared_ptr<Sprite>& sprite, uint8_t lcdX, uint8_t lcdY);
+
+    // Parsing methods
+    uint8_t getTileID(uint16_t mapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY);
+    uint8_t getTilePixelColorIndex(uint8_t tileSet, uint8_t id, uint8_t tileX, uint8_t tileY);
     static uint8_t getColor(uint8_t palette, uint8_t colorIndex);
 
-    // MMU reading functions.
-    uint8_t getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY);
-    uint8_t getTilePixelColorIndex(uint8_t tileSet, uint8_t id, uint8_t x, uint8_t y);
-    uint8_t getSpritePixelColorIndex(const std::shared_ptr<Sprite>& sprite, uint8_t x, uint8_t y);
-
-    // Interrupt related functions.
-    bool meetsStatConditions() const;
+    // Interrupt related methods
     void vBlankInterrupt();
     void statInterrupt();
+    bool meetsStatConditions() const;
 
-    std::shared_ptr<Sprite> getHighestPrioritySprite(int lcdX);
+    //DMA transfer
+    void dma_transfer(uint8_t startAddress);
 };
