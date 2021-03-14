@@ -11,8 +11,8 @@ string FileHelper::openDialog() {
     return "";
 }
 
-optional<vector<string>> FileHelper::getDirContents(string _dirPath, string _filter) {
-    auto entryPaths = vector<string>();
+optional<vector<FileHelper::FileEntry>> FileHelper::getDirContents(string _dirPath, string _filter) {
+    auto entryPaths = vector<FileEntry>();
     filesystem::path dirPath(_dirPath);
 
     // Check if path is valid.
@@ -38,8 +38,11 @@ optional<vector<string>> FileHelper::getDirContents(string _dirPath, string _fil
 
     for (const auto & entry : filesystem::directory_iterator(dirPath)) {
         if (regex_match(entry.path().extension().string(), filter) || filesystem::is_directory(entry.path())) {
-            entryPaths.push_back(entry.path().filename().string());
-            cout << entry.path().filename() << endl;
+            FileEntry fe = {entry.path().string(),
+                            filesystem::absolute(entry.path()).string(),
+                            filesystem::is_directory(entry.path())
+            };
+            entryPaths.push_back(fe);
         }
     }
 

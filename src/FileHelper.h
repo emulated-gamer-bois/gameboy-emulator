@@ -6,7 +6,13 @@
 
 class FileHelper {
 public:
+    struct FileEntry {
+        std::string filename;
+        std::string absolutePath;
+        bool isDir;
+    };
+
     static std::string openDialog();
-    static std::optional<std::vector<std::string>> getDirContents(std::string _dirPath, std::string _filter = ".[a-z1-9]*");
-    static std::optional<std::vector<std::string>> getParentDir(std::string _dirPath);
+    static std::optional<std::vector<FileEntry>> getDirContents(std::string _dirPath, std::string _filter = ".[a-z1-9]*");
+    static std::optional<std::vector<FileEntry>> getParentDir(std::string _dirPath);
 };
