@@ -1,18 +1,15 @@
 #include "FileHelper.h"
 
-#include <stdlib.h>
-#include <nfd.h>
+#include <iostream>
+#include <iomanip>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 std::string FileHelper::openDialog() {
-    std::string filePath = "";
+    std::string path = "../";
+    for (const auto & entry : fs::directory_iterator(path))
+        std::cout << entry.path() << std::endl;
 
-    nfdchar_t *outPath = NULL;
-    nfdresult_t result = NFD_OpenDialog( NULL, NULL, &outPath );
-
-    if (result == NFD_OKAY) {
-        filePath = outPath;
-        free(outPath);
-    }
-
-    return filePath;
+    return "";
 }

@@ -6,8 +6,6 @@ project ( labhelper )
 add_subdirectory ( ${CMAKE_SOURCE_DIR}/external_src/imgui-1.51 ${CMAKE_CURRENT_BINARY_DIR}/imgui )
 set_target_properties(imgui PROPERTIES FOLDER external)
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/external_src/nativefiledialog ${CMAKE_CURRENT_BINARY_DIR}/nativefiledialog)
-
 set(glm_DIR "${CMAKE_SOURCE_DIR}/external/glm")
 set(OpenGL_GL_PREFERENCE "GLVND")
 
@@ -60,7 +58,6 @@ target_include_directories( labhelper
 target_link_libraries ( labhelper
     PUBLIC
     imgui
-	nativefiledialog
 	SDL2::SDL2
     ${SDL2_LIBRARIES}
     ${GLEW_LIBRARIES}
