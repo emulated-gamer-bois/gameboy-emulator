@@ -74,6 +74,7 @@ void PPU::write(uint16_t addr, uint8_t data) {
             this->LCDC = data;
             break;
         case STAT_ADDRESS:
+            statInterrupt(); //Hardware bug, interrupt should be thrown every time STAT is written
             this->STAT = data;
             break;
         case SCY_ADDRESS:
