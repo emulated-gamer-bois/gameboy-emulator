@@ -256,7 +256,7 @@ void Application::toolbar(){
         if (ImGui::BeginMenu("File"))
         {
             if (ImGui::MenuItem("Load ROM", "")) {
-                FileHelper::getDirContents("../", ".txt");
+                FileHelper::getParentDir("..");
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Edit", "")) {}
