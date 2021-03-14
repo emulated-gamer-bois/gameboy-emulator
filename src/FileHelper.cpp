@@ -1,15 +1,47 @@
 #include "FileHelper.h"
 
 #include <iostream>
-#include <iomanip>
 #include <filesystem>
+#include <regex>
+#include <optional>
 
-namespace fs = std::filesystem;
+using namespace std;
 
-std::string FileHelper::openDialog() {
-    std::string path = "../";
-    for (const auto & entry : fs::directory_iterator(path))
-        std::cout << entry.path() << std::endl;
-
+string FileHelper::openDialog() {
     return "";
+}
+
+optional<vector<string>> FileHelper::getDirContents(string _dirPath, string _filter) {
+    auto entryPaths = vector<string>();
+    filesystem::path dirPath(_dirPath);
+
+    // Check if path is valid.
+    if (!filesystem::exists(dirPath)) {
+        cerr << "FileHelper ERROR: Invalid path" << endl;
+        return nullopt;
+    }
+
+    // Check if path is a directory.
+    if (!filesystem::is_directory(dirPath)) {
+        cerr << "FileHelper ERROR: Path is not a directory" << endl;
+        return nullopt;
+    }
+
+    // Check if regex is valid.
+    regex filter;
+    try {
+        filter = _filter;
+    } catch (regex_error& e) {
+        cerr << "FileHelper ERROR: Filter is not valid regex" << endl;
+        return nullopt;
+    }
+
+    for (const auto & entry : filesystem::directory_iterator(dirPath)) {
+        if (regex_match(entry.path().extension().string(), filter) || filesystem::is_directory(entry.path())) {
+            entryPaths.push_back(entry.path().filename().string());
+            cout << entry.path().filename() << endl;
+        }
+    }
+
+    return entryPaths;
 }

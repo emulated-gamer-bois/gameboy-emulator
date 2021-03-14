@@ -256,7 +256,7 @@ void Application::toolbar(){
         if (ImGui::BeginMenu("File"))
         {
             if (ImGui::MenuItem("Load ROM", "")) {
-                std::cout << FileHelper::openDialog() << std::endl;
+                FileHelper::getDirContents("../", ".txt");
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Edit", "")) {}
