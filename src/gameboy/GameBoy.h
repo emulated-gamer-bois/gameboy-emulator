@@ -8,7 +8,7 @@
 
 #include "CPU.h"
 #include "MMU.h"
-#include "PPU.h"
+#include "PPU/PPU.h"
 #include "Joypad.h"
 #include "Timer.h"
 

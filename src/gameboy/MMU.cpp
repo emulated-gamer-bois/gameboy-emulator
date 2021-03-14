@@ -5,7 +5,7 @@
 #include "MMU.h"
 #include "Joypad.h"
 #include "Timer.h"
-#include "PPU.h"
+#include "PPU/PPU.h"
 
 #include <memory> // smart pointers
 #include <iostream> // cout

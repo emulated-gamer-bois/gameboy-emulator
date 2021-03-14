@@ -8,8 +8,8 @@
 #include <cstdint> // uint8_t and uint16_t
 #include <array> // frame buffer
 
-#include "Definitions.h" // LCD_WIDTH and LCD_HEIGHT
-#include "MMU.h"
+#include "../Definitions.h" // LCD_WIDTH and LCD_HEIGHT
+#include "../MMU.h"
 #include "Sprite.h"
 
 // Register addresses
