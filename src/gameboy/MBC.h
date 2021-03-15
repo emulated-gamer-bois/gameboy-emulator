@@ -38,4 +38,7 @@ private:
 
     std::shared_ptr<std::vector<uint8_t>> rom;
     std::shared_ptr<std::vector<uint8_t>> ram;
+
+    static uint16_t rom_bank_mask(uint32_t size);
+    static uint16_t ram_bank_mask(uint32_t size);
 };

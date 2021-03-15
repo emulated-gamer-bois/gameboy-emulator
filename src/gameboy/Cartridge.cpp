@@ -111,6 +111,7 @@ bool Cartridge::init_rom() {
             return false;
     }
     std::cout << "ROM size: " << (int)this->rom_size << std::endl;
+    return true;
 }
 
 bool Cartridge::init_ram() {
@@ -136,6 +137,7 @@ bool Cartridge::init_ram() {
             return false;
     }
     std::cout << "RAM size: "<< (int)this->ram_size << std::endl;
+    return true;
 }
 
 bool Cartridge::init_mbc() {

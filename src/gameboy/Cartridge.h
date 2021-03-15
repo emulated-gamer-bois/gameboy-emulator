@@ -12,7 +12,7 @@
 class Cartridge {
 private:
     enum CartridgeType {
-        // When adding cartridge support add it to Cartridge::valid_cartridge_type()
+        // When adding cartridge support add it to Cartridge::init_mbc()
         ROM_ONLY = 0x0,
         MBC1 = 0x1,
         MBC1_R = 0x2,
@@ -46,7 +46,6 @@ private:
     std::shared_ptr<std::vector<uint8_t>> ram;
     std::unique_ptr<MBC> mbc;
 
-    static bool valid_cartridge_type(uint8_t cartrigde_type);
     bool init_rom();
     bool init_ram();
     bool init_mbc();
