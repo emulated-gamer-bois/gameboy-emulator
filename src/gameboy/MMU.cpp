@@ -137,7 +137,7 @@ uint8_t MMU::read(uint16_t addr) {
 
 void MMU::write(uint16_t addr, uint8_t data) {
     // Memory Bank Controller
-    if (BOOT_ROM_START <= addr && addr <= BOOT_ROM_END) {
+    if (GAME_ROM_START <= addr && addr <= GAME_ROM_END) {
         this->cartridge->write(addr, data);
         return;
     }
