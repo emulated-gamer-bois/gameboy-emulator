@@ -19,6 +19,26 @@ private:
         MBC1_R_B = 0x3,
     };
 
+    enum ROM_Size {
+        ROM_32KB = 0x0,
+        ROM_64KB = 0x1,
+        ROM_128KB = 0x2,
+        ROM_256KB = 0x3,
+        ROM_512KB = 0x4,
+        ROM_1MB = 0x5,
+        ROM_2MB = 0x6,
+        ROM_4MB = 0x7,
+        ROM_8MB = 0x8,
+    };
+
+    enum RAM_Size {
+        RAM_NO_RAM = 0x0,
+        RAM_8KB = 0x2,
+        RAM_32KB = 0x3,
+        RAM_128KB = 0x4,
+        RAM_64KB = 0x5,
+    };
+
     uint8_t cartridge_type;
     uint8_t rom_size;
     uint8_t ram_size;
@@ -27,6 +47,9 @@ private:
     std::unique_ptr<MBC> mbc;
 
     static bool valid_cartridge_type(uint8_t cartrigde_type);
+    bool init_rom();
+    bool init_ram();
+    bool init_mbc();
 public:
     Cartridge();
     void reset();

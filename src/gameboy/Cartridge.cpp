@@ -52,34 +52,21 @@ bool Cartridge::load_rom(std::string filepath) {
         // Close file
         file.close();
 
-        this->rom->resize(size);
-        // Copy data
-        std::memcpy(&this->rom->at(this->rom->size() - size), &memblock[0], size);
+        // Set ROM/RAM size
+        this->rom_size = memblock[0x148];
+        if (!this->init_rom()) return false;
+
+        this->ram_size = memblock[0x149];
+        if (!this->init_ram()) return false;
 
         // Check cartridge type
         this->cartridge_type = memblock[0x147];
-        if (!this->valid_cartridge_type(this->cartridge_type)) {
-            std::cout << "ROM file has unsupported cartridge type: " << (int)this->cartridge_type << std::endl;
-            return false;
-        } else {
-            switch (this->cartridge_type) {
-                case ROM_ONLY:
-                    this->mbc = std::make_unique<ROM_Only_MBC>(this->rom);
-                    break;
-                case MBC1:
-                case MBC1_R:
-                case MBC1_R_B:
-                    this->mbc = std::make_unique<MBC1_MBC>(this->rom, this->ram);
-                    break;
-            }
-        }
+        if (!this->init_mbc()) return false;
+
+        // Copy data
+        std::memcpy(&this->rom->at(this->rom->size() - size), &memblock[0], size);
 
         delete[] memblock;
-
-
-        // Set ROM/RAM size
-        this->rom_size = this->rom->at(0x148);
-        this->ram_size = this->rom->at(0x149);
     }
     else {
         std::cout << "Unable to open game ROM: " << filepath << std::endl;
@@ -88,14 +75,84 @@ bool Cartridge::load_rom(std::string filepath) {
     return true;
 }
 
-bool Cartridge::valid_cartridge_type(uint8_t cartrigde_type) {
-    switch (cartrigde_type) {
+bool Cartridge::init_rom() {
+    switch (this->rom_size)
+    {
+        case ROM_32KB:
+            this->rom = std::make_shared<std::vector<uint8_t>>(0x8000);
+            break;
+        case ROM_64KB:
+            this->rom = std::make_shared<std::vector<uint8_t>>(0x10000);
+            break;
+        case ROM_128KB:
+            this->rom = std::make_shared<std::vector<uint8_t>>(0x20000);
+            break;
+        case ROM_256KB:
+            this->rom = std::make_shared<std::vector<uint8_t>>(0x40000);
+            break;
+        case ROM_512KB:
+            this->rom = std::make_shared<std::vector<uint8_t>>(0x80000);
+            break;
+        case ROM_1MB:
+            this->rom = std::make_shared<std::vector<uint8_t>>(0x100000);
+            break;
+        case ROM_2MB:
+            this->rom = std::make_shared<std::vector<uint8_t>>(0x200000);
+            break;
+        case ROM_4MB:
+            this->rom = std::make_shared<std::vector<uint8_t>>(0x400000);
+            break;
+        case ROM_8MB:
+            this->rom = std::make_shared<std::vector<uint8_t>>(0x800000);
+            break;
+
+        default:
+            std::cout << "Invalid or unsupported ROM size: " << (int)this->rom_size << std::endl;
+            return false;
+    }
+    std::cout << "ROM size: " << (int)this->rom_size << std::endl;
+}
+
+bool Cartridge::init_ram() {
+    switch (this->ram_size)
+    {
+        case RAM_NO_RAM:
+            // Should be just a nullptr, but for security add accessible memory
+        case RAM_8KB:
+            this->ram = std::make_shared<std::vector<uint8_t>>(0x2000);
+            break;
+        case RAM_32KB:
+            this->ram = std::make_shared<std::vector<uint8_t>>(0x8000);
+            break;
+        case RAM_128KB:
+            this->ram = std::make_shared<std::vector<uint8_t>>(0x20000);
+            break;
+        case RAM_64KB:
+            this->ram = std::make_shared<std::vector<uint8_t>>(0x10000);
+            break;
+
+        default:
+            std::cout << "Invalid or unsupported RAM size: "<< (int)this->ram_size << std::endl;
+            return false;
+    }
+    std::cout << "RAM size: "<< (int)this->ram_size << std::endl;
+}
+
+bool Cartridge::init_mbc() {
+    switch (this->cartridge_type) {
         case ROM_ONLY:
+            this->mbc = std::make_unique<ROM_Only_MBC>(this->rom);
+            break;
         case MBC1:
         case MBC1_R:
         case MBC1_R_B:
-            return true;
+            this->mbc = std::make_unique<MBC1_MBC>(this->rom, this->ram);
+            break;
+
         default:
+            std::cout << "ROM file has unsupported cartridge type: " << (int)this->cartridge_type << std::endl;
             return false;
     }
+    std::cout << "Cartridge type: " << (int)this->cartridge_type << std::endl;
+    return true;
 }

@@ -63,6 +63,17 @@ void MBC1_MBC::write(uint16_t addr, uint8_t data) {
         this->ram_bank_number = data;
     } else if (0x6000 <= addr && addr <= 0x7fff) {
         this->banking_mode = data;
+    } else if (0xa000 <= addr && addr <= 0xbfff) {
+        if (this->ram_enable != 0xa) {
+            std::cout << "Tried to write to disabled xRAM. addr: " << (int)addr << std::endl;
+        } else {
+            uint8_t target_bank = 0;
+            uint16_t target = addr - 0xa000;
+            if (this->banking_mode == 1) {
+                target_bank = this->ram_bank_number;
+            }
+            this->ram->at((uint16_t)(target + (target_bank * 0x2000))) = data;
+        }
     } else {
         std::cout << "Tried to write data: " << (int)data << " to addr: " << (int)addr << std::endl;
     }
