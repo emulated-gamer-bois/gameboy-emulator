@@ -19,17 +19,17 @@ This emulator was built as a Bachelor's project at Chalmers University of Techno
 
 ## Setup
 
-If you are running linux, you need to install SDL and SDL2, this can be done with you package manager like
+Install dependencies with the following commands
 
 ```
-sudo pacman -S sdl sdl2
+sudo pacman -S sdl sdl2 glew
 ```
 or
 ```
-sudo apt-get install libsdl libsdl2
+sudo apt-get install libsdl2-dev libglew-dev
 ```
 
-Windows users does not need to install SDL
+Windows users does not need to install dependencies
 
 ### Cloning the project
 
@@ -55,4 +55,4 @@ src/project
 - Rebuild and run the project
 
 ## Known issues
-If the project fails to run on Windows, comment out `SDL::SDL` with `#` in `labhelper/CMakeList.txt`
+If cmake fails to find `SDL::SDL`, remove this line (or comment it out with `#`) from `labhelper/CMakeList.txt`
