@@ -15,6 +15,14 @@
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
 #include "Gui.h"
+#define CONTROLLER_UP SDLK_w
+#define CONTROLLER_DOWN SDLK_s
+#define CONTROLLER_LEFT SDLK_a
+#define CONTROLLER_RIGHT SDLK_d
+#define CONTROLLER_A SDLK_f
+#define CONTROLLER_B SDLK_g
+#define CONTROLLER_START SDLK_h
+#define CONTROLLER_SELECT SDLK_j
 class Application {
 public:
     Application();

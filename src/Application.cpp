@@ -8,14 +8,8 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 #include "Application.h"
 #include "Timer.h"
 #include "Gui.h"
-#define CONTROLLER_UP SDLK_w
-#define CONTROLLER_DOWN SDLK_s
-#define CONTROLLER_LEFT SDLK_a
-#define CONTROLLER_RIGHT SDLK_d
-#define CONTROLLER_A SDLK_f
-#define CONTROLLER_B SDLK_g
-#define CONTROLLER_START SDLK_h
-#define CONTROLLER_SELECT SDLK_j
+
+
 const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
 
 
@@ -136,18 +130,21 @@ void Application::terminateSDL() {
 }
 
 
-
 /**
  * Handles SDL Events including keyboard input.
  */
 void Application::handleSDLEvents() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
+        gui.handleInput(event);
+
         switch (event.type) {
             case SDL_QUIT:
                 this->running = false;
                 break;
             case SDL_KEYDOWN:
+
+
                 switch (event.key.keysym.sym) {
                     case CONTROLLER_LEFT:
                         this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
@@ -193,7 +190,7 @@ void Application::handleSDLEvents() {
                         this->gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
                         this->renderView.setPalette(PALETTE_DMG);
                         break;
-                    case CONTROLLER_UP:
+                    case 'w':
                         this->gameBoy.joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
                         this->renderView.setPalette(PALETTE_DMG);
                         break;
@@ -219,6 +216,7 @@ void Application::handleSDLEvents() {
                         break;
                 }
                 break;
+
         }
     }
 }
