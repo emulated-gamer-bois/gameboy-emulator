@@ -14,7 +14,7 @@
 #include "RenderView.h"
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
-
+#include "Gui.h"
 class Application {
 public:
     Application();
@@ -27,7 +27,7 @@ private:
     SDL_GLContext glContext;
     RenderView renderView;
     GameBoy gameBoy;
-
+    Gui gui;
     bool running;
 
     void init();
@@ -35,9 +35,5 @@ private:
     void terminateSDL();
     void handleSDLEvents();
     void updateSDLWindowSize();
-
     void terminate();
-    void terminateImGui();
-    void gui();
-    void toolbar();
 };

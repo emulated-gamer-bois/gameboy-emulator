@@ -7,10 +7,7 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 
 #include "Application.h"
 #include "Timer.h"
-#include <imgui.h>
-#include "FileHelper.h"
-#include "imgui_impl_sdl_gl3.h"
-
+#include "Gui.h"
 #define CONTROLLER_UP SDLK_w
 #define CONTROLLER_DOWN SDLK_s
 #define CONTROLLER_LEFT SDLK_a
@@ -20,6 +17,7 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 #define CONTROLLER_START SDLK_h
 #define CONTROLLER_SELECT SDLK_j
 const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
+
 
 /**
  * Constructor
@@ -56,7 +54,7 @@ void Application::start() {
         this->renderView.setScreenTexture(this->gameBoy.getScreenTexture().get());
         this->renderView.render();
         //TODO Can add some bools or stuff to enable or disable gui, this is just temporary.
-        gui();
+        this->gui.gui(this->window);
         SDL_GL_SwapWindow(this->window);
         this->gameBoy.confirmDraw();
 
@@ -73,7 +71,7 @@ void Application::start() {
 void Application::init() {
     this->initSDL();
     this->renderView.initGL();
-    ImGui_ImplSdlGL3_Init(window);
+    this->gui.init(window);
 
     // TEMP ------------------------------------------------------------------------------------------------------------
     this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/instr_timing/instr_timing.gb");
@@ -81,7 +79,7 @@ void Application::init() {
 }
 
 void Application::terminate() {
-    terminateImGui();
+    this->gui.terminate(this->window);
     terminateSDL();
 }
 
@@ -128,13 +126,6 @@ void Application::initSDL() {
     }
 }
 
-/**
- * Cleans up after ImGui.
- */
-void Application::terminateImGui() {
-    ImGui_ImplSdlGL3_NewFrame(this->window); // If newframe is not ever run before shut down we crash.
-    ImGui_ImplSdlGL3_Shutdown();
-}
 
 /**
  * Cleans up after SDL.
@@ -144,13 +135,7 @@ void Application::terminateSDL() {
     SDL_Quit();
 }
 
-void Application::gui() {
-    // Inform imgui of new frame
-    ImGui_ImplSdlGL3_NewFrame(this->window);
-    toolbar();
-    ImGui::Render();
 
-}
 
 /**
  * Handles SDL Events including keyboard input.
@@ -250,106 +235,4 @@ void Application::updateSDLWindowSize() {
     }
 }
 
-static void ShowExampleMenuFile() {
-    ImGui::MenuItem("(demo menu)", NULL, false, false);
-    if (ImGui::MenuItem("New")) {}
-    if (ImGui::MenuItem("Open", "Ctrl+O")) {}
-    if (ImGui::BeginMenu("Open Recent")) {
-        ImGui::MenuItem("fish_hat.c");
-        ImGui::MenuItem("fish_hat.inl");
-        ImGui::MenuItem("fish_hat.h");
-        if (ImGui::BeginMenu("More..")) {
-            ImGui::MenuItem("Hello");
-            ImGui::MenuItem("Sailor");
-            if (ImGui::BeginMenu("Recurse..")) {
-                ShowExampleMenuFile();
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenu();
-        }
-        ImGui::EndMenu();
-    }
-    if (ImGui::MenuItem("Save", "Ctrl+S")) {}
-    if (ImGui::MenuItem("Save As..")) {}
 
-    ImGui::Separator();
-    if (ImGui::BeginMenu("Options")) {
-        static bool enabled = true;
-        ImGui::MenuItem("Enabled", "", &enabled);
-        ImGui::BeginChild("child", ImVec2(0, 60), true);
-        for (int i = 0; i < 10; i++)
-            ImGui::Text("Scrolling Text %d", i);
-        ImGui::EndChild();
-        static float f = 0.5f;
-        static int n = 0;
-        ImGui::SliderFloat("Value", &f, 0.0f, 1.0f);
-        ImGui::InputFloat("Input", &f, 0.1f);
-        ImGui::Combo("Combo", &n, "Yes\0No\0Maybe\0\0");
-        ImGui::EndMenu();
-    }
-
-    if (ImGui::BeginMenu("Colors")) {
-        float sz = ImGui::GetTextLineHeight();
-        for (int i = 0; i < ImGuiCol_COUNT; i++) {
-            const char *name = ImGui::GetStyleColorName((ImGuiCol) i);
-            ImVec2 p = ImGui::GetCursorScreenPos();
-            ImGui::GetWindowDrawList()->AddRectFilled(p, ImVec2(p.x + sz, p.y + sz), ImGui::GetColorU32((ImGuiCol) i));
-            ImGui::Dummy(ImVec2(sz, sz));
-            ImGui::SameLine();
-            ImGui::MenuItem(name);
-        }
-        ImGui::EndMenu();
-    }
-
-    // Here we demonstrate appending again to the "Options" menu (which we already created above)
-    // Of course in this demo it is a little bit silly that this function calls BeginMenu("Options") twice.
-    // In a real code-base using it would make senses to use this feature from very different code locations.
-    if (ImGui::BeginMenu("Options")) // <-- Append!
-    {
-        static bool b = true;
-        ImGui::Checkbox("SomeOption", &b);
-        ImGui::EndMenu();
-    }
-
-    if (ImGui::BeginMenu("Disabled", false)) // Disabled
-    {
-        IM_ASSERT(0);
-    }
-    if (ImGui::MenuItem("Checked", NULL, true)) {}
-    if (ImGui::MenuItem("Quit", "Alt+F4")) {}
-}
-
-void Application::toolbar() {
-    ShowExampleMenuFile();
-
-    //TODO examplem toolbar, should add actual settings here.
-    if (ImGui::BeginMainMenuBar()) {
-        if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Load ROM", "")) {
-                FileHelper::getParentDir("..");
-            }
-            ImGui::Separator();
-            if (ImGui::MenuItem("Edit", "")) {}
-
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Settings")) {
-            if (ImGui::BeginMenu("Play speed")) {
-                float speed=0.0f;
-                for (int i = 0; i < 4; i++) {
-                    speed+=0.5f;
-                    if(ImGui::MenuItem("Speed: ")){
-                        //TODO actually set play speed to something.
-                    }
-                    ImGui::SameLine();
-                    ImGui::Text(i % 2 == 0 ? "%.1f" : "%.0f", speed);
-
-                }
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenu();
-
-        }
-        ImGui::EndMainMenuBar();
-    }
-}
