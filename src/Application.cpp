@@ -105,11 +105,11 @@ void Application::initSDL() {
 
     // Create the window.
     this->window = SDL_CreateWindow(DEFAULT_WINDOW_CAPTION.c_str(),
-                                          SDL_WINDOWPOS_UNDEFINED,
-                                          SDL_WINDOWPOS_UNDEFINED,
-                                          LCD_WIDTH,
-                                          LCD_HEIGHT,
-                                          SDL_WINDOW_OPENGL);
+                                    SDL_WINDOWPOS_UNDEFINED,
+                                    SDL_WINDOWPOS_UNDEFINED,
+                                    LCD_WIDTH,
+                                    LCD_HEIGHT,
+                                    SDL_WINDOW_OPENGL);
     assert(this->window);
 
     // Get gl context and set it to the current context for this window.
@@ -123,7 +123,7 @@ void Application::initSDL() {
     SDL_GL_SetSwapInterval(0);
 
     // Workaround for AMD. Must not be removed.
-    if(!glBindFragDataLocation) {
+    if (!glBindFragDataLocation) {
         glBindFragDataLocation = glBindFragDataLocationEXT;
     }
 }
@@ -151,6 +151,7 @@ void Application::gui() {
     ImGui::Render();
 
 }
+
 /**
  * Handles SDL Events including keyboard input.
  */
@@ -249,12 +250,81 @@ void Application::updateSDLWindowSize() {
     }
 }
 
-void Application::toolbar(){
-    //TODO examplem toolbar, should add actual settings here.
-    if (ImGui::BeginMainMenuBar())
+static void ShowExampleMenuFile() {
+    ImGui::MenuItem("(demo menu)", NULL, false, false);
+    if (ImGui::MenuItem("New")) {}
+    if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+    if (ImGui::BeginMenu("Open Recent")) {
+        ImGui::MenuItem("fish_hat.c");
+        ImGui::MenuItem("fish_hat.inl");
+        ImGui::MenuItem("fish_hat.h");
+        if (ImGui::BeginMenu("More..")) {
+            ImGui::MenuItem("Hello");
+            ImGui::MenuItem("Sailor");
+            if (ImGui::BeginMenu("Recurse..")) {
+                ShowExampleMenuFile();
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenu();
+    }
+    if (ImGui::MenuItem("Save", "Ctrl+S")) {}
+    if (ImGui::MenuItem("Save As..")) {}
+
+    ImGui::Separator();
+    if (ImGui::BeginMenu("Options")) {
+        static bool enabled = true;
+        ImGui::MenuItem("Enabled", "", &enabled);
+        ImGui::BeginChild("child", ImVec2(0, 60), true);
+        for (int i = 0; i < 10; i++)
+            ImGui::Text("Scrolling Text %d", i);
+        ImGui::EndChild();
+        static float f = 0.5f;
+        static int n = 0;
+        ImGui::SliderFloat("Value", &f, 0.0f, 1.0f);
+        ImGui::InputFloat("Input", &f, 0.1f);
+        ImGui::Combo("Combo", &n, "Yes\0No\0Maybe\0\0");
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Colors")) {
+        float sz = ImGui::GetTextLineHeight();
+        for (int i = 0; i < ImGuiCol_COUNT; i++) {
+            const char *name = ImGui::GetStyleColorName((ImGuiCol) i);
+            ImVec2 p = ImGui::GetCursorScreenPos();
+            ImGui::GetWindowDrawList()->AddRectFilled(p, ImVec2(p.x + sz, p.y + sz), ImGui::GetColorU32((ImGuiCol) i));
+            ImGui::Dummy(ImVec2(sz, sz));
+            ImGui::SameLine();
+            ImGui::MenuItem(name);
+        }
+        ImGui::EndMenu();
+    }
+
+    // Here we demonstrate appending again to the "Options" menu (which we already created above)
+    // Of course in this demo it is a little bit silly that this function calls BeginMenu("Options") twice.
+    // In a real code-base using it would make senses to use this feature from very different code locations.
+    if (ImGui::BeginMenu("Options")) // <-- Append!
     {
-        if (ImGui::BeginMenu("File"))
-        {
+        static bool b = true;
+        ImGui::Checkbox("SomeOption", &b);
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Disabled", false)) // Disabled
+    {
+        IM_ASSERT(0);
+    }
+    if (ImGui::MenuItem("Checked", NULL, true)) {}
+    if (ImGui::MenuItem("Quit", "Alt+F4")) {}
+}
+
+void Application::toolbar() {
+    ShowExampleMenuFile();
+
+    //TODO examplem toolbar, should add actual settings here.
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Load ROM", "")) {
                 FileHelper::getParentDir("..");
             }
@@ -263,7 +333,23 @@ void Application::toolbar(){
 
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Settings")) {
+            if (ImGui::BeginMenu("Play speed")) {
+                float speed=0.0f;
+                for (int i = 0; i < 4; i++) {
+                    speed+=0.5f;
+                    if(ImGui::MenuItem("Speed: ")){
+                        //TODO actually set play speed to something.
+                    }
+                    ImGui::SameLine();
+                    ImGui::Text(i % 2 == 0 ? "%.1f" : "%.0f", speed);
+
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenu();
+
+        }
         ImGui::EndMainMenuBar();
     }
 }
-
