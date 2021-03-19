@@ -132,7 +132,7 @@ uint8_t MBC3_MBC::read(uint16_t addr) {
         return this->rom->at(addr);
     } else if (0x4000 <= addr && addr <= 0x7fff) {
         // Set target bank to 1 if it is 0
-        uint16_t target_bank = this->rom_bank_number == 0 ? 1 : (this->rom_bank_number & 0x1f);
+        uint16_t target_bank = this->rom_bank_number == 0 ? 1 : (this->rom_bank_number & 0x7f);
 
         target_bank &= MBC::rom_bank_mask((uint32_t)rom->size());
         return this->rom->at((addr - 0x4000) + (0x4000 * target_bank));
@@ -140,7 +140,11 @@ uint8_t MBC3_MBC::read(uint16_t addr) {
         if (this->ram_timer_enable != 0xa) {
             return 0xff;
         }
+        if (this->ram_timer_enable == 0x0) {
+            return 0xff;
+        }
         uint16_t target;
+        uint16_t target_bank;
         switch (this->ram_bank_number_rtc_register_select)
         {
             // Read RAM
@@ -148,7 +152,9 @@ uint8_t MBC3_MBC::read(uint16_t addr) {
             case 0x1:
             case 0x2:
             case 0x3:
-                target = (addr - 0xa000) + (0x2000 * this->ram_bank_number_rtc_register_select);
+                target_bank = this->ram_bank_number_rtc_register_select;
+                target_bank &= MBC::ram_bank_mask((uint32_t)this->ram->size());
+                target = (addr - 0xa000) + (0x2000 * target_bank);
                 return this->ram->at(target);
 
             // Seconds
