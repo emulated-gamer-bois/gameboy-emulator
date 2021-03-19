@@ -15,6 +15,7 @@
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
 #include "Gui.h"
+
 #define CONTROLLER_UP SDLK_w
 #define CONTROLLER_DOWN SDLK_s
 #define CONTROLLER_LEFT SDLK_a
@@ -36,6 +37,8 @@ private:
     RenderView renderView;
     GameBoy gameBoy;
     Gui gui;
+    float emulationSpeed;
+    bool emulationPaused;
     bool running;
 
     void init();

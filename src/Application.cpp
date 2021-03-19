@@ -7,7 +7,6 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 
 #include "Application.h"
 #include "Timer.h"
-#include "Gui.h"
 
 const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
 
@@ -15,7 +14,11 @@ const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
  * Constructor
  */
 Application::Application() {
+    this->emulationSpeed = 1.f;
+    this->emulationPaused = false;
     this->running = true;
+
+    this->init_controller();
 }
 
 /**
@@ -33,19 +36,22 @@ void Application::start() {
     Timer timer;
 
     while (running) {
+        this->handleSDLEvents();
+
         // Create time stamp.
         timer.tick();
 
-        // Update emulation
-        while (!this->gameBoy.isReadyToDraw()) {
-            this->handleSDLEvents();
-            this->gameBoy.step();
+        // Step through emulation until
+        if (!this->emulationPaused) {
+            while (!this->gameBoy.isReadyToDraw()) {
+                this->gameBoy.step();
+            }
+            this->renderView.setScreenTexture(this->gameBoy.getScreenTexture().get());
         }
+
         // Prepare for rendering, render and swap buffer.
         this->updateSDLWindowSize();
-        this->renderView.setScreenTexture(this->gameBoy.getScreenTexture().get());
         this->renderView.render();
-        //TODO Can add some bools or stuff to enable or disable draw_gui, this is just temporary.
         this->gui.draw_gui(this->window);
         SDL_GL_SwapWindow(this->window);
         this->gameBoy.confirmDraw();
@@ -57,12 +63,12 @@ void Application::start() {
             std::this_thread::sleep_for(std::chrono::milliseconds(msToSleep));
         }
     }
+
     terminate();
 }
 
 void Application::init() {
     this->initSDL();
-    this->init_controller();
     this->renderView.initGL();
     this->gui.init(window);
 
@@ -119,7 +125,6 @@ void Application::initSDL() {
     }
 }
 
-
 /**
  * Cleans up after SDL.
  */
@@ -127,7 +132,6 @@ void Application::terminateSDL() {
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
-
 
 /**
  * Handles SDL Events including keyboard input.
@@ -143,106 +147,90 @@ void Application::handleSDLEvents() {
             break;
         }
         if (event.type == SDL_KEYDOWN) {
+            if (sym == SDLK_ESCAPE) {
+                this->gui.toggleToolbar();
+                this->emulationPaused = !this->emulationPaused;
+                break;
+            }
+
+            // Game boy input
+            if (this->emulationPaused) {
+                break;
+            }
             if (sym == IO_left) {
                 this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
             if (sym == IO_right) {
                 this->gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_PRESS);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
             if (sym == IO_up) {
                 this->gameBoy.joypad_input(JOYPAD_UP, JOYPAD_PRESS);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
             if (sym == IO_down) {
                 this->gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_PRESS);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
             if (sym == IO_a) {
                 this->gameBoy.joypad_input(JOYPAD_A, JOYPAD_PRESS);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
             if (sym == IO_b) {
                 this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_PRESS);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
-                break;
-            }
-            if (sym == IO_b) {
-                this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_PRESS);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
             if (sym == IO_start) {
                 this->gameBoy.joypad_input(JOYPAD_START, JOYPAD_PRESS);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
             if (sym == IO_select) {
                 this->gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_PRESS);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
         }
         if (event.type == SDL_KEYUP) {
+            // Game boy input
+            if (this->emulationPaused) {
+                break;
+            }
             if (sym == IO_left) {
                 this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
-                this->renderView.setPalette(PALETTE_DMG);
                 break;
             }
             if (sym == IO_right) {
                 this->gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
-                this->renderView.setPalette(PALETTE_DMG);
                 break;
             }
             if (sym == IO_up) {
                 this->gameBoy.joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
-                this->renderView.setPalette(PALETTE_DMG);
                 break;
             }
             if (sym == IO_down) {
                 this->gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
-                this->renderView.setPalette(PALETTE_DMG);
                 break;
             }
             if (sym == IO_a) {
                 this->gameBoy.joypad_input(JOYPAD_A, JOYPAD_RELEASE);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
             if (sym == IO_b) {
                 this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_RELEASE);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
-                break;
-            }
-            if (sym == IO_b) {
-                this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_PRESS);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
             if (sym == IO_start) {
                 this->gameBoy.joypad_input(JOYPAD_START, JOYPAD_RELEASE);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
             if (sym == IO_select) {
                 this->gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_RELEASE);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
         }
-
         break;
-
     }
-
 }
-
 
 /**
  * Makes sure the window dimensions updates to match changes in RenderView dimensions.
@@ -255,7 +243,6 @@ void Application::updateSDLWindowSize() {
         SDL_SetWindowSize(this->window, this->renderView.getWidth(), this->renderView.getHeight());
     }
 }
-
 
 void Application::init_controller() {
     //TODO load settings from file.

@@ -8,27 +8,28 @@
 #include <iostream>
 #include "FileHelper.h"
 #include "imgui_impl_sdl_gl3.h"
-#include "Application.h"
+#include "Application.h" // TODO: Gui and application should not depend on eachother.
+
 void showEditControls(bool &show);
 
-void toolbar();
-
-bool show_edit_controls = false;
-
-bool show_toolbar = true;
-
-bool typing = false;
-
-
-
 /**
- * Cleans up after ImGui.
+ * Constructor
  */
-void Gui::terminate(SDL_Window *window) {
-    ImGui_ImplSdlGL3_NewFrame(window); // If newframe is not ever run before shut down we crash.
-    ImGui_ImplSdlGL3_Shutdown();
+Gui::Gui() {
+    show_edit_controls = false;
+    show_toolbar = false;
+
+    typing = false;
 }
 
+/**
+ */
+void Gui::init(SDL_Window *window) {
+    ImGui_ImplSdlGL3_Init(window);
+}
+
+/**
+ */
 void Gui::draw_gui(SDL_Window *window) {
     // Inform imgui of new frame
     ImGui_ImplSdlGL3_NewFrame(window);
@@ -38,10 +39,26 @@ void Gui::draw_gui(SDL_Window *window) {
     ImGui::Render();
 }
 
-void Gui::init(SDL_Window *window) {
-    ImGui_ImplSdlGL3_Init(window);
-
+/**
+ * Cleans up after ImGui.
+ */
+void Gui::terminate(SDL_Window *window) {
+    ImGui_ImplSdlGL3_NewFrame(window); // If newframe is not ever run before shut down we crash.
+    ImGui_ImplSdlGL3_Shutdown();
 }
+
+/**
+ */
+void Gui::handleInput(SDL_Event event) {
+    ImGui_ImplSdlGL3_ProcessEvent(&event);
+}
+
+/**
+ * Toggles the toolbar.
+ */
+ void Gui::toggleToolbar() {
+     this->show_toolbar = !this->show_toolbar;
+ }
 
 int Gui::savekeybind(){
     SDL_Event event;
@@ -80,7 +97,7 @@ void Gui::showEditControls(bool &show) {
 }
 
 
-void toolbar() {
+void Gui::toolbar() {
 
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
@@ -115,9 +132,3 @@ void toolbar() {
         ImGui::EndMainMenuBar();
     }
 }
-
-void Gui::handleInput(SDL_Event event) {
-    ImGui_ImplSdlGL3_ProcessEvent(&event);
-}
-
-
