@@ -19,8 +19,9 @@ This emulator was built as a Bachelor's project at Chalmers University of Techno
 
 ## Setup
 
-Install dependencies with the following commands
+Install the required dependencies `sdl`, `sdl2` and `glew`.
 
+Ex:
 ```
 sudo pacman -S sdl sdl2 glew
 ```
@@ -29,7 +30,7 @@ or
 sudo apt-get install libsdl2-dev libglew-dev
 ```
 
-Windows users does not need to install dependencies
+Windows users do not need to install dependencies
 
 ### Cloning the project
 
