@@ -67,12 +67,14 @@ bool Cartridge::load_rom(std::string filepath) {
         std::memcpy(&this->rom->at(this->rom->size() - size), &memblock[0], size);
 
         delete[] memblock;
+
+        this->filepath = filepath;
+        return true;
     }
     else {
         std::cout << "Unable to open game ROM: " << filepath << std::endl;
         return false;
     }
-    return true;
 }
 
 bool Cartridge::init_rom() {
@@ -150,6 +152,13 @@ bool Cartridge::init_mbc() {
         case MBC1_R_B:
             this->mbc = std::make_unique<MBC1_MBC>(this->rom, this->ram);
             break;
+        case MBC3_T_B:
+        case MBC3_T_R_B:
+        case MBC3:
+        case MBC_R:
+        case MBC_R_B:
+            this->mbc = std::make_unique<MBC3_MBC>(this->rom, this->ram);
+            break;
 
         default:
             std::cout << "ROM file has unsupported cartridge type: " << (int)this->cartridge_type << std::endl;
@@ -157,4 +166,8 @@ bool Cartridge::init_mbc() {
     }
     std::cout << "Cartridge type: " << (int)this->cartridge_type << std::endl;
     return true;
+}
+
+void Cartridge::update(uint8_t cycles) {
+    this->mbc->update(cycles);
 }

@@ -16,7 +16,7 @@ MMU::MMU() {
     this->reset();
 }
 
-void MMU::link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer) {
+void MMU::link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer, std::shared_ptr<Cartridge> cartridge) {
     if (ppu) {
         this->ppu = ppu;
     }
@@ -25,6 +25,9 @@ void MMU::link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<Joypad> joypad,
     }
     if (timer) {
         this->timer = timer;
+    }
+    if (cartridge) {
+        this->cartridge = cartridge;
     }
 }
 
@@ -42,8 +45,6 @@ void MMU::reset() {
     this->interrupt_enable = 0b11111;
     // No interrupt requests by default
     this->interrupt_flag = 0;
-
-    this->cartridge = std::make_unique<Cartridge>();
 }
 
 uint8_t MMU::read(uint16_t addr) {
@@ -242,10 +243,6 @@ void MMU::disable_boot_rom(uint8_t data) {
     if (data != 0) {
         this->booting = false;
     }
-}
-
-bool MMU::load_game_rom(std::string filepath) {
-    return this->cartridge->load_rom(filepath);
 }
 
 bool MMU::load_boot_rom(std::string filepath) {

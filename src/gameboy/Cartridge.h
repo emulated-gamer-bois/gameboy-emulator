@@ -17,6 +17,11 @@ private:
         MBC1 = 0x1,
         MBC1_R = 0x2,
         MBC1_R_B = 0x3,
+        MBC3_T_B = 0xf,
+        MBC3_T_R_B = 0x10,
+        MBC3 = 0x11,
+        MBC_R = 0x12,
+        MBC_R_B = 0x13,
     };
 
     enum ROM_Size {
@@ -45,6 +50,7 @@ private:
     std::shared_ptr<std::vector<uint8_t>> rom;
     std::shared_ptr<std::vector<uint8_t>> ram;
     std::unique_ptr<MBC> mbc;
+    std::string filepath;
 
     bool init_rom();
     bool init_ram();
@@ -56,4 +62,7 @@ public:
     void write(uint16_t addr, uint8_t data);
     bool load_rom(std::string filepath);
     void write_TEST(uint16_t addr, uint8_t data);
+
+    // For cartridges with timer
+    void update(uint8_t cycles);
 };

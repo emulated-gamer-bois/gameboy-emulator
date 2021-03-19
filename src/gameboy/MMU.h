@@ -60,9 +60,8 @@ public:
     void raise_interrupt_flag(uint8_t bitmask);
     void clear_interrupt_flag(uint8_t bitmask);
 
-    void link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer);
+    void link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer, std::shared_ptr<Cartridge> cartridge);
 
-    bool load_game_rom(std::string filepath);
     bool load_boot_rom(std::string filepath);
 
 private:
@@ -71,7 +70,7 @@ private:
     void disable_boot_rom(uint8_t data);
 
     // Devices
-    std::unique_ptr<Cartridge> cartridge;
+    std::shared_ptr<Cartridge> cartridge;
     std::shared_ptr<Joypad> joypad;
     std::shared_ptr<Timer> timer;
     std::shared_ptr<PPU> ppu;
