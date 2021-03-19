@@ -44,4 +44,8 @@ private:
     void handleSDLEvents();
     void updateSDLWindowSize();
     void terminate();
+    //Controller input
+    int IO_a,IO_b,IO_start,IO_select,IO_left,IO_right,IO_up,IO_down;
+    void init_controller();
+
 };

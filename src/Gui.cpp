@@ -19,10 +19,6 @@ bool show_toolbar = true;
 
 bool typing = false;
 
-Gui::Gui() {
-    io = ImGui::GetIO();
-
-}
 
 
 /**
@@ -33,24 +29,41 @@ void Gui::terminate(SDL_Window *window) {
     ImGui_ImplSdlGL3_Shutdown();
 }
 
-void Gui::gui(SDL_Window *window) {
+void Gui::draw_gui(SDL_Window *window) {
     // Inform imgui of new frame
     ImGui_ImplSdlGL3_NewFrame(window);
 
     if (show_toolbar) { toolbar(); }
     if (show_edit_controls) { showEditControls(show_edit_controls); }
     ImGui::Render();
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-            default:
-                std::cout << event.text.type << std::endl;
-        }
-    }
 }
 
 void Gui::init(SDL_Window *window) {
     ImGui_ImplSdlGL3_Init(window);
+
+}
+
+int Gui::savekeybind(){
+    SDL_Event event;
+    bool Running = true;
+
+    while(Running)
+    {
+        while( SDL_PollEvent(&event) )
+        {
+            switch (event.type)
+            {
+                case SDL_KEYDOWN:
+                    std::cout<<"Keybound to: "<< event.key.keysym.sym <<std::endl;
+                    this->handleInput(event);
+                    return event.key.keysym.sym;
+
+                default:
+                    -1;
+            };
+
+        }
+    }
 
 }
 
@@ -59,10 +72,10 @@ void Gui::showEditControls(bool &show) {
     ImGui::Begin("Controls", &show_edit_controls);
     ImGui::Text("Press a ");
     static char buf[2] = {CONTROLLER_UP};
-
-
-
     ImGui::InputText("", buf, IM_ARRAYSIZE(buf));
+    if(ImGui::IsItemActive()){
+        //TODO might be here where we assign new keybinds.
+    }
     ImGui::End();
 }
 
@@ -106,3 +119,5 @@ void toolbar() {
 void Gui::handleInput(SDL_Event event) {
     ImGui_ImplSdlGL3_ProcessEvent(&event);
 }
+
+
