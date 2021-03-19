@@ -9,6 +9,8 @@
 #include "CPU.h"
 #include "MMU.h"
 #include "PPU.h"
+#include "Joypad.h"
+#include "Timer.h"
 
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
@@ -34,7 +36,10 @@ private:
 
     std::shared_ptr<MMU> mmu;
     std::unique_ptr<CPU> cpu;
-    std::unique_ptr<PPU> ppu;
+    std::shared_ptr<PPU> ppu;
+
+    std::shared_ptr<Joypad> joypad;
+    std::shared_ptr<Timer> timer;
 
     FRIEND_TEST(PPU, g_tile_rom);
 };

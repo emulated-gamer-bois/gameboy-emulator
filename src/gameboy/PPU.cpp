@@ -3,12 +3,14 @@
 //
 
 #include "PPU.h"
+#include "MMU.h"
 #include "Definitions.h"
 #include <cassert>
+#include <iostream>
 
 PPU::PPU(std::shared_ptr<MMU> memory) {
     this->memory = memory;
-    reset();
+    this->reset();
 }
 
 void PPU::reset() {
@@ -30,12 +32,85 @@ void PPU::reset() {
     this->readyToDraw = false;
     this->anyStatConditionLastUpdate = false;
 
-    saveRegisters();
     frameBuffer.fill(0);
 }
 
+uint8_t PPU::read(uint16_t addr) const {
+    switch (addr) {
+        case LCDC_ADDRESS:
+            return this->LCDC;
+        case STAT_ADDRESS:
+            return this->STAT;
+        case SCY_ADDRESS:
+            return this->SCY;
+        case SCX_ADDRESS:
+            return this->SCX;
+        case LY_ADDRESS:
+            return this->LY;
+        case LYC_ADDRESS:
+            return this->LYC;
+        case DMA_ADDRESS:
+            return this->DMA;
+        case BGP_ADDRESS:
+            return this->BGP;
+        case OBP0_ADDRESS:
+            return this->OBP0;
+        case OBP1_ADDRESS:
+            return this->OBP1;
+        case WY_ADDRESS:
+            return this->WY;
+        case WX_ADDRESS:
+            return this->WX;
+        default:
+            return 0;
+    }
+}
+
+void PPU::write(uint16_t addr, uint8_t data) {
+    switch (addr) {
+        case LCDC_ADDRESS:
+            this->LCDC = data;
+            break;
+        case STAT_ADDRESS:
+            this->STAT = data;
+            break;
+        case SCY_ADDRESS:
+            this->SCY = data;
+            break;
+        case SCX_ADDRESS:
+            this->SCX = data;
+            break;
+        case LY_ADDRESS:
+            break;
+        case LYC_ADDRESS:
+            this->LYC = data;
+            break;
+        case DMA_ADDRESS:
+            this->dma_transfer(data);
+            break;
+        case BGP_ADDRESS:
+            this->BGP = data;
+            break;
+        case OBP0_ADDRESS:
+            this->OBP0 = data;
+            break;
+        case OBP1_ADDRESS:
+            this->OBP1 = data;
+            break;
+        case WY_ADDRESS:
+            this->WY = data;
+            break;
+        case WX_ADDRESS:
+            this->WX = data;
+            break;
+        default:
+            std::cout << "Tried to write data: " << (int)data << " to address: " << (int)addr << std::endl;
+    }
+}
+
+
+
 void PPU::update(uint16_t cpuCycles) {
-    initRegisters();
     accumulatedCycles += cpuCycles;
     switch(modeFlag) { //depending on which mode the PPU is in
         case HBLANK:
@@ -59,7 +134,6 @@ void PPU::update(uint16_t cpuCycles) {
 
                 if (LY == 154) { //If the VBLANK should end: Reset LY and clear frame buffer
                     LY = 0;
-                    //frameBuffer.fill(0);
                     modeFlag = OAM_SEARCH;
                     // If leaving VBLANK we are ready to draw the screen
                     readyToDraw = true;
@@ -94,7 +168,6 @@ void PPU::update(uint16_t cpuCycles) {
         }
     }
     anyStatConditionLastUpdate = meetsStatConditionsCurrent;
-    saveRegisters();
 }
 
 const std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>* PPU::getFrameBuffer() const {
@@ -160,31 +233,6 @@ void PPU::drawWindowScanLine() {
         frameBuffer[LY * 160 + x] = pixel;
     }
 }
-
-void PPU::initRegisters() {
-    LCDC = memory->read(LCDC_ADDRESS);
-    STAT = memory->read(STAT_ADDRESS);
-    
-    SCY = memory->read(SCY_ADDRESS);
-    SCX = memory->read(SCX_ADDRESS);
-    LY = memory->read(LY_ADDRESS);
-    LYC = memory->read(LYC_ADDRESS);
-    WY = memory->read(WY_ADDRESS);
-    WX = memory->read(WX_ADDRESS);
-
-    BGP = memory->read(BGP_ADDRESS);
-    OBP0 = memory->read(OBP0_ADDRESS);
-    OBP1 = memory->read(OBP1_ADDRESS);
-    DMA = memory->read(DMA_ADDRESS);
-}
-
-void PPU::saveRegisters() { //TODO check if anything else needs doing here
-    memory->write(LCDC_ADDRESS, LCDC);
-    memory->write(STAT_ADDRESS, STAT);
-
-    memory->write(LY_ADDRESS, LY);
-}
-
 /**
  *
  * @param bgMapStart
@@ -231,21 +279,28 @@ uint8_t PPU::getTilePixelColor(uint8_t tileID, uint8_t absolutePixelX, uint8_t a
 
 bool PPU::meetsStatConditions() const {
     auto lycInterrupt = (lycEqualsLyInterruptEnable && coincidenceFlag);
-    auto oamInterrupt = (oamInterruptEnable && modeFlag == OAM_SEARCH);
-    auto vBlankInterrupt = (vBlankInterruptEnable && modeFlag == VBLANK);
-    auto hBlankInterrupt = (hBlankInterruptEnable && modeFlag == HBLANK);
+    auto oamInterrupt = (oamInterruptEnable && (modeFlag == OAM_SEARCH));
+    auto vBlankInterrupt = (vBlankInterruptEnable && (modeFlag == VBLANK));
+    auto hBlankInterrupt = (hBlankInterruptEnable && (modeFlag == HBLANK));
 
     return (lycInterrupt || oamInterrupt || vBlankInterrupt || hBlankInterrupt);
 }
 
 void PPU::vBlankInterrupt() {
-    uint8_t interruptFlags = memory->read(INTERRUPT_FLAG);
-    interruptFlags |= (1 << 0);
-    memory->write(INTERRUPT_FLAG, interruptFlags);
+    memory->raise_interrupt_flag(V_BLANK_IF_BIT);
 }
 
 void PPU::statInterrupt() {
-    uint8_t interruptFlags = memory->read(INTERRUPT_FLAG);
-    interruptFlags |= (1 << 1);
-    memory->write(INTERRUPT_FLAG, interruptFlags);
+    memory->raise_interrupt_flag(STAT_IF_BIT);
+}
+
+void PPU::dma_transfer(uint8_t data) {
+    if (0x00 <= data && data <= 0xdf) {
+        uint16_t start_addr = (data << 8);
+        for (uint8_t i = 0; i <= 0x9f; i++) {
+            this->memory->write(OAM_START + i, this->read(start_addr+i));
+        }
+    } else {
+        std::cout << "Tried to use DMA transfer with invalid input: " << data << std::endl;
+    }
 }

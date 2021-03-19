@@ -6,9 +6,9 @@
 
 #include <memory> // smart pointers
 #include <cstdint> // uint8_t and uint16_t
+#include <array> // frame buffer
 
 #include "Definitions.h" // LCD_WIDTH and LCD_HEIGHT
-#include "MMU.h"
 
 // Register addresses
 #define LCDC_ADDRESS 0xFF40
@@ -35,9 +35,15 @@
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
 
+// Forward declaration
+class MMU;
+
 class PPU {
 public:
-    explicit PPU(std::shared_ptr<MMU> memory);
+    explicit PPU(std::shared_ptr<MMU> mmu);
+
+    uint8_t read(uint16_t addr) const;
+    void write(uint16_t addr, uint8_t data);
 
     void reset();
     void update(uint16_t cpuCycles);
@@ -106,11 +112,11 @@ private:
     bool readyToDraw;
     bool anyStatConditionLastUpdate;
 
+    void dma_transfer(uint8_t data);
+
     void processNextLine();
     void drawBackgroundScanLine();
     void drawWindowScanLine();
-    void initRegisters();
-    void saveRegisters();
 
     // MMU reading functions.
     uint8_t getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY);

@@ -2378,19 +2378,19 @@ int CPU::handleInterrupts() {
         uint16_t interruptVector = PC;
 
         if (maskedFlags & V_BLANK_IF_BIT) {
-            memory->write(INTERRUPT_FLAG, flags & ~V_BLANK_IF_BIT);
+            memory->clear_interrupt_flag(V_BLANK_IF_BIT);
             interruptVector = 0x40;
         } else if (maskedFlags & STAT_IF_BIT) {
-            memory->write(INTERRUPT_FLAG, flags & ~STAT_IF_BIT);
+            memory->clear_interrupt_flag(STAT_IF_BIT);
             interruptVector = 0x48;
         } else if (maskedFlags & TIMER_IF_BIT) {
-            memory->write(INTERRUPT_FLAG, flags & ~TIMER_IF_BIT);
+            memory->clear_interrupt_flag(TIMER_IF_BIT);
             interruptVector = 0x50;
         } else if (maskedFlags & SERIAL_IF_BIT) {
-            memory->write(INTERRUPT_FLAG, flags & ~SERIAL_IF_BIT);
+            memory->clear_interrupt_flag(SERIAL_IF_BIT);
             interruptVector = 0x58;
         } else if (maskedFlags & CONTROLLER_IF_BIT) {
-            memory->write(INTERRUPT_FLAG, flags & ~CONTROLLER_IF_BIT);
+            memory->clear_interrupt_flag(CONTROLLER_IF_BIT);
             interruptVector = 0x60;
         }
         PC = interruptVector;

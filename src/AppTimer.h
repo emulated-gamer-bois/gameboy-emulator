@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-class Timer {
+class AppTimer {
 public:
     void tick();
     float msSinceTick() const;
