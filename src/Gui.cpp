@@ -56,6 +56,10 @@ void Gui::handleInput(SDL_Event event) {
  */
  void Gui::toggleToolbar() {
      this->displayToolbar = !this->displayToolbar;
+     if (!this->displayToolbar) {
+         // Disable all widgets
+         this->displayEditControls = false;
+     }
  }
 
 int Gui::savekeybind(){
