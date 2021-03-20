@@ -22,12 +22,14 @@ private:
     ImGuiIO io;
 
     bool displayEditControls;
+    bool displayFileDialog;
     bool displayToolbar;
     bool typing;
 
     void toolbar();
 
     void showEditControls();
+    void showFileDialog();
     void testkeyboard();
     int savekeybind();
 };

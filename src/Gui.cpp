@@ -6,6 +6,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <iostream>
+#include <optional>
 #include "FileHelper.h"
 #include "imgui_impl_sdl_gl3.h"
 #include "Application.h" // TODO: Gui and application should not both depend on eachother.
@@ -15,6 +16,7 @@
  */
 Gui::Gui() {
     displayEditControls = false;
+    displayFileDialog = false;
     displayToolbar = false;
 
     typing = false;
@@ -34,6 +36,7 @@ void Gui::draw_gui(SDL_Window *window) {
 
     if (displayToolbar) { toolbar(); }
     if (displayEditControls) { showEditControls(); }
+    if (displayFileDialog) { showFileDialog(); }
     ImGui::Render();
 }
 
@@ -59,6 +62,7 @@ void Gui::handleInput(SDL_Event event) {
      if (!this->displayToolbar) {
          // Disable all widgets
          this->displayEditControls = false;
+         this->displayFileDialog = false;
      }
  }
 
@@ -114,12 +118,20 @@ void Gui::showEditControls() {
     ImGui::End();
 }
 
+void Gui::showFileDialog() {
+    ImGui::Begin("Load ROM", &displayFileDialog);
+    auto parentPath = FileHelper::getParentDir("..");
+    if (parentPath != std::nullopt) {
+        ImGui::Text(parentPath->absolutePath.c_str());
+    }
+    ImGui::End();
+}
 
 void Gui::toolbar() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Load ROM", "")) {
-                FileHelper::getParentDir("..");
+                displayFileDialog = true;
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Edit", "")) {}
@@ -136,12 +148,11 @@ void Gui::toolbar() {
                     }
                     ImGui::SameLine();
                     ImGui::Text(i % 2 == 0 ? "%.1f" : "%.0f", speed);
-
                 }
                 ImGui::EndMenu();
             }
             if (ImGui::MenuItem("Controller")) {
-                displayEditControls = !displayEditControls;
+                displayEditControls = true;
             }
             ImGui::EndMenu();
 
