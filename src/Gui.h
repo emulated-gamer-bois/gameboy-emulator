@@ -7,12 +7,13 @@
 #include <SDL.h>
 #include <imgui.h>
 
+#include "AppSettings.h"
 
 class Gui {
 public:
     Gui();
     void init(SDL_Window *window);
-    void draw_gui(SDL_Window *window);
+    void handleGui(SDL_Window *window, AppSettings* settings);
     void terminate(SDL_Window *window);
     void handleInput(SDL_Event event);
 
@@ -29,7 +30,7 @@ private:
     void toolbar();
 
     void showEditControls();
-    void showFileDialog();
+    void showFileDialog(AppSettings* settings);
     void testkeyboard();
     int savekeybind();
 };

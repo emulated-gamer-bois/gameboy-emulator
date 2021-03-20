@@ -11,6 +11,7 @@
 #include <chrono> // time
 #include <thread> // sleep
 #include "imgui.h"
+#include "AppSettings.h"
 #include "RenderView.h"
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
@@ -32,11 +33,13 @@ public:
 private:
     const static std::string DEFAULT_WINDOW_CAPTION;
 
+    AppSettings settings;
     SDL_Window* window;
     SDL_GLContext glContext;
     RenderView renderView;
     GameBoy gameBoy;
     Gui gui;
+
     float emulationSpeed;
     bool emulationPaused;
     bool running;
@@ -49,6 +52,6 @@ private:
     void terminate();
     //Controller input
     int IO_a,IO_b,IO_start,IO_select,IO_left,IO_right,IO_up,IO_down;
-    void init_controller();
+    void initSettings();
 
 };

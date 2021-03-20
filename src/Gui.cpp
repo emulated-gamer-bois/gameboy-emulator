@@ -30,13 +30,13 @@ void Gui::init(SDL_Window *window) {
 
 /**
  */
-void Gui::draw_gui(SDL_Window *window) {
+void Gui::handleGui(SDL_Window *window, AppSettings* settings) {
     // Inform imgui of new frame
     ImGui_ImplSdlGL3_NewFrame(window);
 
     if (displayToolbar) { toolbar(); }
     if (displayEditControls) { showEditControls(); }
-    if (displayFileDialog) { showFileDialog(); }
+    if (displayFileDialog) { showFileDialog(settings); }
     ImGui::Render();
 }
 
@@ -118,9 +118,9 @@ void Gui::showEditControls() {
     ImGui::End();
 }
 
-void Gui::showFileDialog() {
+void Gui::showFileDialog(AppSettings* settings) {
     ImGui::Begin("Load ROM", &displayFileDialog);
-    auto parentPath = FileHelper::getParentDir("..");
+    auto parentPath = FileHelper::getCurrentDir(settings->defaultPath);
     if (parentPath != std::nullopt) {
         ImGui::Text(parentPath->absolutePath.c_str());
     }

@@ -14,11 +14,12 @@ const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
  * Constructor
  */
 Application::Application() {
-    this->emulationSpeed = 1.f;
     this->emulationPaused = false;
     this->running = true;
 
-    this->init_controller();
+    this->initSettings();
+
+    this->renderView.setScreenMultiplier(this->settings.screenMultiplier);
 }
 
 /**
@@ -52,7 +53,7 @@ void Application::start() {
         // Prepare for rendering, render and swap buffer.
         this->updateSDLWindowSize();
         this->renderView.render();
-        this->gui.draw_gui(this->window);
+        this->gui.handleGui(this->window, &this->settings);
         SDL_GL_SwapWindow(this->window);
         this->gameBoy.confirmDraw();
 
@@ -78,7 +79,7 @@ void Application::init() {
 }
 
 void Application::terminate() {
-    this->gui.draw_gui(this->window);
+    this->gui.handleGui(this->window, &this->settings); // TODO use gui.terminate() instead?
     terminateSDL();
 }
 
@@ -157,35 +158,35 @@ void Application::handleSDLEvents() {
             if (this->emulationPaused) {
                 break;
             }
-            if (sym == IO_left) {
+            if (sym == settings.keyBindings.keyLeft) {
                 this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
                 break;
             }
-            if (sym == IO_right) {
+            if (sym == settings.keyBindings.keyRight) {
                 this->gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_PRESS);
                 break;
             }
-            if (sym == IO_up) {
+            if (sym == settings.keyBindings.keyUp) {
                 this->gameBoy.joypad_input(JOYPAD_UP, JOYPAD_PRESS);
                 break;
             }
-            if (sym == IO_down) {
+            if (sym == settings.keyBindings.keyDown) {
                 this->gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_PRESS);
                 break;
             }
-            if (sym == IO_a) {
+            if (sym == settings.keyBindings.keyA) {
                 this->gameBoy.joypad_input(JOYPAD_A, JOYPAD_PRESS);
                 break;
             }
-            if (sym == IO_b) {
+            if (sym == settings.keyBindings.keyB) {
                 this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_PRESS);
                 break;
             }
-            if (sym == IO_start) {
+            if (sym == settings.keyBindings.keyStart) {
                 this->gameBoy.joypad_input(JOYPAD_START, JOYPAD_PRESS);
                 break;
             }
-            if (sym == IO_select) {
+            if (sym == settings.keyBindings.keySelect) {
                 this->gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_PRESS);
                 break;
             }
@@ -195,35 +196,35 @@ void Application::handleSDLEvents() {
             if (this->emulationPaused) {
                 break;
             }
-            if (sym == IO_left) {
+            if (sym == settings.keyBindings.keyLeft) {
                 this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
                 break;
             }
-            if (sym == IO_right) {
+            if (sym == settings.keyBindings.keyRight) {
                 this->gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
                 break;
             }
-            if (sym == IO_up) {
+            if (sym == settings.keyBindings.keyUp) {
                 this->gameBoy.joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
                 break;
             }
-            if (sym == IO_down) {
+            if (sym == settings.keyBindings.keyDown) {
                 this->gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
                 break;
             }
-            if (sym == IO_a) {
+            if (sym == settings.keyBindings.keyA) {
                 this->gameBoy.joypad_input(JOYPAD_A, JOYPAD_RELEASE);
                 break;
             }
-            if (sym == IO_b) {
+            if (sym == settings.keyBindings.keyB) {
                 this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_RELEASE);
                 break;
             }
-            if (sym == IO_start) {
+            if (sym == settings.keyBindings.keyStart) {
                 this->gameBoy.joypad_input(JOYPAD_START, JOYPAD_RELEASE);
                 break;
             }
-            if (sym == IO_select) {
+            if (sym == settings.keyBindings.keyLeft) {
                 this->gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_RELEASE);
                 break;
             }
@@ -244,8 +245,17 @@ void Application::updateSDLWindowSize() {
     }
 }
 
-void Application::init_controller() {
-    //TODO load settings from file.
+/**
+ * Initialize settings to some default values. This should be called if settings couldn't be loaded from file.
+ */
+void Application::initSettings() {
+    KeyBindings keyBindings = {SDLK_f, SDLK_g, SDLK_h, SDLK_j,
+                                SDLK_a, SDLK_d, SDLK_w, SDLK_s};
+    settings.keyBindings = keyBindings;
+    settings.screenMultiplier = 4;
+    settings.defaultPath = "..";
+
+    /*
     IO_a = 102;
     IO_b = 103;
     IO_start = 104;
@@ -254,6 +264,7 @@ void Application::init_controller() {
     IO_right = 100;
     IO_up = 119;
     IO_down = 115;
+    */
 }
 
 

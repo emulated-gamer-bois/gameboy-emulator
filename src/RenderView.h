@@ -32,6 +32,7 @@ public:
     void render() const;
     void setScreenTexture(uint8_t textureData[]);
     void setPalette(Palette palette);
+    void setScreenMultiplier(int screenMultiplier);
 
     int getWidth() const;
     int getHeight() const;
