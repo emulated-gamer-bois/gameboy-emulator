@@ -8,16 +8,14 @@
 #include <iostream>
 #include "FileHelper.h"
 #include "imgui_impl_sdl_gl3.h"
-#include "Application.h" // TODO: Gui and application should not depend on eachother.
-
-void showEditControls(bool &show);
+#include "Application.h" // TODO: Gui and application should not both depend on eachother.
 
 /**
  * Constructor
  */
 Gui::Gui() {
-    show_edit_controls = false;
-    show_toolbar = false;
+    displayEditControls = false;
+    displayToolbar = false;
 
     typing = false;
 }
@@ -34,8 +32,8 @@ void Gui::draw_gui(SDL_Window *window) {
     // Inform imgui of new frame
     ImGui_ImplSdlGL3_NewFrame(window);
 
-    if (show_toolbar) { toolbar(); }
-    if (show_edit_controls) { showEditControls(show_edit_controls); }
+    if (displayToolbar) { toolbar(); }
+    if (displayEditControls) { showEditControls(); }
     ImGui::Render();
 }
 
@@ -57,14 +55,30 @@ void Gui::handleInput(SDL_Event event) {
  * Toggles the toolbar.
  */
  void Gui::toggleToolbar() {
-     this->show_toolbar = !this->show_toolbar;
+     this->displayToolbar = !this->displayToolbar;
  }
 
 int Gui::savekeybind(){
-    SDL_Event event;
-    bool Running = true;
+    ImGuiIO& io = ImGui::GetIO();
 
-    while(Running)
+    // If we poll events here they will not be catched by application so we need to solve this some
+    // other way. One less efficient way is:
+
+    // TODO we would want to display the keys that are binded and I'm not sure that is done with
+    //  SDL_Keycode that is really just an int. We also probably want a Settings struct we can
+    //  send in to this class so it can be modified here and interpreted by Application. We could
+    //  probably also use lambdas to accomplish this.
+
+    for (int i = 0; i < 512; i++) {
+        if (io.KeysDown[i]) {
+            return i;
+        }
+    }
+
+    return -1;
+
+
+    /*while(Running)
     {
         while( SDL_PollEvent(&event) )
         {
@@ -80,13 +94,13 @@ int Gui::savekeybind(){
             };
 
         }
-    }
+    }*/
 
 }
 
-void Gui::showEditControls(bool &show) {
+void Gui::showEditControls() {
     typing = true;
-    ImGui::Begin("Controls", &show_edit_controls);
+    ImGui::Begin("Controls", &displayEditControls);
     ImGui::Text("Press a ");
     static char buf[2] = {CONTROLLER_UP};
     ImGui::InputText("", buf, IM_ARRAYSIZE(buf));
@@ -98,7 +112,6 @@ void Gui::showEditControls(bool &show) {
 
 
 void Gui::toolbar() {
-
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Load ROM", "")) {
@@ -115,7 +128,7 @@ void Gui::toolbar() {
                 for (int i = 0; i < 4; i++) {
                     speed += 0.5f;
                     if (ImGui::MenuItem("Speed: ")) {
-                        //TODO actually set play speed to something.
+                        //TODO actually set play speed to something. Settings struct or lambdas.
                     }
                     ImGui::SameLine();
                     ImGui::Text(i % 2 == 0 ? "%.1f" : "%.0f", speed);
@@ -124,7 +137,7 @@ void Gui::toolbar() {
                 ImGui::EndMenu();
             }
             if (ImGui::MenuItem("Controller")) {
-                show_edit_controls = !show_edit_controls;
+                displayEditControls = !displayEditControls;
             }
             ImGui::EndMenu();
 

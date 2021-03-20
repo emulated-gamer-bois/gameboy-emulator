@@ -21,14 +21,13 @@ public:
 private:
     ImGuiIO io;
 
-    bool show_edit_controls;
-    bool show_toolbar;
-
+    bool displayEditControls;
+    bool displayToolbar;
     bool typing;
 
     void toolbar();
 
-    void showEditControls(bool &show);
+    void showEditControls();
     void testkeyboard();
     int savekeybind();
 };
