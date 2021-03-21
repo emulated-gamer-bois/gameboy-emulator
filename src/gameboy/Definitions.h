@@ -5,6 +5,8 @@
 #pragma once
 #define LCD_WIDTH 160
 #define LCD_HEIGHT 144
+#define BACKGROUND_WIDTH 256
+#define BACKGROUND_HEIGHT 256
 #define LCD_REFRESH_RATE 60
 
 #define V_BLANK_IF_BIT      (1 << 0)
