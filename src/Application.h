@@ -10,10 +10,12 @@
 #include <string>
 #include <chrono> // time
 #include <thread> // sleep
-
+#include "imgui.h"
 #include "RenderView.h"
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
+#include "Gui.h"
+#include "Keybinds.h"
 
 class Application {
 public:
@@ -27,7 +29,8 @@ private:
     SDL_GLContext glContext;
     RenderView renderView;
     GameBoy gameBoy;
-
+    Keybinds controller;
+    Gui gui = Gui(&controller);
     bool running;
 
     void init();
@@ -35,4 +38,6 @@ private:
     void terminateSDL();
     void handleSDLEvents();
     void updateSDLWindowSize();
+    void terminate();
+
 };

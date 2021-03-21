@@ -3,6 +3,11 @@ cmake_minimum_required ( VERSION 3.0.2 )
 project ( lame-boy )
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# set everything up for c++ 17 features
+set(CMAKE_CXX_STANDARD 17)
+# Don't add this line if you will try_compile with boost.
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # All libraries made is static
 if (MSVC)
     string(REPLACE "/MD" /MT CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
@@ -39,7 +44,7 @@ add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 set ( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 set ( CMAKE_BUILD_TYPE DEBUG )
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 endif()
 
 # Excludes graphics code if tests are run in travis
