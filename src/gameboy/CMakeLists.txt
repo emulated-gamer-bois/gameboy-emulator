@@ -11,6 +11,8 @@ add_library( ${PROJECT_NAME}
         GameBoy.cpp
         PPU.cpp
         PPU.h
+        Sprite.cpp
+        Sprite.h
         Timer.h
         Timer.cpp
         Joypad.h
