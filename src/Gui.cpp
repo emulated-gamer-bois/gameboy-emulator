@@ -17,7 +17,6 @@ void toolbar();
 bool show_edit_controls = false;
 bool show_toolbar = true;
 bool do_keybind = false;
-SDL_Window *win;
 Gui::Gui(Keybinds * controller) {
     this->controller = controller;
 }
@@ -43,7 +42,6 @@ void Gui::draw_gui(SDL_Window *window) {
 }
 
 void Gui::init(SDL_Window *window) {
-    win = window;
     ImGui_ImplSdlGL3_Init(window);
 
 }
@@ -136,7 +134,6 @@ void Gui::showKeyBind(const char *buttonName) {
     ImGui::End();
     do_keybind = true;
 }
-
 
 
 
