@@ -2,16 +2,16 @@
 // Created by isaaklindgren on 2021-03-19.
 //
 
-#ifndef LAME_BOY_CONTROLLER_H
-#define LAME_BOY_CONTROLLER_H
+#ifndef LAME_BOY_KEYBINDS_H
+#define LAME_BOY_KEYBINDS_H
 #include "string"
 
 
 
-class Controller {
+class Keybinds {
 public:
     int nControllers=0;
-    void init_controller();
+    void init_keybinds();
     struct controller_button {
         std::string action_description;
         std::string keybind;
@@ -24,4 +24,4 @@ private:
 };
 
 
-#endif //LAME_BOY_CONTROLLER_H
+#endif //LAME_BOY_KEYBINDS_H

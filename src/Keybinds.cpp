@@ -3,10 +3,10 @@
 //
 
 #include <iostream>
-#include "Controller.h"
+#include "Keybinds.h"
 
 
-void Controller::init_controller() {
+void Keybinds::init_keybinds() {
     a.keyval = 102;
     b.keyval = 103;
     start.keyval= 104;

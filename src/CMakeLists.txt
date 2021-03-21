@@ -28,7 +28,7 @@ if(NOT TRAVIS)
         FileHelper.h
         FileHelper.cpp
         Gui.cpp
-        Gui.h Controller.cpp Controller.h)
+        Gui.h Keybinds.cpp Keybinds.h)
 
     target_link_libraries ( ${PROJECT_NAME} labhelper gameboy )
     config_build_output()

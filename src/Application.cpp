@@ -59,7 +59,7 @@ void Application::start() {
 }
 
 void Application::init() {
-    this->controller.init_controller();
+    this->controller.init_keybinds();
     this->initSDL();
     this->renderView.initGL();
     this->gui.init(window);

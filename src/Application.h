@@ -15,7 +15,7 @@
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
 #include "Gui.h"
-#include "Controller.h"
+#include "Keybinds.h"
 
 class Application {
 public:
@@ -29,7 +29,7 @@ private:
     SDL_GLContext glContext;
     RenderView renderView;
     GameBoy gameBoy;
-    Controller controller;
+    Keybinds controller;
     Gui gui = Gui(&controller);
     bool running;
 

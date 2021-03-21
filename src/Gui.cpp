@@ -17,9 +17,8 @@ void toolbar();
 bool show_edit_controls = false;
 bool show_toolbar = true;
 bool do_keybind = false;
-int counter =0;
 SDL_Window *win;
-Gui::Gui(Controller * controller) {
+Gui::Gui(Keybinds * controller) {
     this->controller = controller;
 }
 /**
@@ -39,7 +38,7 @@ void Gui::draw_gui(SDL_Window *window) {
     ImGui::Render();
     SDL_GL_SwapWindow(window);
     if (do_keybind) {
-        KeyBind();
+        keyBind();
     }
 }
 
@@ -53,8 +52,9 @@ void Gui::showEditControls() {
     ImGui::Begin("Controls", &show_edit_controls);
     for (int i = 0; i < this->controller->nControllers; i++) {
         ImGui::Text("%s", this->controller->controllerButtons[i]->action_description.c_str());
+        ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
         if (ImGui::Button(this->controller->controllerButtons[i]->keybind.c_str())) {
-            showKeybind(this->controller->controllerButtons[i]->action_description.c_str());
+            showKeyBind(this->controller->controllerButtons[i]->action_description.c_str());
             keybindindex = i;
         }
     }
@@ -87,7 +87,7 @@ void toolbar() {
                 }
                 ImGui::EndMenu();
             }
-            if (ImGui::MenuItem("Controller")) {
+            if (ImGui::MenuItem("Keybinds")) {
                 show_edit_controls = !show_edit_controls;
             }
             ImGui::EndMenu();
@@ -101,7 +101,7 @@ void Gui::handleInput(SDL_Event event) {
     ImGui_ImplSdlGL3_ProcessEvent(&event);
 }
 
-void Gui::KeyBind() {
+void Gui::keyBind() {
     SDL_Event event;
     bool a = false;
     bool b = false;
@@ -128,7 +128,7 @@ void Gui::KeyBind() {
     do_keybind = false;
 }
 
-void Gui::showKeybind(const char *buttonName) {
+void Gui::showKeyBind(const char *buttonName) {
     std::string buf("Press a button to register a new keybind for ");
     buf.append(buttonName);
     ImGui::Begin("Keybind");
@@ -136,6 +136,7 @@ void Gui::showKeybind(const char *buttonName) {
     ImGui::End();
     do_keybind = true;
 }
+
 
 
 

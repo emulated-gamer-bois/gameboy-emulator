@@ -8,7 +8,7 @@
 
 #include <SDL.h>
 #include <imgui.h>
-#include "Controller.h"
+#include "Keybinds.h"
 
 
 class Gui {
@@ -16,21 +16,19 @@ class Gui {
 
 
 public:
-    Gui(Controller * controller);
+    Gui(Keybinds * controller);
     void draw_gui(SDL_Window *window);
     void init(SDL_Window *window);
     void terminate(SDL_Window *window);
     void handleInput(SDL_Event event);
-    Controller* controller;
+    Keybinds* controller;
 
 private:
     ImGuiIO io;
     void showEditControls();
-
-    void KeyBind();
+    void keyBind();
     int keybindindex;
-
-    void showKeybind(const char *buttonName);
+    void showKeyBind(const char *buttonName);
 };
 
 
