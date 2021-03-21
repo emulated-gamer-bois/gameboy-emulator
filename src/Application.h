@@ -15,14 +15,8 @@
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
 #include "Gui.h"
-#define CONTROLLER_UP SDLK_w
-#define CONTROLLER_DOWN SDLK_s
-#define CONTROLLER_LEFT SDLK_a
-#define CONTROLLER_RIGHT SDLK_d
-#define CONTROLLER_A SDLK_f
-#define CONTROLLER_B SDLK_g
-#define CONTROLLER_START SDLK_h
-#define CONTROLLER_SELECT SDLK_j
+#include "Controller.h"
+
 class Application {
 public:
     Application();
@@ -35,7 +29,8 @@ private:
     SDL_GLContext glContext;
     RenderView renderView;
     GameBoy gameBoy;
-    Gui gui;
+    Controller controller;
+    Gui gui = Gui(&controller);
     bool running;
 
     void init();
@@ -44,8 +39,5 @@ private:
     void handleSDLEvents();
     void updateSDLWindowSize();
     void terminate();
-    //Controller input
-    int IO_a,IO_b,IO_start,IO_select,IO_left,IO_right,IO_up,IO_down;
-    void init_controller();
 
 };

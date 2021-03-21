@@ -27,11 +27,9 @@ Application::Application() {
  */
 void Application::start() {
     this->init();
-
     float frameTime = 1000.f / LCD_REFRESH_RATE;
 
     Timer timer;
-
     while (running) {
         // Create time stamp.
         timer.tick();
@@ -47,7 +45,7 @@ void Application::start() {
         this->renderView.render();
         //TODO Can add some bools or stuff to enable or disable draw_gui, this is just temporary.
         this->gui.draw_gui(this->window);
-        SDL_GL_SwapWindow(this->window);
+       // SDL_GL_SwapWindow(this->window);
         this->gameBoy.confirmDraw();
 
         // Time application to 60Hz
@@ -61,13 +59,13 @@ void Application::start() {
 }
 
 void Application::init() {
+    this->controller.init_controller();
     this->initSDL();
-    this->init_controller();
     this->renderView.initGL();
     this->gui.init(window);
 
     // TEMP ------------------------------------------------------------------------------------------------------------
-    this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/instr_timing/instr_timing.gb");
+    this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/games/Tetris.gb");
     // END TEMP --------------------------------------------------------------------------------------------------------
 }
 
@@ -143,94 +141,86 @@ void Application::handleSDLEvents() {
             break;
         }
         if (event.type == SDL_KEYDOWN) {
-            if (sym == IO_left) {
+            if (sym == controller.left.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
                 this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
-            if (sym == IO_right) {
+            if (sym == controller.right.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_PRESS);
                 this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
-            if (sym == IO_up) {
+            if (sym == controller.up.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_UP, JOYPAD_PRESS);
                 this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
-            if (sym == IO_down) {
+            if (sym == controller.down.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_PRESS);
                 this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
-            if (sym == IO_a) {
+            if (sym == controller.a.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_A, JOYPAD_PRESS);
                 this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
-            if (sym == IO_b) {
+            if (sym == controller.b.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_PRESS);
                 this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
-            if (sym == IO_b) {
-                this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_PRESS);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
-                break;
-            }
-            if (sym == IO_start) {
+
+            if (sym == controller.start.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_START, JOYPAD_PRESS);
                 this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
-            if (sym == IO_select) {
+            if (sym == controller.select.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_PRESS);
                 this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
         }
         if (event.type == SDL_KEYUP) {
-            if (sym == IO_left) {
+            if (sym == controller.left.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
                 this->renderView.setPalette(PALETTE_DMG);
                 break;
             }
-            if (sym == IO_right) {
+            if (sym == controller.right.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
                 this->renderView.setPalette(PALETTE_DMG);
                 break;
             }
-            if (sym == IO_up) {
+            if (sym == controller.up.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
                 this->renderView.setPalette(PALETTE_DMG);
                 break;
             }
-            if (sym == IO_down) {
+            if (sym == controller.down.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
                 this->renderView.setPalette(PALETTE_DMG);
                 break;
             }
-            if (sym == IO_a) {
+            if (sym == controller.a.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_A, JOYPAD_RELEASE);
                 this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
-            if (sym == IO_b) {
+            if (sym == controller.b.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_RELEASE);
                 this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
-            if (sym == IO_b) {
-                this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_PRESS);
-                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
-                break;
-            }
-            if (sym == IO_start) {
+
+            if (sym == controller.start.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_START, JOYPAD_RELEASE);
                 this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
             }
-            if (sym == IO_select) {
+            if (sym == controller.select.keyval) {
                 this->gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_RELEASE);
                 this->renderView.setPalette(PALETTE_DMG_SMOOTH);
                 break;
@@ -257,16 +247,8 @@ void Application::updateSDLWindowSize() {
 }
 
 
-void Application::init_controller() {
-    //TODO load settings from file.
-    IO_a = 102;
-    IO_b = 103;
-    IO_start = 104;
-    IO_select = 106;
-    IO_left = 97;
-    IO_right = 100;
-    IO_up = 119;
-    IO_down = 115;
-}
+
+
+
 
 
