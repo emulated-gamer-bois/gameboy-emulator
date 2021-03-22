@@ -7,10 +7,6 @@
 
 using namespace std;
 
-string FileHelper::openDialog() {
-    return "";
-}
-
 optional<vector<FileHelper::FileEntry>> FileHelper::getDirContents(string _dirPath, string _filter) {
     auto entryPaths = vector<FileEntry>();
     filesystem::path dirPath(_dirPath);
@@ -68,6 +64,28 @@ optional<FileHelper::FileEntry> FileHelper::getParentDir(std::string _dirPath) {
 
     // TODO check if root
     FileEntry fe = {parentAbsolutePath.filename().string(), parentAbsolutePath.string(), true};
+
+    return fe;
+}
+
+std::optional<FileHelper::FileEntry> FileHelper::getCurrentDir(std::string _dirPath) {
+    filesystem::path dirPath(_dirPath);
+
+    // Check if path is valid.
+    if (!filesystem::exists(dirPath)) {
+        cerr << "FileHelper ERROR: Invalid path" << endl;
+        return nullopt;
+    }
+
+    // Check if path is a directory.
+    if (!filesystem::is_directory(dirPath)) {
+        cerr << "FileHelper ERROR: Path is not a directory" << endl;
+        return nullopt;
+    }
+
+    filesystem::path absolutePath = filesystem::absolute(dirPath);
+
+    FileEntry fe = {absolutePath.filename().string(), absolutePath.string(), true};
 
     return fe;
 }
