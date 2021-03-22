@@ -9,10 +9,10 @@ add_library( ${PROJECT_NAME}
         MMU.cpp
         GameBoy.h
         GameBoy.cpp
-        PPU.cpp
-        PPU.h
-        Sprite.cpp
-        Sprite.h
+        PPU/PPU.cpp
+        PPU/PPU.h
+        PPU/Sprite.cpp
+        PPU/Sprite.h
         Timer.h
         Timer.cpp
         Joypad.h

@@ -2,8 +2,7 @@
 // Created by riddarvid on 3/12/21.
 //
 
-#ifndef LAME_BOY_SPRITE_H
-#define LAME_BOY_SPRITE_H
+#pragma once
 #include <cstdint>
 #include <memory>
 #include <iostream>
@@ -29,17 +28,13 @@ public:
 
     bool coversLine(uint8_t line, unsigned int objectSize) const;
     bool containsX(uint8_t lcdX) const;
+    bool hasHigherPriorityThan(const std::shared_ptr<Sprite>& other) const;
 
     uint8_t getTileID(uint8_t lcdY) const;
     uint8_t getTileX(uint8_t lcdX) const;
     uint8_t getTileY(uint8_t lcdY) const;
     uint8_t getPaletteNumber() const;
-
-    bool hasHigherPriorityThan(const std::shared_ptr<Sprite>& other) const;
     bool backgroundOverSprite() const;
 
-    void print();
+    void print() const;
 };
-
-
-#endif //LAME_BOY_SPRITE_H

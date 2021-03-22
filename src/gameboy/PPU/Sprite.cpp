@@ -26,6 +26,13 @@ bool Sprite::containsX(uint8_t lcdX) const {
     return lcdX >= (this->x - 8) && lcdX < this->x;
 }
 
+bool Sprite::hasHigherPriorityThan(const std::shared_ptr<Sprite>& other) const {
+    if (other == nullptr) {
+        return true;
+    }
+    return this->x < other->x;
+}
+
 uint8_t Sprite::getTileID(uint8_t lcdY) const {
     if (lcdY - (this->y - 16) < 8) {
         return tileIndex;
@@ -56,17 +63,10 @@ uint8_t Sprite::getPaletteNumber() const {
     return paletteNumber;
 }
 
-bool Sprite::hasHigherPriorityThan(const std::shared_ptr<Sprite>& other) const {
-    if (other == nullptr) {
-        return true;
-    }
-    return this->x < other->x;
-}
-
 bool Sprite::backgroundOverSprite() const {
     return bgAndWindowOverOBJ;
 }
 
-void Sprite::print() {
+void Sprite::print() const {
     std::cout << "X: " << (int)this->x << " Y: " << (int)this->y << " Tile: " << (int)tileIndex << " Flags: " << (int)this->flags << std::endl;
 }

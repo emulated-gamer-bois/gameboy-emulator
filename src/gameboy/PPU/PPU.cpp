@@ -3,38 +3,14 @@
 //
 
 #include "PPU.h"
-#include "MMU.h"
-#include "Definitions.h"
+#include "../MMU.h"
+#include "../Definitions.h"
 #include <memory>
 #include <iostream>
 
 PPU::PPU(std::shared_ptr<MMU> memory) {
     this->memory = memory;
     this->reset();
-}
-
-void PPU::reset() {
-    this->SCY = 0;
-    this->SCX = 0;
-    this->LY = 0;
-    this->LYC = 0;
-    this->DMA = 0;
-    this->WY = 0;
-    this->WX = 0;
-    this->BGP = 0;
-    this->OBP0 = 0;
-    this->OBP1 = 0;
-    this->STAT = 0;
-    this->LCDC = 0;
-
-    this->accumulatedCycles = 0;
-    this->modeFlag = OAM_SEARCH;
-    this->readyToDraw = false;
-    this->anyStatConditionLastUpdate = false;
-
-    frameBuffer.fill(0);
-    bgWindowColorIndexesThisLine.fill(0);
-    spritesNextScanLine.clear();
 }
 
 uint8_t PPU::read(uint16_t addr) const {
@@ -111,12 +87,36 @@ void PPU::write(uint16_t addr, uint8_t data) {
     }
 }
 
+void PPU::reset() {
+    this->SCY = 0;
+    this->SCX = 0;
+    this->LY = 0;
+    this->LYC = 0;
+    this->DMA = 0;
+    this->WY = 0;
+    this->WX = 0;
+    this->BGP = 0;
+    this->OBP0 = 0;
+    this->OBP1 = 0;
+    this->STAT = 0;
+    this->LCDC = 0;
 
+    this->accumulatedCycles = 0;
+    this->modeFlag = OAM_SEARCH;
+    this->readyToDraw = false;
+    this->anyStatConditionLastUpdate = false;
+
+    frameBuffer.fill(0);
+    bgWindowColorIndexesThisLine.fill(0);
+    spritesNextScanLine.clear();
+}
 
 void PPU::update(uint16_t cpuCycles) {
     accumulatedCycles += cpuCycles;
-    switch(modeFlag) { //depending on which mode the PPU is in
+    switch(modeFlag) {
         case HBLANK:
+            //When the h-blank phase ends, LY is increased. Depending on LY, we either go to OAM search or v-blank.
+            // If we go to v-blank, we throw a v-blank interrupt.
             if (accumulatedCycles >= HBLANK_THRESHOLD) {
                 accumulatedCycles -= HBLANK_THRESHOLD;
                 LY++;
@@ -131,23 +131,23 @@ void PPU::update(uint16_t cpuCycles) {
             break;
 
         case VBLANK:
+            //When the v-blank phase ends, LY is increased.
+            // If the entire frame has been drawn, LY is reset and the PPU goes to the OAM search phase.
             if (accumulatedCycles >= VBLANK_LINE_THRESHOLD) {
                 accumulatedCycles -= VBLANK_LINE_THRESHOLD;
                 LY++;
 
-                if (LY == LCD_HEIGHT + 10) { //If the VBLANK should end: Reset LY and clear frame buffer
+                if (LY == LCD_HEIGHT + 10) {
                     LY = 0;
                     modeFlag = OAM_SEARCH;
-                    // If leaving VBLANK we are ready to draw the screen
+                    // If leaving VBLANK we are ready to draw the screen.
                     readyToDraw = true;
                 }
             }
             break;
 
         case OAM_SEARCH:
-            if (LY == 0) {
-                frameBuffer.fill(0);
-            }
+            //When the OAM search phase ends, the coincidence flag is updated, the sprites for the scanline are loaded and the PPU goes to the draw phase.
             if (accumulatedCycles >= OAM_SEARCH_THRESHOLD) {
                 accumulatedCycles -= OAM_SEARCH_THRESHOLD;
                 coincidenceFlag = (LYC == LY); // Set coincidence flag before drawing the scanline.
@@ -157,6 +157,7 @@ void PPU::update(uint16_t cpuCycles) {
             break;
 
         case SCANLINE_DRAW:
+            //When the draw phase ends, the current line is processed and the ppu goes into the h-blank phase.
             if (accumulatedCycles >= SCANLINE_DRAW_THRESHOLD) {
                 accumulatedCycles -= SCANLINE_DRAW_THRESHOLD;
                 processNextLine();
@@ -165,6 +166,7 @@ void PPU::update(uint16_t cpuCycles) {
             break;
     }
 
+    //A STAT-interrupt should be thrown when going from no conditions met to any conditions met.
     bool meetsStatConditionsCurrent = meetsStatConditions();
     if (!anyStatConditionLastUpdate) {
         if (meetsStatConditionsCurrent) {
@@ -174,16 +176,17 @@ void PPU::update(uint16_t cpuCycles) {
     anyStatConditionLastUpdate = meetsStatConditionsCurrent;
 }
 
-const std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>* PPU::getFrameBuffer() const {
-    return &frameBuffer;
-}
-
 bool PPU::isReadyToDraw() const {
     return this->readyToDraw;
 }
 
 void PPU::confirmDraw() {
+    this->frameBuffer.fill(0);
     this->readyToDraw = false;
+}
+
+const std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>* PPU::getFrameBuffer() const {
+    return &frameBuffer;
 }
 
 void PPU::processNextLine() {
@@ -208,8 +211,6 @@ void PPU::drawBackgroundScanLine() {
         bgMapStartAddress = BG_WINDOW_MAP0;
     }
 
-    //For each pixel in the current row, find the correct tile ID, then the
-    //correct pixel in that tile
     for (uint8_t x = 0; x < LCD_WIDTH; ++x) {
         uint8_t absolutePixelX = (SCX + x) % BACKGROUND_WIDTH;
         uint8_t absolutePixelY = (SCY + LY) % BACKGROUND_HEIGHT;
@@ -222,7 +223,7 @@ void PPU::drawBackgroundScanLine() {
 }
 
 void PPU::drawWindowScanLine() {
-    if (WY > LY) { //Window hasn't begun yet
+    if (WY > LY) {
         return;
     }
     uint16_t windowMapStartAddress;
@@ -231,15 +232,15 @@ void PPU::drawWindowScanLine() {
     } else {
         windowMapStartAddress = BG_WINDOW_MAP0;
     }
-    int startX = WX - 7;
+    int startX = WX - 7; //WX = windows start position + 7
     if (startX < 0) {
         startX = 0;
     }
     for (int x = startX; x < LCD_WIDTH; ++x) {
-        uint8_t absolutePixelX = (x - startX); //TODO check hardware bug when 0 < WX <= 6 and WX = 166 What is the intended behaviour?
-        uint8_t absolutePixelY = (LY - WY);
+        uint8_t absolutePixelX = x - startX; //TODO check hardware bug when 0 < WX <= 6 and WX = 166 What is the intended behaviour?
+        uint8_t absolutePixelY = LY - WY;
         uint8_t tileID = getTileID(windowMapStartAddress, absolutePixelX, absolutePixelY);
-        uint8_t colorIndex = getTilePixelColorIndex(bgWindowTileSetSelect, tileID, absolutePixelX, absolutePixelY);
+        uint8_t colorIndex = getTilePixelColorIndex(bgWindowTileSetSelect, tileID, absolutePixelX % 8, absolutePixelY % 8);
         uint8_t pixel = getColor(BGP, colorIndex);
         frameBuffer[LY * LCD_WIDTH + x] = pixel;
         bgWindowColorIndexesThisLine[x] = pixel;
@@ -248,11 +249,12 @@ void PPU::drawWindowScanLine() {
 
 void PPU::drawObjectScanLine() {
     for (int x = 0; x < LCD_WIDTH; ++x) {
+        //Only the highest priority sprite determines the color of the current pixel
         std::shared_ptr<Sprite> highestPriority = getHighestPrioritySprite(x);
         if (highestPriority != nullptr) {
-            highestPriority->print();
+            //highestPriority->print();
             uint8_t colorIndex = getSpritePixelColorIndex(highestPriority, x, LY);
-            if (colorIndex != 0) {
+            if (colorIndex != 0) { //Color index 0 is transparent
                 uint8_t pixel;
                 if (highestPriority->getPaletteNumber()) {
                     pixel = getColor(OBP1, colorIndex);
@@ -266,6 +268,8 @@ void PPU::drawObjectScanLine() {
 }
 
 void PPU::loadSpritesNextScanLine() {
+    //Loads the ten first sprites in OAM that appear on the current scanline.
+    //There are a maximum of 40 sprites total and 10 sprites per scanline.
     spritesNextScanLine.clear();
     for (int i = 0; i < 40 && spritesNextScanLine.size() < 10; ++i) {
         std::shared_ptr<Sprite> sprite = loadSprite(i);
@@ -276,7 +280,7 @@ void PPU::loadSpritesNextScanLine() {
 }
 
 std::shared_ptr<Sprite> PPU::loadSprite(int index) {
-    uint16_t startAddress = OAM_START + index * 4;
+    uint16_t startAddress = OAM_START + index * 4; //Each sprite occupies four bytes
     uint8_t yByte = memory->read(startAddress);
     uint8_t xByte = memory->read(startAddress + 1);
     uint8_t tileIndex = memory->read(startAddress + 2);
@@ -284,46 +288,8 @@ std::shared_ptr<Sprite> PPU::loadSprite(int index) {
     return std::make_shared<Sprite>(yByte, xByte, tileIndex, flags);
 }
 
-/**
- *
- * @param bgMapStart
- * @param pixelAbsoluteX
- * @param pixelAbsoluteY
- * @return The ID of the tile containing the target pixel
- */
-uint8_t PPU::getTileID(uint16_t bgMapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY) {
-    uint16_t tileAbsoluteX = pixelAbsoluteX / 8; //Divide by 8 since the width and height of a tile is 8
-    uint16_t tileAbsoluteY = pixelAbsoluteY / 8;
-    uint16_t offset = tileAbsoluteY * 32 + tileAbsoluteX; //Convert from 2D matrix to array index
-    return memory->read(bgMapStart + offset);
-}
-
-uint8_t PPU::getTilePixelColorIndex(uint8_t tileSet, uint8_t id, uint8_t x, uint8_t y) { //TODO test
-    uint16_t startAddress;
-    uint16_t address;
-
-    if (tileSet) { //Find the address of the tile with id tileID, depending on addressing mode
-        startAddress = BG_WINDOW_TILE_DATA1;
-        address = id * 16 + startAddress;
-    } else {
-        startAddress = BG_WINDOW_TILE_DATA0;
-        auto signedID = (int8_t)id;
-        address = signedID * 16 + startAddress;
-    }
-
-    x = 7 - x;
-
-    uint8_t lowByte = memory->read(address + y * 2);
-    uint8_t highByte = memory->read(address + y * 2 + 1);
-
-    uint8_t lowBit = (lowByte >> x) & 1;
-    uint8_t highBit = (highByte >> x) & 1;
-
-    uint8_t pixelColor = (highBit << 1) | lowBit;
-    return pixelColor;
-}
-
 std::shared_ptr<Sprite> PPU::getHighestPrioritySprite(int lcdX) {
+    //Priority is determined first by x-position, then by order in the OAM
     std::shared_ptr<Sprite> highestPriority = nullptr;
     for (const auto &current : spritesNextScanLine) {
         if (current->containsX(lcdX)) {
@@ -336,6 +302,7 @@ std::shared_ptr<Sprite> PPU::getHighestPrioritySprite(int lcdX) {
 }
 
 uint8_t PPU::getSpritePixelColorIndex(const std::shared_ptr<Sprite>& sprite, uint8_t lcdX, uint8_t lcdY) {
+    //If the sprite should be behind the background and the background is not color 0, don't display the pixel
     if ((sprite->backgroundOverSprite()) && (bgWindowColorIndexesThisLine[lcdX] != 0)) { //TODO should this be color index 0 or color 0?
         return 0;
     }
@@ -345,9 +312,52 @@ uint8_t PPU::getSpritePixelColorIndex(const std::shared_ptr<Sprite>& sprite, uin
     return getTilePixelColorIndex(1, tileID, tileX, tileY); //Sprites always use tile set 1
 }
 
+uint8_t PPU::getTileID(uint16_t mapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY) {
+    //Divide by x and y by 8, since the width and height of a tile is 8
+    uint16_t tileAbsoluteX = pixelAbsoluteX / 8;
+    uint16_t tileAbsoluteY = pixelAbsoluteY / 8;
+    uint16_t offset = tileAbsoluteY * 32 + tileAbsoluteX; //Convert from 2D matrix to array index
+    return memory->read(mapStart + offset);
+}
+
+uint8_t PPU::getTilePixelColorIndex(uint8_t tileSet, uint8_t tileId, uint8_t tileX, uint8_t tileY) {
+    uint16_t address;
+
+    //Find the address of the tile with id tileID, depending on addressing mode
+    if (tileSet) {
+        address = tileId * 16 + BG_WINDOW_TILE_DATA1;
+    } else {
+        auto signedID = (int8_t)tileId;
+        address = signedID * 16 + BG_WINDOW_TILE_DATA0;
+    }
+
+    //Pixels in a row are numbered 7 to 0
+    tileX = 7 - tileX;
+
+    //Read the two bytes associated with the correct row of the tile
+    uint8_t lowByte = memory->read(address + tileY * 2);
+    uint8_t highByte = memory->read(address + tileY * 2 + 1);
+
+    //Determine the two bits associated with the correct pixel in the row
+    uint8_t lowBit = (lowByte >> tileX) & 1;
+    uint8_t highBit = (highByte >> tileX) & 1;
+
+    //Combine the two bits to form the color index of the pixel
+    uint8_t pixelColor = (highBit << 1) | lowBit;
+    return pixelColor;
+}
+
 uint8_t PPU::getColor(uint8_t palette, uint8_t colorIndex) {
     uint8_t bitmask = 0b11;
     return ((palette >> 2 * colorIndex) & bitmask);
+}
+
+void PPU::vBlankInterrupt() {
+    memory->raise_interrupt_flag(V_BLANK_IF_BIT);
+}
+
+void PPU::statInterrupt() {
+    memory->raise_interrupt_flag(STAT_IF_BIT);
 }
 
 bool PPU::meetsStatConditions() const {
@@ -359,21 +369,13 @@ bool PPU::meetsStatConditions() const {
     return (lycInterrupt || oamInterrupt || vBlankInterrupt || hBlankInterrupt);
 }
 
-void PPU::vBlankInterrupt() {
-    memory->raise_interrupt_flag(V_BLANK_IF_BIT);
-}
-
-void PPU::statInterrupt() {
-    memory->raise_interrupt_flag(STAT_IF_BIT);
-}
-
-void PPU::dma_transfer(uint8_t data) {
-    if (0x00 <= data && data <= 0xdf) {
-        uint16_t start_addr = (data << 8);
+void PPU::dma_transfer(uint8_t startAddress) {
+    if (0x00 <= startAddress && startAddress <= 0xdf) {
+        uint16_t start_addr = (startAddress << 8);
         for (uint8_t i = 0; i <= 0x9f; i++) {
             this->memory->write(OAM_START + i, this->memory->read(start_addr+i));
         }
     } else {
-        std::cout << "Tried to use DMA transfer with invalid input: " << data << std::endl;
+        std::cout << "Tried to use DMA transfer with invalid input: " << startAddress << std::endl;
     }
 }

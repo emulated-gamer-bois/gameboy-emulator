@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <gtest/gtest.h>
-#include "../src/gameboy/PPU.h"
+#include "../src/gameboy/PPU/PPU.h"
 #include "../src/gameboy/GameBoy.h"
 #include <array>
 #include <cstring>
