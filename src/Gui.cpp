@@ -145,14 +145,14 @@ void Gui::keyBind() {
                     keytaken |= this->settings->keyBinds.controllerButtons[i]->keyval == event.key.keysym.sym;
             }
             if(!keytaken){
-            if (event.type == SDL_KEYDOWN) {
-                this->settings->keyBinds.controllerButtons[keybindindex]->keyval = event.key.keysym.sym;
-                a=true;
-            };
-            if(event.type == SDL_TEXTINPUT){
-                this->settings->keyBinds.controllerButtons[keybindindex]->keybind = event.text.text;
-                b=true;
-            }
+                if (event.type == SDL_KEYDOWN) {
+                    this->settings->keyBinds.controllerButtons[keybindindex]->keyval = event.key.keysym.sym;
+                    a=true;
+                };
+                if(event.type == SDL_TEXTINPUT){
+                    this->settings->keyBinds.controllerButtons[keybindindex]->keybind = event.text.text;
+                    b=true;
+                }
             }
 
         }

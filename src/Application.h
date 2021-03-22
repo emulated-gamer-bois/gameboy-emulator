@@ -26,6 +26,12 @@ public:
 private:
     const static std::string DEFAULT_WINDOW_CAPTION;
 
+    enum State {
+        EMULATION,
+        MENU,
+        TERMINATION
+    } state;
+
     AppSettings settings;
     SDL_Window* window;
     SDL_GLContext glContext;
@@ -34,13 +40,12 @@ private:
     Gui gui = Gui(&settings);
 
     float emulationSpeed;
-    bool emulationPaused;
-    bool running;
 
     void init();
     void initSDL();
     void terminateSDL();
     void handleSDLEvents();
+    void handleEmulatorInput(SDL_Keycode key, int eventType);
     void updateSDLWindowSize();
     void terminate();
     void initSettings();
