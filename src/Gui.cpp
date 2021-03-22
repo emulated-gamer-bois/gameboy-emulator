@@ -49,9 +49,12 @@ void Gui::init(SDL_Window *window) {
 void Gui::showEditControls() {
     ImGui::Begin("Controls", &show_edit_controls);
     for (int i = 0; i < this->controller->nControllers; i++) {
+        ImGui::Spacing();
         ImGui::Text("%s", this->controller->controllerButtons[i]->action_description.c_str());
         ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
-        if (ImGui::Button(this->controller->controllerButtons[i]->keybind.c_str())) {
+        ImVec2 vec(ImGui::GetWindowSize().x*0.25f,ImGui::GetWindowSize().y*0.05f);
+        ImGui::SameLine(ImGui::GetWindowSize().x*0.5f,0);
+        if (ImGui::Button(this->controller->controllerButtons[i]->keybind.c_str(),vec)) {
             showKeyBind(this->controller->controllerButtons[i]->action_description.c_str());
             keybindindex = i;
         }
@@ -127,9 +130,13 @@ void Gui::keyBind() {
 }
 
 void Gui::showKeyBind(const char *buttonName) {
+    ImGuiStyle& style = ImGui::GetStyle();
     std::string buf("Press a button to register a new keybind for ");
     buf.append(buttonName);
     ImGui::Begin("Keybind");
+    ImGui::SetWindowFontScale(1.3);
+    ImGui::SameLine(ImGui::GetWindowSize().x*0.05,0);
+    ImGui::SetCursorPosY(ImGui::GetWindowHeight()*0.3f);
     ImGui::Text("%s", buf.c_str());
     ImGui::End();
     do_keybind = true;
