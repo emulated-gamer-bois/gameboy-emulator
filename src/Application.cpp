@@ -7,20 +7,12 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 
 #include "Application.h"
 #include "AppTimer.h"
-
-#define CONTROLLER_UP SDLK_w
-#define CONTROLLER_DOWN SDLK_s
-#define CONTROLLER_LEFT SDLK_a
-#define CONTROLLER_RIGHT SDLK_d
-#define CONTROLLER_A SDLK_f
-#define CONTROLLER_B SDLK_g
-#define CONTROLLER_START SDLK_h
-#define CONTROLLER_SELECT SDLK_j
-
-// TEMP ----------------------------------------------------------------------------------------------------------------
+#include "Gui.h"
 #include <fstream>
+// TEMP ----------------------------------------------------------------------------------------------------------------
 void TEMP_setTexture(const char* filename, RenderView& rv);
 // END TEMP ------------------------------------------------------------------------------------------------------------
+
 
 const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
 
@@ -40,7 +32,6 @@ Application::Application() {
  */
 void Application::start() {
     this->init();
-
     float frameTime = 1000.f / LCD_REFRESH_RATE;
 
     AppTimer timer;
@@ -54,12 +45,13 @@ void Application::start() {
             this->handleSDLEvents();
             this->gameBoy.step();
         }
-
         // Prepare for rendering, render and swap buffer.
         this->updateSDLWindowSize();
         this->renderView.setScreenTexture(this->gameBoy.getScreenTexture().get());
         this->renderView.render();
-        SDL_GL_SwapWindow(this->window);
+        //TODO Can add some bools or stuff to enable or disable draw_gui, this is just temporary.
+        this->gui.draw_gui(this->window);
+       // SDL_GL_SwapWindow(this->window);
         this->gameBoy.confirmDraw();
 
         // Time application to 60Hz
@@ -69,17 +61,23 @@ void Application::start() {
             std::this_thread::sleep_for(std::chrono::milliseconds(msToSleep));
         }
     }
-
-    terminateSDL();
+    terminate();
 }
 
 void Application::init() {
+    this->controller.init_keybinds();
     this->initSDL();
     this->renderView.initGL();
+    this->gui.init(window);
 
     // TEMP ------------------------------------------------------------------------------------------------------------
-    this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/instr_timing/instr_timing.gb");
+    this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/games/Tetris.gb");
     // END TEMP --------------------------------------------------------------------------------------------------------
+}
+
+void Application::terminate() {
+    this->gui.draw_gui(this->window);
+    terminateSDL();
 }
 
 /*
@@ -102,11 +100,11 @@ void Application::initSDL() {
 
     // Create the window.
     this->window = SDL_CreateWindow(DEFAULT_WINDOW_CAPTION.c_str(),
-                                          SDL_WINDOWPOS_UNDEFINED,
-                                          SDL_WINDOWPOS_UNDEFINED,
-                                          LCD_WIDTH,
-                                          LCD_HEIGHT,
-                                          SDL_WINDOW_OPENGL);
+                                    SDL_WINDOWPOS_UNDEFINED,
+                                    SDL_WINDOWPOS_UNDEFINED,
+                                    LCD_WIDTH,
+                                    LCD_HEIGHT,
+                                    SDL_WINDOW_OPENGL);
     assert(this->window);
 
     // Get gl context and set it to the current context for this window.
@@ -120,10 +118,11 @@ void Application::initSDL() {
     SDL_GL_SetSwapInterval(0);
 
     // Workaround for AMD. Must not be removed.
-    if(!glBindFragDataLocation) {
+    if (!glBindFragDataLocation) {
         glBindFragDataLocation = glBindFragDataLocationEXT;
     }
 }
+
 
 /**
  * Cleans up after SDL.
@@ -133,85 +132,113 @@ void Application::terminateSDL() {
     SDL_Quit();
 }
 
+
 /**
  * Handles SDL Events including keyboard input.
  */
 void Application::handleSDLEvents() {
     SDL_Event event;
+
     while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-            case SDL_QUIT:
-                this->running = false;
-                break;
-            case SDL_KEYDOWN:
-                switch( event.key.keysym.sym ){
-                    case CONTROLLER_LEFT:
-                        this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
-                        break;
-                    case CONTROLLER_RIGHT:
-                        this->gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_PRESS);
-                        break;
-                    case CONTROLLER_UP:
-                        this->gameBoy.joypad_input(JOYPAD_UP, JOYPAD_PRESS);
-                        break;
-                    case CONTROLLER_DOWN:
-                        this->gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_PRESS);
-                        break;
-                    case CONTROLLER_A:
-                        this->gameBoy.joypad_input(JOYPAD_A, JOYPAD_PRESS);
-                        break;
-                    case CONTROLLER_B:
-                        this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_PRESS);
-                        break;
-                    case CONTROLLER_START:
-                        this->gameBoy.joypad_input(JOYPAD_START, JOYPAD_PRESS);
-                        break;
-                    case CONTROLLER_SELECT:
-                        this->gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_PRESS);
-                        break;
-                    // CHOOSE PALETTE
-                    case SDLK_1:
-                        this->renderView.setPalette(PALETTE_DMG_SMOOTH);
-                        break;
-                    case SDLK_2:
-                        this->renderView.setPalette(PALETTE_DMG);
-                        break;
-                    case SDLK_3:
-                        this->renderView.setPalette(PALETTE_POCKET);
-                        break;
-                }
-                break;
-            case SDL_KEYUP:
-                switch( event.key.keysym.sym ){
-                    case CONTROLLER_LEFT:
-                        this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
-                        break;
-                    case CONTROLLER_RIGHT:
-                        this->gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
-                        break;
-                    case CONTROLLER_UP:
-                        this->gameBoy.joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
-                        break;
-                    case CONTROLLER_DOWN:
-                        this->gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
-                        break;
-                    case CONTROLLER_A:
-                        this->gameBoy.joypad_input(JOYPAD_A, JOYPAD_RELEASE);
-                        break;
-                    case CONTROLLER_B:
-                        this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_RELEASE);
-                        break;
-                    case CONTROLLER_START:
-                        this->gameBoy.joypad_input(JOYPAD_START, JOYPAD_RELEASE);
-                        break;
-                    case CONTROLLER_SELECT:
-                        this->gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_RELEASE);
-                        break;
-                }
-                break;
+        SDL_Keycode sym = event.key.keysym.sym;
+        gui.handleInput(event);
+        if (event.type == SDL_QUIT) {
+            this->running = false;
+            break;
         }
+        if (event.type == SDL_KEYDOWN) {
+            if (sym == controller.left.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
+                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
+                break;
+            }
+            if (sym == controller.right.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_PRESS);
+                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
+                break;
+            }
+            if (sym == controller.up.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_UP, JOYPAD_PRESS);
+                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
+                break;
+            }
+            if (sym == controller.down.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_PRESS);
+                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
+                break;
+            }
+            if (sym == controller.a.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_A, JOYPAD_PRESS);
+                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
+                break;
+            }
+            if (sym == controller.b.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_PRESS);
+                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
+                break;
+            }
+
+            if (sym == controller.start.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_START, JOYPAD_PRESS);
+                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
+                break;
+            }
+            if (sym == controller.select.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_PRESS);
+                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
+                break;
+            }
+        }
+        if (event.type == SDL_KEYUP) {
+            if (sym == controller.left.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
+                this->renderView.setPalette(PALETTE_DMG);
+                break;
+            }
+            if (sym == controller.right.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
+                this->renderView.setPalette(PALETTE_DMG);
+                break;
+            }
+            if (sym == controller.up.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
+                this->renderView.setPalette(PALETTE_DMG);
+                break;
+            }
+            if (sym == controller.down.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
+                this->renderView.setPalette(PALETTE_DMG);
+                break;
+            }
+            if (sym == controller.a.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_A, JOYPAD_RELEASE);
+                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
+                break;
+            }
+            if (sym == controller.b.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_B, JOYPAD_RELEASE);
+                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
+                break;
+            }
+
+            if (sym == controller.start.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_START, JOYPAD_RELEASE);
+                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
+                break;
+            }
+            if (sym == controller.select.keyval) {
+                this->gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_RELEASE);
+                this->renderView.setPalette(PALETTE_DMG_SMOOTH);
+                break;
+            }
+        }
+
+        break;
+
     }
+
 }
+
 
 /**
  * Makes sure the window dimensions updates to match changes in RenderView dimensions.
@@ -225,31 +252,9 @@ void Application::updateSDLWindowSize() {
     }
 }
 
-/////////////////////////////////////////////////////////////////////////
-////                           - TEMPORARY -                         ////
-/////////////////////////////////////////////////////////////////////////
-// Manual memory management, no exception handling and global scope.
-void TEMP_setTexture(const char* filename, RenderView& rv) {
-    int pixelAmount = 23040;
-    char* rgbPixels = new char[pixelAmount * 3];
 
-    std::ifstream file(filename, std::ios::in | std::ios::binary);
-    if (file.is_open()) {
-        file.read(rgbPixels, pixelAmount * 3);
-        file.close();
-    }
-    else {
-        delete[] rgbPixels;
-        return;
-    }
 
-    auto* redPixels = new uint8_t[pixelAmount];
-    for (int i = 0; i < pixelAmount; i += 1) {
-        redPixels[i] = rgbPixels[i * 3];
-    }
 
-    rv.setScreenTexture(redPixels);
 
-    delete[] rgbPixels;
-    delete[] redPixels;
-}
+
+
