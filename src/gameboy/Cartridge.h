@@ -10,6 +10,19 @@
 #include <vector>
 
 class Cartridge {
+public:
+    Cartridge();
+    void reset();
+
+    uint8_t read(uint16_t addr) const;
+    void write(uint16_t addr, uint8_t data);
+
+    void write_TEST(uint16_t addr, uint8_t data);
+    bool load_rom(const std::string& filepath);
+
+    // For cartridges with timer
+    void update(uint8_t cycles);
+
 private:
     enum CartridgeType {
         // When adding cartridge support add it to Cartridge::init_mbc()
@@ -47,22 +60,12 @@ private:
     uint8_t cartridge_type;
     uint8_t rom_size;
     uint8_t ram_size;
-    std::shared_ptr<std::vector<uint8_t>> rom;
-    std::shared_ptr<std::vector<uint8_t>> ram;
+    std::vector<uint8_t> rom;
+    std::vector<uint8_t> ram;
     std::unique_ptr<MBC> mbc;
     std::string filepath;
 
     bool init_rom();
     bool init_ram();
     bool init_mbc();
-public:
-    Cartridge();
-    void reset();
-    uint8_t read(uint16_t addr) const;
-    void write(uint16_t addr, uint8_t data);
-    bool load_rom(std::string filepath);
-    void write_TEST(uint16_t addr, uint8_t data);
-
-    // For cartridges with timer
-    void update(uint8_t cycles);
 };

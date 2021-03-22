@@ -19,20 +19,23 @@ public:
 
 class ROM_Only_MBC : public MBC {
 public:
-    explicit ROM_Only_MBC(std::shared_ptr<std::vector<uint8_t>> rom);
+    explicit ROM_Only_MBC(std::vector<uint8_t> *rom);
+
     uint8_t read(uint16_t addr) override;
     void write(uint16_t addr, uint8_t data) override;
     void update(uint8_t cycles) override {}
 
 private:
-    std::shared_ptr<std::vector<uint8_t>> rom;
+    std::vector<uint8_t> *rom;
 };
 
 class MBC1_MBC : public MBC {
 public:
-    MBC1_MBC(std::shared_ptr<std::vector<uint8_t>> rom, std::shared_ptr<std::vector<uint8_t>> ram);
+    MBC1_MBC(std::vector<uint8_t> *rom, std::vector<uint8_t> *ram);
+
     uint8_t read(uint16_t addr) override;
     void write(uint16_t addr, uint8_t data) override;
+
     void update(uint8_t cycles) override {}
 
 private:
@@ -41,13 +44,13 @@ private:
     uint8_t ram_bank_number;
     uint8_t banking_mode;
 
-    std::shared_ptr<std::vector<uint8_t>> rom;
-    std::shared_ptr<std::vector<uint8_t>> ram;
+    std::vector<uint8_t> *rom;
+    std::vector<uint8_t> *ram;
 };
 
 class MBC3_MBC : public MBC {
 public:
-    MBC3_MBC(std::shared_ptr<std::vector<uint8_t>> rom, std::shared_ptr<std::vector<uint8_t>> ram);
+    MBC3_MBC(std::vector<uint8_t> *rom, std::vector<uint8_t> *ram);
     uint8_t read(uint16_t addr) override;
     void write(uint16_t addr, uint8_t data) override;
     void update(uint8_t cycles) override;
@@ -75,6 +78,6 @@ private:
     uint16_t rtc_days_latched;
     uint8_t rtc_days_overflow_latched;
 
-    std::shared_ptr<std::vector<uint8_t>> rom;
-    std::shared_ptr<std::vector<uint8_t>> ram;
+    std::vector<uint8_t> *rom;
+    std::vector<uint8_t> *ram;
 };

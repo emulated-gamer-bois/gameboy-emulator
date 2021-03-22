@@ -245,29 +245,26 @@ void MMU::disable_boot_rom(uint8_t data) {
     }
 }
 
-bool MMU::load_boot_rom(std::string filepath) {
+bool MMU::load_boot_rom(const std::string& filepath) {
     std::streampos size;
-    char *memblock;
 
     std::ifstream file (filepath, std::ios::in|std::ios::binary|std::ios::ate);
     if (file.is_open())
     {
         // Get file size
         size = file.tellg();
-        if ((int)size == 256) {
-            memblock = new char [size];
+        if (static_cast<int>(size) == 256) {
+            std::unique_ptr<char[]> memblock(new char[size]);
 
             // Move seeker to beginning of file
             file.seekg (0, std::ios::beg);
             // Read file to buffer
-            file.read (memblock, size);
+            file.read (memblock.get(), size);
             // Close file
             file.close();
 
             // Copy data
             std::memcpy(&this->boot_rom[this->boot_rom.size() - size], &memblock[0], size);
-
-            delete[] memblock;
         } else {
             std::cout << "Unable to load boot ROM! File size is not 256 bytes!" << std::endl;
             disable_boot_rom(1);

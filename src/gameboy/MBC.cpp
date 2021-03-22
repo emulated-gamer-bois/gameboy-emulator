@@ -15,7 +15,7 @@ uint16_t MBC::ram_bank_mask(uint32_t size) {
 }
 
 // ROM_Only_MBC
-ROM_Only_MBC::ROM_Only_MBC(std::shared_ptr<std::vector<uint8_t>> rom) {
+ROM_Only_MBC::ROM_Only_MBC(std::vector<uint8_t> *rom) {
     this->rom = rom;
 }
 
@@ -28,7 +28,7 @@ void ROM_Only_MBC::write(uint16_t addr, uint8_t data) {
 }
 
 // MBC1
-MBC1_MBC::MBC1_MBC(std::shared_ptr<std::vector<uint8_t>> rom, std::shared_ptr<std::vector<uint8_t>> ram) {
+MBC1_MBC::MBC1_MBC(std::vector<uint8_t> *rom, std::vector<uint8_t> *ram) {
     this->rom = rom;
     this->ram = ram;
 
@@ -47,14 +47,14 @@ uint8_t MBC1_MBC::read(uint16_t addr) {
         // RAM Banking Mode / Advanced ROM Banking Mode
         else if ((this->banking_mode & (1 << 0)) == 1) {
             uint16_t target_bank = (this->ram_bank_number << 5);
-            target_bank &= MBC::rom_bank_mask((uint32_t)rom->size());
+            target_bank &= MBC::rom_bank_mask(static_cast<uint32_t>(this->rom->size()));
             return this->rom->at((addr) + (0x4000 * target_bank));
         }
     } else if (0x4000 <= addr && addr <= 0x7fff) {
         // Set target bank to 1 if it is 0
         uint16_t target_bank = this->rom_bank_number == 0 ? 1 : (this->rom_bank_number & 0x1f);
         target_bank |= (this->ram_bank_number << 5);
-        target_bank &= MBC::rom_bank_mask((uint32_t)rom->size());
+        target_bank &= MBC::rom_bank_mask(static_cast<uint32_t>(this->rom->size()));
         return this->rom->at((addr - 0x4000) + (0x4000 * target_bank));
 
     } else if (0xa000 <= addr && addr <= 0xbfff) {
@@ -67,8 +67,8 @@ uint8_t MBC1_MBC::read(uint16_t addr) {
             if (this->banking_mode == 1) {
                 target_bank = this->ram_bank_number;
             }
-            target_bank &= MBC::ram_bank_mask((uint32_t)ram->size());
-            return this->ram->at((uint16_t)(target + (target_bank * 0x2000)));
+            target_bank &= MBC::ram_bank_mask(static_cast<uint32_t>(this->ram->size()));
+            return this->ram->at(target + static_cast<uint16_t>(target_bank * 0x2000));
         }
     }
     return 0;
@@ -92,8 +92,8 @@ void MBC1_MBC::write(uint16_t addr, uint8_t data) {
             if (this->banking_mode == 1) {
                 target_bank = this->ram_bank_number;
             }
-            target_bank &= MBC::ram_bank_mask((uint32_t)this->ram->size());
-            this->ram->at((uint16_t)(target + (target_bank * 0x2000))) = data;
+            target_bank &= MBC::ram_bank_mask(static_cast<uint32_t>(this->ram->size()));
+            this->ram->at(target + static_cast<uint16_t>(target_bank * 0x2000)) = data;
         }
     } else {
         std::cout << "Tried to write data: " << (int)data << " to addr: " << (int)addr << std::endl;
@@ -101,7 +101,7 @@ void MBC1_MBC::write(uint16_t addr, uint8_t data) {
 }
 
 // MBC3
-MBC3_MBC::MBC3_MBC(std::shared_ptr<std::vector<uint8_t>> rom, std::shared_ptr<std::vector<uint8_t>> ram) {
+MBC3_MBC::MBC3_MBC(std::vector<uint8_t> *rom, std::vector<uint8_t> *ram) {
     this->rom = rom;
     this->ram = ram;
 
@@ -134,7 +134,7 @@ uint8_t MBC3_MBC::read(uint16_t addr) {
         // Set target bank to 1 if it is 0
         uint16_t target_bank = this->rom_bank_number == 0 ? 1 : (this->rom_bank_number & 0x7f);
 
-        target_bank &= MBC::rom_bank_mask((uint32_t)rom->size());
+        target_bank &= MBC::rom_bank_mask(static_cast<uint32_t>(this->rom->size()));
         return this->rom->at((addr - 0x4000) + (0x4000 * target_bank));
     } else if (0xa000 <= addr && addr <= 0xbfff) {
         if (this->ram_timer_enable != 0xa) {
@@ -153,7 +153,7 @@ uint8_t MBC3_MBC::read(uint16_t addr) {
             case 0x2:
             case 0x3:
                 target_bank = this->ram_bank_number_rtc_register_select;
-                target_bank &= MBC::ram_bank_mask((uint32_t)this->ram->size());
+                target_bank &= MBC::ram_bank_mask(static_cast<uint32_t>(this->ram->size()));
                 target = (addr - 0xa000) + (0x2000 * target_bank);
                 return this->ram->at(target);
 
@@ -171,11 +171,11 @@ uint8_t MBC3_MBC::read(uint16_t addr) {
 
             // Lower 8 bits of Day Counter
             case 0xb:
-                return (uint8_t)(this->rtc_days_latched & 0xff);
+                return static_cast<uint8_t>(this->rtc_days_latched & 0xff);
 
             // Upper 1 bit of Day Counter, Carry Bit, Halt Flag
             case 0xc:
-                return (uint8_t) (((this->rtc_days_overflow_latched & (1 << 0)) << 7) |
+                return static_cast<uint8_t>(((this->rtc_days_overflow_latched & (1 << 0)) << 7) |
                        ((this->rtc_halt_latched & (1 << 0)) << 6) |
                        (((this->rtc_days_latched & (1 << 8)) >> 8) << 0));
 
@@ -226,12 +226,12 @@ void MBC3_MBC::write(uint16_t addr, uint8_t data) {
                 this->rtc_hours = data & 0b11111;
                 break;
             case 0xb:
-                this->rtc_days &= ~((uint16_t)0xff);
+                this->rtc_days &= ~(0x00ff);
                 this->rtc_days |= data & 0xff;
                 break;
             case 0xc:
                 this->rtc_days &= 0xff;
-                this->rtc_days |= ((uint16_t)(data & 1)) << 8;
+                this->rtc_days |= (static_cast<uint16_t>(data & 1)) << 8;
 
                 this->rtc_halt = (data & (1 << 6)) >> 6;
 
