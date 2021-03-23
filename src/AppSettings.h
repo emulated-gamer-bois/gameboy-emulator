@@ -7,11 +7,16 @@
 #pragma once
 #include "Keybinds.h"
 #include <string>
+#include "gameboy/Definitions.h"
 
 
 
-struct AppSettings {
+class AppSettings {
+public:
     std::string defaultPath; // The path where the file dialog will always be in when opened.
     Keybinds keyBinds;
     int screenMultiplier;
-};
+    double playSpeed = 1000.f /LCD_REFRESH_RATE;
+    void setPlaySpeed(double speedMultiplier);
+
+    };

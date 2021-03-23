@@ -28,11 +28,11 @@ Application::Application() {
  */
 void Application::start() {
     init();
-    float frameTime = 1000.f / LCD_REFRESH_RATE;
-
+    float  frameTime;
     AppTimer timer;
-
     while (state != State::TERMINATION) {
+         frameTime=settings.playSpeed;
+
         // Create time stamp.
         timer.tick();
         handleSDLEvents();

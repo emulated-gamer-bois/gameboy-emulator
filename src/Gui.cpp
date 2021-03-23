@@ -129,6 +129,7 @@ void Gui::toolbar() {
                     speed += 0.5f;
                     if (ImGui::MenuItem("Speed: ")) {
                         //TODO actually set play speed to something. Settings struct or lambdas.
+                        settings->setPlaySpeed(speed);
                     }
                     ImGui::SameLine();
                     ImGui::Text(i % 2 == 0 ? "%.1f" : "%.0f", speed);
