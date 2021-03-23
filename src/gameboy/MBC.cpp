@@ -20,7 +20,11 @@ ROM_Only_MBC::ROM_Only_MBC(std::vector<uint8_t> *rom) {
 }
 
 uint8_t ROM_Only_MBC::read(uint16_t addr) {
-    return this->rom->at(addr);
+    if (0x0000 <= addr && addr <= 0x7fff) {
+        return this->rom->at(addr);
+    } else if (0xa000 <= addr && addr <= 0xbfff) {
+        return 0xff;
+    }
 }
 
 void ROM_Only_MBC::write(uint16_t addr, uint8_t data) {

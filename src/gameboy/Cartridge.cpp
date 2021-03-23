@@ -74,6 +74,28 @@ bool Cartridge::load_rom(const std::string& filepath) {
     }
 }
 
+bool Cartridge::save_ram() {
+    // Return if Cartridge have no RAM
+    if (this->ram_size == Cartridge::RAM_NO_RAM) {
+        return true;
+    }
+    // Create file
+    std::ofstream wfile (this->filepath + ".sav", std::ios::out|std::ios::binary|std::ios::ate);
+    if(!wfile) {
+        std::cout << "Cannot open file!" << std::endl;
+        return false;
+    }
+    // Write to file
+    wfile.write(reinterpret_cast<const char *>(this->ram.data()), this->ram.size());
+    wfile.close();
+
+    if(!wfile.good()) {
+        std::cout << "Error occurred at writing time!" << std::endl;
+        return false;
+    }
+    return true;
+}
+
 bool Cartridge::init_rom() {
     switch (this->rom_size)
     {
@@ -117,7 +139,7 @@ bool Cartridge::init_ram() {
     switch (this->ram_size)
     {
         case RAM_NO_RAM:
-            // Should be just a nullptr, but for security add accessible memory
+            // Should be empty ram, but for security add accessible memory
         case RAM_8KB:
             this->ram = std::vector<uint8_t>(0x2000);
             break;

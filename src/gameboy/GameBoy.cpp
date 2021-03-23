@@ -84,3 +84,11 @@ bool GameBoy::isReadyToDraw() const {
 void GameBoy::confirmDraw() {
     this->ppu->confirmDraw();
 }
+
+bool GameBoy::save() {
+    // Save RAM to separate file
+    if (!this->cartridge->save_ram()) {
+        return false;
+    }
+    return true;
+}
