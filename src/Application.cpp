@@ -161,7 +161,9 @@ void Application::handleSDLEvents() {
                     gui.toggleToolbar();
                     state = (state == State::EMULATION) ? State::MENU : State::EMULATION;
                 }
-
+                if (key == SDLK_SPACE) {
+                    settings.setPlaySpeed(2);
+                }
                 if (state == State::EMULATION) {
                     handleEmulatorInput(key, JOYPAD_PRESS);
                 }
@@ -179,6 +181,9 @@ void Application::handleSDLEvents() {
             case SDL_KEYUP:
                 if (state == State::EMULATION) {
                     handleEmulatorInput(key, JOYPAD_RELEASE);
+                }
+                if (key == SDLK_SPACE) {
+                    settings.setPlaySpeed(1);
                 }
                 break;
         }
