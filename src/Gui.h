@@ -13,12 +13,11 @@
 class Gui {
 public:
     Gui(AppSettings * settings);
-    void init(SDL_Window *window);
+    void init(SDL_Window *window, SDL_GLContext *glContext,char *glsl_version);
     void handleGui(SDL_Window *window);
     void terminate(SDL_Window *window);
     void handleInput(SDL_Event event);
     AppSettings * settings;
-
     void toggleToolbar();
 
 private:
@@ -34,9 +33,6 @@ private:
     bool typing;
     bool do_keybind;
     void toolbar();
-
     void showFileDialog();
-    void testkeyboard();
-    int savekeybind();
 };
 

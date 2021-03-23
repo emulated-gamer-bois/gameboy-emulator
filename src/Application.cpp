@@ -65,11 +65,10 @@ void Application::start() {
 
     terminate();
 }
-
 void Application::init() {
     initSDL();
     renderView.initGL();
-    gui.init(window);
+    gui.init(window,&glContext,"#version 130"); // GLSL version
 
     // TEMP ------------------------------------------------------------------------------------------------------------
     gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/games/Tetris.gb");

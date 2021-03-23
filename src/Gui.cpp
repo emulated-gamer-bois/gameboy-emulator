@@ -5,12 +5,10 @@
 #include "Gui.h"
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <iostream>
 #include <optional>
 #include "FileHelper.h"
-#include "imgui_impl_sdl_gl3.h"
-#include "Application.h" // TODO: Gui and application should not both depend on eachother.
-
+#include "imgui_impl_sdl.h"
+#include "imgui_impl_opengl3.h"
 /**
  * Constructor
  */
@@ -25,21 +23,35 @@ Gui::Gui(AppSettings * settings) {
 
 /**
  */
-void Gui::init(SDL_Window *window) {
-    ImGui_ImplSdlGL3_Init(window);
+void Gui::init(SDL_Window *window,SDL_GLContext *glContext, char * glsl_version) {
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    this->io = ImGui::GetIO();
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsClassic();
+    // Setup Platform/Renderer backends
+    ImGui_ImplSDL2_InitForOpenGL(window, glContext);
+    ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
 /**
  */
 void Gui::handleGui(SDL_Window *window) {
-
-    // Inform imgui of new frame
-    ImGui_ImplSdlGL3_NewFrame(window);
+    //Inits new frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame(window);
+    ImGui::NewFrame();
+    //Call ImGui
     if (displayToolbar) { toolbar(); }
     if (displayEditControls) { showEditControls(); }
     if (displayFileDialog) { showFileDialog(); }
-
+    //Render ImGui
     ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     SDL_GL_SwapWindow(window);
     if (do_keybind) {
         keyBind();
@@ -50,14 +62,15 @@ void Gui::handleGui(SDL_Window *window) {
  * Cleans up after ImGui.
  */
 void Gui::terminate(SDL_Window *window) {
-    ImGui_ImplSdlGL3_NewFrame(window); // If newframe is not ever run before shut down we crash.
-    ImGui_ImplSdlGL3_Shutdown();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
 }
 
 /**
  */
 void Gui::handleInput(SDL_Event event) {
-    ImGui_ImplSdlGL3_ProcessEvent(&event);
+    ImGui_ImplSDL2_ProcessEvent(&event);
 }
 
 /**
