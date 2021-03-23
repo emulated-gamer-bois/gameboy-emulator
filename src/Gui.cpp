@@ -6,20 +6,46 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <iostream>
-#include <array>
+#include <optional>
 #include "FileHelper.h"
 #include "imgui_impl_sdl_gl3.h"
+#include "Application.h" // TODO: Gui and application should not both depend on eachother.
 
-void showEditControls(bool &show);
-
-void toolbar();
-
-bool show_edit_controls = false;
-bool show_toolbar = true;
-bool do_keybind = false;
-Gui::Gui(Keybinds * controller) {
-    this->controller = controller;
+/**
+ * Constructor
+ */
+Gui::Gui(AppSettings * settings) {
+    this->settings = settings;
+    displayEditControls = false;
+    displayFileDialog = false;
+    displayToolbar = false;
+    do_keybind =false;
+    typing = false;
 }
+
+/**
+ */
+void Gui::init(SDL_Window *window) {
+    ImGui_ImplSdlGL3_Init(window);
+}
+
+/**
+ */
+void Gui::handleGui(SDL_Window *window) {
+
+    // Inform imgui of new frame
+    ImGui_ImplSdlGL3_NewFrame(window);
+    if (displayToolbar) { toolbar(); }
+    if (displayEditControls) { showEditControls(); }
+    if (displayFileDialog) { showFileDialog(); }
+
+    ImGui::Render();
+    SDL_GL_SwapWindow(window);
+    if (do_keybind) {
+        keyBind();
+    }
+}
+
 /**
  * Cleans up after ImGui.
  */
@@ -28,46 +54,55 @@ void Gui::terminate(SDL_Window *window) {
     ImGui_ImplSdlGL3_Shutdown();
 }
 
-void Gui::draw_gui(SDL_Window *window) {
-
-    // Inform imgui of new frame
-    ImGui_ImplSdlGL3_NewFrame(window);
-    if (show_toolbar) { toolbar(); }
-    if (show_edit_controls) { showEditControls(); }
-    ImGui::Render();
-    SDL_GL_SwapWindow(window);
-    if (do_keybind) {
-        keyBind();
-    }
+/**
+ */
+void Gui::handleInput(SDL_Event event) {
+    ImGui_ImplSdlGL3_ProcessEvent(&event);
 }
 
-void Gui::init(SDL_Window *window) {
-    ImGui_ImplSdlGL3_Init(window);
-
-}
+/**
+ * Toggles the toolbar.
+ */
+ void Gui::toggleToolbar() {
+     this->displayToolbar = !this->displayToolbar;
+     if (!this->displayToolbar) {
+         // Disable all widgets
+         this->displayEditControls = false;
+         this->displayFileDialog = false;
+         //TODO disable everything.
+     }
+ }
 
 void Gui::showEditControls() {
-    ImGui::Begin("Controls", &show_edit_controls);
-    for (int i = 0; i < this->controller->nControllers; i++) {
+    ImGui::Begin("Controls", &displayEditControls);
+    for (int i = 0; i < this->settings->keyBinds.nControllers; i++) {
         ImGui::Spacing();
-        ImGui::Text("%s", this->controller->controllerButtons[i]->action_description.c_str());
+        ImGui::Text("%s", this->settings->keyBinds.controllerButtons[i]->action_description.c_str());
         ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
         ImVec2 vec(ImGui::GetWindowSize().x*0.25f,ImGui::GetWindowSize().y*0.05f);
         ImGui::SameLine(ImGui::GetWindowSize().x*0.5f,0);
-        if (ImGui::Button(this->controller->controllerButtons[i]->keybind.c_str(),vec)) {
-            showKeyBind(this->controller->controllerButtons[i]->action_description.c_str());
+        if (ImGui::Button(this->settings->keyBinds.controllerButtons[i]->keybind.c_str(),vec)) {
+            showKeyBind(this->settings->keyBinds.controllerButtons[i]->action_description.c_str());
             keybindindex = i;
         }
     }
     ImGui::End();
 }
 
-void toolbar() {
+void Gui::showFileDialog() {
+    ImGui::Begin("Load ROM", &displayFileDialog);
+    auto parentPath = FileHelper::getCurrentDir(settings->defaultPath);
+    if (parentPath != std::nullopt) {
+        ImGui::Text("%s",parentPath->absolutePath.c_str());
+    }
+    ImGui::End();
+}
 
+void Gui::toolbar() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Load ROM", "")) {
-                FileHelper::getParentDir("..");
+                displayFileDialog = true;
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Edit", "")) {}
@@ -80,16 +115,15 @@ void toolbar() {
                 for (int i = 0; i < 4; i++) {
                     speed += 0.5f;
                     if (ImGui::MenuItem("Speed: ")) {
-                        //TODO actually set play speed to something.
+                        //TODO actually set play speed to something. Settings struct or lambdas.
                     }
                     ImGui::SameLine();
                     ImGui::Text(i % 2 == 0 ? "%.1f" : "%.0f", speed);
-
                 }
                 ImGui::EndMenu();
             }
             if (ImGui::MenuItem("Keybinds")) {
-                show_edit_controls = !show_edit_controls;
+                displayEditControls = !displayEditControls;
             }
             ImGui::EndMenu();
 
@@ -98,9 +132,6 @@ void toolbar() {
     }
 }
 
-void Gui::handleInput(SDL_Event event) {
-    ImGui_ImplSdlGL3_ProcessEvent(&event);
-}
 
 void Gui::keyBind() {
     SDL_Event event;
@@ -109,19 +140,19 @@ void Gui::keyBind() {
     while (!(b&a)) {
         while (SDL_PollEvent(&event)) {
             bool keytaken=false;
-            for(int i=0;i< this->controller->nControllers;i++){
+            for(int i=0;i< this->settings->keyBinds.nControllers;i++){
                 if(i!=keybindindex)
-                    keytaken |= this->controller->controllerButtons[i]->keyval == event.key.keysym.sym;
+                    keytaken |= this->settings->keyBinds.controllerButtons[i]->keyval == event.key.keysym.sym;
             }
             if(!keytaken){
-            if (event.type == SDL_KEYDOWN) {
-                this->controller->controllerButtons[keybindindex]->keyval = event.key.keysym.sym;
-                a=true;
-            };
-            if(event.type == SDL_TEXTINPUT){
-                this->controller->controllerButtons[keybindindex]->keybind = event.text.text;
-                b=true;
-            }
+                if (event.type == SDL_KEYDOWN) {
+                    this->settings->keyBinds.controllerButtons[keybindindex]->keyval = event.key.keysym.sym;
+                    a=true;
+                };
+                if(event.type == SDL_TEXTINPUT){
+                    this->settings->keyBinds.controllerButtons[keybindindex]->keybind = event.text.text;
+                    b=true;
+                }
             }
 
         }
@@ -141,6 +172,7 @@ void Gui::showKeyBind(const char *buttonName) {
     ImGui::End();
     do_keybind = true;
 }
+
 
 
 
