@@ -62,7 +62,7 @@ void GameBoy::load_rom(std::string bootFilepath, std::string romFilepath) {
     if (!this->mmu->load_boot_rom(bootFilepath)) {
         this->cpu->skipBootRom();
     }
-    this->on = this->cartridge->load_rom(romFilepath);
+    this->on = this->cartridge->load_rom(romFilepath, true);
 }
 
 void GameBoy::load_game_rom(std::string filepath) {
