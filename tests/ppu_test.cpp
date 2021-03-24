@@ -321,7 +321,7 @@ void assertTile00(std::shared_ptr<PPU> & ppu, std::array<char, 64> tile) {
 TEST(PPU, Read_single_tile_no_scrolling) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::shared_ptr<PPU> ppu( new PPU(mmu));
-    mmu->link_devices(ppu, nullptr, nullptr, nullptr);
+    mmu->link_devices(ppu, nullptr, nullptr, nullptr, nullptr);
 
     //Set LCDC to use tile map 0 and 8000 addressing mode
     mmu->write(LCDC_ADDRESS, 0x91);
@@ -342,7 +342,7 @@ TEST(PPU, Read_single_tile_no_scrolling) {
 TEST(PPU, Tile_map_1) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::shared_ptr<PPU> ppu( new PPU(mmu));
-    mmu->link_devices(ppu, nullptr, nullptr, nullptr);
+    mmu->link_devices(ppu, nullptr, nullptr, nullptr, nullptr);
 
     //Set LCDC to use tile map 1 and 8000 addressing mode
     mmu->write(LCDC_ADDRESS, 0x99);
@@ -363,7 +363,7 @@ TEST(PPU, Tile_map_1) {
 TEST(PPU, Tile_set_0) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::shared_ptr<PPU> ppu( new PPU(mmu));
-    mmu->link_devices(ppu, nullptr, nullptr, nullptr);
+    mmu->link_devices(ppu, nullptr, nullptr, nullptr, nullptr);
 
     //Set LCDC to use tile map 1 and 9000 addressing mode
     mmu->write(LCDC_ADDRESS, 0x89);
@@ -384,7 +384,7 @@ TEST(PPU, Tile_set_0) {
 TEST(PPU, Read_single_tile_scrolling_x) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::shared_ptr<PPU> ppu( new PPU(mmu));
-    mmu->link_devices(ppu, nullptr, nullptr, nullptr);
+    mmu->link_devices(ppu, nullptr, nullptr, nullptr, nullptr);
 
     //Set LCDC to use tile map 0 and 8000 addressing mode
     mmu->write(LCDC_ADDRESS, 0x91);
@@ -417,7 +417,7 @@ TEST(PPU, Read_single_tile_scrolling_x) {
 TEST(PPU, Many_tiles) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::shared_ptr<PPU> ppu( new PPU(mmu));
-    mmu->link_devices(ppu, nullptr, nullptr, nullptr);
+    mmu->link_devices(ppu, nullptr, nullptr, nullptr, nullptr);
 
     //Set LCDC to use tile map 0 and 8000 addressing mode
     mmu->write(LCDC_ADDRESS, 0x91);
@@ -457,7 +457,7 @@ TEST(PPU, Many_tiles) {
 TEST(PPU, window) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::shared_ptr<PPU> ppu( new PPU(mmu));
-    mmu->link_devices(ppu, nullptr, nullptr, nullptr);
+    mmu->link_devices(ppu, nullptr, nullptr, nullptr, nullptr);
 
     //Set LCDC to use window tile map 0 and 8000 addressing mode with window enabled. BG tile map 1.
     mmu->write(LCDC_ADDRESS, 0xB9);
