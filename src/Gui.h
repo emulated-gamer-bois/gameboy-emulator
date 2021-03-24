@@ -15,24 +15,25 @@ public:
     Gui(AppSettings * settings);
     void init(SDL_Window *window, SDL_GLContext *glContext,char *glsl_version);
     void handleGui(SDL_Window *window);
-    void terminate(SDL_Window *window);
+    void terminate();
     void handleInput(SDL_Event event);
     AppSettings * settings;
     void toggleToolbar();
 
 private:
-    ImGuiIO * io;
     void showEditControls();
     void keyBind();
     int keybindindex;
-    void showKeyBind(const char *buttonName);
 
     bool displayEditControls;
     bool displayFileDialog;
     bool displayToolbar;
-    bool typing;
-    bool do_keybind;
+    bool waitingForKeyBind;
     void toolbar();
     void showFileDialog();
+    const ImVec4 pressColor{ 0.0f, 0.217f, 1.0f, 0.784f };
+    const ImVec4 releaseColor{ 0.202f, 0.549f, 0.798f, 0.784f };
+
+    void disableWidgets();
 };
 
