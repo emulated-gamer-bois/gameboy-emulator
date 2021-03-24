@@ -72,9 +72,22 @@ uint8_t MMU::read(uint16_t addr) {
         return this->ram[addr - WRAM_START];
     }
 
+    //ECHO RAM
+    if (ECHO_RAM_START <= addr && addr <= ECHO_RAM_END) {
+        //TODO What is intended behaviour?
+        std::cout << "Tried to read from echo RAM. addr: " << (int)addr << std::endl;
+        return 0;
+    }
+
     // OAM
     if (OAM_START <= addr && addr <= OAM_END) {
         return this->oam[addr - OAM_START];
+    }
+
+    // PROHIBITED
+    if (PROHIBITED_START <= addr && addr <= PROHIBITED_END) {
+        std::cout << "Tried to read from prohibited memory area. addr: " << (int)addr << std::endl;
+        return 0;
     }
 
     // I/O
@@ -161,9 +174,22 @@ void MMU::write(uint16_t addr, uint8_t data) {
         return;
     }
 
+    //ECHO RAM
+    if (ECHO_RAM_START <= addr && addr <= ECHO_RAM_END) {
+        //TODO What is intended behaviour?
+        std::cout << "Tried to write to echo RAM. addr: " << (int)addr << " data: " << (int)data << std::endl;
+        return;
+    }
+
     // OAM
     if (OAM_START <= addr && addr <= OAM_END) {
         this->oam[addr - OAM_START] = data;
+        return;
+    }
+
+    // PROHIBITED
+    if (PROHIBITED_START <= addr && addr <= PROHIBITED_END) {
+        std::cout << "Tried to write to prohibited memory area. addr: " << (int)addr << " data: " << (int)data << std::endl;
         return;
     }
 

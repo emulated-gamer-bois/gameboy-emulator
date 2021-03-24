@@ -20,4 +20,4 @@ add_library( ${PROJECT_NAME}
         Cartridge.h
         Cartridge.cpp
         MBC.h
-        MBC.cpp)
+        MBC.cpp APU/APU.cpp APU/APU.h)
