@@ -21,7 +21,7 @@ public:
     void toggleToolbar();
 
 private:
-    ImGuiIO io;
+    ImGuiIO * io;
     void showEditControls();
     void keyBind();
     int keybindindex;

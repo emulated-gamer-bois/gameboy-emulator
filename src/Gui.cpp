@@ -6,6 +6,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <optional>
+#include <iostream>
 #include "FileHelper.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
@@ -27,7 +28,7 @@ void Gui::init(SDL_Window *window,SDL_GLContext *glContext, char * glsl_version)
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    this->io = ImGui::GetIO();
+    this->io = &ImGui::GetIO();
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     // Setup Dear ImGui style
@@ -52,6 +53,7 @@ void Gui::handleGui(SDL_Window *window) {
     //Render ImGui
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    //TODO move to application
     SDL_GL_SwapWindow(window);
     if (do_keybind) {
         keyBind();
@@ -71,6 +73,8 @@ void Gui::terminate(SDL_Window *window) {
  */
 void Gui::handleInput(SDL_Event event) {
     ImGui_ImplSDL2_ProcessEvent(&event);
+   // ImGui::CaptureKeyboardFromApp(true);
+
 }
 
 /**
@@ -148,30 +152,24 @@ void Gui::toolbar() {
 
 
 void Gui::keyBind() {
-    SDL_Event event;
-    bool a = false;
-    bool b = false;
-    while (!(b&a)) {
-        while (SDL_PollEvent(&event)) {
-            bool keytaken=false;
-            for(int i=0;i< this->settings->keyBinds.nControllers;i++){
-                if(i!=keybindindex)
-                    keytaken |= this->settings->keyBinds.controllerButtons[i]->keyval == event.key.keysym.sym;
-            }
-            if(!keytaken){
-                if (event.type == SDL_KEYDOWN) {
-                    this->settings->keyBinds.controllerButtons[keybindindex]->keyval = event.key.keysym.sym;
-                    a=true;
-                };
-                if(event.type == SDL_TEXTINPUT){
-                    this->settings->keyBinds.controllerButtons[keybindindex]->keybind = event.text.text;
-                    b=true;
-                }
-            }
 
+    for(int i =0;i<512;i++) {
+        if (io->KeysDown[i]) {
+            bool keytaken = false;
+            for (int j = 0; j < this->settings->keyBinds.nControllers; j++) {
+                if (j != keybindindex)
+                    keytaken |= this->settings->keyBinds.controllerButtons[j]->keyval == SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(i));
+            }
+            if (!keytaken) {
+                this->settings->keyBinds.controllerButtons[keybindindex]->keybind = SDL_GetScancodeName(
+                        static_cast<SDL_Scancode>(i));
+                this->settings->keyBinds.controllerButtons[keybindindex]->keyval = SDL_GetKeyFromScancode(
+                        static_cast<SDL_Scancode>(i));
+                this->do_keybind = false;
+
+            }
         }
     }
-    do_keybind = false;
 }
 
 void Gui::showKeyBind(const char *buttonName) {
