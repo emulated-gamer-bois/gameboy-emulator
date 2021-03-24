@@ -1,16 +1,30 @@
-//
-// Created by Andreas on 2021-03-24.
-//
+#pragma once
 
-#ifndef LAME_BOY_FILEEXPLORER_H
-#define LAME_BOY_FILEEXPLORER_H
+#include <string>
+#include <vector>
+#include <regex>
 
-
-
-class FileExplorer {
-
+struct FileEntry {
+    std::string filename;
+    std::string absolutePath;
+    bool isDir;
 };
 
+class FileExplorer {
+private:
+    std::string currentDir;
+    std::regex filter;
+    std::vector<FileEntry> fileEntryList;
 
+    void listDir();
 
-#endif //LAME_BOY_FILEEXPLORER_H
+public:
+    explicit FileExplorer(std::string&& startDir);
+
+    void setCurrentDir(std::string&& currentDir);
+    void setFilter(const std::string& filter);
+    [[nodiscard]] const std::vector<FileEntry>* getDirContents() const;
+
+    void moveTo(const FileEntry& dir);
+    void moveBack();
+};

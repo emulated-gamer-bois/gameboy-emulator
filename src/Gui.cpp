@@ -7,7 +7,7 @@
 #include <imgui_internal.h>
 #include <optional>
 #include <iostream>
-#include "FileHelper.h"
+#include "FileExplorer.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 /**
@@ -108,9 +108,8 @@ void Gui::showEditControls() {
 
 void Gui::showFileDialog() {
     ImGui::Begin("Load ROM", &displayFileDialog);
-    auto parentPath = FileHelper::getCurrentDir(settings->defaultPath);
-    if (parentPath != std::nullopt) {
-        ImGui::Text("%s",parentPath->absolutePath.c_str());
+    if (ImGui::BeginListBox("nut")) {
+        ImGui::EndListBox();
     }
     ImGui::End();
 }

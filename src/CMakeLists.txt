@@ -25,8 +25,8 @@ if(NOT TRAVIS)
         Palette.h
         AppTimer.h
         AppTimer.cpp
-        FileHelper.h
-        FileHelper.cpp
+        FileExplorer.h
+        FileExplorer.cpp
         Gui.cpp
         Gui.h
         Keybinds.cpp
