@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Cartridge.h"
+#include "APU/APU.h"
 #include <cstdint>
 #include <array> // array
 #include <string> // string
@@ -65,7 +66,7 @@ public:
     void raise_interrupt_flag(uint8_t bitmask);
     void clear_interrupt_flag(uint8_t bitmask);
 
-    void link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer, std::shared_ptr<Cartridge> cartridge);
+    void link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<APU> apu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer, std::shared_ptr<Cartridge> cartridge);
 
     bool load_boot_rom(const std::string& filepath);
 

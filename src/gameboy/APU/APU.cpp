@@ -9,7 +9,7 @@ APU::APU(std::shared_ptr<MMU> memory) {
     this->reset();
 }
 
-uint8_t APU::read(uint16_t address) {
+uint8_t APU::read(uint16_t address) const {
     if (IO_WAVEFORM_RAM_START <= address && address <= IO_WAVEFORM_RAM_END) {
         return this->wavePatternRAM[address - IO_WAVEFORM_RAM_START];
     }

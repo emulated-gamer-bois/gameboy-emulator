@@ -38,6 +38,8 @@
 #include <iostream>
 #include "../MMU.h"
 
+class MMU;
+
 class APU {
 private:
     std::shared_ptr<MMU> memory;
@@ -71,7 +73,7 @@ private:
 public:
     explicit APU(std::shared_ptr<MMU> memory);
 
-    uint8_t read(uint16_t address);
+    uint8_t read(uint16_t address) const;
     void write(uint16_t address, uint8_t data);
 
     void reset();

@@ -38,6 +38,7 @@ private:
     std::shared_ptr<MMU> mmu;
     std::unique_ptr<CPU> cpu;
     std::shared_ptr<PPU> ppu;
+    std::shared_ptr<APU> apu;
 
     std::shared_ptr<Joypad> joypad;
     std::shared_ptr<Timer> timer;

@@ -13,7 +13,8 @@ GameBoy::GameBoy() {
 
     this->cpu = std::make_unique<CPU>(0x0000, 0xFFFE, mmu);
     this->ppu = std::make_shared<PPU>(mmu);
-    this->mmu->link_devices(this->ppu, this->joypad, this->timer, this->cartridge);
+    this->apu = std::make_shared<APU>(mmu);
+    this->mmu->link_devices(this->ppu, this->apu, this->joypad, this->timer, this->cartridge);
     this->on = false;
 }
 
