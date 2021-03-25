@@ -50,7 +50,7 @@ void Application::start() {
         timer.tick();
 
         // Update emulation
-        while (!this->gameBoy.isReadyToDraw() && this->gameBoy.isReadyToPlaySound()) {
+        while (!this->gameBoy.isReadyToDraw() /*&& this->gameBoy.isReadyToPlaySound()*/) {
             this->handleSDLEvents();
             this->gameBoy.step();
         }
@@ -63,7 +63,7 @@ void Application::start() {
         this->gameBoy.confirmDraw();
 
         //Play audio
-        this->audio.playBuffers(this->gameBoy.getAudioBuffers());
+        //this->audio.playBuffers(this->gameBoy.getAudioBuffers());
 
         // Time application to 60Hz
         float msSinceTick = timer.msSinceTick();

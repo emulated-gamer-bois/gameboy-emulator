@@ -5,8 +5,8 @@
 #ifndef LAME_BOY_AUDIOCONTROLLER_H
 #define LAME_BOY_AUDIOCONTROLLER_H
 
-#include <AL/alc.h>
-#include <AL/al.h>
+#include <alc.h>
+#include <al.h>
 #include <iostream>
 
 class AudioController {
