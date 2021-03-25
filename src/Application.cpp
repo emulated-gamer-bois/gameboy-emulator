@@ -28,10 +28,9 @@ Application::Application() {
  */
 void Application::start() {
     init();
-    float  frameTime;
+    float frameTime= 1000.f /LCD_REFRESH_RATE;
     AppTimer timer;
     while (state != State::TERMINATION) {
-         frameTime=settings.playSpeed;
 
         // Create time stamp.
         timer.tick();
@@ -49,7 +48,9 @@ void Application::start() {
         updateSDLWindowSize();
         renderView.render();
         // TODO: only handle gui if state == State::MENU
-        gui.handleGui(window);
+        if(state == State::MENU){
+            gui.handleGui(window);
+        }
          SDL_GL_SwapWindow(window);
         // TODO: find a better way to handle texture fetching than needing to call gameBoy.confirmDraw()
         gameBoy.confirmDraw();

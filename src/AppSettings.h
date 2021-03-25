@@ -17,6 +17,6 @@ public:
     Keybinds keyBinds;
     int screenMultiplier;
     double playSpeed = 1000.f /LCD_REFRESH_RATE;
-    void setPlaySpeed(double speedMultiplier);
+    void setPlaySpeed(int speedMultiplier);
 
     };
