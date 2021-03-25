@@ -15,7 +15,7 @@ if(NOT TRAVIS)
     source_group("Shaders" FILES ${SHADERS})
 
     set(OPENAL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external_src/openal-soft/include/AL")
-    set(OPENAL_LIBRARY "${CMAKE_SOURCE_DIR}/external_src/openal-soft")
+    set(OPENAL_LIBRARY "${CMAKE_SOURCE_DIR}/external/openal/OpenAL32.lib")
     find_package ( OpenAL REQUIRED )
 
     # Build and link executable.
@@ -29,8 +29,8 @@ if(NOT TRAVIS)
         Palette.h
         AppTimer.h
         AppTimer.cpp
-            AudioController.h
-            AudioController.cpp)
+        AudioController.h
+        AudioController.cpp)
 
     target_include_directories ( ${PROJECT_NAME}
             PUBLIC
