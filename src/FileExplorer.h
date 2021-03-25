@@ -19,11 +19,10 @@ private:
     void listDir();
 
 public:
-    explicit FileExplorer(std::string&& startDir);
-
-    void setCurrentDir(std::string&& currentDir);
+    void setCurrentDir(std::string currentDir);
     void setFilter(const std::string& filter);
-    [[nodiscard]] const std::vector<FileEntry>* getDirContents() const;
+    [[nodiscard]] const std::string& getCurrentDir() const;
+    [[nodiscard]] const std::vector<FileEntry>& getDirContents() const;
 
     void moveTo(const FileEntry& dir);
     void moveBack();

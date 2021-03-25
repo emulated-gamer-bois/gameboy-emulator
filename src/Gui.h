@@ -6,8 +6,9 @@
 
 #include <SDL.h>
 #include <imgui.h>
-#include "Keybinds.h"
 
+#include "Keybinds.h"
+#include "FileExplorer.h"
 #include "AppSettings.h"
 
 class Gui {
@@ -22,6 +23,7 @@ public:
 
 private:
     ImGuiIO * io;
+    FileExplorer fileExplorer;
     void showEditControls();
     void keyBind();
     int keybindindex;

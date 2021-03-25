@@ -3,11 +3,11 @@
 //
 
 #include "Gui.h"
+
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <optional>
 #include <iostream>
-#include "FileExplorer.h"
+
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 /**
@@ -25,6 +25,9 @@ Gui::Gui(AppSettings * settings) {
 /**
  */
 void Gui::init(SDL_Window *window,SDL_GLContext *glContext, char * glsl_version) {
+    fileExplorer.setCurrentDir(settings->defaultPath);
+    fileExplorer.setFilter(".[a-z0-9]*");
+
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -108,6 +111,7 @@ void Gui::showEditControls() {
 
 void Gui::showFileDialog() {
     ImGui::Begin("Load ROM", &displayFileDialog);
+    ImGui::Text(fileExplorer.getCurrentDir().c_str());
     if (ImGui::BeginListBox("nut")) {
         ImGui::EndListBox();
     }

@@ -39,12 +39,7 @@ void FileExplorer::listDir() {
     sort(fileEntryList.begin(), fileEntryList.end(), comparator);
 }
 
-FileExplorer::FileExplorer(std::string&& startDir) {
-    setCurrentDir(std::move(startDir));
-    filter = ".[a-z1-9]*";
-}
-
-void FileExplorer::setCurrentDir(std::string&& currentDir) {
+void FileExplorer::setCurrentDir(std::string currentDir) {
     // Check if path is valid.
     if (!filesystem::exists(currentDir)) {
         cerr << "FileHelper ERROR: Invalid path" << endl;
@@ -57,7 +52,7 @@ void FileExplorer::setCurrentDir(std::string&& currentDir) {
         return;
     }
 
-    this->currentDir = std::move(currentDir);
+    this->currentDir = currentDir;
 }
 
 void FileExplorer::setFilter(const std::string& filter) {
@@ -72,8 +67,12 @@ void FileExplorer::setFilter(const std::string& filter) {
     this->filter = std::move(r);
 }
 
-const std::vector<FileEntry>* FileExplorer::getDirContents() const {
-    return &fileEntryList;
+const std::string& FileExplorer::getCurrentDir() const {
+    return currentDir;
+}
+
+const std::vector<FileEntry>& FileExplorer::getDirContents() const {
+    return fileEntryList;
 }
 
 void FileExplorer::moveTo(const FileEntry& dir) {
