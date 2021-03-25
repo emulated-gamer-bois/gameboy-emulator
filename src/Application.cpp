@@ -50,8 +50,7 @@ void Application::start() {
         renderView.render();
         // TODO: only handle gui if state == State::MENU
         gui.handleGui(window);
-        // TODO: buffer should be swapped here.
-        // SDL_GL_SwapWindow(window);
+         SDL_GL_SwapWindow(window);
         // TODO: find a better way to handle texture fetching than needing to call gameBoy.confirmDraw()
         gameBoy.confirmDraw();
 

@@ -15,11 +15,7 @@
  */
 Gui::Gui(AppSettings * settings) {
     this->settings = settings;
-    displayEditControls = false;
-    displayFileDialog = false;
-    displayToolbar = false;
-    do_keybind =false;
-    typing = false;
+    disableWidgets();
 }
 
 /**
@@ -31,13 +27,8 @@ void Gui::init(SDL_Window *window,SDL_GLContext *glContext, char * glsl_version)
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    this->io = &ImGui::GetIO();
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsClassic();
-    // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForOpenGL(window, glContext);
     ImGui_ImplOpenGL3_Init(glsl_version);
 }
@@ -45,7 +36,6 @@ void Gui::init(SDL_Window *window,SDL_GLContext *glContext, char * glsl_version)
 /**
  */
 void Gui::handleGui(SDL_Window *window) {
-    //Inits new frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(window);
     ImGui::NewFrame();
@@ -56,9 +46,7 @@ void Gui::handleGui(SDL_Window *window) {
     //Render ImGui
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    //TODO move to application
-    SDL_GL_SwapWindow(window);
-    if (do_keybind) {
+    if (waitingForKeyBind) {
         keyBind();
     }
 }
@@ -66,7 +54,7 @@ void Gui::handleGui(SDL_Window *window) {
 /**
  * Cleans up after ImGui.
  */
-void Gui::terminate(SDL_Window *window) {
+void Gui::terminate() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
@@ -76,8 +64,6 @@ void Gui::terminate(SDL_Window *window) {
  */
 void Gui::handleInput(SDL_Event event) {
     ImGui_ImplSDL2_ProcessEvent(&event);
-   // ImGui::CaptureKeyboardFromApp(true);
-
 }
 
 /**
@@ -87,24 +73,29 @@ void Gui::handleInput(SDL_Event event) {
      this->displayToolbar = !this->displayToolbar;
      if (!this->displayToolbar) {
          // Disable all widgets
-         this->displayEditControls = false;
-         this->displayFileDialog = false;
-         //TODO disable everything.
+         disableWidgets();
      }
  }
 
 void Gui::showEditControls() {
     ImGui::Begin("Controls", &displayEditControls);
-    for (int i = 0; i < this->settings->keyBinds.nControllers; i++) {
+    for (int i = 0; i < this->settings->keyBinds.controllerButtons.capacity(); i++) {
         ImGui::Spacing();
         ImGui::Text("%s", this->settings->keyBinds.controllerButtons[i]->action_description.c_str());
         ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
         ImVec2 vec(ImGui::GetWindowSize().x*0.25f,ImGui::GetWindowSize().y*0.05f);
         ImGui::SameLine(ImGui::GetWindowSize().x*0.5f,0);
-        if (ImGui::Button(this->settings->keyBinds.controllerButtons[i]->keybind.c_str(),vec)) {
-            showKeyBind(this->settings->keyBinds.controllerButtons[i]->action_description.c_str());
-            keybindindex = i;
+        if(waitingForKeyBind && keybindindex == i){
+            ImGui::PushStyleColor( ImGuiCol_Button, pressColor );
         }
+        else{
+            ImGui::PushStyleColor( ImGuiCol_Button, releaseColor );
+        }
+        if (ImGui::Button(this->settings->keyBinds.controllerButtons[i]->keybind.c_str(),vec)) {
+            keybindindex = i;
+            waitingForKeyBind = true;
+        }
+        ImGui::PopStyleColor(1);
     }
     ImGui::End();
 }
@@ -135,7 +126,6 @@ void Gui::toolbar() {
                 for (int i = 0; i < 4; i++) {
                     speed += 0.5f;
                     if (ImGui::MenuItem("Speed: ")) {
-                        //TODO actually set play speed to something. Settings struct or lambdas.
                         settings->setPlaySpeed(speed);
                     }
                     ImGui::SameLine();
@@ -155,38 +145,18 @@ void Gui::toolbar() {
 
 
 void Gui::keyBind() {
-
-    for(int i =0;i<512;i++) {
-        if (io->KeysDown[i]) {
-            bool keytaken = false;
-            for (int j = 0; j < this->settings->keyBinds.nControllers; j++) {
-                if (j != keybindindex)
-                    keytaken |= this->settings->keyBinds.controllerButtons[j]->keyval == SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(i));
-            }
-            if (!keytaken) {
-                this->settings->keyBinds.controllerButtons[keybindindex]->keybind = SDL_GetScancodeName(
-                        static_cast<SDL_Scancode>(i));
-                this->settings->keyBinds.controllerButtons[keybindindex]->keyval = SDL_GetKeyFromScancode(
-                        static_cast<SDL_Scancode>(i));
-                this->do_keybind = false;
-
-            }
-        }
-    }
+     if(this->settings->keyBinds.editKeyBinds(ImGui::GetIO().KeysDown,keybindindex)){
+         this->waitingForKeyBind=false;
+     }
 }
 
-void Gui::showKeyBind(const char *buttonName) {
-    ImGuiStyle& style = ImGui::GetStyle();
-    std::string buf("Press a button to register a new keybind for ");
-    buf.append(buttonName);
-    ImGui::Begin("Keybind");
-    ImGui::SetWindowFontScale(1.3);
-    ImGui::SameLine(ImGui::GetWindowSize().x*0.05,0);
-    ImGui::SetCursorPosY(ImGui::GetWindowHeight()*0.3f);
-    ImGui::Text("%s", buf.c_str());
-    ImGui::End();
-    do_keybind = true;
+void Gui::disableWidgets() {
+    displayEditControls = false;
+    displayFileDialog = false;
+    displayToolbar = false;
+    waitingForKeyBind =false;
 }
+
 
 
 
