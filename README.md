@@ -30,7 +30,8 @@ or
 sudo apt-get install libsdl2-dev libglew-dev
 ```
 
-Windows users do not need to install dependencies
+Windows users only need to install the following dependencies:
+- Most recent [OpenAL 1.1 (Windows Installer)](https://openal.org/downloads/)
 
 ### Cloning the project
 
