@@ -50,7 +50,7 @@ void Application::start() {
         timer.tick();
 
         // Update emulation
-        while (!this->gameBoy.isReadyToDraw()) {
+        while (!this->gameBoy.isReadyToDraw() && this->gameBoy.isReadyToPlaySound()) {
             this->handleSDLEvents();
             this->gameBoy.step();
         }
@@ -61,6 +61,9 @@ void Application::start() {
         this->renderView.render();
         SDL_GL_SwapWindow(this->window);
         this->gameBoy.confirmDraw();
+
+        //Play audio
+        this->audio.playBuffers(this->gameBoy.getAudioBuffers());
 
         // Time application to 60Hz
         float msSinceTick = timer.msSinceTick();
@@ -76,6 +79,7 @@ void Application::start() {
 void Application::init() {
     this->initSDL();
     this->renderView.initGL();
+    this->audio.init();
 
     // TEMP ------------------------------------------------------------------------------------------------------------
     this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/instr_timing/instr_timing.gb");

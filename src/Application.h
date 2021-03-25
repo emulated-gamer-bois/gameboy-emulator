@@ -14,6 +14,7 @@
 #include "RenderView.h"
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
+#include "AudioController.h"
 
 class Application {
 public:
@@ -26,6 +27,7 @@ private:
     SDL_Window* window;
     SDL_GLContext glContext;
     RenderView renderView;
+    AudioController audio;
     GameBoy gameBoy;
 
     bool running;
