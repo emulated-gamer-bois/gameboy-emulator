@@ -14,6 +14,8 @@ if(NOT TRAVIS)
     # Separate filter for shaders.
     source_group("Shaders" FILES ${SHADERS})
 
+    find_package ( OpenAL REQUIRED )
+
     # Build and link executable.
     add_executable ( ${PROJECT_NAME}
         main.cpp
@@ -25,8 +27,12 @@ if(NOT TRAVIS)
         Palette.h
         AppTimer.h
         AppTimer.cpp
-        )
+            AudioController.cpp AudioController.h)
 
-    target_link_libraries ( ${PROJECT_NAME} labhelper gameboy )
+    target_include_directories ( ${PROJECT_NAME}
+            PUBLIC
+            ${OPENAL_INCLUDE_DIR} )
+
+    target_link_libraries ( ${PROJECT_NAME} labhelper gameboy ${OPENAL_LIBRARY} )
     config_build_output()
 endif()
