@@ -162,19 +162,10 @@ void Application::handleSDLEvents() {
                     state = (state == State::EMULATION) ? State::MENU : State::EMULATION;
                 }
                 if (key == SDLK_SPACE) {
-                    settings.setPlaySpeed(2);
+                    settings.setPlaySpeed(settings.playSpeed+1);
                 }
                 if (state == State::EMULATION) {
                     handleEmulatorInput(key, JOYPAD_PRESS);
-                }
-
-                if (state == State::MENU) {
-                    /* 2 -----------------------------------------------------
-                     * Here we can do something like this:
-                     * if (gui.isKeyBindTime()) {
-                     *     gui.keyBind(--Info needed about the binding here--);
-                     * }
-                     */
                 }
                 break;
 
@@ -183,7 +174,6 @@ void Application::handleSDLEvents() {
                     handleEmulatorInput(key, JOYPAD_RELEASE);
                 }
                 if (key == SDLK_SPACE) {
-                    settings.setPlaySpeed(1);
                 }
                 break;
         }
