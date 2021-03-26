@@ -5,9 +5,8 @@
 #include "AudioController.h"
 
 AudioController::~AudioController() {
-    alDeleteSources(1, sources);
-    alDeleteBuffers(1, buffers);
-
+    alDeleteSources(4, sources);
+    alDeleteBuffers(4, buffers);
     alcMakeContextCurrent(context);
     alcDestroyContext(context);
 
@@ -40,15 +39,16 @@ void AudioController::init() {
         return;
     }
 
-    alGenBuffers(1, buffers);
-    alGenSources(1, sources);
-
-    alSourcef(sources[0], AL_PITCH, 1);
-    alSourcef(sources[0], AL_GAIN, 1.0f);
-    alSource3f(sources[0], AL_POSITION, 0, 0, 0);
-    alSource3f(sources[0], AL_VELOCITY, 0, 0, 0);
-    alSourcei(sources[0], AL_LOOPING, AL_FALSE);
-
+    alGenBuffers(2, buffers);
+    alGenSources(2, sources);
+    //Initializes first two sources
+    for(int i = 0; i < 2; i++) {
+        alSourcef(sources[i], AL_PITCH, 1);
+        alSourcef(sources[i], AL_GAIN, 1.0f);
+        alSource3f(sources[i], AL_POSITION, 0, 0, 0);
+        alSource3f(sources[i], AL_VELOCITY, 0, 0, 0);
+        alSourcei(sources[i], AL_LOOPING, AL_FALSE);
+    }
     const unsigned char dutyPatterns[4] = {0x01, 0x81, 0x87, 0x7E};
     const int stepLength = SQUARE_SAMPLE_RATE / 8;
     unsigned char value;
@@ -66,10 +66,10 @@ void AudioController::init() {
     }
 }
 
-void AudioController::playSound(char *soundData, int size, int sampleRate) {
-    alBufferData(buffers[0], AL_FORMAT_MONO8, soundData, size, sampleRate);
-    alSourcei(sources[0], AL_BUFFER, buffers[0]);
-    alSourcePlay(sources[0]);
+void AudioController::playSound(int source, char *soundData, int size, int sampleRate) {
+    alBufferData(buffers[source], AL_FORMAT_MONO8, soundData, size, sampleRate);
+    alSourcei(sources[source], AL_BUFFER, buffers[source]);
+    alSourcePlay(sources[source]);
 }
 
 /**

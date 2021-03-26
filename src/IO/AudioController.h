@@ -13,7 +13,7 @@ class AudioController {
 public:
     ~AudioController();
     void init();
-    void playSound(char *soundData, int size, int sampleRate);
+    void playSound(int source, char *soundData, int size, int sampleRate);
     void playSquare(int source, char duty, ALsizei frequency);
     void playGBSquare(int source, char duty, unsigned short frequency);
     void stopSource(int source);
@@ -22,8 +22,8 @@ private:
     ALCdevice* device;
     ALCcontext* context;
 
-    ALuint buffers[1];
-    ALuint sources[1];
+    ALuint buffers[4];
+    ALuint sources[4];
 
     const static int SQUARE_SAMPLE_RATE = 32;
     unsigned char duties[4][SQUARE_SAMPLE_RATE];
