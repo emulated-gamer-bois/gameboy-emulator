@@ -72,6 +72,12 @@ void AudioController::playSound(char *soundData, int size, int sampleRate) {
     alSourcePlay(sources[0]);
 }
 
+/**
+ * Plays a square wave sound until stopped
+ * @param source index (0 to 3)
+ * @param duty (0 = 12.5%, 1 = 25%, 2 = 50%, 3 = 75%)
+ * @param frequency the frequency of the sound
+ */
 void AudioController::playSquare(int source, char duty, ALsizei frequency) {
     alSourcei(sources[source], AL_BUFFER, 0);
     alBufferData(
@@ -85,6 +91,12 @@ void AudioController::playSquare(int source, char duty, ALsizei frequency) {
     alSourcePlay(sources[source]);
 }
 
+/**
+ * Plays a square wave sound until stopped
+ * @param source index (0 to 3)
+ * @param duty (0 = 12.5%, 1 = 25%, 2 = 50%, 3 = 75%)
+ * @param frequency the values read from the F bits
+ */
 void AudioController::playGBSquare(int source, char duty, unsigned short frequency) {
     this->playSquare(source, duty, 131072.0/(2048 - frequency));
 }
