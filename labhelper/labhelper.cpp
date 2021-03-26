@@ -34,8 +34,8 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/glm.hpp>
 #include <imgui.h>
-#include "imgui_impl_sdl_gl3.h"
-
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_sdl.h"
 //#define HDR_FRAMEBUFFER
 
 using std::vector;
@@ -91,7 +91,8 @@ SDL_Window* init_window_SDL(std::string caption, int width, int height)
 	glewInit();
 
 	// Initialize ImGui; will allow us to edit variables in the application.
-	ImGui_ImplSdlGL3_Init(window);
+	ImGui_ImplSDL2_InitForOpenGL(window,maincontext);
+//	ImGui_ImplSdlGL3_Init(window);
 
 	// Check OpenGL properties
 	labhelper::startupGLDiagnostics();
@@ -116,10 +117,12 @@ SDL_Window* init_window_SDL(std::string caption, int width, int height)
 void shutDown(SDL_Window* window)
 {
 	// If newframe is not ever run before shut down we crash
-	ImGui_ImplSdlGL3_NewFrame(window);
+	//ImGui_ImplSdlGL3_NewFrame(window);
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL2_NewFrame(window);
 
 	//Destroy imgui
-	ImGui_ImplSdlGL3_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
 
 	//Destroy window
 	SDL_DestroyWindow(window);
