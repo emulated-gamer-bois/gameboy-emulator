@@ -15,9 +15,9 @@ void Keybinds::init_keybinds() {
     up.keyval = SDLK_w;
     down.keyval = SDLK_s;
     doubleSpeed.keyval = SDLK_SPACE;
-    for(int i=0;i<controllerButtons.capacity();i++){
-        this->controllerButtons[i]->keybind = SDL_GetKeyName(
-                this->controllerButtons[i]->keyval);
+    for(int i=0; i < keybinds.capacity(); i++){
+        this->keybinds[i]->keybind = SDL_GetKeyName(
+                this->keybinds[i]->keyval);
     }
     a.action_description = "A";
     b.action_description = "B";
@@ -39,9 +39,9 @@ bool Keybinds::editKeyBinds( bool keysDown [], int keyBindIndex) {
                 return true;
             }
             if (validKey(keyBindIndex,static_cast<SDL_Scancode>(i))) {
-                controllerButtons[keyBindIndex]->keybind = SDL_GetScancodeName(
+                keybinds[keyBindIndex]->keybind = SDL_GetScancodeName(
                         static_cast<SDL_Scancode>(i));
-                controllerButtons[keyBindIndex]->keyval = SDL_GetKeyFromScancode(
+                keybinds[keyBindIndex]->keyval = SDL_GetKeyFromScancode(
                         static_cast<SDL_Scancode>(i));
             return true;
             }
@@ -51,9 +51,9 @@ bool Keybinds::editKeyBinds( bool keysDown [], int keyBindIndex) {
 }
 bool Keybinds::validKey(int keyBindIndex,SDL_Scancode scanCode) {
     bool forbiddenKeyBind = false;
-    for (int j = 0; j < controllerButtons.capacity(); j++) {
+    for (int j = 0; j < keybinds.capacity(); j++) {
         if (j != keyBindIndex)
-            forbiddenKeyBind |= controllerButtons[j]->keyval == SDL_GetKeyFromScancode(scanCode);
+            forbiddenKeyBind |= keybinds[j]->keyval == SDL_GetKeyFromScancode(scanCode);
     }
     for(int j=0;j<forbiddenKeys.capacity();j++){
         forbiddenKeyBind |= SDL_GetKeyFromScancode(scanCode) == forbiddenKeys[j];

@@ -17,6 +17,7 @@ public:
     Keybinds keyBinds;
     int screenMultiplier;
     int playSpeed = 1;
+    int maxPlaySpeed=4;
     void setPlaySpeed(int speedMultiplier);
 
-    };
+};

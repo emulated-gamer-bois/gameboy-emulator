@@ -28,7 +28,7 @@ Application::Application() {
  */
 void Application::start() {
     init();
-    float frameTime= 1000.f /LCD_REFRESH_RATE;
+    float frameTime = 1000.f / LCD_REFRESH_RATE;
     AppTimer timer;
     while (state != State::TERMINATION) {
 
@@ -38,8 +38,13 @@ void Application::start() {
 
         // Step through emulation until
         if (state == State::EMULATION) {
-            while (!gameBoy.isReadyToDraw()) {
-                gameBoy.step();
+            for (int i = 0; i < settings.playSpeed; i++) {
+                if (gameBoy.isReadyToDraw()) {
+                    gameBoy.confirmDraw();
+                }
+                while (!gameBoy.isReadyToDraw()) {
+                    gameBoy.step();
+                }
             }
             renderView.setScreenTexture(gameBoy.getScreenTexture().get());
         }
@@ -48,10 +53,10 @@ void Application::start() {
         updateSDLWindowSize();
         renderView.render();
         // TODO: only handle gui if state == State::MENU
-        if(state == State::MENU){
+        if (state == State::MENU) {
             gui.handleGui(window);
         }
-         SDL_GL_SwapWindow(window);
+        SDL_GL_SwapWindow(window);
         // TODO: find a better way to handle texture fetching than needing to call gameBoy.confirmDraw()
         gameBoy.confirmDraw();
 
@@ -65,10 +70,11 @@ void Application::start() {
 
     terminate();
 }
+
 void Application::init() {
     initSDL();
     renderView.initGL();
-    gui.init(window,&glContext,"#version 130"); // GLSL version
+    gui.init(window, &glContext, "#version 130"); // GLSL version
 
     // TEMP ------------------------------------------------------------------------------------------------------------
     gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/games/Tetris.gb");
@@ -76,7 +82,7 @@ void Application::init() {
 }
 
 void Application::terminate() {
-    gui.handleGui(window); // TODO use gui.terminate() instead?
+    gui.terminate();
     terminateSDL();
 }
 
@@ -100,11 +106,11 @@ void Application::initSDL() {
 
     // Create the window.
     window = SDL_CreateWindow(DEFAULT_WINDOW_CAPTION.c_str(),
-                                    SDL_WINDOWPOS_UNDEFINED,
-                                    SDL_WINDOWPOS_UNDEFINED,
-                                    LCD_WIDTH,
-                                    LCD_HEIGHT,
-                                    SDL_WINDOW_OPENGL);
+                              SDL_WINDOWPOS_UNDEFINED,
+                              SDL_WINDOWPOS_UNDEFINED,
+                              LCD_WIDTH,
+                              LCD_HEIGHT,
+                              SDL_WINDOW_OPENGL);
     assert(window);
 
     // Get gl context and set it to the current context for this window.
@@ -144,10 +150,6 @@ void Application::handleSDLEvents() {
         SDL_Keycode key = event.key.keysym.sym;
 
         if (state == State::MENU) {
-            /* 1 -----------------------------------------------------
-             * Since we already sends the event into the gui here we can handle the keybind stuff in
-             * gui.handleInput() as well
-             */
             gui.handleInput(event);
         }
 
@@ -162,7 +164,8 @@ void Application::handleSDLEvents() {
                     state = (state == State::EMULATION) ? State::MENU : State::EMULATION;
                 }
                 if (key == SDLK_SPACE) {
-                    settings.setPlaySpeed(settings.playSpeed+1);
+                    //TODO fix so that the speed takes current speed x2 and resets correctly.
+                    settings.setPlaySpeed(2);
                 }
                 if (state == State::EMULATION) {
                     handleEmulatorInput(key, JOYPAD_PRESS);
@@ -174,6 +177,7 @@ void Application::handleSDLEvents() {
                     handleEmulatorInput(key, JOYPAD_RELEASE);
                 }
                 if (key == SDLK_SPACE) {
+                    settings.setPlaySpeed(1);
                 }
                 break;
         }

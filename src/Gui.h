@@ -24,7 +24,6 @@ private:
     void showEditControls();
     void keyBind();
     int keybindindex;
-
     bool displayEditControls;
     bool displayFileDialog;
     bool displayToolbar;
@@ -33,7 +32,7 @@ private:
     void showFileDialog();
     const ImVec4 pressColor{ 0.0f, 0.217f, 1.0f, 0.784f };
     const ImVec4 releaseColor{ 0.202f, 0.549f, 0.798f, 0.784f };
-
     void disableWidgets();
+    void displayPlaySpeed();
 };
 

@@ -76,11 +76,10 @@ void Gui::handleInput(SDL_Event event) {
 
 void Gui::showEditControls() {
     ImGui::Begin("Controls", &displayEditControls);
-    for (int i = 0; i < this->settings->keyBinds.controllerButtons.capacity(); i++) {
+    for (int i = 0; i < this->settings->keyBinds.keybinds.capacity(); i++) {
         ImGui::Spacing();
-        ImGui::Text("%s", this->settings->keyBinds.controllerButtons[i]->action_description.c_str());
+        ImGui::Text("%s", this->settings->keyBinds.keybinds[i]->action_description.c_str());
         ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
-        ImVec2 vec(ImGui::GetWindowSize().x*0.25f,ImGui::GetWindowSize().y*0.05f);
         ImGui::SameLine(ImGui::GetWindowSize().x*0.5f,0);
         if(waitingForKeyBind && keybindindex == i){
             ImGui::PushStyleColor( ImGuiCol_Button, pressColor );
@@ -88,7 +87,8 @@ void Gui::showEditControls() {
         else{
             ImGui::PushStyleColor( ImGuiCol_Button, releaseColor );
         }
-        if (ImGui::Button(this->settings->keyBinds.controllerButtons[i]->keybind.c_str(),vec)) {
+        ImVec2 vec(ImGui::GetWindowSize().x*0.25f,ImGui::GetWindowSize().y*0.05f);
+        if (ImGui::Button(this->settings->keyBinds.keybinds[i]->keybind.c_str(), vec)) {
             keybindindex = i;
             waitingForKeyBind = true;
         }
@@ -118,18 +118,7 @@ void Gui::toolbar() {
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Settings")) {
-            if (ImGui::BeginMenu("Play speed")) {
-                float speed = 0.0f;
-                for (int i = 0; i < 4; i++) {
-                    speed += 0.5f;
-                    if (ImGui::MenuItem("Speed: ")) {
-                        settings->setPlaySpeed(speed);
-                    }
-                    ImGui::SameLine();
-                    ImGui::Text(i % 2 == 0 ? "%.1f" : "%.0f", speed);
-                }
-                ImGui::EndMenu();
-            }
+            displayPlaySpeed();
             if (ImGui::MenuItem("Keybinds")) {
                 displayEditControls = !displayEditControls;
             }
@@ -139,7 +128,20 @@ void Gui::toolbar() {
         ImGui::EndMainMenuBar();
     }
 }
+void Gui::displayPlaySpeed(){
+     //TODO allow for slowing down the play speed.
+    if (ImGui::BeginMenu("Play speed")) {
+        for (int i = 0; i < settings->maxPlaySpeed; i++) {
 
+            if (ImGui::MenuItem("Speed: ")) {
+                settings->setPlaySpeed(i+1);
+            }
+            ImGui::SameLine();
+            ImGui::Text("%d",i+1);
+        }
+        ImGui::EndMenu();
+    }
+ }
 
 void Gui::keyBind() {
      if(this->settings->keyBinds.editKeyBinds(ImGui::GetIO().KeysDown,keybindindex)){
