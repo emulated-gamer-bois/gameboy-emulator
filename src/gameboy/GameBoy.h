@@ -11,6 +11,7 @@
 #include "PPU/PPU.h"
 #include "Joypad.h"
 #include "Timer.h"
+#include "Cartridge.h"
 
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
@@ -40,6 +41,7 @@ private:
 
     std::shared_ptr<Joypad> joypad;
     std::shared_ptr<Timer> timer;
+    std::shared_ptr<Cartridge> cartridge;
 
     FRIEND_TEST(PPU, g_tile_rom);
 };

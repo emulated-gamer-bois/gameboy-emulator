@@ -11,6 +11,8 @@
 
 TEST(MMU, read_write){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
+    std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>();
+    mmu->link_devices(nullptr, nullptr, nullptr, cartridge);
 
     // Disable boot ROM
     mmu->write(0xff50, 0x01);
@@ -37,6 +39,8 @@ TEST(MMU, read_write_interrupt_enable){
 
 TEST(MMU, disable_boot_rom){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
+    std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>();
+    mmu->link_devices(nullptr, nullptr, nullptr, cartridge);
 
     mmu->write_BOOT_ROM_ONLY_IN_TESTS(0x00, 0x55);
     ASSERT_EQ(mmu->read(0x00), 0x55);
@@ -50,7 +54,7 @@ TEST(MMU, disable_boot_rom){
 TEST(MMU, joypad){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::shared_ptr<Joypad> joypad = std::make_shared<Joypad>(mmu);
-    mmu->link_devices(nullptr, joypad, nullptr);
+    mmu->link_devices(nullptr, joypad, nullptr, nullptr);
 
     mmu->write(IO_JOYPAD, JOYPAD_SEL_BUTTONS);
     ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1111);
@@ -88,7 +92,7 @@ TEST(MMU, joypad){
 TEST(MMU, timer){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::shared_ptr<Timer> timer = std::make_shared<Timer>(mmu);
-    mmu->link_devices(nullptr, nullptr, timer);
+    mmu->link_devices(nullptr, nullptr, timer, nullptr);
 
     // Disable boot ROM
     mmu->write(0xff50, 0x01);
@@ -127,21 +131,3 @@ TEST(MMU, timer){
     ASSERT_EQ(mmu->read(0xff0f), (1 << 2));
     ASSERT_EQ(mmu->read(0xff05), 0x55);
 }
-
-/*TEST(MMU, load_rom){
-    std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-
-    mmu->load_game_rom("../../roms/game.gb");
-    mmu->load_boot_rom("../../roms/boot.bin");
-
-    // Check data in boot ROM
-    ASSERT_EQ(mmu->read(0x1), 0x50);
-    ASSERT_EQ(mmu->read(0x2), 0xff);
-
-    // Disable boot ROM
-    mmu->write(0xff50, 0x01);
-
-    // Check data in game ROM
-    ASSERT_EQ(mmu->read(0x104), 0xce);
-    ASSERT_EQ(mmu->read(0x105), 0xed);
-}*/
