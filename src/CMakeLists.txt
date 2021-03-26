@@ -14,8 +14,11 @@ if(NOT TRAVIS)
     # Separate filter for shaders.
     source_group("Shaders" FILES ${SHADERS})
 
-    set(OPENAL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external_src/openal-soft/include/AL")
-    set(OPENAL_LIBRARY "${CMAKE_SOURCE_DIR}/external/openal/OpenAL32.lib")
+    set(OPENAL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external_src/openal-soft/include")
+    if(WIN32)
+        set(OPENAL_LIBRARY "${CMAKE_SOURCE_DIR}/external/openal/OpenAL32.lib")
+    endif()
+
     find_package ( OpenAL REQUIRED )
 
     # Build and link executable.
