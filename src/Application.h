@@ -11,10 +11,10 @@
 #include <chrono> // time
 #include <thread> // sleep
 
-#include "RenderView.h"
+#include "IO/RenderView.h"
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
-#include "AudioController.h"
+#include "IO/AudioController.h"
 
 class Application {
 public:
