@@ -2,7 +2,7 @@ cmake_minimum_required ( VERSION 3.0.2 )
 
 project ( lame-boy )
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
+set(CMAKE_CXX_STANDARD 20)
 # All libraries made is static
 if (MSVC)
     string(REPLACE "/MD" /MT CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})

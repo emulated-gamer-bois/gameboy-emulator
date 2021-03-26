@@ -177,8 +177,8 @@ void APU::confirmPlay() {
 
 std::shared_ptr<APUState> APU::getState() {
     return std::make_shared<APUState>(APUState{
-        enable_square_a: (bool)(this->NR14 & 0x80),
-        duty_square_a: (uint8_t)((this->NR11 >> 6) & 0x3),
-        frequency_square_a: (uint16_t)((((uint16_t)(this->NR14 & 0x7)) << 8) + this->NR13)
+        .enable_square_a =  (bool)(this->NR14 & 0x80),
+        .duty_square_a =  (uint8_t)((this->NR11 >> 6) & 0x3),
+        .frequency_square_a =  (uint16_t)((((uint16_t)(this->NR14 & 0x7)) << 8) + this->NR13)
     });
 }
