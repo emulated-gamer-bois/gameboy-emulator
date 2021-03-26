@@ -15,11 +15,22 @@ link_libraries (
         gtest
         gtest_main)
 
-add_executable(tests
-        tests.cpp
-        cpu_test.cpp
-        register_pair_test.cpp
-        mmu_test.cpp
-        ppu_test.cpp)
+if(NOT TRAVIS)
+    add_executable( tests
+            tests.cpp
+            cpu_test.cpp
+            register_pair_test.cpp
+            mmu_test.cpp
+            ppu_test.cpp
+            audio_test.cpp)
+    target_link_libraries(${PROJECT_NAME} IO)
+    else()
+    add_executable(tests
+            tests.cpp
+            cpu_test.cpp
+            register_pair_test.cpp
+            mmu_test.cpp
+            ppu_test.cpp)
+endif()
 
 target_link_libraries(${PROJECT_NAME} gameboy )
