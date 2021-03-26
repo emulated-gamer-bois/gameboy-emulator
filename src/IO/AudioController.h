@@ -8,6 +8,7 @@
 #include <AL/alc.h>
 #include <AL/al.h>
 #include <iostream>
+#include <array>
 
 class AudioController {
 public:
@@ -17,8 +18,10 @@ public:
     void playSquare(int source, char duty, ALsizei frequency);
     void playGBSquare(int source, char duty, unsigned short frequency);
     void stopSource(int source);
-
+    void playGBWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency);
+    void playWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency);
 private:
+
     ALCdevice* device;
     ALCcontext* context;
 

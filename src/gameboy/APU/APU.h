@@ -68,7 +68,7 @@ private:
     uint8_t NR32;
     uint8_t NR33;
     uint8_t NR34;
-    std::array<uint8_t, 32> wavePatternRAM{};
+    std::array<uint8_t, 16> wavePatternRAM{};
 
     uint8_t NR41;
     uint8_t NR42;

@@ -104,3 +104,29 @@ void AudioController::playGBSquare(int source, char duty, unsigned short frequen
 void AudioController::stopSource(int source) {
     alSourceRewind(sources[source]);
 }
+
+void AudioController::playWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency) {
+    auto wave = new char[32];
+    uint8_t form;
+    for(auto i = 0; i < 16; i++) {
+        form = waveForm[i] & 0xF;
+        wave[i*2] = form * form;
+        form = (waveForm[i] & 0xF0) >> 4;
+        wave[i*2+1] = form * form;
+    }
+
+    alSourcei(sources[source], AL_BUFFER, 0);
+    alBufferData(
+            buffers[source],
+            AL_FORMAT_MONO8,
+            wave,
+            32,
+            32 * frequency);
+    alSourcei(sources[source], AL_BUFFER, buffers[source]);
+    alSourcei(sources[source], AL_LOOPING, 1);
+    alSourcePlay(sources[source]);
+}
+
+void AudioController::playGBWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency) {
+    this->playWave(source, waveForm, 131072.0/(2048 - frequency));
+}
