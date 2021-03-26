@@ -76,7 +76,7 @@ void Gui::handleInput(SDL_Event event) {
 
 void Gui::showEditControls() {
 
-    ImGui::SetNextWindowSize(ImVec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImGui::GetWindowSize(), ImGuiCond_Once);
     ImGui::Begin("Controls", &displayEditControls);
     for (int i = 0; i < this->settings->keyBinds.keybinds.capacity(); i++) {
         ImGui::Spacing();
