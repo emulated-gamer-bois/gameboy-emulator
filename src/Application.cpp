@@ -50,26 +50,30 @@ void Application::start() {
         timer.tick();
 
         // Update emulation
-        while (!this->gameBoy.isReadyToDraw() /*&& this->gameBoy.isReadyToPlaySound()*/) {
+        while (!this->gameBoy.isReadyToDraw() && !this->gameBoy.isReadyToPlaySound()) {
             this->handleSDLEvents();
             this->gameBoy.step();
         }
 
-        // Prepare for rendering, render and swap buffer.
-        this->updateSDLWindowSize();
-        this->renderView.setScreenTexture(this->gameBoy.getScreenTexture().get());
-        this->renderView.render();
-        SDL_GL_SwapWindow(this->window);
-        this->gameBoy.confirmDraw();
+        if(this->gameBoy.isReadyToPlaySound()) {
+            //Play audio
+            //this->audio.playBuffers(this->gameBoy.getAudioBuffers());
+        }
 
-        //Play audio
-        //this->audio.playBuffers(this->gameBoy.getAudioBuffers());
+        if(this->gameBoy.isReadyToDraw()) {
+            // Prepare for rendering, render and swap buffer.
+            this->updateSDLWindowSize();
+            this->renderView.setScreenTexture(this->gameBoy.getScreenTexture().get());
+            this->renderView.render();
+            SDL_GL_SwapWindow(this->window);
+            this->gameBoy.confirmDraw();
 
-        // Time application to 60Hz
-        float msSinceTick = timer.msSinceTick();
-        if (msSinceTick < frameTime) {
-            int msToSleep = frameTime - msSinceTick;
-            std::this_thread::sleep_for(std::chrono::milliseconds(msToSleep));
+            // Time application to 60Hz
+            float msSinceTick = timer.msSinceTick();
+            if (msSinceTick < frameTime) {
+                int msToSleep = frameTime - msSinceTick;
+                std::this_thread::sleep_for(std::chrono::milliseconds(msToSleep));
+            }
         }
     }
 

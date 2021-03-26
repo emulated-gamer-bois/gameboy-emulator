@@ -5,6 +5,7 @@
 #include "APU.h"
 
 APU::APU(std::shared_ptr<MMU> memory) {
+    this->accumulated_cycles = 0;
     this->memory = memory;
     this->reset();
 }
@@ -55,6 +56,10 @@ void APU::write(uint16_t address, uint8_t data) {
             return;
         case NR14_ADDRESS:
             this->NR14 = data;
+            // If trigger bit is set
+            if(this->NR14 & 0x80) {
+                trigger_event(0);
+            }
             return;
         case NR50_ADDRESS:
             this->NR50 = data;
@@ -98,6 +103,61 @@ void APU::reset() {
     NR50 = 0;
     NR51 = 0;
     NR52 = 0;
+}
+
+void APU::trigger_event(uint8_t source) {
+    //TODO: Complete functionality
+    /**
+    - Done - Channel is enabled (see length counter).
+    - Done - If length counter is zero, it is set to 64 (256 for wave channel).
+    - Done-ish (since frequency timer does not change in our program, it does not need to be reset)
+        - Frequency timer is reloaded with period.
+    - Pass - Volume envelope timer is reloaded with period.
+    - Pass - Channel volume is reloaded from NRx2.
+    - Pass - Noise channel's LFSR bits are all set to 1.
+    - Pass - Wave channel's position is set to 0 but sample buffer is NOT refilled.
+    - Pass - Square 1's sweep does several things (see frequency sweep).
+     */
+
+    switch(source) {
+        case 0:
+            //If length counter is zero, it is set to 64
+            if(!(this->NR11 & 0x3F)) {
+                this->NR11 |= 64;
+            }
+    }
+}
+
+void APU::length_step() {
+    //TODO: Update length
+}
+
+void APU::vol_envelope_step() {
+    //TODO: Update volume length
+}
+
+void APU::sweep_step() {
+    //TODO: Update with sweep
+}
+
+void APU::update(uint16_t cpuCycles) {
+    this->accumulated_cycles += cpuCycles;
+    if(this->accumulated_cycles < CLOCK_CYCLE_THRESHOLD) {
+        return;
+    }
+    this->accumulated_cycles -= CLOCK_CYCLE_THRESHOLD;
+    this->state++;
+    state %= 8;
+
+    if(state % 2 == 0) {
+        length_step();
+    }
+    if(state == 7) {
+        vol_envelope_step();
+    }
+    if(state % 4 == 2) {
+        sweep_step();
+    }
 }
 
 

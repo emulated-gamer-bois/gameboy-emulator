@@ -32,6 +32,8 @@
 #define NR51_ADDRESS 0xFF24
 #define NR52_ADDRESS 0xFF25
 
+#define CLOCK_CYCLE_THRESHOLD (4194304/(512 * 4))
+
 #include <cstdint>
 #include <array>
 #include <memory>
@@ -70,13 +72,24 @@ private:
     uint8_t NR50;
     uint8_t NR51;
     uint8_t NR52;
+
+    bool readyToPlay;
+    int accumulated_cycles;
+    uint8_t state;
 public:
     explicit APU(std::shared_ptr<MMU> memory);
 
     uint8_t read(uint16_t address) const;
     void write(uint16_t address, uint8_t data);
+    void update(uint16_t cpuCycles);
 
     void reset();
+
+    void length_step();
+    void vol_envelope_step();
+    void sweep_step();
+
+    void trigger_event(uint8_t source);
 };
 
 
