@@ -56,6 +56,7 @@ void Application::start() {
         // Prepare for rendering, render and swap buffer.
         updateSDLWindowSize();
         if (state == State::MENU) {
+            renderView.render();
             gui.handleGui(window);
         }
         SDL_GL_SwapWindow(window);

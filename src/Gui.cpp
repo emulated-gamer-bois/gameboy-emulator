@@ -75,11 +75,12 @@ void Gui::handleInput(SDL_Event event) {
  }
 
 void Gui::showEditControls() {
+
+    ImGui::SetNextWindowSize(ImVec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y), ImGuiCond_FirstUseEver);
     ImGui::Begin("Controls", &displayEditControls);
     for (int i = 0; i < this->settings->keyBinds.keybinds.capacity(); i++) {
         ImGui::Spacing();
         ImGui::Text("%s", this->settings->keyBinds.keybinds[i]->action_description.c_str());
-        ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
         ImGui::SameLine(ImGui::GetWindowSize().x*0.5f,0);
         if(waitingForKeyBind && keybindindex == i){
             ImGui::PushStyleColor( ImGuiCol_Button, pressColor );
