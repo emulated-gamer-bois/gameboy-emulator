@@ -31,6 +31,8 @@ public:
     void confirmDraw();
     void cpu_dump();
 
+    void discardFrame();
+
 private:
     bool on;
 

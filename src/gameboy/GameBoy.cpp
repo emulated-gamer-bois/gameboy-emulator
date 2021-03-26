@@ -33,7 +33,6 @@ std::unique_ptr<uint8_t[]> GameBoy::getScreenTexture() {
     for (int i = 0; i < ppuFrameBuffer->size(); i++) {
         texture[i] = 0xFF - (ppuFrameBuffer->at(i) * 0x55);
     }
-
     return texture;
 }
 
@@ -81,4 +80,9 @@ bool GameBoy::isReadyToDraw() const {
 
 void GameBoy::confirmDraw() {
     this->ppu->confirmDraw();
+}
+
+void GameBoy::discardFrame() {
+    this->ppu->confirmDraw();
+
 }

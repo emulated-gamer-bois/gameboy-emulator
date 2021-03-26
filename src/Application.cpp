@@ -36,29 +36,29 @@ void Application::start() {
         timer.tick();
         handleSDLEvents();
 
-        // Step through emulation until
+        // Step through emulation until playspeed number of frames are produced, then display the last one.
         if (state == State::EMULATION) {
             for (int i = 0; i < settings.playSpeed; i++) {
                 if (gameBoy.isReadyToDraw()) {
-                    gameBoy.confirmDraw();
+                    gameBoy.discardFrame();
                 }
                 while (!gameBoy.isReadyToDraw()) {
                     gameBoy.step();
                 }
             }
             renderView.setScreenTexture(gameBoy.getScreenTexture().get());
+            renderView.render();
+            // TODO: find a better way to handle texture fetching than needing to call gameBoy.confirmDraw()
+
+            gameBoy.confirmDraw();
         }
 
         // Prepare for rendering, render and swap buffer.
         updateSDLWindowSize();
-        renderView.render();
-        // TODO: only handle gui if state == State::MENU
         if (state == State::MENU) {
             gui.handleGui(window);
         }
         SDL_GL_SwapWindow(window);
-        // TODO: find a better way to handle texture fetching than needing to call gameBoy.confirmDraw()
-        gameBoy.confirmDraw();
 
         // Time application to 60Hz
         float msSinceTick = timer.msSinceTick();
@@ -141,10 +141,6 @@ void Application::terminateSDL() {
  * Handles SDL Events including keyboard input.
  */
 void Application::handleSDLEvents() {
-    /* Assuming we keep track of gui state in gui we can forward events into the gui in two ways without
-     * polling in the gui class. See below.
-     */
-
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         SDL_Keycode key = event.key.keysym.sym;
