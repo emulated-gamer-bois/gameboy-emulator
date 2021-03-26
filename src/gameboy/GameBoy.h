@@ -32,6 +32,10 @@ public:
     void confirmDraw();
     void cpu_dump();
 
+  bool isReadyToPlaySound();
+  void confirmPlay();
+  std::shared_ptr<APUState> getState();
+
 private:
     bool on;
 

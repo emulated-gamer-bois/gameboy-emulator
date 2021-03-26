@@ -118,18 +118,26 @@ void APU::trigger_event(uint8_t source) {
     - Pass - Wave channel's position is set to 0 but sample buffer is NOT refilled.
     - Pass - Square 1's sweep does several things (see frequency sweep).
      */
-
+    readyToPlay = true;
     switch(source) {
         case 0:
             //If length counter is zero, it is set to 64
-            if(!(this->NR11 & 0x3F)) {
-                this->NR11 |= 64;
+            if(!(this->NR11 & 0x3F) && !(this->NR14 & 0x40)) {
+                this->NR14 |= 0x40;
             }
     }
 }
 
 void APU::length_step() {
-    //TODO: Update length
+    if((this->NR14 & 0x80) && ((this->NR11 & 0x3F) || (this->NR14 & 0x40))) {
+        uint16_t timer = ((this->NR11 & 0x3F) | (this->NR14 & 0x40)) - 1;
+        this->NR11 = (this->NR11 & 0xC0) | ( timer & 0x3F);
+        this->NR14 |= timer & 0x40;
+        if(!(this->NR11 & 0x3F)) {
+            this->NR14 &= 0x7F;
+            readyToPlay = true;
+        }
+    }
 }
 
 void APU::vol_envelope_step() {
@@ -150,17 +158,27 @@ void APU::update(uint16_t cpuCycles) {
     state %= 8;
 
     if(state % 2 == 0) {
-        length_step();
+        this->length_step();
     }
     if(state == 7) {
-        vol_envelope_step();
+        this->vol_envelope_step();
     }
     if(state % 4 == 2) {
-        sweep_step();
+        this->sweep_step();
     }
 }
+bool APU::isReadyToPlaySound() {
+    return readyToPlay;
+}
 
+void APU::confirmPlay() {
+    readyToPlay = false;
+}
 
-
-
-
+std::shared_ptr<APUState> APU::getState() {
+    return std::make_shared<APUState>(APUState{
+        enable_square_a: (bool)(this->NR14 & 0x80),
+        duty_square_a: (uint8_t)((this->NR11 >> 6) & 0x3),
+        frequency_square_a: (uint16_t)((((uint16_t)(this->NR14 & 0x7)) << 8) + this->NR13)
+    });
+}

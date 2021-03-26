@@ -32,7 +32,7 @@
 #define NR51_ADDRESS 0xFF24
 #define NR52_ADDRESS 0xFF25
 
-#define CLOCK_CYCLE_THRESHOLD (4194304/(512 * 4))
+#define CLOCK_CYCLE_THRESHOLD 2048  //4194304/(512 * 4)
 
 #include <cstdint>
 #include <array>
@@ -41,6 +41,12 @@
 #include "../MMU.h"
 
 class MMU;
+
+struct APUState {
+    bool enable_square_a;
+    uint8_t duty_square_a;
+    uint16_t frequency_square_a;
+};
 
 class APU {
 private:
@@ -90,6 +96,9 @@ public:
     void sweep_step();
 
     void trigger_event(uint8_t source);
+    bool isReadyToPlaySound();
+    void confirmPlay();
+    std::shared_ptr<APUState> getState();
 };
 
 

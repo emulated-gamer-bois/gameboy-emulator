@@ -58,6 +58,13 @@ void Application::start() {
         if(this->gameBoy.isReadyToPlaySound()) {
             //Play audio
             //this->audio.playBuffers(this->gameBoy.getAudioBuffers());
+
+            auto state = this->gameBoy.getState();
+            this->audio.stopSource(0);
+            if(state->enable_square_a) {
+                this->audio.playGBSquare(0, state->duty_square_a, state->frequency_square_a);
+            }
+            gameBoy.confirmPlay();
         }
 
         if(this->gameBoy.isReadyToDraw()) {

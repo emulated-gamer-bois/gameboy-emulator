@@ -25,6 +25,7 @@ void GameBoy::step() {
 
     int cycles = this->cpu->update();
     this->ppu->update(cycles);
+    this->apu->update(cycles);
     this->timer->update(cycles);
     this->cartridge->update(cycles);
 }
@@ -84,4 +85,13 @@ bool GameBoy::isReadyToDraw() const {
 
 void GameBoy::confirmDraw() {
     this->ppu->confirmDraw();
+}
+bool GameBoy::isReadyToPlaySound() {
+    return this->apu->isReadyToPlaySound();
+}
+void GameBoy::confirmPlay() {
+    this->apu->confirmPlay();
+}
+std::shared_ptr<APUState> GameBoy::getState() {
+    return this->apu->getState();
 }
