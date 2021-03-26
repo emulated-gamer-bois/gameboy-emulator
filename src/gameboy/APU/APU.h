@@ -32,6 +32,9 @@
 #define NR51_ADDRESS 0xFF24
 #define NR52_ADDRESS 0xFF25
 
+#define WAVE_PATTERN_START 0xFF30
+#define WAVE_PATTERN_END 0xFF3F
+
 #define CLOCK_CYCLE_THRESHOLD 2048  //4194304/(512 * 4)
 
 #include <cstdint>
@@ -46,6 +49,10 @@ struct APUState {
     bool enable_square_a;
     uint8_t duty_square_a;
     uint16_t frequency_square_a;
+
+    bool enable_wave;
+    std::array<uint8_t, 16> waveform_wave;
+    uint16_t frequency_wave;
 };
 
 class APU {

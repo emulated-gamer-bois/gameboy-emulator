@@ -61,6 +61,25 @@ void APU::write(uint16_t address, uint8_t data) {
                 trigger_event(0);
             }
             return;
+        case NR30_ADDRESS:
+            this->NR30 = data;
+            return;
+        case NR31_ADDRESS:
+            this->NR31 = data;
+            return;
+        case NR32_ADDRESS:
+            this->NR12 = data;
+            return;
+        case NR33_ADDRESS:
+            this->NR33 = data;
+            return;
+        case NR34_ADDRESS:
+            this->NR34 = data;
+            // If trigger bit is set
+            if(this->NR34 & 0x80) {
+                trigger_event(2);
+            }
+            return;
         case NR50_ADDRESS:
             this->NR50 = data;
             return;
@@ -71,6 +90,10 @@ void APU::write(uint16_t address, uint8_t data) {
             this->NR52 = data;
             return;
         default:
+            if(address >= WAVE_PATTERN_START && address <= WAVE_PATTERN_END){
+                wavePatternRAM[address - WAVE_PATTERN_START] = data;
+                return;
+            }
             std::cout << "Tried to write to unimplemented audio address " << address << " data " << (int)data << std::endl;
     }
 }
@@ -125,6 +148,11 @@ void APU::trigger_event(uint8_t source) {
             if(!(this->NR11 & 0x3F) && !(this->NR14 & 0x40)) {
                 this->NR14 |= 0x40;
             }
+        case 2:
+            //If length counter is zero, it is set to 64
+            if(!(this->NR31 & 0x3F) && !(this->NR34 & 0x40)) {
+                this->NR34 |= 0x40;
+            }
     }
 }
 
@@ -135,6 +163,16 @@ void APU::length_step() {
         this->NR14 |= timer & 0x40;
         if(!(this->NR11 & 0x3F)) {
             this->NR14 &= 0x7F;
+            readyToPlay = true;
+        }
+    }
+
+    if((this->NR34 & 0x80) && ((this->NR31 & 0x3F) || (this->NR34 & 0x40))) {
+        uint16_t timer = ((this->NR31 & 0x3F) | (this->NR34 & 0x40)) - 1;
+        this->NR31 = (this->NR31 & 0xC0) | ( timer & 0x3F);
+        this->NR34 |= timer & 0x40;
+        if(!(this->NR31 & 0x3F)) {
+            this->NR34 &= 0x7F;
             readyToPlay = true;
         }
     }
@@ -179,6 +217,10 @@ std::shared_ptr<APUState> APU::getState() {
     return std::make_shared<APUState>(APUState{
         .enable_square_a =  (bool)(this->NR14 & 0x80),
         .duty_square_a =  (uint8_t)((this->NR11 >> 6) & 0x3),
-        .frequency_square_a =  (uint16_t)((((uint16_t)(this->NR14 & 0x7)) << 8) + this->NR13)
+        .frequency_square_a =  (uint16_t)((((uint16_t)(this->NR14 & 0x7)) << 8) + this->NR13),
+
+        .enable_wave = (bool)(this->NR34 & 0x80),
+        .waveform_wave = wavePatternRAM,
+        .frequency_wave = (uint16_t)((((uint16_t)(this->NR34 & 0x7)) << 8) + this->NR33)
     });
 }

@@ -40,14 +40,16 @@ void AudioController::init() {
         return;
     }
 
-    alGenBuffers(1, buffers);
-    alGenSources(1, sources);
+    alGenBuffers(N_SOURCES, buffers);
+    alGenSources(N_SOURCES, sources);
 
-    alSourcef(sources[0], AL_PITCH, 1);
-    alSourcef(sources[0], AL_GAIN, 1.0f);
-    alSource3f(sources[0], AL_POSITION, 0, 0, 0);
-    alSource3f(sources[0], AL_VELOCITY, 0, 0, 0);
-    alSourcei(sources[0], AL_LOOPING, AL_FALSE);
+    for(auto i = 0; i < N_SOURCES; i++) {
+        alSourcef(sources[i], AL_PITCH, 1);
+        alSourcef(sources[i], AL_GAIN, 1.0f);
+        alSource3f(sources[i], AL_POSITION, 0, 0, 0);
+        alSource3f(sources[i], AL_VELOCITY, 0, 0, 0);
+        alSourcei(sources[i], AL_LOOPING, AL_FALSE);
+    }
 
     const unsigned char dutyPatterns[4] = {0x01, 0x81, 0x87, 0x7E};
     const int stepLength = SQUARE_SAMPLE_RATE / 8;
@@ -125,6 +127,8 @@ void AudioController::playWave(int source, std::array<uint8_t, 16> waveForm, ALs
     alSourcei(sources[source], AL_BUFFER, buffers[source]);
     alSourcei(sources[source], AL_LOOPING, 1);
     alSourcePlay(sources[source]);
+
+    delete[] wave;
 }
 
 void AudioController::playGBWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency) {

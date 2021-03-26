@@ -64,6 +64,11 @@ void Application::start() {
             if(state->enable_square_a) {
                 this->audio.playGBSquare(0, state->duty_square_a, state->frequency_square_a);
             }
+
+            this->audio.stopSource(2);
+            if(state->enable_wave) {
+                this->audio.playGBWave(2, state->waveform_wave, state->frequency_wave);
+            }
             gameBoy.confirmPlay();
         }
 
@@ -93,7 +98,7 @@ void Application::init() {
     this->audio.init();
 
     // TEMP ------------------------------------------------------------------------------------------------------------
-    this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/instr_timing/instr_timing.gb");
+    this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/games/not_tetris.gb");
     // END TEMP --------------------------------------------------------------------------------------------------------
 }
 

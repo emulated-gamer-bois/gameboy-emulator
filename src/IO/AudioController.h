@@ -25,11 +25,13 @@ private:
     ALCdevice* device;
     ALCcontext* context;
 
-    ALuint buffers[1];
-    ALuint sources[1];
+    const static int N_SOURCES = 4;
+
+    ALuint buffers[N_SOURCES];
+    ALuint sources[N_SOURCES];
 
     const static int SQUARE_SAMPLE_RATE = 32;
-    unsigned char duties[4][SQUARE_SAMPLE_RATE];
+    unsigned char duties[N_SOURCES][SQUARE_SAMPLE_RATE];
 };
 
 
