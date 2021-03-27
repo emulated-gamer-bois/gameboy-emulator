@@ -7,7 +7,7 @@ RenderView::RenderView(int screenMultiplier, Palette palette) {
     this->palette = palette;
 }
 
-RenderView::RenderView() : RenderView(4, PALETTE_POCKET) {}
+RenderView::RenderView() : RenderView(2, PALETTE_DMG) {}
 
 void RenderView::initGL() {
     // Initialize screen quad.
@@ -78,6 +78,10 @@ void RenderView::setScreenTexture(uint8_t textureData[]) {
 
 void RenderView::setPalette(Palette palette) {
     this->palette = palette;
+}
+
+void RenderView::setScreenMultiplier(int screenMultiplier) {
+    this->screenMultiplier = screenMultiplier;
 }
 
 int RenderView::getWidth() const {

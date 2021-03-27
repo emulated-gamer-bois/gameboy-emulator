@@ -32,6 +32,7 @@ public:
     void confirmDraw();
     void cpu_dump();
 
+
 private:
     bool on;
 
