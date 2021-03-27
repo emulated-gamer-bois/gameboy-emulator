@@ -90,7 +90,7 @@ private:
     uint8_t NR51;
     uint8_t NR52;
 
-    bool readyToPlay;
+    uint8_t readyToPlay;
     int accumulated_cycles;
     uint8_t state;
 public:
@@ -107,7 +107,7 @@ public:
     void sweep_step();
 
     void trigger_event(uint8_t source);
-    bool isReadyToPlaySound();
+    uint8_t isReadyToPlaySound();
     void confirmPlay();
     std::shared_ptr<APUState> getState();
 };

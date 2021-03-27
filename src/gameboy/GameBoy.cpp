@@ -86,7 +86,7 @@ bool GameBoy::isReadyToDraw() const {
 void GameBoy::confirmDraw() {
     this->ppu->confirmDraw();
 }
-bool GameBoy::isReadyToPlaySound() {
+uint8_t GameBoy::isReadyToPlaySound() {
     return this->apu->isReadyToPlaySound();
 }
 void GameBoy::confirmPlay() {

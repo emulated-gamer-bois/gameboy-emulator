@@ -165,24 +165,27 @@ void APU::trigger_event(uint8_t source) {
     - Pass - Wave channel's position is set to 0 but sample buffer is NOT refilled.
     - Pass - Square 1's sweep does several things (see frequency sweep).
      */
-    readyToPlay = true;
     switch(source) {
         case 0:
             //If length counter is zero, it is set to 64
             if(!(this->NR11 & 0x3F) && !(this->NR14 & 0x40)) {
                 this->NR14 |= 0x40;
             }
+            readyToPlay |= 1;
+            break;
         case 1:
             //If length counter is zero, it is set to 64
             if(!(this->NR21 & 0x3F) && !(this->NR24 & 0x40)) {
                 this->NR24 |= 0x40;
             }
+            readyToPlay |= 2;
             break;
         case 2:
             //If length counter is zero, it is set to 64
             if(!(this->NR31 & 0x3F) && !(this->NR34 & 0x40)) {
                 this->NR34 |= 0x40;
             }
+            readyToPlay |= 4;
             break;
     }
 }
@@ -194,7 +197,7 @@ void APU::length_step() {
         this->NR14 |= timer & 0x40;
         if(!(this->NR11 & 0x3F)) {
             this->NR14 &= 0x7F;
-            readyToPlay = true;
+            readyToPlay |= 1;
         }
     }
 
@@ -204,7 +207,7 @@ void APU::length_step() {
         this->NR24 |= timer & 0x40;
         if(!(this->NR21 & 0x3F)) {
             this->NR24 &= 0x7F;
-            readyToPlay = true;
+            readyToPlay |= 2;
         }
     }
 
@@ -214,7 +217,7 @@ void APU::length_step() {
         this->NR34 |= timer & 0x40;
         if(!(this->NR31 & 0x3F)) {
             this->NR34 &= 0x7F;
-            readyToPlay = true;
+            readyToPlay |= 4;
         }
     }
 }
@@ -246,12 +249,12 @@ void APU::update(uint16_t cpuCycles) {
         this->sweep_step();
     }
 }
-bool APU::isReadyToPlaySound() {
+uint8_t APU::isReadyToPlaySound() {
     return readyToPlay;
 }
 
 void APU::confirmPlay() {
-    readyToPlay = false;
+    readyToPlay = 0;
 }
 
 std::shared_ptr<APUState> APU::getState() {
