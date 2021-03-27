@@ -60,15 +60,25 @@ void Application::start() {
             //this->audio.playBuffers(this->gameBoy.getAudioBuffers());
 
             auto state = this->gameBoy.getState();
+
+            //1st square
             this->audio.stopSource(0);
             if(state->enable_square_a) {
                 this->audio.playGBSquare(0, state->duty_square_a, state->frequency_square_a);
             }
 
+            //2nd square
+            this->audio.stopSource(1);
+            if(state->enable_square_b) {
+                this->audio.playGBSquare(1, state->duty_square_b, state->frequency_square_b);
+            }
+
+            //Wave
             this->audio.stopSource(2);
             if(state->enable_wave) {
                 this->audio.playGBWave(2, state->waveform_wave, state->frequency_wave);
             }
+
             gameBoy.confirmPlay();
         }
 

@@ -5,9 +5,8 @@
 #include "AudioController.h"
 
 AudioController::~AudioController() {
-    alDeleteSources(1, sources);
-    alDeleteBuffers(1, buffers);
-
+    alDeleteSources(4, sources);
+    alDeleteBuffers(4, buffers);
     alcMakeContextCurrent(context);
     alcDestroyContext(context);
 
@@ -68,10 +67,10 @@ void AudioController::init() {
     }
 }
 
-void AudioController::playSound(char *soundData, int size, int sampleRate) {
-    alBufferData(buffers[0], AL_FORMAT_MONO8, soundData, size, sampleRate);
-    alSourcei(sources[0], AL_BUFFER, buffers[0]);
-    alSourcePlay(sources[0]);
+void AudioController::playSound(int source, char *soundData, int size, int sampleRate) {
+    alBufferData(buffers[source], AL_FORMAT_MONO8, soundData, size, sampleRate);
+    alSourcei(sources[source], AL_BUFFER, buffers[source]);
+    alSourcePlay(sources[source]);
 }
 
 /**

@@ -50,6 +50,10 @@ struct APUState {
     uint8_t duty_square_a;
     uint16_t frequency_square_a;
 
+    bool enable_square_b;
+    uint8_t duty_square_b;
+    uint16_t frequency_square_b;
+
     bool enable_wave;
     std::array<uint8_t, 16> waveform_wave;
     uint16_t frequency_wave;

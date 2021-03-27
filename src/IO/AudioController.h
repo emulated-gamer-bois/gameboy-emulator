@@ -14,7 +14,7 @@ class AudioController {
 public:
     ~AudioController();
     void init();
-    void playSound(char *soundData, int size, int sampleRate);
+    void playSound(int source, char *soundData, int size, int sampleRate);
     void playSquare(int source, char duty, ALsizei frequency);
     void playGBSquare(int source, char duty, unsigned short frequency);
     void stopSource(int source);

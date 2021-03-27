@@ -25,6 +25,14 @@ uint8_t APU::read(uint16_t address) const {
             return this->NR13;
         case NR14_ADDRESS:
             return this->NR14;
+        case NR21_ADDRESS:
+            return this->NR21;
+        case NR22_ADDRESS:
+            return this->NR22;
+        case NR23_ADDRESS:
+            return this->NR23;
+        case NR24_ADDRESS:
+            return this->NR24;
         case NR50_ADDRESS:
             return this->NR50;
         case NR51_ADDRESS:
@@ -59,6 +67,22 @@ void APU::write(uint16_t address, uint8_t data) {
             // If trigger bit is set
             if(this->NR14 & 0x80) {
                 trigger_event(0);
+            }
+            return;
+        case NR21_ADDRESS:
+            this->NR21 = data;
+            return;
+        case NR22_ADDRESS:
+            this->NR22 = data;
+            return;
+        case NR23_ADDRESS:
+            this->NR23 = data;
+            return;
+        case NR24_ADDRESS:
+            this->NR24 = data;
+            // If trigger bit is set
+            if(this->NR24 & 0x80) {
+                trigger_event(1);
             }
             return;
         case NR30_ADDRESS:
@@ -148,11 +172,18 @@ void APU::trigger_event(uint8_t source) {
             if(!(this->NR11 & 0x3F) && !(this->NR14 & 0x40)) {
                 this->NR14 |= 0x40;
             }
+        case 1:
+            //If length counter is zero, it is set to 64
+            if(!(this->NR21 & 0x3F) && !(this->NR24 & 0x40)) {
+                this->NR24 |= 0x40;
+            }
+            break;
         case 2:
             //If length counter is zero, it is set to 64
             if(!(this->NR31 & 0x3F) && !(this->NR34 & 0x40)) {
                 this->NR34 |= 0x40;
             }
+            break;
     }
 }
 
@@ -163,6 +194,16 @@ void APU::length_step() {
         this->NR14 |= timer & 0x40;
         if(!(this->NR11 & 0x3F)) {
             this->NR14 &= 0x7F;
+            readyToPlay = true;
+        }
+    }
+
+    if((this->NR24 & 0x80) && ((this->NR21 & 0x3F) || (this->NR24 & 0x40))) {
+        uint16_t timer = ((this->NR21 & 0x3F) | (this->NR24 & 0x40)) - 1;
+        this->NR21 = (this->NR21 & 0xC0) | ( timer & 0x3F);
+        this->NR24 |= timer & 0x40;
+        if(!(this->NR21 & 0x3F)) {
+            this->NR24 &= 0x7F;
             readyToPlay = true;
         }
     }
@@ -219,8 +260,12 @@ std::shared_ptr<APUState> APU::getState() {
         .duty_square_a =  (uint8_t)((this->NR11 >> 6) & 0x3),
         .frequency_square_a =  (uint16_t)((((uint16_t)(this->NR14 & 0x7)) << 8) + this->NR13),
 
+        .enable_square_b =  (bool)(this->NR24 & 0x80),
+        .duty_square_b =  (uint8_t)((this->NR21 >> 6) & 0x3),
+        .frequency_square_b =  (uint16_t)((((uint16_t)(this->NR24 & 0x7)) << 8) + this->NR23),
+
         .enable_wave = (bool)(this->NR34 & 0x80),
         .waveform_wave = wavePatternRAM,
-        .frequency_wave = (uint16_t)((((uint16_t)(this->NR34 & 0x7)) << 8) + this->NR33)
+        .frequency_wave = (uint16_t)((((uint16_t)(this->NR34 & 0x7)) << 8) + this->NR33),
     });
 }
