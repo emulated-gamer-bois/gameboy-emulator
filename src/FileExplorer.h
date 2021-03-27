@@ -12,7 +12,7 @@ struct FileEntry {
 
 class FileExplorer {
 private:
-    std::string currentDir;
+    FileEntry currentDir;
     std::regex filter;
     std::vector<FileEntry> fileEntryList;
 
@@ -21,7 +21,7 @@ private:
 public:
     void setCurrentDir(std::string currentDir);
     void setFilter(const std::string& filter);
-    [[nodiscard]] const std::string& getCurrentDir() const;
+    [[nodiscard]] const FileEntry& getCurrentDir() const;
     [[nodiscard]] const std::vector<FileEntry>& getDirContents() const;
 
     void moveTo(const FileEntry& dir);

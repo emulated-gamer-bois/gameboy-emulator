@@ -22,17 +22,25 @@ public:
     void toggleToolbar();
 
 private:
+    // File dialog members
     FileExplorer fileExplorer;
+    int selectedFile;
+
+    // Key binding members
+    int keybindindex;
+
+    // File dialog window functions
+    void showFileDialog();
+
+    // Key binding window functions
     void showEditControls();
     void keyBind();
-    int keybindindex;
 
     bool displayEditControls;
     bool displayFileDialog;
     bool displayToolbar;
     bool waitingForKeyBind;
     void toolbar();
-    void showFileDialog();
     const ImVec4 pressColor{ 0.0f, 0.217f, 1.0f, 0.784f };
     const ImVec4 releaseColor{ 0.202f, 0.549f, 0.798f, 0.784f };
 

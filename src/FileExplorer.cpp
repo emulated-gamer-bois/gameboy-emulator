@@ -11,7 +11,7 @@
 using namespace std;
 
 void FileExplorer::listDir() {
-    filesystem::path dirPath(currentDir);
+    filesystem::path dirPath(currentDir.absolutePath);
 
     if (!fileEntryList.empty()) {
         fileEntryList.clear();
@@ -39,35 +39,39 @@ void FileExplorer::listDir() {
     sort(fileEntryList.begin(), fileEntryList.end(), comparator);
 }
 
-void FileExplorer::setCurrentDir(std::string currentDir) {
+void FileExplorer::setCurrentDir(std::string _currentDir) {
+    filesystem::path dirPath(_currentDir);
+
     // Check if path is valid.
-    if (!filesystem::exists(currentDir)) {
+    if (!filesystem::exists(dirPath)) {
         cerr << "FileHelper ERROR: Invalid path" << endl;
         return;
     }
 
     // Check if path is a directory.
-    if (!filesystem::is_directory(currentDir)) {
+    if (!filesystem::is_directory(dirPath)) {
         cerr << "FileHelper ERROR: Path is not a directory" << endl;
         return;
     }
+    FileEntry fe = {dirPath.filename().string(), filesystem::absolute(dirPath).string(), true};
+    currentDir = fe;
 
-    this->currentDir = currentDir;
+    listDir();
 }
 
-void FileExplorer::setFilter(const std::string& filter) {
+void FileExplorer::setFilter(const std::string& _filter) {
     regex r;
     try {
-        r = filter;
+        r = _filter;
     } catch (regex_error& e) {
         cerr << "FileHelper ERROR: Filter is not valid regex" << endl;
         return;
     }
 
-    this->filter = std::move(r);
+    filter = std::move(r);
 }
 
-const std::string& FileExplorer::getCurrentDir() const {
+const FileEntry& FileExplorer::getCurrentDir() const {
     return currentDir;
 }
 
@@ -81,5 +85,5 @@ void FileExplorer::moveTo(const FileEntry& dir) {
         return;
     }
 
-    currentDir = dir.absolutePath;
+    setCurrentDir(dir.absolutePath);
 }

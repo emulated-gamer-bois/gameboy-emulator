@@ -15,14 +15,18 @@
  */
 Gui::Gui(AppSettings * settings) {
     this->settings = settings;
+
+    selectedFile = -1;
+
     disableWidgets();
 }
 
 /**
  */
 void Gui::init(SDL_Window *window,SDL_GLContext *glContext, char * glsl_version) {
+    // File dialog init
     fileExplorer.setCurrentDir(settings->defaultPath);
-    fileExplorer.setFilter(".[a-z0-9]*");
+    fileExplorer.setFilter(".gb");
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -39,6 +43,7 @@ void Gui::handleGui(SDL_Window *window) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(window);
     ImGui::NewFrame();
+    //ImGui::ShowDemoWindow();
     //Call ImGui
     if (displayToolbar) { toolbar(); }
     if (displayEditControls) { showEditControls(); }
@@ -101,11 +106,68 @@ void Gui::showEditControls() {
 }
 
 void Gui::showFileDialog() {
-    ImGui::Begin("Load ROM", &displayFileDialog);
-    ImGui::Text(fileExplorer.getCurrentDir().c_str());
-    if (ImGui::BeginListBox("nut")) {
+    float indentSize = 20.f;
+
+    ImGui::Begin("Load ROM", &displayFileDialog, ImGuiWindowFlags_NoResize);
+    ImGui::Text("Current Directory: ");
+    ImGui::Indent(indentSize);
+    ImGui::Text(fileExplorer.getCurrentDir().absolutePath.c_str());
+    ImGui::Unindent(indentSize);
+    ImGui::Spacing();
+
+    const std::vector<FileEntry>& fileEntryList = fileExplorer.getDirContents();
+
+    ImGui::Text("File Select: ");
+    ImGui::Indent(indentSize);
+    if (ImGui::BeginListBox("##FileList")) {
+        for (int i = 0; i < fileEntryList.size(); i++) {
+            int flags = ImGuiSelectableFlags_AllowDoubleClick;
+            bool isSelected = (selectedFile == i);
+            if (ImGui::Selectable(fileEntryList.at(i).filename.c_str(), isSelected, flags)) {
+                selectedFile = i;
+                if (ImGui::IsMouseDoubleClicked(0)) {
+                    if (fileEntryList.at(i).isDir) {
+                        fileExplorer.moveTo(fileEntryList.at(i));
+                        selectedFile = -1;
+                    }
+                    //else
+                        // Load here
+                }
+            }
+        }
         ImGui::EndListBox();
     }
+    ImGui::Unindent(indentSize);
+    ImGui::Spacing();
+
+    ImGui::Text("Selected File: ");
+    ImGui::SameLine();
+    bool romSelected = !fileEntryList.empty() && selectedFile != -1 && !fileEntryList.at(selectedFile).isDir;
+    if (romSelected) {
+        ImGui::Text(fileEntryList.at(selectedFile).filename.c_str());
+    } else {
+        ImGui::Text("None");
+    }
+    ImGui::Spacing();
+
+    if (!romSelected) {
+        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+    }
+    if (ImGui::Button("Load")) {
+
+    }
+    if (!romSelected) {
+        ImGui::PopItemFlag();
+        ImGui::PopStyleVar();
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Cancel")) {
+        displayFileDialog = false;
+    }
+
     ImGui::End();
 }
 
