@@ -40,7 +40,8 @@ void Application::start() {
         if (state == State::EMULATION) {
             for (int i = 0; i < settings.playSpeed; i++) {
                 if (gameBoy.isReadyToDraw()) {
-                    gameBoy.discardFrame();
+                    //Actually discards frame until settings.playSpeed number of frames have been produced.
+                    gameBoy.confirmDraw();
                 }
                 while (!gameBoy.isReadyToDraw()) {
                     gameBoy.step();
@@ -49,7 +50,6 @@ void Application::start() {
             renderView.setScreenTexture(gameBoy.getScreenTexture().get());
             renderView.render();
             // TODO: find a better way to handle texture fetching than needing to call gameBoy.confirmDraw()
-
             gameBoy.confirmDraw();
         }
 
@@ -78,7 +78,7 @@ void Application::init() {
     gui.init(window, &glContext, "#version 130"); // GLSL version
 
     // TEMP ------------------------------------------------------------------------------------------------------------
-    gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/games/Tetris.gb");
+    this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/instr_timing/instr_timing.gb");
     // END TEMP --------------------------------------------------------------------------------------------------------
 }
 

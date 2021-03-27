@@ -25,7 +25,6 @@ void Gui::init(SDL_Window *window,SDL_GLContext *glContext, char * glsl_version)
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
     ImGui_ImplSDL2_InitForOpenGL(window, glContext);
     ImGui_ImplOpenGL3_Init(glsl_version);
 }
@@ -113,9 +112,6 @@ void Gui::toolbar() {
             if (ImGui::MenuItem("Load ROM", "")) {
                 displayFileDialog = true;
             }
-            ImGui::Separator();
-            if (ImGui::MenuItem("Edit", "")) {}
-
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Settings")) {

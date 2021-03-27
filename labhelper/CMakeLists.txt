@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 3.0.2)
 project(labhelper)
 
 # External libraries which need to be built.
-#add_subdirectory ( ${CMAKE_SOURCE_DIR}/external_src/imgui-1.51 ${CMAKE_CURRENT_BINARY_DIR}/imgui )
-#set_target_properties(imgui PROPERTIES FOLDER external)
 add_subdirectory(${CMAKE_SOURCE_DIR}/external_src/imgui-1.81 ${CMAKE_CURRENT_BINARY_DIR}/imgui)
 set_target_properties(imgui PROPERTIES FOLDER external)
 
@@ -53,11 +51,6 @@ target_include_directories(labhelper
         ${GLEW_INCLUDE_DIRS}
         ${OPENGL_INCLUDE_DIR}
         )
-
-#If exists SDL_LIBRARY is due to Isak having problem with SDL2::SDL2 but SDL_2LIBRARIES is working.
-#/Isak
-
-
 target_link_libraries(labhelper
         PUBLIC
         imgui

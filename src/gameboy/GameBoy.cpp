@@ -83,8 +83,3 @@ bool GameBoy::isReadyToDraw() const {
 void GameBoy::confirmDraw() {
     this->ppu->confirmDraw();
 }
-
-void GameBoy::discardFrame() {
-    this->ppu->confirmDraw();
-
-}
