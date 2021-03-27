@@ -28,31 +28,38 @@ Application::Application() {
  */
 void Application::start() {
     init();
-    float  frameTime;
+    float frameTime = 1000.f / LCD_REFRESH_RATE;
     AppTimer timer;
     while (state != State::TERMINATION) {
-         frameTime=settings.playSpeed;
 
         // Create time stamp.
         timer.tick();
         handleSDLEvents();
 
-        // Step through emulation until
+        // Step through emulation until playspeed number of frames are produced, then display the last one.
         if (state == State::EMULATION) {
-            while (!gameBoy.isReadyToDraw()) {
-                gameBoy.step();
+            for (int i = 0; i < settings.playSpeed; i++) {
+                if (gameBoy.isReadyToDraw()) {
+                    //Actually discards frame until settings.playSpeed number of frames have been produced.
+                    gameBoy.confirmDraw();
+                }
+                while (!gameBoy.isReadyToDraw()) {
+                    gameBoy.step();
+                }
             }
             renderView.setScreenTexture(gameBoy.getScreenTexture().get());
+            renderView.render();
+            // TODO: find a better way to handle texture fetching than needing to call gameBoy.confirmDraw()
+            gameBoy.confirmDraw();
         }
 
         // Prepare for rendering, render and swap buffer.
         updateSDLWindowSize();
-        renderView.render();
-        // TODO: only handle gui if state == State::MENU
-        gui.handleGui(window);
-         SDL_GL_SwapWindow(window);
-        // TODO: find a better way to handle texture fetching than needing to call gameBoy.confirmDraw()
-        gameBoy.confirmDraw();
+        if (state == State::MENU) {
+            renderView.render();
+            gui.handleGui(window);
+        }
+        SDL_GL_SwapWindow(window);
 
         // Time application to 60Hz
         float msSinceTick = timer.msSinceTick();
@@ -64,18 +71,19 @@ void Application::start() {
 
     terminate();
 }
+
 void Application::init() {
     initSDL();
     renderView.initGL();
-    gui.init(window,&glContext,"#version 130"); // GLSL version
+    gui.init(window, &glContext, "#version 130"); // GLSL version
 
     // TEMP ------------------------------------------------------------------------------------------------------------
-    gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/games/Tetris.gb");
+    this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/instr_timing/instr_timing.gb");
     // END TEMP --------------------------------------------------------------------------------------------------------
 }
 
 void Application::terminate() {
-    gui.handleGui(window); // TODO use gui.terminate() instead?
+    gui.terminate();
     terminateSDL();
 }
 
@@ -99,11 +107,11 @@ void Application::initSDL() {
 
     // Create the window.
     window = SDL_CreateWindow(DEFAULT_WINDOW_CAPTION.c_str(),
-                                    SDL_WINDOWPOS_UNDEFINED,
-                                    SDL_WINDOWPOS_UNDEFINED,
-                                    LCD_WIDTH,
-                                    LCD_HEIGHT,
-                                    SDL_WINDOW_OPENGL);
+                              SDL_WINDOWPOS_UNDEFINED,
+                              SDL_WINDOWPOS_UNDEFINED,
+                              LCD_WIDTH,
+                              LCD_HEIGHT,
+                              SDL_WINDOW_OPENGL);
     assert(window);
 
     // Get gl context and set it to the current context for this window.
@@ -134,19 +142,11 @@ void Application::terminateSDL() {
  * Handles SDL Events including keyboard input.
  */
 void Application::handleSDLEvents() {
-    /* Assuming we keep track of gui state in gui we can forward events into the gui in two ways without
-     * polling in the gui class. See below.
-     */
-
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         SDL_Keycode key = event.key.keysym.sym;
 
         if (state == State::MENU) {
-            /* 1 -----------------------------------------------------
-             * Since we already sends the event into the gui here we can handle the keybind stuff in
-             * gui.handleInput() as well
-             */
             gui.handleInput(event);
         }
 
@@ -161,19 +161,11 @@ void Application::handleSDLEvents() {
                     state = (state == State::EMULATION) ? State::MENU : State::EMULATION;
                 }
                 if (key == SDLK_SPACE) {
+                    //TODO fix so that the speed takes current speed x2 and resets correctly.
                     settings.setPlaySpeed(2);
                 }
                 if (state == State::EMULATION) {
                     handleEmulatorInput(key, JOYPAD_PRESS);
-                }
-
-                if (state == State::MENU) {
-                    /* 2 -----------------------------------------------------
-                     * Here we can do something like this:
-                     * if (gui.isKeyBindTime()) {
-                     *     gui.keyBind(--Info needed about the binding here--);
-                     * }
-                     */
                 }
                 break;
 

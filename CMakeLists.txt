@@ -46,6 +46,12 @@ set ( CMAKE_BUILD_TYPE DEBUG )
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 endif()
+#If you want your game to go swoosh while developing
+if(MSVC)
+    set(CMAKE_CXX_FLAGS_DEBUG  "/O2")
+else()
+    set(CMAKE_CXX_FLAGS_DEBUG  "-O3")
+endif()
 
 # Excludes graphics code if tests are run in travis
 if(NOT TRAVIS)

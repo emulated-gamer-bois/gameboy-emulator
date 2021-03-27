@@ -20,7 +20,7 @@ public:
         int keyval;
     };
     action a,b,start,select,left,right,up,down,doubleSpeed;
-    std::vector<action*> controllerButtons = {&a, &b, &start, &select, &left, &right, &up, &down, &doubleSpeed};
+    std::vector<action*> keybinds = {&a, &b, &start, &select, &left, &right, &up, &down, &doubleSpeed};
     bool editKeyBinds(bool *keysDown, int keyBindIndex);
 
 

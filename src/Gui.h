@@ -27,7 +27,7 @@ private:
     int selectedFile;
 
     // Key binding members
-    int keybindindex;
+    int keyBindIndex;
 
     // File dialog window functions
     void showFileDialog();
@@ -43,7 +43,7 @@ private:
     void toolbar();
     const ImVec4 pressColor{ 0.0f, 0.217f, 1.0f, 0.784f };
     const ImVec4 releaseColor{ 0.202f, 0.549f, 0.798f, 0.784f };
-
     void disableWidgets();
+    void displayPlaySpeed();
 };
 

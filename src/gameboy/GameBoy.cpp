@@ -9,10 +9,11 @@ GameBoy::GameBoy() {
 
     this->joypad = std::make_shared<Joypad>(this->mmu);
     this->timer = std::make_shared<Timer>(this->mmu);
+    this->cartridge = std::make_shared<Cartridge>();
 
     this->cpu = std::make_unique<CPU>(0x0000, 0xFFFE, mmu);
     this->ppu = std::make_shared<PPU>(mmu);
-    this->mmu->link_devices(this->ppu, this->joypad, this->timer);
+    this->mmu->link_devices(this->ppu, this->joypad, this->timer, this->cartridge);
     this->on = false;
 }
 
@@ -24,6 +25,7 @@ void GameBoy::step() {
     int cycles = this->cpu->update();
     this->ppu->update(cycles);
     this->timer->update(cycles);
+    this->cartridge->update(cycles);
 }
 
 std::unique_ptr<uint8_t[]> GameBoy::getScreenTexture() {
@@ -33,7 +35,6 @@ std::unique_ptr<uint8_t[]> GameBoy::getScreenTexture() {
     for (int i = 0; i < ppuFrameBuffer->size(); i++) {
         texture[i] = 0xFF - (ppuFrameBuffer->at(i) * 0x55);
     }
-
     return texture;
 }
 
@@ -60,11 +61,11 @@ void GameBoy::load_rom(std::string bootFilepath, std::string romFilepath) {
     if (!this->mmu->load_boot_rom(bootFilepath)) {
         this->cpu->skipBootRom();
     }
-    on = this->mmu->load_game_rom(romFilepath);
+    this->on = this->cartridge->load_rom(romFilepath);
 }
 
 void GameBoy::load_game_rom(std::string filepath) {
-    this->mmu->load_game_rom(filepath);
+    this->cartridge->load_rom(filepath);
 }
 
 void GameBoy::load_boot_rom(std::string filepath) {
