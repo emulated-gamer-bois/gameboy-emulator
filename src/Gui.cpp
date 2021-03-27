@@ -25,7 +25,7 @@ Gui::Gui(AppSettings * settings) {
  */
 void Gui::init(SDL_Window *window,SDL_GLContext *glContext, char * glsl_version) {
     // File dialog init
-    fileExplorer.setCurrentDir(settings->defaultPath);
+    fileExplorer.setCurrentDir(settings->romPath);
     fileExplorer.setFilter(".gb");
 
     // Setup Dear ImGui context
@@ -73,7 +73,7 @@ void Gui::handleInput(SDL_Event event) {
 /**
  * Toggles the toolbar.
  */
- void Gui::toggleToolbar() {
+ void Gui::toggleGui() {
      this->displayToolbar = !this->displayToolbar;
      if (!this->displayToolbar) {
          // Disable all widgets
@@ -106,9 +106,13 @@ void Gui::showEditControls() {
 }
 
 void Gui::showFileDialog() {
+    float fileSelectAreaHeight = 150.f;
     float indentSize = 20.f;
 
-    ImGui::Begin("Load ROM", &displayFileDialog, ImGuiWindowFlags_NoResize);
+    int windowFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse;
+    ImGui::Begin("Load ROM", &displayFileDialog, windowFlags);
+
+    // Display Current Directory
     ImGui::Text("Current Directory: ");
     ImGui::Indent(indentSize);
     ImGui::Text(fileExplorer.getCurrentDir().absolutePath.c_str());
@@ -117,9 +121,10 @@ void Gui::showFileDialog() {
 
     const std::vector<FileEntry>& fileEntryList = fileExplorer.getDirContents();
 
+    // Display File Select
     ImGui::Text("File Select: ");
     ImGui::Indent(indentSize);
-    if (ImGui::BeginListBox("##FileList")) {
+    if (ImGui::BeginListBox("##FileList", ImVec2(350.f, fileSelectAreaHeight))) {
         for (int i = 0; i < fileEntryList.size(); i++) {
             int flags = ImGuiSelectableFlags_AllowDoubleClick;
             bool isSelected = (selectedFile == i);
@@ -137,9 +142,22 @@ void Gui::showFileDialog() {
         }
         ImGui::EndListBox();
     }
+
+    // Display Rom Folder Buttons
+    ImGui::SameLine();
+    ImGui::BeginChild("RomFolderButtons", ImVec2(140, fileSelectAreaHeight), true);
+    if (ImGui::Button("Set Rom Folder")) {
+        settings->romPath = fileExplorer.getCurrentDir().absolutePath;
+    }
+    ImGui::Spacing();
+    if (ImGui::Button("Go to Rom Folder")) {
+        fileExplorer.setCurrentDir(settings->romPath);
+    }
+    ImGui::EndChild();
     ImGui::Unindent(indentSize);
     ImGui::Spacing();
 
+    // Display Selected File
     ImGui::Text("Selected File: ");
     ImGui::SameLine();
     bool romSelected = !fileEntryList.empty() && selectedFile != -1 && !fileEntryList.at(selectedFile).isDir;
@@ -150,6 +168,7 @@ void Gui::showFileDialog() {
     }
     ImGui::Spacing();
 
+    // Control Buttons
     if (!romSelected) {
         ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);

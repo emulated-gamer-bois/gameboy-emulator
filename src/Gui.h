@@ -13,21 +13,31 @@
 
 class Gui {
 public:
-    Gui(AppSettings * settings);
+    Gui(AppSettings* settings);
     void init(SDL_Window *window, SDL_GLContext *glContext,char *glsl_version);
     void handleGui(SDL_Window *window);
-    void terminate();
     void handleInput(SDL_Event event);
-    AppSettings * settings;
-    void toggleToolbar();
+    void terminate();
+
+    // Enables/Disables the gui
+    void toggleGui();
 
 private:
+    const ImVec4 pressColor{ 0.0f, 0.217f, 1.0f, 0.784f };
+    const ImVec4 releaseColor{ 0.202f, 0.549f, 0.798f, 0.784f };
+
+    AppSettings* settings;
+    bool displayEditControls;
+    bool displayFileDialog;
+    bool displayToolbar;
+
     // File dialog members
     FileExplorer fileExplorer;
     int selectedFile;
 
     // Key binding members
     int keyBindIndex;
+    bool waitingForKeyBind;
 
     // File dialog window functions
     void showFileDialog();
@@ -36,14 +46,11 @@ private:
     void showEditControls();
     void keyBind();
 
-    bool displayEditControls;
-    bool displayFileDialog;
-    bool displayToolbar;
-    bool waitingForKeyBind;
-    void toolbar();
-    const ImVec4 pressColor{ 0.0f, 0.217f, 1.0f, 0.784f };
-    const ImVec4 releaseColor{ 0.202f, 0.549f, 0.798f, 0.784f };
-    void disableWidgets();
+    // Speed settings functions
     void displayPlaySpeed();
+
+    void toolbar();
+    void disableWidgets();
+
 };
 

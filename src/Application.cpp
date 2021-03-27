@@ -157,7 +157,7 @@ void Application::handleSDLEvents() {
 
             case SDL_KEYDOWN:
                 if (key == SDLK_ESCAPE) {
-                    gui.toggleToolbar();
+                    gui.toggleGui();
                     state = (state == State::EMULATION) ? State::MENU : State::EMULATION;
                 }
                 if (key == SDLK_SPACE) {
@@ -219,7 +219,7 @@ void Application::updateSDLWindowSize() {
 void Application::initSettings() {
     settings.keyBinds.init_keybinds();
     settings.screenMultiplier = 4;
-    settings.defaultPath = "..";
+    settings.romPath = "..";
 }
 
 
