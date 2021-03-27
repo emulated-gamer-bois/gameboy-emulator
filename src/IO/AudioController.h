@@ -15,8 +15,8 @@ public:
     ~AudioController();
     void init();
     void playSound(int source, char *soundData, int size, int sampleRate);
-    void playSquare(int source, char duty, ALsizei frequency);
-    void playGBSquare(int source, char duty, unsigned short frequency);
+    void playSquare(int source, char duty, ALsizei frequency, float volume);
+    void playGBSquare(int source, char duty, unsigned short frequency, float volume);
     void stopSource(int source);
     void playGBWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency);
     void playWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency);

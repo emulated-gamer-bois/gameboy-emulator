@@ -12,10 +12,10 @@
 TEST(AUDIO, START_SOUND) {
     AudioController a;
     a.init();
-    a.playGBSquare(0, 2, 0x783);
+    a.playGBSquare(0, 2, 0x783, 1.0f);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     a.stopSource(0);
-    a.playGBSquare(0, 2, 0x7C1);
+    a.playGBSquare(0, 2, 0x7C1, 1.0f);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     a.stopSource(0);
 }
@@ -50,10 +50,10 @@ TEST(AUDIO, SIN_WAVE) {
 TEST(AUDIO, START_SOUND_B) {
     AudioController a;
     a.init();
-    a.playGBSquare(1, 2, 0x783);
+    a.playGBSquare(1, 2, 0x783, 1.0f);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     a.stopSource(1);
-    a.playGBSquare(1, 2, 0x7C1);
+    a.playGBSquare(1, 2, 0x7C1, 1.0f);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     a.stopSource(1);
 }

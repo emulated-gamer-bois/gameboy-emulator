@@ -7,6 +7,11 @@
 APU::APU(std::shared_ptr<MMU> memory) {
     this->accumulated_cycles = 0;
     this->memory = memory;
+    this->readyToPlay = 0;
+    this->accumulated_cycles = 0;
+    this->state = 0;
+    this->volume_envelope_a = 0;
+    this->volume_envelope_b = 0;
     this->reset();
 }
 
@@ -160,7 +165,7 @@ void APU::trigger_event(uint8_t source) {
     - Done-ish (since frequency timer does not change in our program, it does not need to be reset)
         - Frequency timer is reloaded with period.
     - Pass - Volume envelope timer is reloaded with period.
-    - Pass - Channel volume is reloaded from NRx2.
+    - Done - Channel volume is reloaded from NRx2.
     - Pass - Noise channel's LFSR bits are all set to 1.
     - Pass - Wave channel's position is set to 0 but sample buffer is NOT refilled.
     - Pass - Square 1's sweep does several things (see frequency sweep).
@@ -171,6 +176,7 @@ void APU::trigger_event(uint8_t source) {
             if(!(this->NR11 & 0x3F) && !(this->NR14 & 0x40)) {
                 this->NR14 |= 0x40;
             }
+            volume_envelope_a = (this->NR12 >> 4) & 0xF;
             readyToPlay |= 1;
             break;
         case 1:
@@ -178,6 +184,7 @@ void APU::trigger_event(uint8_t source) {
             if(!(this->NR21 & 0x3F) && !(this->NR24 & 0x40)) {
                 this->NR24 |= 0x40;
             }
+            volume_envelope_b = (this->NR22 >> 4) & 0xF;
             readyToPlay |= 2;
             break;
         case 2:
@@ -223,7 +230,27 @@ void APU::length_step() {
 }
 
 void APU::vol_envelope_step() {
-    //TODO: Update volume length
+    //If in increment mode and envelope can be incremented
+    if((this->NR12 & 8) && (volume_envelope_a < 15)) {
+        volume_envelope_a++;
+        readyToPlay |= 1;
+    }
+    //If in decrement mode and envelope can be decremented
+    if(!(this->NR12 & 8) && volume_envelope_a) {
+        volume_envelope_a--;
+        readyToPlay |= 1;
+    }
+
+    //If in increment mode and envelope can be incremented
+    if((this->NR22 & 8) && (volume_envelope_b < 15)) {
+        volume_envelope_b++;
+        readyToPlay |= 2;
+    }
+    //If in decrement mode and envelope can be decremented
+    if(!(this->NR22 & 8) && volume_envelope_b) {
+        volume_envelope_b--;
+        readyToPlay |= 2;
+    }
 }
 
 void APU::sweep_step() {
@@ -262,10 +289,12 @@ std::shared_ptr<APUState> APU::getState() {
         .enable_square_a =  (bool)(this->NR14 & 0x80),
         .duty_square_a =  (uint8_t)((this->NR11 >> 6) & 0x3),
         .frequency_square_a =  (uint16_t)((((uint16_t)(this->NR14 & 0x7)) << 8) + this->NR13),
+        .volume_square_a = (float)volume_envelope_a / 15.0f,
 
         .enable_square_b =  (bool)(this->NR24 & 0x80),
         .duty_square_b =  (uint8_t)((this->NR21 >> 6) & 0x3),
         .frequency_square_b =  (uint16_t)((((uint16_t)(this->NR24 & 0x7)) << 8) + this->NR23),
+        .volume_square_b = (float)volume_envelope_b / 15.0f,
 
         .enable_wave = (bool)(this->NR34 & 0x80),
         .waveform_wave = wavePatternRAM,

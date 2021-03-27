@@ -66,7 +66,7 @@ void Application::start() {
             if(ready & 1) {
                 this->audio.stopSource(0);
                 if(state->enable_square_a) {
-                    this->audio.playGBSquare(0, state->duty_square_a, state->frequency_square_a);
+                    this->audio.playGBSquare(0, state->duty_square_a, state->frequency_square_a, state->volume_square_a);
                 }
             }
 
@@ -74,7 +74,7 @@ void Application::start() {
             if(ready & 2) {
                 this->audio.stopSource(1);
                 if(state->enable_square_b) {
-                    this->audio.playGBSquare(1, state->duty_square_b, state->frequency_square_b);
+                    this->audio.playGBSquare(1, state->duty_square_b, state->frequency_square_b, state->volume_square_b);
                 }
             }
 

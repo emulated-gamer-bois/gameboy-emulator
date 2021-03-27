@@ -79,7 +79,7 @@ void AudioController::playSound(int source, char *soundData, int size, int sampl
  * @param duty (0 = 12.5%, 1 = 25%, 2 = 50%, 3 = 75%)
  * @param frequency the frequency of the sound
  */
-void AudioController::playSquare(int source, char duty, ALsizei frequency) {
+void AudioController::playSquare(int source, char duty, ALsizei frequency, float volume) {
     alSourcei(sources[source], AL_BUFFER, 0);
     alBufferData(
         buffers[source],
@@ -87,6 +87,7 @@ void AudioController::playSquare(int source, char duty, ALsizei frequency) {
         duties[duty],
         SQUARE_SAMPLE_RATE,
         SQUARE_SAMPLE_RATE * frequency);
+    alSourcef(sources[source], AL_GAIN, volume);
     alSourcei(sources[source], AL_BUFFER, buffers[source]);
     alSourcei(sources[source], AL_LOOPING, 1);
     alSourcePlay(sources[source]);
@@ -98,8 +99,8 @@ void AudioController::playSquare(int source, char duty, ALsizei frequency) {
  * @param duty (0 = 12.5%, 1 = 25%, 2 = 50%, 3 = 75%)
  * @param frequency the values read from the F bits
  */
-void AudioController::playGBSquare(int source, char duty, unsigned short frequency) {
-    this->playSquare(source, duty, 131072.0/(2048 - frequency));
+void AudioController::playGBSquare(int source, char duty, unsigned short frequency, float volume) {
+    this->playSquare(source, duty, 131072.0/(2048 - frequency), volume);
 }
 
 void AudioController::stopSource(int source) {
