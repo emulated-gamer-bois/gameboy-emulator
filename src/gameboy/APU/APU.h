@@ -81,6 +81,9 @@ private:
     uint8_t readyToPlay;
     int accumulated_cycles;
     uint8_t state;
+    uint8_t period_envelope_a;
+    uint8_t period_envelope_b;
+
     uint8_t volume_envelope_a;
     uint8_t volume_envelope_b;
 public:

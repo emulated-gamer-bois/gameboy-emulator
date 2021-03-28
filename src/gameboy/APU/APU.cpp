@@ -164,7 +164,7 @@ void APU::trigger_event(uint8_t source) {
     - Done - If length counter is zero, it is set to 64 (256 for wave channel).
     - Done-ish (since frequency timer does not change in our program, it does not need to be reset)
         - Frequency timer is reloaded with period.
-    - Pass - Volume envelope timer is reloaded with period.
+    - Done - Volume envelope timer is reloaded with period.
     - Done - Channel volume is reloaded from NRx2.
     - Pass - Noise channel's LFSR bits are all set to 1.
     - Pass - Wave channel's position is set to 0 but sample buffer is NOT refilled.
@@ -176,23 +176,25 @@ void APU::trigger_event(uint8_t source) {
             if(!(this->NR11 & 0x3F) && !(this->NR14 & 0x40)) {
                 this->NR14 |= 0x40;
             }
-            volume_envelope_a = (this->NR12 >> 4) & 0xF;
-            readyToPlay |= 1;
+            this->period_envelope_a = this->NR12 & 0x7;
+            this->volume_envelope_a = (this->NR12 >> 4) & 0xF;
+            this->readyToPlay |= 1;
             break;
         case 1:
             //If length counter is zero, it is set to 64
             if(!(this->NR21 & 0x3F) && !(this->NR24 & 0x40)) {
                 this->NR24 |= 0x40;
             }
-            volume_envelope_b = (this->NR22 >> 4) & 0xF;
-            readyToPlay |= 2;
+            this->period_envelope_b = this->NR22 & 0x7;
+            this->volume_envelope_b = (this->NR22 >> 4) & 0xF;
+            this->readyToPlay |= 2;
             break;
         case 2:
             //If length counter is zero, it is set to 64
             if(!(this->NR31 & 0x3F) && !(this->NR34 & 0x40)) {
                 this->NR34 |= 0x40;
             }
-            readyToPlay |= 4;
+            this->readyToPlay |= 4;
             break;
     }
 }
@@ -230,26 +232,32 @@ void APU::length_step() {
 }
 
 void APU::vol_envelope_step(IVolumeController* vc) {
-    //If in increment mode and envelope can be incremented
-    if((this->NR12 & 8) && (volume_envelope_a < 15)) {
-        volume_envelope_a++;
-        vc->setVolume(0, (float)volume_envelope_a/15.0f);
-    }
-    //If in decrement mode and envelope can be decremented
-    if(!(this->NR12 & 8) && volume_envelope_a) {
-        volume_envelope_a--;
-        vc->setVolume(0, (float)volume_envelope_a/15.0f);
+    if(!--this->period_envelope_a) {
+        this->period_envelope_a = this->NR12 & 0x7;
+        //If in increment mode and envelope can be incremented
+        if((this->NR12 & 8) && (volume_envelope_a < 15)) {
+            volume_envelope_a++;
+            vc->setVolume(0, (float)volume_envelope_a/15.0f);
+        }
+        //If in decrement mode and envelope can be decremented
+        if(!(this->NR12 & 8) && volume_envelope_a) {
+            volume_envelope_a--;
+            vc->setVolume(0, (float)volume_envelope_a/15.0f);
+        }
     }
 
-    //If in increment mode and envelope can be incremented
-    if((this->NR22 & 8) && (volume_envelope_b < 15)) {
-        volume_envelope_b++;
-        vc->setVolume(1, (float)volume_envelope_b/15.0f);
-    }
-    //If in decrement mode and envelope can be decremented
-    if(!(this->NR22 & 8) && volume_envelope_b) {
-        volume_envelope_b--;
-        vc->setVolume(1, (float)volume_envelope_b/15.0f);
+    if(!--this->period_envelope_b) {
+        this->period_envelope_b = this->NR22 & 0x7;
+        //If in increment mode and envelope can be incremented
+        if((this->NR22 & 8) && (volume_envelope_b < 15)) {
+            volume_envelope_b++;
+            vc->setVolume(1, (float)volume_envelope_b/15.0f);
+        }
+        //If in decrement mode and envelope can be decremented
+        if(!(this->NR22 & 8) && volume_envelope_b) {
+            volume_envelope_b--;
+            vc->setVolume(1, (float)volume_envelope_b/15.0f);
+        }
     }
 }
 
