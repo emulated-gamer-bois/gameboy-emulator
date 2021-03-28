@@ -7,6 +7,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <iostream>
+#include <sstream>
 
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
@@ -19,6 +20,7 @@ Gui::Gui(AppSettings * settings) {
     selectedFile = -1;
 
     disableWidgets();
+    displayToolbar = true;
 }
 
 /**
@@ -42,17 +44,17 @@ void Gui::handleGui(SDL_Window *window) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(window);
     ImGui::NewFrame();
-    //ImGui::ShowDemoWindow();
+
     //Call ImGui
-    if (displayToolbar) { toolbar(); }
+    if (displayToolbar) { showToolbar(); }
     if (displayEditControls) { showEditControls(); }
     if (displayFileDialog) { showFileDialog(); }
+
     //Render ImGui
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    if (waitingForKeyBind) {
-        keyBind();
-    }
+
+    if (waitingForKeyBind) { keyBind(); }
 }
 
 /**
@@ -71,30 +73,34 @@ void Gui::handleInput(SDL_Event event) {
 }
 
 /**
- * Toggles the toolbar.
+ * Toggles the showToolbar.
  */
- void Gui::toggleGui() {
-     this->displayToolbar = !this->displayToolbar;
-     if (!this->displayToolbar) {
-         // Disable all widgets
-         disableWidgets();
-     }
- }
+void Gui::toggleGui() {
+    this->displayToolbar = !this->displayToolbar;
+    if (!this->displayToolbar) {
+        // Disable all widgets
+        disableWidgets();
+    }
+}
+
+void Gui::setLoadRomCallback(std::function<void(std::string)>&& loadRomCallback) {
+    this->loadRomCallback = loadRomCallback;
+}
 
 void Gui::showEditControls() {
-
     ImGui::SetNextWindowSize(ImGui::GetWindowSize(), ImGuiCond_Once);
     ImGui::Begin("Controls", &displayEditControls);
     for (int i = 0; i < this->settings->keyBinds.keybinds.capacity(); i++) {
         ImGui::Spacing();
         ImGui::Text("%s", this->settings->keyBinds.keybinds[i]->action_description.c_str());
         ImGui::SameLine(ImGui::GetWindowSize().x*0.5f,0);
-        if(waitingForKeyBind && keyBindIndex == i){
+
+        if(waitingForKeyBind && keyBindIndex == i) {
             ImGui::PushStyleColor( ImGuiCol_Button, pressColor );
-        }
-        else{
+        } else {
             ImGui::PushStyleColor( ImGuiCol_Button, releaseColor );
         }
+
         ImVec2 vec(ImGui::GetWindowSize().x*0.25f,ImGui::GetWindowSize().y*0.05f);
         if (ImGui::Button(this->settings->keyBinds.keybinds[i]->keybind.c_str(), vec)) {
             keyBindIndex = i;
@@ -108,6 +114,7 @@ void Gui::showEditControls() {
 void Gui::showFileDialog() {
     float fileSelectAreaHeight = 150.f;
     float indentSize = 20.f;
+    bool loadRom = false;
 
     int windowFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse;
     ImGui::Begin("Load ROM", &displayFileDialog, windowFlags);
@@ -134,9 +141,9 @@ void Gui::showFileDialog() {
                     if (fileEntryList.at(i).isDir) {
                         fileExplorer.moveTo(fileEntryList.at(i));
                         selectedFile = -1;
+                    } else {
+                        loadRom = true;
                     }
-                    //else
-                        // Load here
                 }
             }
         }
@@ -174,7 +181,7 @@ void Gui::showFileDialog() {
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
     }
     if (ImGui::Button("Load")) {
-
+        loadRom = true;
     }
     if (!romSelected) {
         ImGui::PopItemFlag();
@@ -188,9 +195,17 @@ void Gui::showFileDialog() {
     }
 
     ImGui::End();
+
+    if (loadRom) {
+        try {
+            loadRomCallback(fileEntryList.at(selectedFile).absolutePath);
+        } catch(...) {
+            std::cerr << "GUI error: something went wrong with the load rom callback." << std::endl;
+        }
+    }
 }
 
-void Gui::toolbar() {
+void Gui::showToolbar() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Load ROM", "")) {
@@ -200,7 +215,7 @@ void Gui::toolbar() {
         }
         if (ImGui::BeginMenu("Settings")) {
             displayPlaySpeed();
-            if (ImGui::MenuItem("Keybinds")) {
+            if (ImGui::MenuItem("Key Binds")) {
                 displayEditControls = !displayEditControls;
             }
             ImGui::EndMenu();
@@ -209,25 +224,32 @@ void Gui::toolbar() {
         ImGui::EndMainMenuBar();
     }
 }
+
 void Gui::displayPlaySpeed(){
      //TODO allow for slowing down the play speed.
-    if (ImGui::BeginMenu("Play speed")) {
-        for (int i = 0; i < settings->maxPlaySpeed; i++) {
-
-            if (ImGui::MenuItem("Speed: ")) {
-                settings->setPlaySpeed(i+1);
+    if (ImGui::BeginMenu("Emulation speed")) {
+        float speed = MIN_EMULATION_SPEED_FLOAT;
+        while (speed <= MAX_EMULATION_SPEED_FLOAT) {
+            std::stringstream ss;
+            ss << speed << 'x';
+            if (ImGui::MenuItem(ss.str().c_str())) {
+                if (speed < 1) {
+                    std::cerr << "Gui Error: Slower speeds not implemented yet." << std::endl;
+                } else {
+                    settings->emulationSpeedMultiplier = speed;
+                }
             }
-            ImGui::SameLine();
-            ImGui::Text("%d",i+1);
+
+            speed = speed * 2;
         }
         ImGui::EndMenu();
     }
  }
 
 void Gui::keyBind() {
-     if(this->settings->keyBinds.editKeyBinds(ImGui::GetIO().KeysDown, keyBindIndex)){
-         this->waitingForKeyBind=false;
-     }
+    if(this->settings->keyBinds.editKeyBinds(ImGui::GetIO().KeysDown, keyBindIndex)){
+        this->waitingForKeyBind=false;
+    }
 }
 
 void Gui::disableWidgets() {

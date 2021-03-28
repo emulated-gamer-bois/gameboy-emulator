@@ -6,10 +6,12 @@
 
 #include <SDL.h>
 #include <imgui.h>
+#include <functional>
 
 #include "Keybinds.h"
 #include "FileExplorer.h"
 #include "AppSettings.h"
+#include "gameboy/Definitions.h"
 
 class Gui {
 public:
@@ -22,6 +24,8 @@ public:
     // Enables/Disables the gui
     void toggleGui();
 
+    void setLoadRomCallback(std::function<void(std::string)>&& loadRomCallback);
+
 private:
     const ImVec4 pressColor{ 0.0f, 0.217f, 1.0f, 0.784f };
     const ImVec4 releaseColor{ 0.202f, 0.549f, 0.798f, 0.784f };
@@ -33,6 +37,7 @@ private:
 
     // File dialog members
     FileExplorer fileExplorer;
+    std::function<void(std::string)> loadRomCallback;
     int selectedFile;
 
     // Key binding members
@@ -49,7 +54,7 @@ private:
     // Speed settings functions
     void displayPlaySpeed();
 
-    void toolbar();
+    void showToolbar();
     void disableWidgets();
 
 };

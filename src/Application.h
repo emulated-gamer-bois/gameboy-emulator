@@ -24,8 +24,6 @@ public:
     void start();
 
 private:
-    const static std::string DEFAULT_WINDOW_CAPTION;
-
     enum State {
         EMULATION,
         MENU,
@@ -39,7 +37,7 @@ private:
     GameBoy gameBoy;
     Gui gui = Gui(&settings);
 
-    float emulationSpeed;
+    float savedEmulationSpeed;
 
     void init();
     void initSDL();

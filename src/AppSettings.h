@@ -5,17 +5,15 @@
  */
 
 #pragma once
-#include "Keybinds.h"
+
 #include <string>
+
+#include "Keybinds.h"
 #include "gameboy/Definitions.h"
 
-class AppSettings {
-public:
+struct AppSettings {
     std::string romPath; // The path where the file dialog will always be in when opened.
     Keybinds keyBinds;
     int screenMultiplier;
-    int playSpeed = 1;
-    int maxPlaySpeed=4;
-    void setPlaySpeed(int speedMultiplier);
-
+    float emulationSpeedMultiplier;
 };

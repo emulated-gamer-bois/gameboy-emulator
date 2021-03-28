@@ -8,14 +8,13 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 #include "Application.h"
 #include "AppTimer.h"
 
-const std::string Application::DEFAULT_WINDOW_CAPTION = "Lame Boy";
-
 /**
  * Constructor
  */
 Application::Application() {
-    state = State::EMULATION;
+    state = State::MENU;
     initSettings();
+    savedEmulationSpeed = settings.emulationSpeedMultiplier;
     renderView.setScreenMultiplier(settings.screenMultiplier);
 }
 
@@ -31,14 +30,13 @@ void Application::start() {
     float frameTime = 1000.f / LCD_REFRESH_RATE;
     AppTimer timer;
     while (state != State::TERMINATION) {
-
         // Create time stamp.
         timer.tick();
         handleSDLEvents();
 
         // Step through emulation until playspeed number of frames are produced, then display the last one.
-        if (state == State::EMULATION) {
-            for (int i = 0; i < settings.playSpeed; i++) {
+        if (state == State::EMULATION && gameBoy.isOn()) {
+            for (int i = 0; i < settings.emulationSpeedMultiplier; i++) {
                 if (gameBoy.isReadyToDraw()) {
                     //Actually discards frame until settings.playSpeed number of frames have been produced.
                     gameBoy.confirmDraw();
@@ -48,17 +46,17 @@ void Application::start() {
                 }
             }
             renderView.setScreenTexture(gameBoy.getScreenTexture().get());
-            renderView.render();
             // TODO: find a better way to handle texture fetching than needing to call gameBoy.confirmDraw()
             gameBoy.confirmDraw();
         }
 
-        // Prepare for rendering, render and swap buffer.
         updateSDLWindowSize();
+        renderView.render();
+
         if (state == State::MENU) {
-            renderView.render();
             gui.handleGui(window);
         }
+
         SDL_GL_SwapWindow(window);
 
         // Time application to 60Hz
@@ -77,9 +75,12 @@ void Application::init() {
     renderView.initGL();
     gui.init(window, &glContext, "#version 130"); // GLSL version
 
-    // TEMP ------------------------------------------------------------------------------------------------------------
-    this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/instr_timing/instr_timing.gb");
-    // END TEMP --------------------------------------------------------------------------------------------------------
+    // Delegate actual loading of roms to the gui class.
+    gui.setLoadRomCallback([this](std::string&& romPath) -> void {
+        gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", romPath);
+        state = State::EMULATION;
+        gui.toggleGui();
+    });
 }
 
 void Application::terminate() {
@@ -106,7 +107,7 @@ void Application::initSDL() {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
     // Create the window.
-    window = SDL_CreateWindow(DEFAULT_WINDOW_CAPTION.c_str(),
+    window = SDL_CreateWindow(EMULATOR_NAME_STRING,
                               SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED,
                               LCD_WIDTH,
@@ -156,13 +157,18 @@ void Application::handleSDLEvents() {
                 break;
 
             case SDL_KEYDOWN:
+                // Disable key repeat
+                if (event.key.repeat != 0) {
+                    break;
+                }
+
                 if (key == SDLK_ESCAPE) {
                     gui.toggleGui();
                     state = (state == State::EMULATION) ? State::MENU : State::EMULATION;
                 }
                 if (key == SDLK_SPACE) {
-                    //TODO fix so that the speed takes current speed x2 and resets correctly.
-                    settings.setPlaySpeed(2);
+                    savedEmulationSpeed = settings.emulationSpeedMultiplier;
+                    settings.emulationSpeedMultiplier = MAX_EMULATION_SPEED_FLOAT;
                 }
                 if (state == State::EMULATION) {
                     handleEmulatorInput(key, JOYPAD_PRESS);
@@ -170,11 +176,11 @@ void Application::handleSDLEvents() {
                 break;
 
             case SDL_KEYUP:
+                if (key == SDLK_SPACE) {
+                    settings.emulationSpeedMultiplier = savedEmulationSpeed;
+                }
                 if (state == State::EMULATION) {
                     handleEmulatorInput(key, JOYPAD_RELEASE);
-                }
-                if (key == SDLK_SPACE) {
-                    settings.setPlaySpeed(1);
                 }
                 break;
         }
@@ -220,6 +226,7 @@ void Application::initSettings() {
     settings.keyBinds.init_keybinds();
     settings.screenMultiplier = 4;
     settings.romPath = "..";
+    settings.emulationSpeedMultiplier = 1;
 }
 
 
