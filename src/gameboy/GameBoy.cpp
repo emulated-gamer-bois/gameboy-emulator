@@ -18,14 +18,14 @@ GameBoy::GameBoy() {
     this->on = false;
 }
 
-void GameBoy::step() {
+void GameBoy::step(IVolumeController* vc) {
     if (!this->on) {
         return;
     }
 
     int cycles = this->cpu->update();
     this->ppu->update(cycles);
-    this->apu->update(cycles);
+    this->apu->update(cycles, vc);
     this->timer->update(cycles);
     this->cartridge->update(cycles);
 }

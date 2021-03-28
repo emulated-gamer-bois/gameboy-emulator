@@ -22,7 +22,7 @@ friend class test_case_name##_##test_name##_Test
 class GameBoy {
 public:
     GameBoy();
-    void step();
+    void step(IVolumeController* vc);
     std::unique_ptr<uint8_t[]> getScreenTexture();
     void joypad_input(uint8_t key, uint8_t action);
     void load_rom(std::string bootFilepath, std::string romFilepath);

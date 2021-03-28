@@ -9,8 +9,9 @@
 #include <AL/al.h>
 #include <iostream>
 #include <array>
+#include "../gameboy/APU/IVolumeController.h"
 
-class AudioController {
+class AudioController : public IVolumeController {
 public:
     ~AudioController();
     void init();
@@ -20,6 +21,7 @@ public:
     void stopSource(int source);
     void playGBWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency);
     void playWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency);
+    void setVolume(int source, float volume);
 private:
 
     ALCdevice* device;

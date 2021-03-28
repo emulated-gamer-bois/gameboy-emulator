@@ -14,7 +14,7 @@ add_library( IO
         AudioController.h
         Palette.h
         RenderView.cpp
-        RenderView.h)
+        RenderView.h ../gameboy/APU/IVolumeController.h)
 
 target_include_directories ( ${PROJECT_NAME}
         PUBLIC

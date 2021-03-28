@@ -134,3 +134,7 @@ void AudioController::playWave(int source, std::array<uint8_t, 16> waveForm, ALs
 void AudioController::playGBWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency) {
     this->playWave(source, waveForm, 131072.0/(2048 - frequency));
 }
+
+void AudioController::setVolume(int source, float volume) {
+    alSourcef(sources[source], AL_GAIN, volume);
+}

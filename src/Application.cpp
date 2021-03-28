@@ -52,7 +52,7 @@ void Application::start() {
         // Update emulation
         while (!this->gameBoy.isReadyToDraw() && !this->gameBoy.isReadyToPlaySound()) {
             this->handleSDLEvents();
-            this->gameBoy.step();
+            this->gameBoy.step(&audio);
         }
 
         uint8_t ready = this->gameBoy.isReadyToPlaySound();
@@ -115,7 +115,7 @@ void Application::init() {
     this->audio.init();
 
     // TEMP ------------------------------------------------------------------------------------------------------------
-    this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/cpu_instrs/cpu_instrs.gb");
+    this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/games/not_tetris.gb");
     // END TEMP --------------------------------------------------------------------------------------------------------
 }
 

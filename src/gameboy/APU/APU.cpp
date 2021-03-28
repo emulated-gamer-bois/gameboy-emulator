@@ -229,27 +229,27 @@ void APU::length_step() {
     }
 }
 
-void APU::vol_envelope_step() {
+void APU::vol_envelope_step(IVolumeController* vc) {
     //If in increment mode and envelope can be incremented
     if((this->NR12 & 8) && (volume_envelope_a < 15)) {
         volume_envelope_a++;
-        readyToPlay |= 1;
+        vc->setVolume(0, (float)volume_envelope_a/15.0f);
     }
     //If in decrement mode and envelope can be decremented
     if(!(this->NR12 & 8) && volume_envelope_a) {
         volume_envelope_a--;
-        readyToPlay |= 1;
+        vc->setVolume(0, (float)volume_envelope_a/15.0f);
     }
 
     //If in increment mode and envelope can be incremented
     if((this->NR22 & 8) && (volume_envelope_b < 15)) {
         volume_envelope_b++;
-        readyToPlay |= 2;
+        vc->setVolume(1, (float)volume_envelope_b/15.0f);
     }
     //If in decrement mode and envelope can be decremented
     if(!(this->NR22 & 8) && volume_envelope_b) {
         volume_envelope_b--;
-        readyToPlay |= 2;
+        vc->setVolume(1, (float)volume_envelope_b/15.0f);
     }
 }
 
@@ -257,7 +257,7 @@ void APU::sweep_step() {
     //TODO: Update with sweep
 }
 
-void APU::update(uint16_t cpuCycles) {
+void APU::update(uint16_t cpuCycles, IVolumeController* vc) {
     this->accumulated_cycles += cpuCycles;
     if(this->accumulated_cycles < CLOCK_CYCLE_THRESHOLD) {
         return;
@@ -270,7 +270,7 @@ void APU::update(uint16_t cpuCycles) {
         this->length_step();
     }
     if(state == 7) {
-        this->vol_envelope_step();
+        this->vol_envelope_step(vc);
     }
     if(state % 4 == 2) {
         this->sweep_step();
