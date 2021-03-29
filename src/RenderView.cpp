@@ -36,8 +36,6 @@ void RenderView::initGL() {
 void RenderView::render() const {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, LCD_WIDTH * screenMultiplier, LCD_HEIGHT * screenMultiplier);
-    glClearColor(0., 0., 0., 1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(renderShaderProgram);
     glActiveTexture(GL_TEXTURE0);
@@ -55,6 +53,11 @@ void RenderView::render() const {
     glBindVertexArray(vertexArrayObject);
     glDrawArrays(GL_TRIANGLES, 0, VERTEX_AMOUNT);
     glBindVertexArray(0);
+}
+
+void RenderView::clear() const {
+    glClearColor(0., 0., 0., 1.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void RenderView::setScreenTexture(uint8_t textureData[]) {

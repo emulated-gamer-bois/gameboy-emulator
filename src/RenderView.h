@@ -18,6 +18,7 @@ public:
 
     void initGL();
     void render() const;
+    void clear() const;
     void setScreenTexture(uint8_t textureData[]);
     void setPalette(Palette palette);
     void setScreenMultiplier(int screenMultiplier);

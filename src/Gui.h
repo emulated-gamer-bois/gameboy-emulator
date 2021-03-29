@@ -27,8 +27,11 @@ public:
     void setLoadRomCallback(std::function<void(std::string)>&& loadRomCallback);
 
 private:
+    // General gui constants
     const ImVec4 pressColor{ 0.0f, 0.217f, 1.0f, 0.784f };
     const ImVec4 releaseColor{ 0.202f, 0.549f, 0.798f, 0.784f };
+    const int indentSpace = 20;
+    const int windowFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse;
 
     AppSettings* settings;
     bool displayEditControls;

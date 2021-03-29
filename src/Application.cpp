@@ -19,11 +19,6 @@ Application::Application() {
 }
 
 /**
- * The main loop of this Application. It works like this:
- *     1. Initialize application and loop.
- *     2. Handle events and step the emulator until the ppu have left VBLANK.
- *     3. Prepare for rendering and render a frame.
- *     4. Wait for timing purposes
  */
 void Application::start() {
     init();
@@ -32,6 +27,12 @@ void Application::start() {
     while (state != State::TERMINATION) {
         // Create time stamp.
         timer.tick();
+
+        // Init loop by clearing render view and update window size
+        updateSDLWindowSize();
+        renderView.clear();
+
+        // Handle Events
         handleSDLEvents();
 
         // Step through emulation until playspeed number of frames are produced, then display the last one.
@@ -46,17 +47,16 @@ void Application::start() {
                 }
             }
             renderView.setScreenTexture(gameBoy.getScreenTexture().get());
-            // TODO: find a better way to handle texture fetching than needing to call gameBoy.confirmDraw()
+            renderView.render();
             gameBoy.confirmDraw();
         }
 
-        updateSDLWindowSize();
-        renderView.render();
-
+        // Render menu
         if (state == State::MENU) {
             gui.handleGui(window);
         }
 
+        // Swap buffers
         SDL_GL_SwapWindow(window);
 
         // Time application to 60Hz

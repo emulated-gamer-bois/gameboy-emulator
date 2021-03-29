@@ -18,8 +18,11 @@ void FileExplorer::listDir() {
     }
 
     // Add parent.
-    FileEntry parent = {"..", filesystem::absolute(dirPath).parent_path().string(), true};
-    fileEntryList.push_back(parent);
+    filesystem::path parentPath = filesystem::absolute(dirPath).parent_path();
+    if (!(parentPath == dirPath.root_path())) {
+        FileEntry parent = {"..", parentPath.string(), true};
+        fileEntryList.push_back(parent);
+    }
 
     // Add files in currentDir to list.
     for (const auto& entry : filesystem::directory_iterator(dirPath)) {

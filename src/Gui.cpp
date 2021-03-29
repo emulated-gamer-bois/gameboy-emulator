@@ -14,7 +14,7 @@
 /**
  * Constructor
  */
-Gui::Gui(AppSettings * settings) {
+Gui::Gui(AppSettings* settings) {
     this->settings = settings;
 
     selectedFile = -1;
@@ -76,8 +76,8 @@ void Gui::handleInput(SDL_Event event) {
  * Toggles the showToolbar.
  */
 void Gui::toggleGui() {
-    this->displayToolbar = !this->displayToolbar;
-    if (!this->displayToolbar) {
+    displayToolbar = !displayToolbar;
+    if (!displayToolbar) {
         // Disable all widgets
         disableWidgets();
     }
@@ -88,12 +88,20 @@ void Gui::setLoadRomCallback(std::function<void(std::string)>&& loadRomCallback)
 }
 
 void Gui::showEditControls() {
-    ImGui::SetNextWindowSize(ImGui::GetWindowSize(), ImGuiCond_Once);
-    ImGui::Begin("Controls", &displayEditControls);
-    for (int i = 0; i < this->settings->keyBinds.keybinds.capacity(); i++) {
-        ImGui::Spacing();
-        ImGui::Text("%s", this->settings->keyBinds.keybinds[i]->action_description.c_str());
-        ImGui::SameLine(ImGui::GetWindowSize().x*0.5f,0);
+    //ImGui::SetNextWindowSize(ImGui::GetWindowSize(), ImGuiCond_Once);
+    ImGui::Begin("Controls", &displayEditControls, windowFlags);
+    for (int i = 0; i < settings->keyBinds.keybinds.capacity(); i++) {
+        if (i == KEY_INDEX_JOYPAD_START) {
+            ImGui::Text("JoyPad Keys ");
+            ImGui::Spacing();
+        } else if (i == KEY_INDEX_SPECIAL_START) {
+            ImGui::Text("Special Keys ");
+            ImGui::Spacing();
+        }
+
+        ImGui::Indent(indentSpace);
+        ImGui::Text("%s", settings->keyBinds.keybinds[i]->action_description.c_str());
+        ImGui::SameLine(130,0);
 
         if(waitingForKeyBind && keyBindIndex == i) {
             ImGui::PushStyleColor( ImGuiCol_Button, pressColor );
@@ -101,36 +109,37 @@ void Gui::showEditControls() {
             ImGui::PushStyleColor( ImGuiCol_Button, releaseColor );
         }
 
-        ImVec2 vec(ImGui::GetWindowSize().x*0.25f,ImGui::GetWindowSize().y*0.05f);
-        if (ImGui::Button(this->settings->keyBinds.keybinds[i]->keybind.c_str(), vec)) {
+        ImVec2 buttonSize(90, 18);
+        if (ImGui::Button(settings->keyBinds.keybinds[i]->keybind.c_str(), buttonSize)) {
             keyBindIndex = i;
             waitingForKeyBind = true;
         }
         ImGui::PopStyleColor(1);
+        ImGui::Unindent(indentSpace);
+
+        ImGui::Spacing();
     }
     ImGui::End();
 }
 
 void Gui::showFileDialog() {
     float fileSelectAreaHeight = 150.f;
-    float indentSize = 20.f;
     bool loadRom = false;
 
-    int windowFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse;
     ImGui::Begin("Load ROM", &displayFileDialog, windowFlags);
 
     // Display Current Directory
-    ImGui::Text("Current Directory: ");
-    ImGui::Indent(indentSize);
+    ImGui::Text("Current Directory ");
+    ImGui::Indent(indentSpace);
     ImGui::Text(fileExplorer.getCurrentDir().absolutePath.c_str());
-    ImGui::Unindent(indentSize);
+    ImGui::Unindent(indentSpace);
     ImGui::Spacing();
 
     const std::vector<FileEntry>& fileEntryList = fileExplorer.getDirContents();
 
     // Display File Select
-    ImGui::Text("File Select: ");
-    ImGui::Indent(indentSize);
+    ImGui::Text("File Select ");
+    ImGui::Indent(indentSpace);
     if (ImGui::BeginListBox("##FileList", ImVec2(350.f, fileSelectAreaHeight))) {
         for (int i = 0; i < fileEntryList.size(); i++) {
             int flags = ImGuiSelectableFlags_AllowDoubleClick;
@@ -161,7 +170,7 @@ void Gui::showFileDialog() {
         fileExplorer.setCurrentDir(settings->romPath);
     }
     ImGui::EndChild();
-    ImGui::Unindent(indentSize);
+    ImGui::Unindent(indentSpace);
     ImGui::Spacing();
 
     // Display Selected File
@@ -247,8 +256,8 @@ void Gui::displayPlaySpeed(){
  }
 
 void Gui::keyBind() {
-    if(this->settings->keyBinds.editKeyBinds(ImGui::GetIO().KeysDown, keyBindIndex)){
-        this->waitingForKeyBind=false;
+    if(settings->keyBinds.editKeyBinds(ImGui::GetIO().KeysDown, keyBindIndex)){
+        waitingForKeyBind=false;
     }
 }
 
