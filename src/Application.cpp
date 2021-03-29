@@ -171,7 +171,7 @@ void Application::handleSDLEvents() {
                     settings.emulationSpeedMultiplier = MAX_EMULATION_SPEED_FLOAT;
                 }
                 if (state == State::EMULATION) {
-                    handleEmulatorInput(key, JOYPAD_PRESS);
+                    handleEmulatorInputPress(key);
                 }
                 break;
 
@@ -180,30 +180,54 @@ void Application::handleSDLEvents() {
                     settings.emulationSpeedMultiplier = savedEmulationSpeed;
                 }
                 if (state == State::EMULATION) {
-                    handleEmulatorInput(key, JOYPAD_RELEASE);
+                    handleEmulatorInputRelease(key);
                 }
                 break;
         }
     }
 }
 
-void Application::handleEmulatorInput(SDL_Keycode key, int eventType) {
+void Application::handleEmulatorInputPress(SDL_Keycode key) {
     if (key == settings.keyBinds.left.keyval) {
-        gameBoy.joypad_input(JOYPAD_LEFT, eventType);
+        gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
+        gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
     } else if (key == settings.keyBinds.right.keyval) {
-        gameBoy.joypad_input(JOYPAD_RIGHT, eventType);
+        gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
+        gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_PRESS);
     } else if (key == settings.keyBinds.up.keyval) {
-        gameBoy.joypad_input(JOYPAD_UP, eventType);
+        gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
+        gameBoy.joypad_input(JOYPAD_UP, JOYPAD_PRESS);
     } else if (key == settings.keyBinds.down.keyval) {
-        gameBoy.joypad_input(JOYPAD_DOWN, eventType);
+        gameBoy.joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
+        gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_PRESS);
     } else if (key == settings.keyBinds.a.keyval) {
-        gameBoy.joypad_input(JOYPAD_A, eventType);
+        gameBoy.joypad_input(JOYPAD_A, JOYPAD_PRESS);
     } else if (key == settings.keyBinds.b.keyval) {
-        gameBoy.joypad_input(JOYPAD_B, eventType);
+        gameBoy.joypad_input(JOYPAD_B, JOYPAD_PRESS);
     } else if (key == settings.keyBinds.start.keyval) {
-        gameBoy.joypad_input(JOYPAD_START, eventType);
+        gameBoy.joypad_input(JOYPAD_START, JOYPAD_PRESS);
     } else if (key == settings.keyBinds.select.keyval) {
-        gameBoy.joypad_input(JOYPAD_SELECT, eventType);
+        gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_PRESS);
+    }
+}
+
+void Application::handleEmulatorInputRelease(SDL_Keycode key) {
+    if (key == settings.keyBinds.left.keyval) {
+        gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
+    } else if (key == settings.keyBinds.right.keyval) {
+        gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
+    } else if (key == settings.keyBinds.up.keyval) {
+        gameBoy.joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
+    } else if (key == settings.keyBinds.down.keyval) {
+        gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
+    } else if (key == settings.keyBinds.a.keyval) {
+        gameBoy.joypad_input(JOYPAD_A, JOYPAD_RELEASE);
+    } else if (key == settings.keyBinds.b.keyval) {
+        gameBoy.joypad_input(JOYPAD_B, JOYPAD_RELEASE);
+    } else if (key == settings.keyBinds.start.keyval) {
+        gameBoy.joypad_input(JOYPAD_START, JOYPAD_RELEASE);
+    } else if (key == settings.keyBinds.select.keyval) {
+        gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_RELEASE);
     }
 }
 
