@@ -30,12 +30,12 @@ private:
         TERMINATION
     } state;
 
-    AppSettings settings;
+    std::shared_ptr<AppSettings> settings{std::make_shared<AppSettings>()};
     SDL_Window* window;
     SDL_GLContext glContext;
     RenderView renderView;
     GameBoy gameBoy;
-    Gui gui = Gui(&settings);
+    Gui gui = Gui(settings);
 
     float savedEmulationSpeed;
 

@@ -14,8 +14,8 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 Application::Application() {
     state = State::MENU;
     initSettings();
-    savedEmulationSpeed = settings.emulationSpeedMultiplier;
-    renderView.setScreenMultiplier(settings.screenMultiplier);
+    savedEmulationSpeed = settings->emulationSpeedMultiplier;
+    renderView.setScreenMultiplier(settings->screenMultiplier);
 }
 
 /**
@@ -37,9 +37,9 @@ void Application::start() {
 
         // Step through emulation until playspeed number of frames are produced, then display the last one.
         if (state == State::EMULATION && gameBoy.isOn()) {
-            for (int i = 0; i < settings.emulationSpeedMultiplier; i++) {
+            for (int i = 0; i < settings->emulationSpeedMultiplier; i++) {
                 if (gameBoy.isReadyToDraw()) {
-                    //Actually discards frame until settings.playSpeed number of frames have been produced.
+                    //Actually discards frame until settings->playSpeed number of frames have been produced.
                     gameBoy.confirmDraw();
                 }
                 while (!gameBoy.isReadyToDraw()) {
@@ -166,9 +166,9 @@ void Application::handleSDLEvents() {
                     gui.toggleGui();
                     state = (state == State::EMULATION) ? State::MENU : State::EMULATION;
                 }
-                if (key == SDLK_SPACE) {
-                    savedEmulationSpeed = settings.emulationSpeedMultiplier;
-                    settings.emulationSpeedMultiplier = MAX_EMULATION_SPEED_FLOAT;
+                if (key == settings->keyBinds.turboMode.keyval) {
+                    savedEmulationSpeed = settings->emulationSpeedMultiplier;
+                    settings->emulationSpeedMultiplier = MAX_EMULATION_SPEED_FLOAT;
                 }
                 if (state == State::EMULATION) {
                     handleEmulatorInput(key, JOYPAD_PRESS);
@@ -176,8 +176,8 @@ void Application::handleSDLEvents() {
                 break;
 
             case SDL_KEYUP:
-                if (key == SDLK_SPACE) {
-                    settings.emulationSpeedMultiplier = savedEmulationSpeed;
+                if (key == settings->keyBinds.turboMode.keyval) {
+                    settings->emulationSpeedMultiplier = savedEmulationSpeed;
                 }
                 if (state == State::EMULATION) {
                     handleEmulatorInput(key, JOYPAD_RELEASE);
@@ -188,21 +188,21 @@ void Application::handleSDLEvents() {
 }
 
 void Application::handleEmulatorInput(SDL_Keycode key, int eventType) {
-    if (key == settings.keyBinds.left.keyval) {
+    if (key == settings->keyBinds.left.keyval) {
         gameBoy.joypad_input(JOYPAD_LEFT, eventType);
-    } else if (key == settings.keyBinds.right.keyval) {
+    } else if (key == settings->keyBinds.right.keyval) {
         gameBoy.joypad_input(JOYPAD_RIGHT, eventType);
-    } else if (key == settings.keyBinds.up.keyval) {
+    } else if (key == settings->keyBinds.up.keyval) {
         gameBoy.joypad_input(JOYPAD_UP, eventType);
-    } else if (key == settings.keyBinds.down.keyval) {
+    } else if (key == settings->keyBinds.down.keyval) {
         gameBoy.joypad_input(JOYPAD_DOWN, eventType);
-    } else if (key == settings.keyBinds.a.keyval) {
+    } else if (key == settings->keyBinds.a.keyval) {
         gameBoy.joypad_input(JOYPAD_A, eventType);
-    } else if (key == settings.keyBinds.b.keyval) {
+    } else if (key == settings->keyBinds.b.keyval) {
         gameBoy.joypad_input(JOYPAD_B, eventType);
-    } else if (key == settings.keyBinds.start.keyval) {
+    } else if (key == settings->keyBinds.start.keyval) {
         gameBoy.joypad_input(JOYPAD_START, eventType);
-    } else if (key == settings.keyBinds.select.keyval) {
+    } else if (key == settings->keyBinds.select.keyval) {
         gameBoy.joypad_input(JOYPAD_SELECT, eventType);
     }
 }
@@ -223,10 +223,10 @@ void Application::updateSDLWindowSize() {
  * Initialize settings to some default values. This should be called if settings couldn't be loaded from file.
  */
 void Application::initSettings() {
-    settings.keyBinds.init_keybinds();
-    settings.screenMultiplier = 4;
-    settings.romPath = "..";
-    settings.emulationSpeedMultiplier = 1;
+    settings->keyBinds.init_keybinds();
+    settings->screenMultiplier = 4;
+    settings->romPath = "..";
+    settings->emulationSpeedMultiplier = 1;
 }
 
 

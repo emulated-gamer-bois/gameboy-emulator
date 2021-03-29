@@ -8,17 +8,17 @@
 #include <imgui_internal.h>
 #include <iostream>
 #include <sstream>
+#include <utility>
 
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 /**
  * Constructor
  */
-Gui::Gui(AppSettings* settings) {
-    this->settings = settings;
 
+Gui::Gui(std::shared_ptr<AppSettings> settings) {
+    this->settings = std::move(settings);
     selectedFile = -1;
-
     disableWidgets();
     displayToolbar = true;
 }
@@ -267,6 +267,10 @@ void Gui::disableWidgets() {
     displayToolbar = false;
     waitingForKeyBind =false;
 }
+
+
+
+
 
 
 
