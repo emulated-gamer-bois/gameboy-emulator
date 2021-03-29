@@ -61,6 +61,11 @@ void RenderView::clear() const {
 }
 
 void RenderView::setScreenTexture(uint8_t textureData[]) {
+    // Free previous texture.
+    if (screenTexture != 0) {
+        glDeleteTextures(1, &screenTexture);
+    }
+
     glGenTextures(1, &screenTexture);
     glBindTexture(GL_TEXTURE_2D, screenTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
