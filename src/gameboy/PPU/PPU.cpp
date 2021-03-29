@@ -181,7 +181,8 @@ bool PPU::isReadyToDraw() const {
 }
 
 void PPU::confirmDraw() {
-    this->frameBuffer.fill(0);
+    //TODO Filling the frame buffer with zeroes seems unnecessary?
+   // this->frameBuffer.fill(0);
     this->readyToDraw = false;
 }
 
@@ -240,7 +241,7 @@ void PPU::drawWindowScanLine() {
         uint8_t absolutePixelX = x - startX; //TODO check hardware bug when 0 < WX <= 6 and WX = 166 What is the intended behaviour?
         uint8_t absolutePixelY = LY - WY;
         uint8_t tileID = getTileID(windowMapStartAddress, absolutePixelX, absolutePixelY);
-        uint8_t colorIndex = getTilePixelColorIndex(bgWindowTileSetSelect, tileID, absolutePixelX, absolutePixelY);
+        uint8_t colorIndex = getTilePixelColorIndex(bgWindowTileSetSelect, tileID, absolutePixelX % 8, absolutePixelY % 8);
         uint8_t pixel = getColor(BGP, colorIndex);
         frameBuffer[LY * LCD_WIDTH + x] = pixel;
         bgWindowColorIndexesThisLine[x] = pixel;

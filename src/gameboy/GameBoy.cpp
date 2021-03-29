@@ -35,7 +35,6 @@ std::unique_ptr<uint8_t[]> GameBoy::getScreenTexture() {
     for (int i = 0; i < ppuFrameBuffer->size(); i++) {
         texture[i] = 0xFF - (ppuFrameBuffer->at(i) * 0x55);
     }
-
     return texture;
 }
 
