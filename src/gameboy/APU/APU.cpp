@@ -173,8 +173,8 @@ void APU::trigger_event(uint8_t source) {
     switch(source) {
         case 0:
             //If length counter is zero, it is set to 64
-            if(!(this->NR11 & 0x3F) && !(this->NR14 & 0x40)) {
-                this->NR14 |= 0x40;
+            if(!length_counter_a) {
+                length_counter_a = 0x40;
             }
             this->period_envelope_a = this->NR12 & 0x7;
             this->volume_envelope_a = (this->NR12 >> 4) & 0xF;
@@ -182,8 +182,8 @@ void APU::trigger_event(uint8_t source) {
             break;
         case 1:
             //If length counter is zero, it is set to 64
-            if(!(this->NR21 & 0x3F) && !(this->NR24 & 0x40)) {
-                this->NR24 |= 0x40;
+            if(!length_counter_b) {
+                length_counter_b = 0x40;
             }
             this->period_envelope_b = this->NR22 & 0x7;
             this->volume_envelope_b = (this->NR22 >> 4) & 0xF;
@@ -191,8 +191,8 @@ void APU::trigger_event(uint8_t source) {
             break;
         case 2:
             //If length counter is zero, it is set to 64
-            if(!(this->NR31 & 0x3F) && !(this->NR34 & 0x40)) {
-                this->NR34 |= 0x40;
+            if(length_counter_wave) {
+                length_counter_wave = 0x40;
             }
             this->readyToPlay |= 4;
             break;
@@ -200,31 +200,22 @@ void APU::trigger_event(uint8_t source) {
 }
 
 void APU::length_step() {
-    if((this->NR14 & 0x80) && ((this->NR11 & 0x3F) || (this->NR14 & 0x40))) {
-        uint16_t timer = ((this->NR11 & 0x3F) | (this->NR14 & 0x40)) - 1;
-        this->NR11 = (this->NR11 & 0xC0) | ( timer & 0x3F);
-        this->NR14 |= timer & 0x40;
-        if(!(this->NR11 & 0x3F)) {
+    if((this->NR14 & 0x80) && length_counter_a) {
+        if(!--this->length_counter_a) {
             this->NR14 &= 0x7F;
             readyToPlay |= 1;
         }
     }
 
-    if((this->NR24 & 0x80) && ((this->NR21 & 0x3F) || (this->NR24 & 0x40))) {
-        uint16_t timer = ((this->NR21 & 0x3F) | (this->NR24 & 0x40)) - 1;
-        this->NR21 = (this->NR21 & 0xC0) | ( timer & 0x3F);
-        this->NR24 |= timer & 0x40;
-        if(!(this->NR21 & 0x3F)) {
+    if((this->NR24 & 0x80) && length_counter_b) {
+        if(!--this->length_counter_b) {
             this->NR24 &= 0x7F;
             readyToPlay |= 2;
         }
     }
 
-    if((this->NR34 & 0x80) && ((this->NR31 & 0x3F) || (this->NR34 & 0x40))) {
-        uint16_t timer = ((this->NR31 & 0x3F) | (this->NR34 & 0x40)) - 1;
-        this->NR31 = (this->NR31 & 0xC0) | ( timer & 0x3F);
-        this->NR34 |= timer & 0x40;
-        if(!(this->NR31 & 0x3F)) {
+    if((this->NR34 & 0x80) && length_counter_wave) {
+        if(!--this->length_counter_wave) {
             this->NR34 &= 0x7F;
             readyToPlay |= 4;
         }
@@ -237,13 +228,12 @@ void APU::vol_envelope_step(IVolumeController* vc) {
         //If in increment mode and envelope can be incremented
         if((this->NR12 & 8) && (volume_envelope_a < 15)) {
             volume_envelope_a++;
-            vc->setVolume(0, (float)volume_envelope_a/15.0f);
         }
         //If in decrement mode and envelope can be decremented
         if(!(this->NR12 & 8) && volume_envelope_a) {
             volume_envelope_a--;
-            vc->setVolume(0, (float)volume_envelope_a/15.0f);
         }
+        vc->setVolume(0, (float)volume_envelope_a/15.0f);
     }
 
     if(!--this->period_envelope_b) {
@@ -251,13 +241,12 @@ void APU::vol_envelope_step(IVolumeController* vc) {
         //If in increment mode and envelope can be incremented
         if((this->NR22 & 8) && (volume_envelope_b < 15)) {
             volume_envelope_b++;
-            vc->setVolume(1, (float)volume_envelope_b/15.0f);
         }
         //If in decrement mode and envelope can be decremented
         if(!(this->NR22 & 8) && volume_envelope_b) {
             volume_envelope_b--;
-            vc->setVolume(1, (float)volume_envelope_b/15.0f);
         }
+        vc->setVolume(1, (float)volume_envelope_b/15.0f);
     }
 }
 
@@ -307,5 +296,6 @@ std::shared_ptr<APUState> APU::getState() {
         .enable_wave = (bool)(this->NR34 & 0x80),
         .waveform_wave = wavePatternRAM,
         .frequency_wave = (uint16_t)((((uint16_t)(this->NR34 & 0x7)) << 8) + this->NR33),
+        .volume_wave = WAVE_VOLUMES[(this->NR32 >> 5) & 0x3],
     });
 }

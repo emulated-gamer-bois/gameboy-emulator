@@ -81,11 +81,18 @@ private:
     uint8_t readyToPlay;
     int accumulated_cycles;
     uint8_t state;
-    uint8_t period_envelope_a;
-    uint8_t period_envelope_b;
 
+    uint8_t period_envelope_a;
     uint8_t volume_envelope_a;
+    uint8_t length_counter_a;
+
+    uint8_t period_envelope_b;
     uint8_t volume_envelope_b;
+    uint8_t length_counter_b;
+
+    uint8_t length_counter_wave;
+
+    const float WAVE_VOLUMES[4] = {0.0f, 1.0f, 0.5f, 0.25f};
 public:
     explicit APU(std::shared_ptr<MMU> memory);
 

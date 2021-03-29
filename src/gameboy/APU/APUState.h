@@ -18,4 +18,5 @@ struct APUState {
     bool enable_wave;
     std::array<uint8_t, 16> waveform_wave;
     uint16_t frequency_wave;
+    float volume_wave;
 };

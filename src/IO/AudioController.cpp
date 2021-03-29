@@ -107,7 +107,7 @@ void AudioController::stopSource(int source) {
     alSourceRewind(sources[source]);
 }
 
-void AudioController::playWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency) {
+void AudioController::playWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency, float volume) {
     auto wave = new char[32];
     uint8_t form;
     for(auto i = 0; i < 16; i++) {
@@ -124,6 +124,7 @@ void AudioController::playWave(int source, std::array<uint8_t, 16> waveForm, ALs
             wave,
             32,
             32 * frequency);
+    alSourcef(sources[source], AL_GAIN, volume);
     alSourcei(sources[source], AL_BUFFER, buffers[source]);
     alSourcei(sources[source], AL_LOOPING, 1);
     alSourcePlay(sources[source]);
@@ -131,8 +132,8 @@ void AudioController::playWave(int source, std::array<uint8_t, 16> waveForm, ALs
     delete[] wave;
 }
 
-void AudioController::playGBWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency) {
-    this->playWave(source, waveForm, 131072.0/(2048 - frequency));
+void AudioController::playGBWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency, float volume) {
+    this->playWave(source, waveForm, 131072.0/(2048 - frequency), volume);
 }
 
 void AudioController::setVolume(int source, float volume) {

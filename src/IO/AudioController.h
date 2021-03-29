@@ -19,8 +19,8 @@ public:
     void playSquare(int source, char duty, ALsizei frequency, float volume);
     void playGBSquare(int source, char duty, unsigned short frequency, float volume);
     void stopSource(int source);
-    void playGBWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency);
-    void playWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency);
+    void playGBWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency, float volume);
+    void playWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency, float volume);
     void setVolume(int source, float volume);
 private:
 

@@ -82,7 +82,7 @@ void Application::start() {
             if(ready & 4) {
                 this->audio.stopSource(2);
                 if(state->enable_wave) {
-                    this->audio.playGBWave(2, state->waveform_wave, state->frequency_wave);
+                    this->audio.playGBWave(2, state->waveform_wave, state->frequency_wave, state->volume_wave);
                 }
             }
 
