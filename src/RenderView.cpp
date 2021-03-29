@@ -4,7 +4,7 @@ using namespace glm;
 
 RenderView::RenderView() {
     screenMultiplier = MIN_SCREEN_MULTIPLIER;
-    palette = PALETTE_DMG;
+    palette = PALETTE_POCKET;
 }
 
 void RenderView::initGL() {
@@ -18,12 +18,16 @@ void RenderView::initGL() {
 
     vertexArrayObject = 0;
     glGenVertexArrays(1, &vertexArrayObject);
-    labhelper::createAddAttribBuffer(vertexArrayObject,
-                                     screenVertices,
-                                     sizeof(screenVertices),
-                                     0,
-                                     2,
-                                     GL_FLOAT);
+
+    // Create the VAO.
+    GLuint buffer = 0;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(screenVertices), screenVertices, GL_STATIC_DRAW);
+
+    glBindVertexArray(vertexArrayObject);
+    glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+    glEnableVertexAttribArray(0);
 
     // Initialize shader programs, if renderShaderProgram is 0, the shader program could not
     // be loaded.
@@ -61,7 +65,8 @@ void RenderView::clear() const {
 }
 
 void RenderView::setScreenTexture(uint8_t textureData[]) {
-    // Free previous texture.
+    // Free previous texture. It is the only gl resource that needs to be deleted continuously in this code since
+    // the texture is replaced so often.
     if (screenTexture != 0) {
         glDeleteTextures(1, &screenTexture);
     }
