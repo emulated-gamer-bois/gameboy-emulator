@@ -90,7 +90,7 @@ private:
     uint8_t volume_envelope_b;
     uint8_t length_counter_b;
 
-    uint8_t length_counter_wave;
+    uint16_t length_counter_wave;
 
     const float WAVE_VOLUMES[4] = {0.0f, 1.0f, 0.5f, 0.25f};
 public:

@@ -45,7 +45,7 @@ uint8_t APU::read(uint16_t address) const {
         case NR52_ADDRESS:
             return this->NR52;
         default:
-            std::cout << "Tried to read from unimplemented audio address " << address << std::endl;
+            //std::cout << "Tried to read from unimplemented audio address " << address << std::endl;
             return 0;
     }
 }
@@ -97,7 +97,7 @@ void APU::write(uint16_t address, uint8_t data) {
             this->NR31 = data;
             return;
         case NR32_ADDRESS:
-            this->NR12 = data;
+            this->NR32 = data;
             return;
         case NR33_ADDRESS:
             this->NR33 = data;
@@ -123,7 +123,6 @@ void APU::write(uint16_t address, uint8_t data) {
                 wavePatternRAM[address - WAVE_PATTERN_START] = data;
                 return;
             }
-            std::cout << "Tried to write to unimplemented audio address " << address << " data " << (int)data << std::endl;
     }
 }
 
@@ -190,9 +189,9 @@ void APU::trigger_event(uint8_t source) {
             this->readyToPlay |= 2;
             break;
         case 2:
-            //If length counter is zero, it is set to 64
-            if(length_counter_wave) {
-                length_counter_wave = 0x40;
+            //If length counter is zero, it is set to 256
+            if(!length_counter_wave) {
+                length_counter_wave = 0x100;
             }
             this->readyToPlay |= 4;
             break;
@@ -200,21 +199,21 @@ void APU::trigger_event(uint8_t source) {
 }
 
 void APU::length_step() {
-    if((this->NR14 & 0x80) && length_counter_a) {
+    if((this->NR14 & 0x40) && length_counter_a) {
         if(!--this->length_counter_a) {
             this->NR14 &= 0x7F;
             readyToPlay |= 1;
         }
     }
 
-    if((this->NR24 & 0x80) && length_counter_b) {
+    if((this->NR24 & 0x40) && length_counter_b) {
         if(!--this->length_counter_b) {
             this->NR24 &= 0x7F;
             readyToPlay |= 2;
         }
     }
 
-    if((this->NR34 & 0x80) && length_counter_wave) {
+    if((this->NR34 & 0x40) && length_counter_wave) {
         if(!--this->length_counter_wave) {
             this->NR34 &= 0x7F;
             readyToPlay |= 4;
@@ -260,6 +259,7 @@ void APU::update(uint16_t cpuCycles, IVolumeController* vc) {
         return;
     }
     this->accumulated_cycles -= CLOCK_CYCLE_THRESHOLD;
+
     this->state++;
     state %= 8;
 
