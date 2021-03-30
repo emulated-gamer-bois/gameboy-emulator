@@ -19,8 +19,8 @@ public:
         std::string keybind;
         int keyval;
     };
-    action a,b,start,select,left,right,up,down,doubleSpeed;
-    std::vector<action*> keybinds = {&a, &b, &start, &select, &left, &right, &up, &down, &doubleSpeed};
+    action a,b,start,select,left,right,up,down,turboMode;
+    std::vector<action*> keybinds = {&a, &b, &start, &select, &left, &right, &up, &down, &turboMode};
     bool editKeyBinds(bool *keysDown, int keyBindIndex);
 
 

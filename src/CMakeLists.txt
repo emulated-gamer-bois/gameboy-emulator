@@ -25,13 +25,13 @@ if(NOT TRAVIS)
         Palette.h
         AppTimer.h
         AppTimer.cpp
-        FileHelper.h
-        FileHelper.cpp
+        FileExplorer.h
+        FileExplorer.cpp
         Gui.cpp
         Gui.h
         Keybinds.cpp
         Keybinds.h
-        AppSettings.h AppSettings.cpp)
+        AppSettings.h)
 
     target_link_libraries ( ${PROJECT_NAME} labhelper gameboy )
     config_build_output()

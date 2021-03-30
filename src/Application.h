@@ -24,22 +24,20 @@ public:
     void start();
 
 private:
-    const static std::string DEFAULT_WINDOW_CAPTION;
-
     enum State {
         EMULATION,
         MENU,
         TERMINATION
     } state;
 
-    AppSettings settings;
+    std::shared_ptr<AppSettings> settings{std::make_shared<AppSettings>()};
     SDL_Window* window;
     SDL_GLContext glContext;
     RenderView renderView;
     GameBoy gameBoy;
-    Gui gui = Gui(&settings);
+    Gui gui = Gui(settings);
 
-    float emulationSpeed;
+    float savedEmulationSpeed;
 
     void init();
     void initSDL();
