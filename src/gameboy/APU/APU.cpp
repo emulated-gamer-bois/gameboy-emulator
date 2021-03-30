@@ -92,6 +92,7 @@ void APU::write(uint16_t address, uint8_t data) {
             return;
         case NR30_ADDRESS:
             this->NR30 = data;
+            this->readyToPlay |= 4;
             return;
         case NR31_ADDRESS:
             this->NR31 = data;
@@ -172,27 +173,22 @@ void APU::trigger_event(uint8_t source) {
     switch(source) {
         case 0:
             //If length counter is zero, it is set to 64
-            if(!length_counter_a) {
-                length_counter_a = 0x40;
-            }
+            length_counter_a = this->NR11 & 0x3F ? this->NR11 & 0x3F : 0x40;
+
             this->period_envelope_a = this->NR12 & 0x7;
             this->volume_envelope_a = (this->NR12 >> 4) & 0xF;
             this->readyToPlay |= 1;
             break;
         case 1:
             //If length counter is zero, it is set to 64
-            if(!length_counter_b) {
-                length_counter_b = 0x40;
-            }
+            length_counter_b = this->NR21 & 0x3F ? this->NR21 & 0x3F : 0x40;
             this->period_envelope_b = this->NR22 & 0x7;
             this->volume_envelope_b = (this->NR22 >> 4) & 0xF;
             this->readyToPlay |= 2;
             break;
         case 2:
             //If length counter is zero, it is set to 256
-            if(!length_counter_wave) {
-                length_counter_wave = 0x100;
-            }
+            length_counter_wave = this->NR31 ? this->NR11 : 0x100;
             this->readyToPlay |= 4;
             break;
     }
@@ -222,7 +218,7 @@ void APU::length_step() {
 }
 
 void APU::vol_envelope_step(IVolumeController* vc) {
-    if(!--this->period_envelope_a) {
+    if((this->NR12 & 0x7) && !--this->period_envelope_a) {
         this->period_envelope_a = this->NR12 & 0x7;
         //If in increment mode and envelope can be incremented
         if((this->NR12 & 8) && (volume_envelope_a < 15)) {
@@ -235,7 +231,7 @@ void APU::vol_envelope_step(IVolumeController* vc) {
         vc->setVolume(0, (float)volume_envelope_a/15.0f);
     }
 
-    if(!--this->period_envelope_b) {
+    if((this->NR22 & 0x7) && !--this->period_envelope_b) {
         this->period_envelope_b = this->NR22 & 0x7;
         //If in increment mode and envelope can be incremented
         if((this->NR22 & 8) && (volume_envelope_b < 15)) {
@@ -293,7 +289,7 @@ std::shared_ptr<APUState> APU::getState() {
         .frequency_square_b =  (uint16_t)((((uint16_t)(this->NR24 & 0x7)) << 8) + this->NR23),
         .volume_square_b = (float)volume_envelope_b / 15.0f,
 
-        .enable_wave = (bool)(this->NR34 & 0x80),
+        .enable_wave = (this->NR34 & 0x80) && (this->NR30 & 0x80),
         .waveform_wave = wavePatternRAM,
         .frequency_wave = (uint16_t)((((uint16_t)(this->NR34 & 0x7)) << 8) + this->NR33),
         .volume_wave = WAVE_VOLUMES[(this->NR32 >> 5) & 0x3],

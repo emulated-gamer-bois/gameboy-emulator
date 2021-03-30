@@ -115,7 +115,7 @@ void Application::init() {
     this->audio.init();
 
     // TEMP ------------------------------------------------------------------------------------------------------------
-    this->gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", "../roms/games/not_tetris.gb");
+    this->gameBoy.load_rom("../../rom/boot_rom.gb", "../roms/games/not_tetris.gb");
     // END TEMP --------------------------------------------------------------------------------------------------------
 }
 
