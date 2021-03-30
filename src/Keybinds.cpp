@@ -14,7 +14,7 @@ void Keybinds::init_keybinds() {
     right.keyval = SDLK_d;
     up.keyval = SDLK_w;
     down.keyval = SDLK_s;
-    doubleSpeed.keyval = SDLK_SPACE;
+    turboMode.keyval = SDLK_SPACE;
     for(int i=0; i < keybinds.capacity(); i++){
         this->keybinds[i]->keybind = SDL_GetKeyName(
                 this->keybinds[i]->keyval);
@@ -28,7 +28,7 @@ void Keybinds::init_keybinds() {
     up.action_description = "Gamepad Up";
     down.action_description = "Gamepad Down";
     start.action_description = "Start";
-    doubleSpeed.action_description = "Hold for double speed";
+    turboMode.action_description = "Turbo Mode";
 }
 
 bool Keybinds::editKeyBinds( bool keysDown [], int keyBindIndex) {
