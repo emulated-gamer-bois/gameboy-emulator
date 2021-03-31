@@ -24,7 +24,14 @@ if(NOT TRAVIS)
         Application.h
         Application.cpp
         AppTimer.h
-        AppTimer.cpp)
+        AppTimer.cpp
+        FileExplorer.h
+        FileExplorer.cpp
+        Gui.cpp
+        Gui.h
+        Keybinds.cpp
+        Keybinds.h
+        AppSettings.h)
 
     target_link_libraries ( ${PROJECT_NAME} gameboy IO )
     config_build_output()

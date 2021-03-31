@@ -13,6 +13,19 @@
 #include "../gameboy/Definitions.h"
 
 class RenderView {
+public:
+    RenderView();
+
+    void initGL();
+    void render() const;
+    void clear() const;
+    void setScreenTexture(uint8_t textureData[]);
+    void setPalette(Palette palette);
+    void setScreenMultiplier(int screenMultiplier);
+
+    int getWidth() const;
+    int getHeight() const;
+
 private:
     const static int VERTEX_AMOUNT = 6;
 
@@ -23,16 +36,4 @@ private:
     GLuint renderShaderProgram;
     GLuint fxShaderProgram;
     Palette palette;
-
-public:
-    RenderView(int screenMultiplier, Palette palette);
-    RenderView();
-
-    void initGL();
-    void render() const;
-    void setScreenTexture(uint8_t textureData[]);
-    void setPalette(Palette palette);
-
-    int getWidth() const;
-    int getHeight() const;
 };

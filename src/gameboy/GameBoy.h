@@ -31,6 +31,8 @@ public:
     bool isReadyToDraw() const;
     void confirmDraw();
     void cpu_dump();
+    bool isOn() const;
+
 
     uint8_t isReadyToPlaySound();
     void confirmPlay();

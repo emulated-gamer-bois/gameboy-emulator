@@ -179,7 +179,8 @@ bool PPU::isReadyToDraw() const {
 }
 
 void PPU::confirmDraw() {
-    this->frameBuffer.fill(0);
+    //TODO Filling the frame buffer with zeroes seems unnecessary?
+   // this->frameBuffer.fill(0);
     this->readyToDraw = false;
 }
 
