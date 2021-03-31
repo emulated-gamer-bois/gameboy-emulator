@@ -16,9 +16,12 @@ MMU::MMU() {
     this->reset();
 }
 
-void MMU::link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer, std::shared_ptr<Cartridge> cartridge) {
+void MMU::link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<APU> apu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer, std::shared_ptr<Cartridge> cartridge) {
     if (ppu) {
         this->ppu = ppu;
+    }
+    if (apu) {
+        this->apu = apu;
     }
     if (joypad) {
         this->joypad = joypad;
@@ -72,9 +75,22 @@ uint8_t MMU::read(uint16_t addr) {
         return this->ram[addr - WRAM_START];
     }
 
+    //ECHO RAM
+    if (ECHO_RAM_START <= addr && addr <= ECHO_RAM_END) {
+        //TODO What is intended behaviour?
+        std::cout << "Tried to read from echo RAM. addr: " << (int)addr << std::endl;
+        return 0;
+    }
+
     // OAM
     if (OAM_START <= addr && addr <= OAM_END) {
         return this->oam[addr - OAM_START];
+    }
+
+    // PROHIBITED
+    if (PROHIBITED_START <= addr && addr <= PROHIBITED_END) {
+        std::cout << "Tried to read from prohibited memory area. addr: " << (int)addr << std::endl;
+        return 0;
     }
 
     // I/O
@@ -101,18 +117,14 @@ uint8_t MMU::read(uint16_t addr) {
             return this->interrupt_flag;
         }
 
-        // Sound TODO: Implement sound
+        // Sound
         if (IO_SOUND_START <= addr && addr <= IO_SOUND_END) {
-            // Supress to prevent console spam
-            // std::cout << "Tried to read from sound device. addr: " << (int)addr << std::endl;
-            return 0;
+            return this->apu->read(addr);
         }
 
-        // Waveform RAM TODO: Implement sound
+        // Waveform RAM
         if (IO_WAVEFORM_RAM_START <= addr && addr <= IO_WAVEFORM_RAM_END) {
-            // Supress to prevent console spam
-            // std::cout << "Tried to read Waveform RAM. addr: " << (int)addr << std::endl;
-            return 0;
+            return this->apu->read(addr);
         }
 
         // LCD
@@ -161,9 +173,22 @@ void MMU::write(uint16_t addr, uint8_t data) {
         return;
     }
 
+    //ECHO RAM
+    if (ECHO_RAM_START <= addr && addr <= ECHO_RAM_END) {
+        //TODO What is intended behaviour?
+        std::cout << "Tried to write to echo RAM. addr: " << (int)addr << " data: " << (int)data << std::endl;
+        return;
+    }
+
     // OAM
     if (OAM_START <= addr && addr <= OAM_END) {
         this->oam[addr - OAM_START] = data;
+        return;
+    }
+
+    // PROHIBITED
+    if (PROHIBITED_START <= addr && addr <= PROHIBITED_END) {
+        std::cout << "Tried to write to prohibited memory area. addr: " << (int)addr << " data: " << (int)data << std::endl;
         return;
     }
 
@@ -196,15 +221,13 @@ void MMU::write(uint16_t addr, uint8_t data) {
 
         // Sound TODO: Implement sound
         if (IO_SOUND_START <= addr && addr <= IO_SOUND_END) {
-            // Supress to prevent console spam
-            // std::cout << "Tried to write to sound device. addr: " << (int)addr << " data: " << (int)data << std::endl;
+            this->apu->write(addr, data);
             return;
         }
 
         // Waveform RAM TODO: Implement sound
         if (IO_WAVEFORM_RAM_START <= addr && addr <= IO_WAVEFORM_RAM_END) {
-            // Supress to prevent console spam
-            // std::cout << "Tried to write to Waveform RAM. addr: " << (int)addr << " data: " << (int)data<< std::endl;
+            this->apu->write(addr, data);
             return;
         }
 

@@ -10,7 +10,7 @@
 #include <labhelper.h> // includes glew.h and glm.hpp
 
 #include "Palette.h"
-#include "gameboy/Definitions.h"
+#include "../gameboy/Definitions.h"
 
 class RenderView {
 public:

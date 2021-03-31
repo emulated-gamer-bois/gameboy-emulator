@@ -41,21 +41,32 @@ else ()
 endif ()
 set_property(SOURCE Model.cpp labhelper.cpp PROPERTY COMPILE_OPTIONS "$<$<CONFIG:Debug>:${CMAKE_CXX_FLAGS_DEBUG_MODEL}>")
 
-target_include_directories(labhelper
-        PUBLIC
-        ${CMAKE_SOURCE_DIR}/labhelper
-        ${CMAKE_SOURCE_DIR}/external_src/stb-master
-        ${CMAKE_SOURCE_DIR}/external_src/tinyobjloader-1.0.6
-        ${SDL2_INCLUDE_DIRS}
-        ${GLM_INCLUDE_DIRS}
-        ${GLEW_INCLUDE_DIRS}
-        ${OPENGL_INCLUDE_DIR}
-        )
-target_link_libraries(labhelper
-        PUBLIC
-        imgui
-        SDL2::SDL2
-        ${SDL2_LIBRARIES}
-        ${GLEW_LIBRARIES}
-        ${OPENGL_LIBRARY}
-        )
+target_include_directories( labhelper
+    PUBLIC
+    ${CMAKE_SOURCE_DIR}/labhelper
+    ${CMAKE_SOURCE_DIR}/external_src/stb-master
+    ${CMAKE_SOURCE_DIR}/external_src/tinyobjloader-1.0.6
+    ${SDL2_INCLUDE_DIRS}
+    ${GLM_INCLUDE_DIRS}
+    ${GLEW_INCLUDE_DIRS}
+    ${OPENGL_INCLUDE_DIR}
+    )
+
+if(WIN32)
+	target_link_libraries ( labhelper
+			PUBLIC
+			imgui
+			${SDL2_LIBRARIES}
+			${GLEW_LIBRARIES}
+			${OPENGL_LIBRARY}
+			)
+else()
+	target_link_libraries ( labhelper
+			PUBLIC
+			imgui
+			SDL2::SDL2
+			${SDL2_LIBRARIES}
+			${GLEW_LIBRARIES}
+			${OPENGL_LIBRARY}
+			)
+endif()

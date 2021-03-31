@@ -10,11 +10,12 @@
 #include <string>
 #include <chrono> // time
 #include <thread> // sleep
-#include "imgui.h"
-#include "AppSettings.h"
-#include "RenderView.h"
+#include "IO/RenderView.h"
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
+#include "IO/AudioController.h"
+#include "imgui.h"
+#include "AppSettings.h"
 #include "Gui.h"
 #include "Keybinds.h"
 
@@ -34,6 +35,7 @@ private:
     SDL_Window* window;
     SDL_GLContext glContext;
     RenderView renderView;
+    AudioController audio;
     GameBoy gameBoy;
     Gui gui = Gui(settings);
 
@@ -47,5 +49,5 @@ private:
     void updateSDLWindowSize();
     void terminate();
     void initSettings();
-
+    void updateSound(uint8_t ready);
 };

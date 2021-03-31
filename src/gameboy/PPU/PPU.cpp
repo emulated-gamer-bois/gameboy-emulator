@@ -3,8 +3,6 @@
 //
 
 #include "PPU.h"
-#include "../MMU.h"
-#include "../Definitions.h"
 #include <memory>
 #include <iostream>
 

@@ -24,6 +24,7 @@ void Application::start() {
     init();
     float frameTime = 1000.f / LCD_REFRESH_RATE;
     AppTimer timer;
+    uint8_t ready;
     while (state != State::TERMINATION) {
         // Create time stamp.
         timer.tick();
@@ -43,16 +44,27 @@ void Application::start() {
                     gameBoy.confirmDraw();
                 }
                 while (!gameBoy.isReadyToDraw()) {
-                    gameBoy.step();
+                    gameBoy.step(&audio);
+
+                    ready = this->gameBoy.isReadyToPlaySound();
+                    if(ready) {
+                        updateSound(ready);
+                    }
                 }
             }
-            renderView.setScreenTexture(gameBoy.getScreenTexture().get());
-            renderView.render();
-            gameBoy.confirmDraw();
+
+            if(gameBoy.isReadyToDraw()) {
+                renderView.setScreenTexture(gameBoy.getScreenTexture().get());
+                renderView.render();
+                gameBoy.confirmDraw();
+            }
         }
 
         // Render menu
         if (state == State::MENU) {
+            audio.stopSource(0);
+            audio.stopSource(1);
+            audio.stopSource(2);
             gui.handleGui(window);
         }
 
@@ -231,4 +243,38 @@ void Application::initSettings() {
     settings->screenMultiplier = 4;
     settings->romPath = "..";
     settings->emulationSpeedMultiplier = 1;
+}
+
+void Application::updateSound(uint8_t ready) {
+        //Play audio
+        //this->audio.playBuffers(this->gameBoy.getAudioBuffers());
+
+        auto state = this->gameBoy.getAPUState();
+
+        //1st square
+        if(ready & 1) {
+            this->audio.stopSource(0);
+            if(state->enable_square_a) {
+                this->audio.playGBSquare(0, state->duty_square_a, state->frequency_square_a, state->volume_square_a);
+            }
+        }
+
+        //2nd square
+        if(ready & 2) {
+            this->audio.stopSource(1);
+            if(state->enable_square_b) {
+                this->audio.playGBSquare(1, state->duty_square_b, state->frequency_square_b, state->volume_square_b);
+            }
+        }
+
+        //Wave
+        if(ready & 4) {
+            this->audio.stopSource(2);
+            if(state->enable_wave) {
+                this->audio.playGBWave(2, state->waveform_wave, state->frequency_wave, state->volume_wave);
+            }
+        }
+
+        gameBoy.confirmPlay();
+        delete state;
 }

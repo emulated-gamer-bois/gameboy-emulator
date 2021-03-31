@@ -10,7 +10,7 @@ TEST(CPU, Execute_NOP_Instruction) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::unique_ptr<CPU> cpu(new CPU(0x0000, 0xFFFE, mmu));
     std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>();
-    mmu->link_devices(nullptr, nullptr, nullptr, cartridge);
+    mmu->link_devices(nullptr, nullptr, nullptr, nullptr, cartridge);
 
 
     // Disable boot ROM
@@ -27,7 +27,7 @@ TEST(CPU, Execute_LD_SP_D16_Instruction) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::unique_ptr<CPU> cpu(new CPU(0x0000, 0xFFFE, mmu));
     std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>();
-    mmu->link_devices(nullptr, nullptr, nullptr, cartridge);
+    mmu->link_devices(nullptr, nullptr, nullptr, nullptr, cartridge);
 
     // Disable boot ROM
     mmu->write(0xff50, 0x01);
