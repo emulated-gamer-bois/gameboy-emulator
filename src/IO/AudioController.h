@@ -13,6 +13,7 @@
 
 class AudioController : public IVolumeController {
 public:
+    AudioController();
     ~AudioController();
     void init();
     void playSound(int source, char *soundData, int size, int sampleRate);

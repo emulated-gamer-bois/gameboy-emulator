@@ -139,3 +139,7 @@ void AudioController::playGBWave(int source, std::array<uint8_t, 16> waveForm, A
 void AudioController::setVolume(int source, float volume) {
     alSourcef(sources[source], AL_GAIN, volume);
 }
+
+AudioController::AudioController() {
+    init();
+}
