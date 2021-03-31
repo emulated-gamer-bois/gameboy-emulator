@@ -72,7 +72,7 @@ void GameBoy::load_rom(std::string bootFilepath, std::string romFilepath)
     {
         cpu->skipBootRom();
     }
-    on = cartridge->load_rom(romFilepath);
+    on = cartridge->load_rom(romFilepath, true);
 }
 
 void GameBoy::load_game_rom(std::string filepath)
@@ -104,6 +104,7 @@ void GameBoy::confirmDraw()
 {
     ppu->confirmDraw();
 }
+
 uint8_t GameBoy::isReadyToPlaySound()
 {
     return this->apu->isReadyToPlaySound();
@@ -115,4 +116,12 @@ void GameBoy::confirmPlay()
 APUState *GameBoy::getAPUState()
 {
     return this->apu->getAPUState();
+}
+
+bool GameBoy::save() {
+    // Save RAM to separate file
+    if (!this->cartridge->save_ram()) {
+        return false;
+    }
+    return true;
 }
