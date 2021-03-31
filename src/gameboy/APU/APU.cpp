@@ -4,9 +4,8 @@
 
 #include "APU.h"
 
-APU::APU(std::shared_ptr<MMU> memory) {
+APU::APU() {
     this->accumulated_cycles = 0;
-    this->memory = memory;
     this->readyToPlay = 0;
     this->accumulated_cycles = 0;
     this->state = 0;

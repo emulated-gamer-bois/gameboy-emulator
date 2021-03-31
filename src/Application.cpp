@@ -43,13 +43,14 @@ void Application::start() {
                     //Actually discards frame until settings->playSpeed number of frames have been produced.
                     gameBoy.confirmDraw();
                 }
-                while (!gameBoy.isReadyToDraw() && !gameBoy.isReadyToDraw()) {
+                while (!gameBoy.isReadyToDraw()) {
                     gameBoy.step(&audio);
+
+                    ready = this->gameBoy.isReadyToPlaySound();
+                    if(ready) {
+                        updateSound(ready);
+                    }
                 }
-            }
-            ready = this->gameBoy.isReadyToPlaySound();
-            if(ready) {
-                updateSound(ready);
             }
 
             if(gameBoy.isReadyToDraw()) {

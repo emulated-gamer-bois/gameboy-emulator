@@ -45,12 +45,26 @@
 #include "APUState.h"
 #include "IVolumeController.h"
 
-class MMU;
-
 class APU {
-private:
-    std::shared_ptr<MMU> memory;
+public:
+    explicit APU();
 
+    uint8_t read(uint16_t address) const;
+    void write(uint16_t address, uint8_t data);
+    void update(uint16_t cpuCycles, IVolumeController* vc);
+
+    void reset();
+
+    void length_step();
+    void vol_envelope_step(IVolumeController* vc);
+    void sweep_step();
+
+    void trigger_event(uint8_t source);
+    uint8_t isReadyToPlaySound();
+    void confirmPlay();
+    APUState* getAPUState();
+
+private:
     uint8_t NR10;
     uint8_t NR11;
     uint8_t NR12;
@@ -93,23 +107,6 @@ private:
     uint16_t length_counter_wave;
 
     const float WAVE_VOLUMES[4] = {0.0f, 1.0f, 0.5f, 0.25f};
-public:
-    explicit APU(std::shared_ptr<MMU> memory);
-
-    uint8_t read(uint16_t address) const;
-    void write(uint16_t address, uint8_t data);
-    void update(uint16_t cpuCycles, IVolumeController* vc);
-
-    void reset();
-
-    void length_step();
-    void vol_envelope_step(IVolumeController* vc);
-    void sweep_step();
-
-    void trigger_event(uint8_t source);
-    uint8_t isReadyToPlaySound();
-    void confirmPlay();
-    APUState* getAPUState();
 };
 
 

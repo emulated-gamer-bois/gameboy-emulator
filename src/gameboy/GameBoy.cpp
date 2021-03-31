@@ -14,7 +14,7 @@ GameBoy::GameBoy()
 
     cpu = std::make_unique<CPU>(0x0000, 0xFFFE, mmu);
     ppu = std::make_shared<PPU>(mmu);
-    apu = std::make_shared<APU>(mmu);
+    apu = std::make_shared<APU>();
     mmu->link_devices(this->ppu, this->apu, this->joypad, this->timer, this->cartridge);
     on = false;
 }
@@ -65,6 +65,7 @@ void GameBoy::load_rom(std::string bootFilepath, std::string romFilepath)
 {
     cpu->reset();
     ppu->reset();
+    apu->reset();
     mmu->reset();
     timer->reset();
     joypad->reset();
