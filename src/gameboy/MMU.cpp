@@ -132,7 +132,7 @@ uint8_t MMU::read(uint16_t addr) {
     }
 
     // Address did not match
-    std::cout << "Tried to read unmapped memory address: " << (int)addr << std::endl;
+    //std::cout << "Tried to read unmapped memory address: " << (int)addr << std::endl;
     return 0;
 }
 
@@ -220,7 +220,7 @@ void MMU::write(uint16_t addr, uint8_t data) {
             return;
         }
 
-        std::cout << "Tried to write to unmapped memory address: " << (int)addr << " data: " << (int)data << std::endl;
+        //std::cout << "Tried to write to unmapped memory address: " << (int)addr << " data: " << (int)data << std::endl;
     }
 
     // HRAM
@@ -236,7 +236,7 @@ void MMU::write(uint16_t addr, uint8_t data) {
     }
 
     // Address did not match
-    std::cout << "Tried to write to unmapped memory address: " << (int)addr << " data: " << (int)data << std::endl;
+    //std::cout << "Tried to write to unmapped memory address: " << (int)addr << " data: " << (int)data << std::endl;
 }
 
 void MMU::disable_boot_rom(uint8_t data) {
@@ -266,13 +266,13 @@ bool MMU::load_boot_rom(const std::string& filepath) {
             // Copy data
             std::memcpy(&this->boot_rom[this->boot_rom.size() - size], &memblock[0], size);
         } else {
-            std::cout << "Unable to load boot ROM! File size is not 256 bytes!" << std::endl;
+            //std::cout << "Unable to load boot ROM! File size is not 256 bytes!" << std::endl;
             disable_boot_rom(1);
             return false;
         }
     }
     else {
-        std::cout << "Unable to open boot ROM: " << filepath << std::endl;
+        //std::cout << "Unable to open boot ROM: " << filepath << std::endl;
         disable_boot_rom(1);
         return false;
     }
@@ -284,7 +284,7 @@ void MMU::write_GAME_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data) {
     if (GAME_ROM_START <= addr && addr <= GAME_ROM_END) {
         this->cartridge->write_TEST(addr, data);
     } else {
-        std::cout << "Tried to use write_GAME_ROM_ONLY_IN_TESTS with invalid addr: " << addr << std::endl;
+        //std::cout << "Tried to use write_GAME_ROM_ONLY_IN_TESTS with invalid addr: " << addr << std::endl;
     }
 }
 
@@ -293,7 +293,7 @@ void MMU::write_BOOT_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data) {
     if (BOOT_ROM_START <= addr && addr <= BOOT_ROM_END) {
         this->boot_rom[addr] = data;
     } else {
-        std::cout << "Tried to use write_BOOT_ROM_ONLY_IN_TESTS with invalid addr: " << addr << std::endl;
+        //std::cout << "Tried to use write_BOOT_ROM_ONLY_IN_TESTS with invalid addr: " << addr << std::endl;
     }
 }
 

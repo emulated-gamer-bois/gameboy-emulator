@@ -31,6 +31,9 @@ public:
     bool isReadyToDraw() const;
     void confirmDraw();
     void cpu_dump();
+    bool isOn() const;
+
+    bool save();
 
 private:
     bool on;

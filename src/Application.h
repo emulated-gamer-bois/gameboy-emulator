@@ -10,10 +10,13 @@
 #include <string>
 #include <chrono> // time
 #include <thread> // sleep
-
+#include "imgui.h"
+#include "AppSettings.h"
 #include "RenderView.h"
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
+#include "Gui.h"
+#include "Keybinds.h"
 
 class Application {
 public:
@@ -21,18 +24,28 @@ public:
     void start();
 
 private:
-    const static std::string DEFAULT_WINDOW_CAPTION;
+    enum State {
+        EMULATION,
+        MENU,
+        TERMINATION
+    } state;
 
+    std::shared_ptr<AppSettings> settings{std::make_shared<AppSettings>()};
     SDL_Window* window;
     SDL_GLContext glContext;
     RenderView renderView;
     GameBoy gameBoy;
+    Gui gui = Gui(settings);
 
-    bool running;
+    float savedEmulationSpeed;
 
     void init();
     void initSDL();
     void terminateSDL();
     void handleSDLEvents();
+    void handleEmulatorInput(SDL_Keycode key, int eventType);
     void updateSDLWindowSize();
+    void terminate();
+    void initSettings();
+
 };
