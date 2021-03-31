@@ -49,5 +49,5 @@ private:
     void updateSDLWindowSize();
     void terminate();
     void initSettings();
-
+    void updateSound(uint8_t ready);
 };
