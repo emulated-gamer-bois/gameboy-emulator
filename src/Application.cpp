@@ -62,6 +62,9 @@ void Application::start() {
 
         // Render menu
         if (state == State::MENU) {
+            audio.stopSource(0);
+            audio.stopSource(1);
+            audio.stopSource(2);
             gui.handleGui(window);
         }
 
