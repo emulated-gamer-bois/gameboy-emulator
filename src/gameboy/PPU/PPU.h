@@ -12,7 +12,6 @@
 #include "../Definitions.h" // LCD_WIDTH and LCD_HEIGHT
 #include "../MMU.h"
 #include "Sprite.h"
-#include "../../../external_src/imgui-1.51/stb_truetype.h"
 
 // Register addresses
 #define LCDC_ADDRESS    0xFF40
