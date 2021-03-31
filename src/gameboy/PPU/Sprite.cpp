@@ -13,7 +13,7 @@ Sprite::Sprite(uint8_t y, uint8_t x, uint8_t tileIndex, uint8_t flags, uint8_t p
 }
 
 bool Sprite::coversLine(uint8_t line, unsigned int objectSize) const {
-    uint8_t min = this->y - 16;
+    uint8_t min = getY();
     uint8_t max;
     if (objectSize) {
         max = min + 16;
@@ -24,7 +24,7 @@ bool Sprite::coversLine(uint8_t line, unsigned int objectSize) const {
 }
 
 
-bool Sprite::hasHigherPriorityThan(const Sprite & other) const {
+bool Sprite::hasHigherPriorityThan(const Sprite &other) const {
     if (this->x != other.x) {
         return this->x < other.x;
     }
@@ -32,14 +32,15 @@ bool Sprite::hasHigherPriorityThan(const Sprite & other) const {
 }
 
 uint8_t Sprite::getTileID(uint8_t lcdY) const {
-    if (lcdY - (this->y - 16) < 8) {
+    uint8_t tileY = lcdY - getY();
+    if ((tileY < 8 && !yFlip) || (tileY >= 8 && yFlip)) {
         return tileIndex;
     }
     return tileIndex + 1;
 }
 
 uint8_t Sprite::getTileX(uint8_t lcdX) const {
-    uint8_t tileX = lcdX - (this->x - 8);
+    uint8_t tileX = lcdX - getX();
     if (xFlip) {
         return 7 - tileX;
     }
@@ -47,14 +48,14 @@ uint8_t Sprite::getTileX(uint8_t lcdX) const {
 }
 
 uint8_t Sprite::getTileY(uint8_t lcdY) const {
-    uint8_t spriteY = lcdY - (this->y - 16);
-    if (spriteY >= 8) {
-        spriteY = spriteY - 8;
+    uint8_t tileY = lcdY - getY(); //Between 0-15
+    if (tileY >= 8) {
+        tileY = tileY - 8;
     }
     if (yFlip) {
-        spriteY = 7 - spriteY;
+        tileY = 7 - tileY;
     }
-    return spriteY;
+    return tileY;
 }
 
 uint8_t Sprite::getPaletteNumber() const {
@@ -66,11 +67,16 @@ bool Sprite::backgroundOverSprite() const {
 }
 
 void Sprite::print() const {
-    std::cout << "X: " << (int)this->x << " Y: " << (int)this->y << " Tile: " << (int)tileIndex << " Flags: " << (int)this->flags << std::endl;
+    std::cout << "X: " << (int) this->x << " Y: " << (int) this->y << " Tile: " << (int) tileIndex << " Flags: "
+              << (int) this->flags << std::endl;
 }
 
 uint8_t Sprite::getX() const {
     return this->x - 8;
+}
+
+uint8_t Sprite::getY() const {
+    return this->y - 16;
 }
 
 bool operator<(const Sprite &lhs, const Sprite &rhs) {

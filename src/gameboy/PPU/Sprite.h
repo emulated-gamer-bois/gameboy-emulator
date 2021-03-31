@@ -30,6 +30,7 @@ public:
     bool coversLine(uint8_t line, unsigned int objectSize) const;
 
     uint8_t getX() const;
+    uint8_t getY() const;
     uint8_t getTileID(uint8_t lcdY) const;
     uint8_t getTileX(uint8_t lcdX) const;
     uint8_t getTileY(uint8_t lcdY) const;
