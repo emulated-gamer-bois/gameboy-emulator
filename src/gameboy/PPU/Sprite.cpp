@@ -74,7 +74,7 @@ uint8_t Sprite::getX() const {
 }
 
 bool operator<(const Sprite &lhs, const Sprite &rhs) {
-    return !lhs.hasHigherPriorityThan(rhs);
+    return lhs.hasHigherPriorityThan(rhs);
 }
 
 

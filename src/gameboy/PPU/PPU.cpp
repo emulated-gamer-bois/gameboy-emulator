@@ -251,15 +251,20 @@ void PPU::drawObjectScanLine() {
         auto sprite = spritesNextScanLine.top();
         spritesNextScanLine.pop();
         for (int x = sprite.getX(); x < sprite.getX() + 8; ++x) {
-            uint8_t colorIndex = getSpritePixelColorIndex(sprite, x, LY);
-            if (colorIndex != 0) { //Color index 0 is transparent
-                uint8_t pixel;
-                if (sprite.getPaletteNumber()) {
-                    pixel = getColor(OBP1, colorIndex);
-                } else {
-                    pixel = getColor(OBP0, colorIndex);
+            //If the sprite should be behind the background and the background is not color 0, don't display the pixel
+            if ((sprite.backgroundOverSprite()) && (bgWindowColorIndexesThisLine[x] != 0)) { //TODO should this be color index 0 or color 0?
+                frameBuffer[LY * LCD_WIDTH + x] = getColor(BGP, bgWindowColorIndexesThisLine[x]);
+            } else {
+                uint8_t colorIndex = getSpritePixelColorIndex(sprite, x, LY);
+                if (colorIndex != 0) { //Color index 0 is transparent
+                    uint8_t pixel;
+                    if (sprite.getPaletteNumber()) {
+                        pixel = getColor(OBP1, colorIndex);
+                    } else {
+                        pixel = getColor(OBP0, colorIndex);
+                    }
+                    frameBuffer[LY * LCD_WIDTH + x] = pixel;
                 }
-                frameBuffer[LY * LCD_WIDTH + x] = pixel;
             }
         }
     }
@@ -287,10 +292,6 @@ Sprite PPU::loadSprite(uint8_t index) {
 
 
 uint8_t PPU::getSpritePixelColorIndex(Sprite & sprite, uint8_t lcdX, uint8_t lcdY) {
-    //If the sprite should be behind the background and the background is not color 0, don't display the pixel
-    if ((sprite.backgroundOverSprite()) && (bgWindowColorIndexesThisLine[lcdX] != 0)) { //TODO should this be color index 0 or color 0?
-        return 0;
-    }
     uint8_t tileID = sprite.getTileID(lcdY);
     uint8_t tileX = sprite.getTileX(lcdX);
     uint8_t tileY = sprite.getTileY(lcdY);
