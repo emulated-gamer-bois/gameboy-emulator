@@ -92,6 +92,6 @@ uint8_t GameBoy::isReadyToPlaySound() {
 void GameBoy::confirmPlay() {
     this->apu->confirmPlay();
 }
-std::shared_ptr<APUState> GameBoy::getState() {
-    return this->apu->getState();
+APUState* GameBoy::getAPUState() {
+    return this->apu->getAPUState();
 }

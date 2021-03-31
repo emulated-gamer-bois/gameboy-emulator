@@ -34,7 +34,7 @@ public:
 
     uint8_t isReadyToPlaySound();
     void confirmPlay();
-    std::shared_ptr<APUState> getState();
+    APUState* getAPUState();
 
 private:
     bool on;

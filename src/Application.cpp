@@ -60,7 +60,7 @@ void Application::start() {
             //Play audio
             //this->audio.playBuffers(this->gameBoy.getAudioBuffers());
 
-            auto state = this->gameBoy.getState();
+            auto state = this->gameBoy.getAPUState();
 
             //1st square
             if(ready & 1) {
@@ -87,6 +87,7 @@ void Application::start() {
             }
 
             gameBoy.confirmPlay();
+            delete state;
         }
 
         if(this->gameBoy.isReadyToDraw()) {

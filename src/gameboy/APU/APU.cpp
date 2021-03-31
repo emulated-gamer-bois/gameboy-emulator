@@ -277,21 +277,22 @@ void APU::confirmPlay() {
     readyToPlay = 0;
 }
 
-std::shared_ptr<APUState> APU::getState() {
-    return std::make_shared<APUState>(APUState{
-        .enable_square_a =  (bool)(this->NR14 & 0x80),
-        .duty_square_a =  (uint8_t)((this->NR11 >> 6) & 0x3),
-        .frequency_square_a =  (uint16_t)((((uint16_t)(this->NR14 & 0x7)) << 8) + this->NR13),
-        .volume_square_a = (float)volume_envelope_a / 15.0f,
+//Returns the state of the
+APUState* APU::getAPUState() {
+    return new APUState{
+        (bool)(this->NR14 & 0x80),
+        (uint8_t)((this->NR11 >> 6) & 0x3),
+        (uint16_t)((((uint16_t)(this->NR14 & 0x7)) << 8) + this->NR13),
+        (float)volume_envelope_a / 15.0f,
 
-        .enable_square_b =  (bool)(this->NR24 & 0x80),
-        .duty_square_b =  (uint8_t)((this->NR21 >> 6) & 0x3),
-        .frequency_square_b =  (uint16_t)((((uint16_t)(this->NR24 & 0x7)) << 8) + this->NR23),
-        .volume_square_b = (float)volume_envelope_b / 15.0f,
+        (bool)(this->NR24 & 0x80),
+        (uint8_t)((this->NR21 >> 6) & 0x3),
+        (uint16_t)((((uint16_t)(this->NR24 & 0x7)) << 8) + this->NR23),
+        (float)volume_envelope_b / 15.0f,
 
-        .enable_wave = (this->NR34 & 0x80) && (this->NR30 & 0x80),
-        .waveform_wave = wavePatternRAM,
-        .frequency_wave = (uint16_t)((((uint16_t)(this->NR34 & 0x7)) << 8) + this->NR33),
-        .volume_wave = WAVE_VOLUMES[(this->NR32 >> 5) & 0x3],
-    });
+        (this->NR34 & 0x80) && (this->NR30 & 0x80),
+        wavePatternRAM,
+        (uint16_t)((((uint16_t)(this->NR34 & 0x7)) << 8) + this->NR33),
+        WAVE_VOLUMES[(this->NR32 >> 5) & 0x3],
+    };
 }

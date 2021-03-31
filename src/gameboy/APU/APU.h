@@ -109,7 +109,7 @@ public:
     void trigger_event(uint8_t source);
     uint8_t isReadyToPlaySound();
     void confirmPlay();
-    std::shared_ptr<APUState> getState();
+    APUState* getAPUState();
 };
 
 
