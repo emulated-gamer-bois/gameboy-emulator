@@ -66,7 +66,11 @@ void Application::start() {
             std::this_thread::sleep_for(std::chrono::milliseconds(msToSleep));
         }
     }
-
+    if (this->gameBoy.save()) {
+        std::cout << "Saved successfully" << std::endl;
+    } else {
+        std::cout << "Save failed" << std::endl;
+    }
     terminate();
 }
 
@@ -228,5 +232,3 @@ void Application::initSettings() {
     settings->romPath = "..";
     settings->emulationSpeedMultiplier = 1;
 }
-
-

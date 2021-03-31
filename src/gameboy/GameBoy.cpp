@@ -61,7 +61,7 @@ void GameBoy::load_rom(std::string bootFilepath, std::string romFilepath) {
     if (!mmu->load_boot_rom(bootFilepath)) {
         cpu->skipBootRom();
     }
-    on = cartridge->load_rom(romFilepath);
+    on = cartridge->load_rom(romFilepath, true);
 }
 
 void GameBoy::load_game_rom(std::string filepath) {
@@ -86,4 +86,12 @@ bool GameBoy::isReadyToDraw() const {
 
 void GameBoy::confirmDraw() {
     ppu->confirmDraw();
+}
+
+bool GameBoy::save() {
+    // Save RAM to separate file
+    if (!this->cartridge->save_ram()) {
+        return false;
+    }
+    return true;
 }
