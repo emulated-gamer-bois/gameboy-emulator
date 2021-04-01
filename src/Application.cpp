@@ -24,7 +24,6 @@ void Application::start() {
     init();
     float frameTime = 1000.f / LCD_REFRESH_RATE;
     AppTimer timer;
-    uint8_t playSound;
     while (state != State::TERMINATION) {
         // Create time stamp.
         timer.tick();
@@ -38,26 +37,8 @@ void Application::start() {
 
         // Step through emulation until playspeed number of frames are produced, then display the last one.
         if (state == State::EMULATION && gameBoy.isOn()) {
-            for (int i = 0; i < settings->emulationSpeedMultiplier; i++) {
-                if (gameBoy.isReadyToDraw()) {
-                    //Actually discards frame until settings->playSpeed number of frames have been produced.
-                    gameBoy.confirmDraw();
-                }
-                while (!gameBoy.isReadyToDraw()) {
-                    gameBoy.step(&audio);
-
-                    playSound = this->gameBoy.isReadyToPlaySound();
-                    if(playSound) {
-                        updateSound(playSound);
-                    }
-                }
-            }
-
-            if(gameBoy.isReadyToDraw()) {
-                renderView.setScreenTexture(gameBoy.getScreenTexture().get());
-                renderView.render();
-                gameBoy.confirmDraw();
-            }
+            stepEmulation();
+            renderEmulation();
         }
 
         // Render menu
@@ -277,4 +258,46 @@ void Application::updateSound(uint8_t ready) {
 
         gameBoy.confirmPlay();
         delete state;
+}
+void Application::stepFast(){
+    for (int i = 0; i < settings->emulationSpeedMultiplier; i++) {
+        gameBoyStep();
+    }
+}
+void Application::stepSlowly(){
+    if(framesUntilStep == 0){
+        gameBoyStep();
+        framesUntilStep=1/settings->emulationSpeedMultiplier;
+    }
+    framesUntilStep--;
+}
+void Application::gameBoyStep(){
+    if (gameBoy.isReadyToDraw()) {
+        //Actually discards frame until settings->playSpeed number of frames have been produced.
+        gameBoy.confirmDraw();
+    }
+    while (!gameBoy.isReadyToDraw()) {
+        gameBoy.step(&audio);
+    }
+    uint8_t playSound = this->gameBoy.isReadyToPlaySound();
+    if(playSound) {
+        updateSound(playSound);
+    }
+}
+void Application::stepEmulation() {
+    if(settings->emulationSpeedMultiplier==1){
+        gameBoyStep();
+    }else if(settings->emulationSpeedMultiplier <1){
+        stepSlowly();
+    }else{
+        stepFast();
+    }
+}
+
+void Application::renderEmulation() {
+    renderView.setScreenTexture(gameBoy.getScreenTexture().get());
+    renderView.render();
+    if(gameBoy.isReadyToDraw()) {
+        gameBoy.confirmDraw();
+    }
 }
