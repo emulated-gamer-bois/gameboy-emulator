@@ -106,7 +106,6 @@ void PPU::reset() {
 
     frameBuffer.fill(0);
     bgWindowColorIndexesThisLine.fill(0);
-    spritesNextScanLine.clear();
 }
 
 void PPU::update(uint16_t cpuCycles) {
@@ -247,20 +246,24 @@ void PPU::drawWindowScanLine() {
 }
 
 void PPU::drawObjectScanLine() {
-    for (int x = 0; x < LCD_WIDTH; ++x) {
-        //Only the highest priority sprite determines the color of the current pixel
-        std::shared_ptr<Sprite> highestPriority = getHighestPrioritySprite(x);
-        if (highestPriority != nullptr) {
-            //highestPriority->print();
-            uint8_t colorIndex = getSpritePixelColorIndex(highestPriority, x, LY);
-            if (colorIndex != 0) { //Color index 0 is transparent
-                uint8_t pixel;
-                if (highestPriority->getPaletteNumber()) {
-                    pixel = getColor(OBP1, colorIndex);
-                } else {
-                    pixel = getColor(OBP0, colorIndex);
+    while (!spritesNextScanLine.empty()) {
+        auto sprite = spritesNextScanLine.top();
+        spritesNextScanLine.pop();
+        for (int x = sprite.getX(); x < sprite.getX() + 8; ++x) {
+            //If the sprite should be behind the background and the background is not color 0, don't display the pixel
+            if ((sprite.backgroundOverSprite()) && (bgWindowColorIndexesThisLine[x] != 0)) { //TODO should this be color index 0 or color 0?
+                frameBuffer[LY * LCD_WIDTH + x] = getColor(BGP, bgWindowColorIndexesThisLine[x]);
+            } else {
+                uint8_t colorIndex = getSpritePixelColorIndex(sprite, x, LY);
+                if (colorIndex != 0) { //Color index 0 is transparent
+                    uint8_t pixel;
+                    if (sprite.getPaletteNumber()) {
+                        pixel = getColor(OBP1, colorIndex);
+                    } else {
+                        pixel = getColor(OBP0, colorIndex);
+                    }
+                    frameBuffer[LY * LCD_WIDTH + x] = pixel;
                 }
-                frameBuffer[LY * LCD_WIDTH + x] = pixel;
             }
         }
     }
@@ -269,45 +272,28 @@ void PPU::drawObjectScanLine() {
 void PPU::loadSpritesNextScanLine() {
     //Loads the ten first sprites in OAM that appear on the current scanline.
     //There are a maximum of 40 sprites total and 10 sprites per scanline.
-    spritesNextScanLine.clear();
     for (int i = 0; i < 40 && spritesNextScanLine.size() < 10; ++i) {
-        std::shared_ptr<Sprite> sprite = loadSprite(i);
-        if (sprite->coversLine(LY, objectSize)) {
-            spritesNextScanLine.push_back(sprite);
+        Sprite sprite = loadSprite(i);
+        if (sprite.coversLine(LY, objectSize)) {
+            spritesNextScanLine.push(sprite);
         }
     }
 }
 
-std::shared_ptr<Sprite> PPU::loadSprite(int index) {
+Sprite PPU::loadSprite(uint8_t index) {
     uint16_t startAddress = OAM_START + index * 4; //Each sprite occupies four bytes
     uint8_t yByte = memory->read(startAddress);
     uint8_t xByte = memory->read(startAddress + 1);
     uint8_t tileIndex = memory->read(startAddress + 2);
     uint8_t flags = memory->read(startAddress + 3);
-    return std::make_shared<Sprite>(yByte, xByte, tileIndex, flags);
+    return {yByte, xByte, tileIndex, flags, index};
 }
 
-std::shared_ptr<Sprite> PPU::getHighestPrioritySprite(int lcdX) {
-    //Priority is determined first by x-position, then by order in the OAM
-    std::shared_ptr<Sprite> highestPriority = nullptr;
-    for (const auto &current : spritesNextScanLine) {
-        if (current->containsX(lcdX)) {
-            if (current->hasHigherPriorityThan(highestPriority)) {
-                highestPriority = current;
-            }
-        }
-    }
-    return highestPriority;
-}
 
-uint8_t PPU::getSpritePixelColorIndex(const std::shared_ptr<Sprite>& sprite, uint8_t lcdX, uint8_t lcdY) {
-    //If the sprite should be behind the background and the background is not color 0, don't display the pixel
-    if ((sprite->backgroundOverSprite()) && (bgWindowColorIndexesThisLine[lcdX] != 0)) { //TODO should this be color index 0 or color 0?
-        return 0;
-    }
-    uint8_t tileID = sprite->getTileID(lcdY);
-    uint8_t tileX = sprite->getTileX(lcdX);
-    uint8_t tileY = sprite->getTileY(lcdY);
+uint8_t PPU::getSpritePixelColorIndex(Sprite & sprite, uint8_t lcdX, uint8_t lcdY) {
+    uint8_t tileID = sprite.getTileID(lcdY);
+    uint8_t tileX = sprite.getTileX(lcdX);
+    uint8_t tileY = sprite.getTileY(lcdY);
     return getTilePixelColorIndex(1, tileID, tileX, tileY); //Sprites always use tile set 1
 }
 

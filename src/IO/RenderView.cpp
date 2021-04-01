@@ -31,6 +31,7 @@ void RenderView::initGL() {
                                                              "../src/shaders/palette.frag",
                                                              false);
     fxShaderProgram = 0; // TODO Implement post process fx
+    glGenTextures(1, &screenTexture);
 }
 
 void RenderView::render() const {
@@ -61,7 +62,6 @@ void RenderView::clear() const {
 }
 
 void RenderView::setScreenTexture(uint8_t textureData[]) {
-    glGenTextures(1, &screenTexture);
     glBindTexture(GL_TEXTURE_2D, screenTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

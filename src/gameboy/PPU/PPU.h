@@ -7,6 +7,7 @@
 #include <memory> // smart pointers
 #include <cstdint> // uint8_t and uint16_t
 #include <array> // frame buffer
+#include <queue>
 
 #include "../Definitions.h" // LCD_WIDTH and LCD_HEIGHT
 #include "../MMU/MMU.h"
@@ -112,8 +113,9 @@ private:
 
     //The color indexes of the background and window this scanline. Used to determine priority of sprites
     std::array<uint8_t, LCD_WIDTH> bgWindowColorIndexesThisLine;
-    std::vector<std::shared_ptr<Sprite>> spritesNextScanLine;
+    std::priority_queue<Sprite> spritesNextScanLine;
     std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> frameBuffer;
+
 
     bool readyToDraw;
     bool anyStatConditionLastUpdate;
@@ -126,9 +128,8 @@ private:
 
     //Sprite methods
     void loadSpritesNextScanLine();
-    std::shared_ptr<Sprite> loadSprite(int index);
-    std::shared_ptr<Sprite> getHighestPrioritySprite(int lcdX);
-    uint8_t getSpritePixelColorIndex(const std::shared_ptr<Sprite>& sprite, uint8_t lcdX, uint8_t lcdY);
+    Sprite loadSprite(uint8_t index);
+    uint8_t getSpritePixelColorIndex(Sprite & sprite, uint8_t lcdX, uint8_t lcdY);
 
     // Parsing methods
     uint8_t getTileID(uint16_t mapStart, uint8_t pixelAbsoluteX, uint8_t pixelAbsoluteY);
