@@ -24,7 +24,7 @@ void Application::start() {
     init();
     float frameTime = 1000.f / LCD_REFRESH_RATE;
     AppTimer timer;
-    uint8_t ready;
+    uint8_t playSound;
     while (state != State::TERMINATION) {
         // Create time stamp.
         timer.tick();
@@ -46,9 +46,9 @@ void Application::start() {
                 while (!gameBoy.isReadyToDraw()) {
                     gameBoy.step(&audio);
 
-                    ready = this->gameBoy.isReadyToPlaySound();
-                    if(ready) {
-                        updateSound(ready);
+                    playSound = this->gameBoy.isReadyToPlaySound();
+                    if(playSound) {
+                        updateSound(playSound);
                     }
                 }
             }

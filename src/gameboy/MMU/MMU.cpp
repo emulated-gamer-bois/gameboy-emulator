@@ -3,7 +3,7 @@
 //
 
 #include "MMU.h"
-#include "../../IO/Joypad.h"
+#include "../Joypad.h"
 #include "Timer.h"
 #include "../PPU/PPU.h"
 

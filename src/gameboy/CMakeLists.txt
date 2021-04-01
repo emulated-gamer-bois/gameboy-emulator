@@ -15,8 +15,8 @@ add_library( ${PROJECT_NAME}
         PPU/Sprite.h
         MMU/Timer.h
         MMU/Timer.cpp
-        ../IO/Joypad.h
-        ../IO/Joypad.cpp
+        Joypad.h
+        Joypad.cpp
         MMU/Cartridge.h
         MMU/Cartridge.cpp
         MMU/MBC.h

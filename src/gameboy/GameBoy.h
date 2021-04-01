@@ -9,7 +9,7 @@
 #include "CPU/CPU.h"
 #include "MMU/MMU.h"
 #include "PPU/PPU.h"
-#include "../IO/Joypad.h"
+#include "Joypad.h"
 #include "MMU/Timer.h"
 #include "MMU/Cartridge.h"
 

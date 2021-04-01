@@ -5,9 +5,9 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "../src/gameboy/MMU.h"
+#include "../src/gameboy/MMU/MMU.h"
 #include "../src/gameboy/Joypad.h"
-#include "../src/gameboy/Timer.h"
+#include "../src/gameboy/MMU/Timer.h"
 
 TEST(MMU, read_write){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();

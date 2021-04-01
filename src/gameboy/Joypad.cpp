@@ -3,9 +3,9 @@
 //
 
 #include "Joypad.h"
-#include "../gameboy/MMU/MMU.h"
+#include "MMU/MMU.h"
 #include <iostream>
-#include "../gameboy/Definitions.h"
+#include "Definitions.h"
 
 Joypad::Joypad(std::shared_ptr<MMU> mmu) {
     this->mmu = mmu;
