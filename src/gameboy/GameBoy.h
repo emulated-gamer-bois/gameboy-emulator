@@ -6,12 +6,12 @@
 
 #include <memory>
 
-#include "CPU.h"
-#include "MMU.h"
+#include "CPU/CPU.h"
+#include "MMU/MMU.h"
 #include "PPU/PPU.h"
-#include "Joypad.h"
-#include "Timer.h"
-#include "Cartridge.h"
+#include "../IO/Joypad.h"
+#include "MMU/Timer.h"
+#include "MMU/Cartridge.h"
 
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test

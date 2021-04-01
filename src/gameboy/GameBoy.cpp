@@ -25,6 +25,13 @@ void GameBoy::step(IVolumeController *vc)
     {
         return;
     }
+    if(cpu->getStop()){
+        if(mmu->read(JOYPAD) & mmu->read(INTERRUPT_ENABLE)){
+            cpu->return_from_stop();
+        }
+        return;
+    }
+
 
     int cycles = this->cpu->update();
     ppu->update(cycles);
