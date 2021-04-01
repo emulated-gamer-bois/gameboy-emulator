@@ -54,7 +54,6 @@ void RenderView::render() const {
     glBindVertexArray(vertexArrayObject);
     glDrawArrays(GL_TRIANGLES, 0, VERTEX_AMOUNT);
     glBindVertexArray(0);
-    glDeleteTextures(1, &screenTexture);
 }
 
 void RenderView::clear() const {
