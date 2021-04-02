@@ -242,11 +242,7 @@ void Gui::displayPlaySpeed(){
             std::stringstream ss;
             ss << speed << 'x';
             if (ImGui::MenuItem(ss.str().c_str())) {
-                if (speed < 1) {
-                    std::cerr << "Gui Error: Slower speeds not implemented yet." << std::endl;
-                } else {
                     settings->emulationSpeedMultiplier = speed;
-                }
             }
 
             speed = speed * 2;

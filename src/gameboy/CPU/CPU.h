@@ -9,9 +9,9 @@
 #include <memory>
 #include <cstdint>
 #include "RegisterPair.h"
-#include "MMU.h"
+#include "../MMU/MMU.h"
 #include "Flags.h"
-#include "Definitions.h"
+#include "../Definitions.h"
 
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test

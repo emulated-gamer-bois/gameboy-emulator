@@ -40,7 +40,7 @@ private:
     Gui gui = Gui(settings);
 
     float savedEmulationSpeed;
-
+    int framesUntilStep{0};
     void init();
     void initSDL();
     void terminateSDL();
@@ -50,4 +50,14 @@ private:
     void terminate();
     void initSettings();
     void updateSound(uint8_t ready);
+
+    void stepFast();
+
+    void gameBoyStep();
+
+    void stepSlowly();
+
+    void stepEmulation();
+
+    void renderEmulation();
 };

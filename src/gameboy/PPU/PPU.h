@@ -10,7 +10,7 @@
 #include <queue>
 
 #include "../Definitions.h" // LCD_WIDTH and LCD_HEIGHT
-#include "../MMU.h"
+#include "../MMU/MMU.h"
 #include "Sprite.h"
 
 // Register addresses
