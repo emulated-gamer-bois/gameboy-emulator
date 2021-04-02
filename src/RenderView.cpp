@@ -1,4 +1,5 @@
 #include "RenderView.h" // implements
+#include <fstream>
 
 using namespace glm;
 
@@ -31,9 +32,8 @@ void RenderView::initGL() {
 
     // Initialize shader programs, if renderShaderProgram is 0, the shader program could not
     // be loaded.
-    renderShaderProgram = labhelper::loadShaderProgram("../src/shaders/palette.vert",
-                                                             "../src/shaders/palette.frag",
-                                                             false);
+    renderShaderProgram = loadShaderProgram("../src/shaders/palette.vert",
+                                            "../src/shaders/palette.frag");
     fxShaderProgram = 0; // TODO Implement post process fx
 }
 
@@ -101,4 +101,88 @@ int RenderView::getWidth() const {
 
 int RenderView::getHeight() const {
     return LCD_HEIGHT * screenMultiplier;
+}
+
+GLuint RenderView::loadShaderProgram(const std::string& vertexShader, const std::string& fragmentShader) {
+    // Create shader objects.
+    GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
+    GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    // Load shader source codes.
+    std::ifstream vsFile(vertexShader);
+    std::string vsSrc((std::istreambuf_iterator<char>(vsFile)), std::istreambuf_iterator<char>());
+
+    std::ifstream fsFile(fragmentShader);
+    std::string fsSrc((std::istreambuf_iterator<char>(fsFile)), std::istreambuf_iterator<char>());
+
+    // Set vertex shader and fragment shader source code.
+    const char* vsTemp = vsSrc.c_str();
+    const char* fsTemp = fsSrc.c_str();
+    glShaderSource(vertShader, 1, &vsTemp, nullptr);
+    glShaderSource(fragShader, 1, &fsTemp, nullptr);
+
+    // For shader compilation error handling.
+    GLint compiled = 0;
+
+    // Compile vertex shader.
+    glCompileShader(vertShader);
+    glGetShaderiv(vertShader, GL_COMPILE_STATUS, &compiled);
+    if (!compiled) { FATAL_ERROR(getShaderErrorLog(vertShader)); }
+
+    // Compile fragment shader.
+    glCompileShader(fragShader);
+    glGetShaderiv(fragShader, GL_COMPILE_STATUS, &compiled);
+    if (!compiled) { FATAL_ERROR(getShaderErrorLog(fragShader)); }
+
+    // Create shader program and attach shaders.
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertShader);
+    glDeleteShader(vertShader);
+    glAttachShader(shaderProgram, fragShader);
+    glDeleteShader(fragShader);
+    // Error checking here
+
+    // For shader linking error handling.
+    GLint linked = 0;
+
+    // Link here
+    glLinkProgram(shaderProgram);
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &linked);
+    if (!linked) { FATAL_ERROR(getProgramErrorLog(shaderProgram)); }
+
+    return shaderProgram;
+}
+
+void RenderView::glError() {
+
+}
+
+const std::string RenderView::getShaderErrorLog(GLuint shader) const {
+    int logLength = 0;
+    int charsWritten = 0;
+
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+
+    auto log = std::make_unique<char[]>(logLength);
+    if(logLength > 0) {
+        glGetShaderInfoLog(shader, logLength, &charsWritten, log.get());
+    }
+
+    std::string strLog = log.get();
+    return strLog;
+}
+
+const std::string RenderView::getProgramErrorLog(GLuint program) const {
+    int logLength = 0;
+    int charsWritten = 0;
+
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+
+    auto log = std::make_unique<char[]>(logLength);
+    if(logLength > 0) {
+        glGetProgramInfoLog(program, logLength, &charsWritten, log.get());
+    }
+
+    std::string strLog = log.get();
+    return strLog;
 }

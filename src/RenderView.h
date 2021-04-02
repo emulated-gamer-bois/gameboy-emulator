@@ -8,8 +8,11 @@
 #pragma once
 
 #include <labhelper.h> // includes glew.h and glm.hpp
+#include <iostream>
+#include <memory>
 
 #include "Palette.h"
+#include "ErrorReport.h"
 #include "gameboy/Definitions.h"
 
 class RenderView {
@@ -36,4 +39,9 @@ private:
     GLuint renderShaderProgram;
     GLuint fxShaderProgram;
     Palette palette;
+
+    GLuint loadShaderProgram(const std::string& vertexShader, const std::string& fragmentShader);
+    void glError();
+    [[nodiscard]] const std::string getShaderErrorLog(GLuint shader) const;
+    [[nodiscard]] const std::string getProgramErrorLog(GLuint program) const;
 };

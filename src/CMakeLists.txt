@@ -31,7 +31,9 @@ if(NOT TRAVIS)
         Gui.h
         Keybinds.cpp
         Keybinds.h
-        AppSettings.h)
+        AppSettings.h
+        ErrorReport.h
+            )
 
     target_link_libraries ( ${PROJECT_NAME} labhelper gameboy )
     config_build_output()
