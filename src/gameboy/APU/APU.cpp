@@ -109,6 +109,22 @@ void APU::write(uint16_t address, uint8_t data) {
                 trigger_event(2);
             }
             return;
+        case NR41_ADDRESS:
+            this->NR41 = data;
+            return;
+        case NR42_ADDRESS:
+            this->NR42 = data;
+            return;
+        case NR43_ADDRESS:
+            this->NR43 = data;
+            return;
+        case NR44_ADDRESS:
+            this->NR44 = data;
+            // If trigger bit is set
+            if(this->NR44 & 0x80) {
+                trigger_event(3);
+            }
+            return;
         case NR50_ADDRESS:
             this->NR50 = data;
             return;
@@ -165,7 +181,7 @@ void APU::trigger_event(uint8_t source) {
         - Frequency timer is reloaded with period.
     - Done - Volume envelope timer is reloaded with period.
     - Done - Channel volume is reloaded from NRx2.
-    - Pass - Noise channel's LFSR bits are all set to 1.
+    - Done-ish (done in audio controller) - Noise channel's LFSR bits are all set to 1.
     - Pass - Wave channel's position is set to 0 but sample buffer is NOT refilled.
     - Pass - Square 1's sweep does several things (see frequency sweep).
      */
@@ -190,6 +206,11 @@ void APU::trigger_event(uint8_t source) {
             length_counter_wave = this->NR31 ? this->NR11 : 0x100;
             this->readyToPlay |= 4;
             break;
+        case 3:
+            //If length counter is zero, it is set to 64
+            length_counter_noise = this->NR41 & 0x3F ? this->NR41 & 0x3F : 0x40;
+            this->period_envelope_noise = this->NR42 & 0x7;
+            volume_envelope_noise = (this->NR42 >> 4) & 0xF;
     }
 }
 
@@ -212,6 +233,13 @@ void APU::length_step() {
         if(!--this->length_counter_wave) {
             this->NR34 &= 0x7F;
             readyToPlay |= 4;
+        }
+    }
+
+    if((this->NR44 & 0x40) && length_counter_noise) {
+        if(!--this->length_counter_noise) {
+            this->NR44 &= 0x7F;
+            readyToPlay |= 8;
         }
     }
 }
@@ -241,6 +269,19 @@ void APU::vol_envelope_step(IVolumeController* vc) {
             volume_envelope_b--;
         }
         vc->setVolume(1, (float)volume_envelope_b/15.0f);
+    }
+
+    if((this->NR42 & 0x7) && !--this->period_envelope_noise) {
+        this->period_envelope_noise = this->NR42 & 0x7;
+        //If in increment mode and envelope can be incremented
+        if((this->NR42 & 8) && (volume_envelope_noise < 15)) {
+            volume_envelope_noise++;
+        }
+        //If in decrement mode and envelope can be decremented
+        if(!(this->NR42 & 8) && volume_envelope_noise) {
+            volume_envelope_noise--;
+        }
+        vc->setVolume(3, (float)volume_envelope_noise/15.0f);
     }
 }
 
@@ -293,5 +334,10 @@ APUState* APU::getAPUState() {
         wavePatternRAM,
         (uint16_t)((((uint16_t)(this->NR34 & 0x7)) << 8) + this->NR33),
         WAVE_VOLUMES[(this->NR32 >> 5) & 0x3],
+
+        (bool)(this->NR34 & 0x80),
+        ((262144*2) / NOISE_DIVISOR[this->NR43 & 0x07]),
+        (float)volume_envelope_noise/15.0f,
+        (bool)(this->NR43 & 8)
     };
 }

@@ -256,6 +256,14 @@ void Application::updateSound(uint8_t ready) {
             }
         }
 
+        //Noise
+        if(ready & 8) {
+            this->audio.stopSource(3);
+            if(state->enable_noise) {
+                this->audio.playNoise(3, state->is_7_bit_mode, state->frequency_noise, state->volume_noise);
+            }
+        }
+
         gameBoy.confirmPlay();
         delete state;
 }
