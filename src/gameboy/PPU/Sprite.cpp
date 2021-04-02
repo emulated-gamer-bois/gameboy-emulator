@@ -14,13 +14,12 @@ Sprite::Sprite(uint8_t y, uint8_t x, uint8_t tileIndex, uint8_t flags, uint8_t p
 
 bool Sprite::coversLine(uint8_t line, unsigned int objectSize) const {
     uint8_t min = getY();
-    uint8_t max;
+    uint8_t distance = line - min;
     if (objectSize) {
-        max = min + 16;
+        return distance < 16;
     } else {
-        max = min + 8;
+        return distance < 8;
     }
-    return min <= line && line < max;
 }
 
 
@@ -71,12 +70,12 @@ void Sprite::print() const {
               << (int) this->flags << std::endl;
 }
 
-uint8_t Sprite::getX() const {
-    return this->x - 8;
+int Sprite::getX() const {
+    return (int)this->x - 8;
 }
 
-uint8_t Sprite::getY() const {
-    return this->y - 16;
+int Sprite::getY() const {
+    return (int)(this->y) - 16;
 }
 
 bool operator<(const Sprite &lhs, const Sprite &rhs) {

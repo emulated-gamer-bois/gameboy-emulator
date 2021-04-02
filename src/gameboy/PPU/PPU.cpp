@@ -250,6 +250,9 @@ void PPU::drawObjectScanLine() {
         auto sprite = spritesNextScanLine.top();
         spritesNextScanLine.pop();
         for (int x = sprite.getX(); x < sprite.getX() + 8; ++x) {
+            if (x < 0 || x >= 160) {
+                continue;
+            }
             //If the sprite should be behind the background and the background is not color 0, don't display the pixel
             if ((sprite.backgroundOverSprite()) && (bgWindowColorIndexesThisLine[x] != 0)) { //TODO should this be color index 0 or color 0?
                 frameBuffer[LY * LCD_WIDTH + x] = getColor(BGP, bgWindowColorIndexesThisLine[x]);
