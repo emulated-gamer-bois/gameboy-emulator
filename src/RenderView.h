@@ -7,7 +7,8 @@
 
 #pragma once
 
-#include <labhelper.h> // includes glew.h and glm.hpp
+#include <GL/glew.h>
+#include <glm/glm.hpp>
 #include <iostream>
 #include <memory>
 
