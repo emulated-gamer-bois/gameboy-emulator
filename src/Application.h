@@ -14,6 +14,7 @@
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
 #include "IO/AudioController.h"
+#include "helpers/ErrorReport.h"
 #include "imgui.h"
 #include "AppSettings.h"
 #include "Gui.h"

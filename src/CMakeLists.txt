@@ -23,8 +23,8 @@ if(NOT TRAVIS)
         ${SHADERS}
         Application.h
         Application.cpp
-        AppTimer.h
-        AppTimer.cpp
+            helpers/AppTimer.h
+            helpers/AppTimer.cpp
         FileExplorer.h
         FileExplorer.cpp
         Gui.cpp
@@ -32,7 +32,7 @@ if(NOT TRAVIS)
         Keybinds.cpp
         Keybinds.h
         AppSettings.h
-        ErrorReport.h
+            helpers/ErrorReport.h
             )
 
     target_link_libraries ( ${PROJECT_NAME} gameboy IO )

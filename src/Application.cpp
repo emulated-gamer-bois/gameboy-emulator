@@ -6,7 +6,7 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 */
 
 #include "Application.h"
-#include "AppTimer.h"
+#include "helpers/AppTimer.h"
 
 /**
  * Constructor
@@ -91,7 +91,9 @@ void Application::terminate() {
  */
 void Application::initSDL() {
     // Initialize SDL and check if SDL could be initialize.
-    assert(SDL_Init(SDL_INIT_VIDEO) >= 0);
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        FATAL_ERROR("SDL failed to initialize");
+    }
     atexit(SDL_Quit);
     SDL_GL_LoadLibrary(nullptr); // Load the default OpenGL library
 
@@ -110,11 +112,11 @@ void Application::initSDL() {
                               LCD_WIDTH,
                               LCD_HEIGHT,
                               SDL_WINDOW_OPENGL);
-    assert(window);
+    if (!window) { FATAL_ERROR("Failed to create SDL window."); }
 
     // Get gl context and set it to the current context for this window.
     glContext = SDL_GL_CreateContext(window);
-    assert(glContext);
+    if (!glContext) { FATAL_ERROR("Failed to create GL context."); }
 
     // Don't know if this is needed.
     glewInit();
