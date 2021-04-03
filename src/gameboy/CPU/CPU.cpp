@@ -3,10 +3,10 @@
 //
 
 #include "CPU.h"
-#include "MMU.h"
+#include "../MMU/MMU.h"
 #include <iostream> // cpu_dump
 #include <iomanip> // cpu_dump
-#include "Definitions.h"
+#include "../Definitions.h"
 
 uint16_t combine_bytes(uint8_t first_byte, uint8_t second_byte);
 

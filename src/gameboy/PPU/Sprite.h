@@ -11,6 +11,7 @@ class Sprite {
     uint8_t x;
     uint8_t y;
     uint8_t tileIndex;
+    uint8_t positionInOAM;
 
     union {
         struct {
@@ -24,12 +25,12 @@ class Sprite {
     };
 
 public:
-    Sprite(uint8_t y, uint8_t x, uint8_t tileIndex, uint8_t flags);
+    Sprite(uint8_t y, uint8_t x, uint8_t tileIndex, uint8_t flags, uint8_t positionInOAM);
 
     bool coversLine(uint8_t line, unsigned int objectSize) const;
-    bool containsX(uint8_t lcdX) const;
-    bool hasHigherPriorityThan(const std::shared_ptr<Sprite>& other) const;
 
+    int getX() const;
+    int getY() const;
     uint8_t getTileID(uint8_t lcdY) const;
     uint8_t getTileX(uint8_t lcdX) const;
     uint8_t getTileY(uint8_t lcdY) const;
@@ -37,4 +38,7 @@ public:
     bool backgroundOverSprite() const;
 
     void print() const;
+
+    friend bool operator <(const Sprite & lhs, const Sprite & rhs);
+    bool hasHigherPriorityThan(const Sprite &other) const;
 };

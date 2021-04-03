@@ -4,44 +4,42 @@
 
 #include "Sprite.h"
 
-Sprite::Sprite(uint8_t y, uint8_t x, uint8_t tileIndex, uint8_t flags) {
+Sprite::Sprite(uint8_t y, uint8_t x, uint8_t tileIndex, uint8_t flags, uint8_t positionInOAM) {
     this->x = x;
     this->y = y;
     this->tileIndex = tileIndex;
     this->flags = flags;
+    this->positionInOAM = positionInOAM;
 }
 
 bool Sprite::coversLine(uint8_t line, unsigned int objectSize) const {
-    uint8_t min = this->y - 16;
-    uint8_t max;
+    uint8_t min = getY();
+    uint8_t distance = line - min;
     if (objectSize) {
-        max = min + 16;
+        return distance < 16;
     } else {
-        max = min + 8;
+        return distance < 8;
     }
-    return min <= line && line < max;
 }
 
-bool Sprite::containsX(uint8_t lcdX) const {
-    return lcdX >= (this->x - 8) && lcdX < this->x;
-}
 
-bool Sprite::hasHigherPriorityThan(const std::shared_ptr<Sprite>& other) const {
-    if (other == nullptr) {
-        return true;
+bool Sprite::hasHigherPriorityThan(const Sprite &other) const {
+    if (this->x != other.x) {
+        return this->x < other.x;
     }
-    return this->x < other->x;
+    return this->positionInOAM < other.positionInOAM;
 }
 
 uint8_t Sprite::getTileID(uint8_t lcdY) const {
-    if (lcdY - (this->y - 16) < 8) {
+    uint8_t tileY = lcdY - getY();
+    if ((tileY < 8 && !yFlip) || (tileY >= 8 && yFlip)) {
         return tileIndex;
     }
     return tileIndex + 1;
 }
 
 uint8_t Sprite::getTileX(uint8_t lcdX) const {
-    uint8_t tileX = lcdX - (this->x - 8);
+    uint8_t tileX = lcdX - getX();
     if (xFlip) {
         return 7 - tileX;
     }
@@ -49,14 +47,14 @@ uint8_t Sprite::getTileX(uint8_t lcdX) const {
 }
 
 uint8_t Sprite::getTileY(uint8_t lcdY) const {
-    uint8_t spriteY = lcdY - (this->y - 16);
-    if (spriteY >= 8) {
-        spriteY = spriteY - 8;
+    uint8_t tileY = lcdY - getY(); //Between 0-15
+    if (tileY >= 8) {
+        tileY = tileY - 8;
     }
     if (yFlip) {
-        spriteY = 7 - spriteY;
+        tileY = 7 - tileY;
     }
-    return spriteY;
+    return tileY;
 }
 
 uint8_t Sprite::getPaletteNumber() const {
@@ -68,5 +66,20 @@ bool Sprite::backgroundOverSprite() const {
 }
 
 void Sprite::print() const {
-    std::cout << "X: " << (int)this->x << " Y: " << (int)this->y << " Tile: " << (int)tileIndex << " Flags: " << (int)this->flags << std::endl;
+    std::cout << "X: " << (int) this->x << " Y: " << (int) this->y << " Tile: " << (int) tileIndex << " Flags: "
+              << (int) this->flags << std::endl;
 }
+
+int Sprite::getX() const {
+    return (int)this->x - 8;
+}
+
+int Sprite::getY() const {
+    return (int)(this->y) - 16;
+}
+
+bool operator<(const Sprite &lhs, const Sprite &rhs) {
+    return lhs.hasHigherPriorityThan(rhs);
+}
+
+

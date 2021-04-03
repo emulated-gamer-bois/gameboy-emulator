@@ -7,22 +7,22 @@ add_subdirectory( gameboy )
 # Excludes graphics code if tests are run in travis
 if(NOT TRAVIS)
     # Find *all* shaders.
-    file(GLOB_RECURSE SHADERS
-        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert"
-        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.frag"
+    file(GLOB_RECURSE shaders
+        "shaders/*.vert"
+        "shaders/*.frag"
     )
+
     # Separate filter for shaders.
-    source_group("Shaders" FILES ${SHADERS})
+    source_group("shaders" FILES ${SHADERS})
+
+    add_subdirectory( IO )
 
     # Build and link executable.
     add_executable ( ${PROJECT_NAME}
         main.cpp
         ${SHADERS}
-        RenderView.h
-        RenderView.cpp
         Application.h
         Application.cpp
-        Palette.h
         AppTimer.h
         AppTimer.cpp
         FileExplorer.h
@@ -35,6 +35,6 @@ if(NOT TRAVIS)
         ErrorReport.h
             )
 
-    target_link_libraries ( ${PROJECT_NAME} labhelper gameboy )
+    target_link_libraries ( ${PROJECT_NAME} gameboy IO )
     config_build_output()
 endif()

@@ -10,11 +10,12 @@
 #include <string>
 #include <chrono> // time
 #include <thread> // sleep
-#include "imgui.h"
-#include "AppSettings.h"
-#include "RenderView.h"
+#include "IO/RenderView.h"
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
+#include "IO/AudioController.h"
+#include "imgui.h"
+#include "AppSettings.h"
 #include "Gui.h"
 #include "Keybinds.h"
 
@@ -30,15 +31,16 @@ private:
         TERMINATION
     } state;
 
-    AppSettings settings;
+    std::shared_ptr<AppSettings> settings{std::make_shared<AppSettings>()};
     SDL_Window* window;
     SDL_GLContext glContext;
     RenderView renderView;
+    AudioController audio;
     GameBoy gameBoy;
-    Gui gui = Gui(&settings);
+    Gui gui = Gui(settings);
 
     float savedEmulationSpeed;
-
+    int framesUntilStep{0};
     void init();
     void initSDL();
     void terminateSDL();
@@ -48,5 +50,15 @@ private:
     void updateSDLWindowSize();
     void terminate();
     void initSettings();
+    void updateSound(uint8_t ready);
 
+    void stepFast();
+
+    void gameBoyStep();
+
+    void stepSlowly();
+
+    void stepEmulation();
+
+    void renderEmulation();
 };

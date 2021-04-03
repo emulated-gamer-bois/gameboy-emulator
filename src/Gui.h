@@ -15,7 +15,7 @@
 
 class Gui {
 public:
-    Gui(AppSettings* settings);
+    Gui(std::shared_ptr<AppSettings> settings);
     void init(SDL_Window *window, SDL_GLContext *glContext,char *glsl_version);
     void handleGui(SDL_Window *window);
     void handleInput(SDL_Event event);
@@ -33,7 +33,7 @@ private:
     const int indentSpace = 20;
     const int windowFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse;
 
-    AppSettings* settings;
+    std::shared_ptr<AppSettings> settings;
     bool displayEditControls;
     bool displayFileDialog;
     bool displayToolbar;

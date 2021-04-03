@@ -34,7 +34,8 @@ void Cartridge::write_TEST(uint16_t addr, uint8_t data) {
     this->rom.at(addr) = data;
 }
 
-bool Cartridge::load_rom(const std::string& filepath) {
+bool Cartridge::load_rom(const std::string& filepath, bool load_ram_from_file) {
+    this->filepath = filepath;
     std::streampos size;
 
     std::ifstream file (filepath, std::ios::in|std::ios::binary|std::ios::ate);
@@ -56,7 +57,7 @@ bool Cartridge::load_rom(const std::string& filepath) {
         if (!this->init_rom()) return false;
 
         this->ram_size = memblock[0x149];
-        if (!this->init_ram()) return false;
+        if (!this->init_ram(load_ram_from_file)) return false;
 
         // Check cartridge type
         this->cartridge_type = memblock[0x147];
@@ -65,11 +66,65 @@ bool Cartridge::load_rom(const std::string& filepath) {
         // Copy data
         std::memcpy(&this->rom.at(this->rom.size() - size), &memblock[0], size);
 
-        this->filepath = filepath;
         return true;
     }
     else {
         std::cout << "Unable to open game ROM: " << filepath << std::endl;
+        return false;
+    }
+}
+
+bool Cartridge::save_ram() {
+    // Return if Cartridge have no RAM
+    if (this->ram_size == Cartridge::RAM_NO_RAM) {
+        return true;
+    }
+    // Create file
+    std::ofstream wfile (this->filepath + ".sav", std::ios::out|std::ios::binary|std::ios::ate);
+    if(!wfile) {
+        std::cout << "Cannot open file!" << std::endl;
+        return false;
+    }
+    // Write to file
+    wfile.write(reinterpret_cast<const char *>(this->ram.data()), this->ram.size());
+    wfile.close();
+
+    if(!wfile.good()) {
+        std::cout << "Error occurred at writing time!" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+bool Cartridge::load_ram() {
+    // Return if Cartridge should not have RAM
+    if (this->ram_size == Cartridge::RAM_NO_RAM) {
+        return true;
+    }
+
+    std::streampos size;
+    std::ifstream rfile (filepath + ".sav", std::ios::in|std::ios::binary|std::ios::ate);
+    if (rfile.is_open())
+    {
+        // Get file size
+        size = rfile.tellg();
+
+        if (size != this->ram.size()) {
+            std::cout << "Savefile: " << filepath + ".sav" << " has wrong file size" << std::endl;
+            return false;
+        }
+
+        // Move seeker to beginning of file
+        rfile.seekg (0, std::ios::beg);
+        // Read file to this->ram
+        rfile.read (reinterpret_cast<char *>(this->ram.data()), size);
+        // Close file
+        rfile.close();
+
+        return true;
+    }
+    else {
+        std::cout << "Unable to open file: " << filepath << std::endl;
         return false;
     }
 }
@@ -113,11 +168,11 @@ bool Cartridge::init_rom() {
     return true;
 }
 
-bool Cartridge::init_ram() {
+bool Cartridge::init_ram(bool load_from_file) {
     switch (this->ram_size)
     {
         case RAM_NO_RAM:
-            // Should be just a nullptr, but for security add accessible memory
+            // Should be empty ram, but for security add accessible memory
         case RAM_8KB:
             this->ram = std::vector<uint8_t>(0x2000);
             break;
@@ -134,6 +189,13 @@ bool Cartridge::init_ram() {
         default:
             std::cout << "Invalid or unsupported RAM size: "<< (int)this->ram_size << std::endl;
             return false;
+    }
+    if (load_from_file) {
+        if (!this->load_ram()) {
+            std::cout << "Could not load extended RAM from file!" << std::endl;
+        } else {
+            std::cout << "Extended RAM loaded from file!" << std::endl;
+        }
     }
     std::cout << "RAM size: "<< (int)this->ram_size << std::endl;
     return true;

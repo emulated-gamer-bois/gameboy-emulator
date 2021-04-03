@@ -18,7 +18,10 @@ public:
     void write(uint16_t addr, uint8_t data);
 
     void write_TEST(uint16_t addr, uint8_t data);
-    bool load_rom(const std::string& filepath);
+    bool load_rom(const std::string& filepath, bool load_ram_from_file=false);
+
+    bool save_ram();
+    bool load_ram();
 
     // For cartridges with timer
     void update(uint8_t cycles);
@@ -66,6 +69,6 @@ private:
     std::string filepath;
 
     bool init_rom();
-    bool init_ram();
+    bool init_ram(bool load_from_ram=false);
     bool init_mbc();
 };

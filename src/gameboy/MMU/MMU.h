@@ -5,12 +5,14 @@
 #pragma once
 
 #include "Cartridge.h"
+#include "../APU/APU.h"
 #include <cstdint>
 #include <array> // array
 #include <string> // string
 
 // Forward declaration
 class PPU;
+class APU;
 class Timer;
 class Joypad;
 
@@ -28,8 +30,12 @@ friend class test_case_name##_##test_name##_Test
 #define xRAM_END                0xbfff
 #define WRAM_START              0xc000
 #define WRAM_END                0xdfff
+#define ECHO_RAM_START          0xe000
+#define ECHO_RAM_END            0xfdff
 #define OAM_START               0xfe00
 #define OAM_END                 0xfe9f
+#define PROHIBITED_START        0xfea0
+#define PROHIBITED_END          0xfeff
 #define IO_START                0xff00
 #define IO_END                  0xff7f
 #define HRAM_START              0xff80
@@ -60,7 +66,7 @@ public:
     void raise_interrupt_flag(uint8_t bitmask);
     void clear_interrupt_flag(uint8_t bitmask);
 
-    void link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer, std::shared_ptr<Cartridge> cartridge);
+    void link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<APU> apu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer, std::shared_ptr<Cartridge> cartridge);
 
     bool load_boot_rom(const std::string& filepath);
 
@@ -74,6 +80,7 @@ private:
     std::shared_ptr<Joypad> joypad;
     std::shared_ptr<Timer> timer;
     std::shared_ptr<PPU> ppu;
+    std::shared_ptr<APU> apu;
 
     // Using array for memory with fixed size.
     std::array<uint8_t, 256> boot_rom;

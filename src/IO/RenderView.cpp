@@ -35,6 +35,7 @@ void RenderView::initGL() {
     renderShaderProgram = loadShaderProgram("../src/shaders/palette.vert",
                                             "../src/shaders/palette.frag");
     fxShaderProgram = 0; // TODO Implement post process fx
+    glGenTextures(1, &screenTexture);
 }
 
 void RenderView::render() const {

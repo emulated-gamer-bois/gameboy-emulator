@@ -13,8 +13,8 @@
 #include <memory>
 
 #include "Palette.h"
-#include "ErrorReport.h"
-#include "gameboy/Definitions.h"
+#include "../ErrorReport.h"
+#include "../gameboy/Definitions.h"
 
 class RenderView {
 public:
