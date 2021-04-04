@@ -33,9 +33,9 @@ bool Sprite::hasHigherPriorityThan(const Sprite &other) const {
 uint8_t Sprite::getTileID(uint8_t lcdY) const {
     uint8_t tileY = lcdY - getY();
     if ((tileY < 8 && !yFlip) || (tileY >= 8 && yFlip)) {
-        return tileIndex;
+        return tileIndex & 0xFE;
     }
-    return tileIndex + 1;
+    return tileIndex | 0x01;
 }
 
 uint8_t Sprite::getTileX(uint8_t lcdX) const {
