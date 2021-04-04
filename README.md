@@ -19,15 +19,15 @@ This emulator was built as a Bachelor's project at Chalmers University of Techno
 
 ## Setup
 
-Install the required dependencies `sdl`, `sdl2` and `glew`.
+Install the required dependencies `sdl`, `sdl2`, `glew` and `openal`.
 
 Ex:
 ```
-sudo pacman -S sdl sdl2 glew
+sudo pacman -S sdl sdl2 glew openal
 ```
 or
 ```
-sudo apt-get install libsdl2-dev libglew-dev
+sudo apt-get install libsdl2-dev libglew-dev libopenal-dev
 ```
 
 Windows users only need to install the following dependencies:
