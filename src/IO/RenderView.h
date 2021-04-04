@@ -10,6 +10,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <sstream>
 #include <memory>
 
 #include "Palette.h"
@@ -42,7 +43,8 @@ private:
     Palette palette;
 
     GLuint loadShaderProgram(const std::string& vertexShader, const std::string& fragmentShader);
-    void glError();
+
+    bool glErrorFound(std::string& errorLog) const;
     [[nodiscard]] const std::string getShaderErrorLog(GLuint shader) const;
     [[nodiscard]] const std::string getProgramErrorLog(GLuint program) const;
 };

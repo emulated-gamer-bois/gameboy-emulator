@@ -16,6 +16,7 @@ if(NOT TRAVIS)
     source_group("shaders" FILES ${SHADERS})
 
     add_subdirectory( IO )
+    add_subdirectory( helpers ) # No need in tests?
 
     # Build and link executable.
     add_executable ( ${PROJECT_NAME}
@@ -23,8 +24,6 @@ if(NOT TRAVIS)
         ${SHADERS}
         Application.h
         Application.cpp
-            helpers/AppTimer.h
-            helpers/AppTimer.cpp
         FileExplorer.h
         FileExplorer.cpp
         Gui.cpp
@@ -32,9 +31,8 @@ if(NOT TRAVIS)
         Keybinds.cpp
         Keybinds.h
         AppSettings.h
-            helpers/ErrorReport.h
             )
 
-    target_link_libraries ( ${PROJECT_NAME} gameboy IO )
+    target_link_libraries ( ${PROJECT_NAME} gameboy IO helpers )
     config_build_output()
 endif()

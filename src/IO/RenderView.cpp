@@ -9,6 +9,8 @@ RenderView::RenderView() {
 }
 
 void RenderView::initGL() {
+    std::string glErrorLog;
+
     // Initialize screen quad.
     screenVertices[0] = {-1.0f, -1.0f};
     screenVertices[1] = {1.0f, -1.0f};
@@ -25,10 +27,12 @@ void RenderView::initGL() {
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(screenVertices), screenVertices, GL_STATIC_DRAW);
+    if (glErrorFound(glErrorLog)) { FATAL_ERROR(glErrorLog); }
 
     glBindVertexArray(vertexArrayObject);
     glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
     glEnableVertexAttribArray(0);
+    if (glErrorFound(glErrorLog)) { FATAL_ERROR(glErrorLog); }
 
     // Initialize shader programs, if renderShaderProgram is 0, the shader program could not
     // be loaded.
@@ -66,6 +70,8 @@ void RenderView::clear() const {
 }
 
 void RenderView::setScreenTexture(uint8_t textureData[]) {
+    std::string glErrorLog;
+
     // Free previous texture. It is the only gl resource that needs to be deleted continuously in this code since
     // the texture is replaced so often.
     if (screenTexture != 0) {
@@ -86,6 +92,7 @@ void RenderView::setScreenTexture(uint8_t textureData[]) {
                  GL_UNSIGNED_BYTE,
                  textureData);
     glBindTexture(GL_TEXTURE_2D, 0);
+    if (glErrorFound(glErrorLog)) { FATAL_ERROR(glErrorLog); }
 }
 
 void RenderView::setPalette(Palette palette) {
@@ -105,6 +112,8 @@ int RenderView::getHeight() const {
 }
 
 GLuint RenderView::loadShaderProgram(const std::string& vertexShader, const std::string& fragmentShader) {
+    std::string glErrorLog;
+
     // Create shader objects.
     GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -141,7 +150,7 @@ GLuint RenderView::loadShaderProgram(const std::string& vertexShader, const std:
     glDeleteShader(vertShader);
     glAttachShader(shaderProgram, fragShader);
     glDeleteShader(fragShader);
-    // Error checking here
+    if (glErrorFound(glErrorLog)) { FATAL_ERROR(glErrorLog); }
 
     // For shader linking error handling.
     GLint linked = 0;
@@ -154,8 +163,29 @@ GLuint RenderView::loadShaderProgram(const std::string& vertexShader, const std:
     return shaderProgram;
 }
 
-void RenderView::glError() {
+bool RenderView::glErrorFound(std::string& errorLog) const {
+    std::stringstream ss;
 
+    bool foundError = false;
+    auto errorCode = glGetError();
+    while (errorCode != GL_NO_ERROR) {
+        foundError = true;
+
+        auto* errorMessage = gluErrorString(errorCode);
+
+        ss << "GL Error #" << errorCode << " - ";
+        if (!errorMessage) {
+            ss << "(No message)" << std::endl;
+        } else {
+            ss << errorMessage << std::endl;
+        }
+
+        errorCode = glGetError();
+    }
+
+    errorLog = ss.str();
+
+    return foundError;
 }
 
 const std::string RenderView::getShaderErrorLog(GLuint shader) const {
