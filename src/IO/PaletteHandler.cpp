@@ -11,11 +11,72 @@ PaletteHandler::PaletteHandler() {
                            {0.30f, 0.33f, 0.23f},
                            {0.54f, 0.58f, 0.47f},
                            {0.75f, 0.81f, 0.63f}};
-    palettes[2].paletteName = "Special Smooth DMG-01";
-    palettes[2].palette = {{0.03f, 0.09f, 0.13f},
-                           {0.20f, 0.41f, 0.34f},
-                           {0.53f, 0.75f, 0.44f},
-                           {0.88f, 0.97f, 0.82f}};
+    palettes[2].paletteName = "GB Light";
+    palettes[2].palette = {{0.f, 0.31f, 0.23f},
+                           {0.f, 0.41f, 0.29f},
+                           {0.f, 0.6f, 0.44f},
+                           {0.f, 0.71f, 0.51f}};
+    palettes[3].paletteName = "GBC Brown";
+    palettes[3].palette = {{0.f, 0.f, 0.f},
+                           {0.52f, 0.26f, 0.02f},
+                           {0.93f, 0.60f, 0.33f},
+                           {1.f, 1.f, 1.f}};
+    palettes[4].paletteName = "GBC Pastel Mix";
+    palettes[4].palette = {{0.f, 0.f, 0.f},
+                           {0.61f, 0.57f, 0.96f},
+                           {0.93f, 0.54f, 0.55f},
+                           {0.99f, 0.98f, 0.67f}};
+    palettes[5].paletteName = "GBC Blue";
+    palettes[5].palette = {{0.f, 0.f, 0.f},
+                           {0.02f, 0.2f, 0.99f},
+                           {0.45f, 0.67f, 0.99f},
+                           {1.f, 1.f, 1.f}};
+    palettes[6].paletteName = "GBC Green";
+    palettes[6].palette = {{0.f, 0.f, 0.f},
+                           {0.99f, 0.2f, 0.02f},
+                           {0.02f, 0.98f, 0.02f},
+                           {1.f, 1.f, 1.f}};
+    palettes[7].paletteName = "GBC Red";
+    palettes[7].palette = {{0.f, 0.f, 0.f},
+                           {0.67f, 0.15f, 0.14f},
+                           {0.93f, 0.54f, 0.55f},
+                           {1.f, 1.f, 1.f}};
+    palettes[8].paletteName = "GBC Orange";
+    palettes[8].palette = {{0.f, 0.f, 0.f},
+                           {0.99f, 0.2f, 0.02f},
+                           {0.96f, 0.99f, 0.02f},
+                           {1.f, 1.f, 1.f}};
+    palettes[9].paletteName = "GBC Dark Blue";
+    palettes[9].palette = {{0.f, 0.f, 0.f},
+                           {0.27f, 0.2f, 0.64f},
+                           {0.61f, 0.57f, 0.96f},
+                           {1.f, 1.f, 1.f}};
+    palettes[10].paletteName = "GBC Dark Green";
+    palettes[10].palette = {{0.f, 0.f, 0.f},
+                            {0.02f, 0.2f, 0.99f},
+                            {0.02f, 0.98f, 0.02f},
+                            {1.f, 1.f, 1.f}};
+    palettes[11].paletteName = "GBC Dark Brown";
+    palettes[11].palette = {{0.32f, 0.16f, 0.13f},
+                           {0.48f, 0.35f, 0.26f},
+                           {0.78f, 0.59f, 0.58f},
+                           {0.96f, 0.86f, 0.83f}};
+    palettes[12].paletteName = "GBC Yellow";
+    palettes[12].palette = {{0.f, 0.f, 0.f},
+                            {0.52f, 0.26f, 0.02f},
+                            {0.96f, 0.99f, 0.02f},
+                            {1.f, 1.f, 1.f}};
+    palettes[13].paletteName = "GBC Greyscale";
+    palettes[13].palette = {{0.f, 0.f, 0.f},
+                           {0.32f, 0.32f, 0.32f},
+                           {0.64f, 0.64f, 0.64f},
+                           {1.f, 1.f, 1.f}};
+    palettes[14].paletteName = "GBC Inverted";
+    palettes[14].palette = {{1.f, 1.f, 1.f},
+                           {0.96f, 0.99f, 0.02f},
+                           {0.02f, 0.64f, 0.64f},
+                           {0.f, 0.f, 0.f}};
+
 }
 
 const std::string PaletteHandler::getPaletteName(int index) const {

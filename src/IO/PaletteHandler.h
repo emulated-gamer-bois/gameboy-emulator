@@ -18,7 +18,7 @@ private:
         Palette palette;
     };
 
-    const static int paletteAmount = 3;
+    const static int paletteAmount = 15;
 
     std::array<PaletteEntry, paletteAmount> palettes;
 };
