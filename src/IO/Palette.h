@@ -17,10 +17,10 @@ struct Palette {
     rgb c4;
 };
 
-const static Palette PALETTE_POCKET = {{0.f, 0.f, 0.f},
-                                       {0.33f, 0.33f, 0.33f},
-                                       {0.67f, 0.67f, 0.67f},
-                                       {1.f, 1.f, 1.f}};
+const static Palette PALETTE_POCKET = {{0.12f, 0.12f, 0.12f},
+                                       {0.30f, 0.33f, 0.23f},
+                                       {0.54f, 0.58f, 0.47f},
+                                       {0.75f, 0.81f, 0.63f}};
 
 const static Palette PALETTE_DMG = {{0.06f, 0.22f, 0.06f},
                                     {0.19f, 0.38f, 0.19f},

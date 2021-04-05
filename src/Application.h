@@ -14,6 +14,7 @@
 #include "gameboy/GameBoy.h"
 #include "gameboy/Definitions.h"
 #include "IO/AudioController.h"
+#include "helpers/ErrorReport.h"
 #include "imgui.h"
 #include "AppSettings.h"
 #include "Gui.h"
@@ -45,7 +46,8 @@ private:
     void initSDL();
     void terminateSDL();
     void handleSDLEvents();
-    void handleEmulatorInput(SDL_Keycode key, int eventType);
+    void handleEmulatorInputPress(SDL_Keycode key);
+    void handleEmulatorInputRelease(SDL_Keycode key);
     void updateSDLWindowSize();
     void terminate();
     void initSettings();
