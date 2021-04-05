@@ -294,7 +294,7 @@ Sprite PPU::loadSprite(uint8_t index) {
 
 
 uint8_t PPU::getSpritePixelColorIndex(Sprite & sprite, uint8_t lcdX, uint8_t lcdY) {
-    uint8_t tileID = sprite.getTileID(lcdY);
+    uint8_t tileID = sprite.getTileID(lcdY, objectSize);
     uint8_t tileX = sprite.getTileX(lcdX);
     uint8_t tileY = sprite.getTileY(lcdY);
     return getTilePixelColorIndex(1, tileID, tileX, tileY); //Sprites always use tile set 1
