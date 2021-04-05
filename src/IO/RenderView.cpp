@@ -5,7 +5,7 @@ using namespace glm;
 
 RenderView::RenderView() {
     screenMultiplier = MIN_SCREEN_MULTIPLIER;
-    palette = PALETTE_POCKET;
+    palette = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 }
 
 void RenderView::initGL() {

@@ -15,6 +15,7 @@ Application::Application() {
     state = State::MENU;
     initSettings();
     savedEmulationSpeed = settings->emulationSpeedMultiplier;
+    renderView.setPalette(settings->palette);
     renderView.setScreenMultiplier(settings->screenMultiplier);
 }
 
@@ -75,6 +76,12 @@ void Application::init() {
     // Delegate actual loading of roms to the gui class.
     gui.setLoadRomCallback([this](std::string&& romPath) -> void {
         gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", romPath);
+        state = State::EMULATION;
+        gui.toggleGui();
+    });
+
+    gui.setChangePaletteCallback([this](int index) -> void {
+        renderView.setPalette(paletteHandler->getPalette(index));
         state = State::EMULATION;
         gui.toggleGui();
     });
@@ -250,6 +257,7 @@ void Application::initSettings() {
     settings->keyBinds.init_keybinds();
     settings->screenMultiplier = 4;
     settings->romPath = "..";
+    settings->palette = paletteHandler->getPalette(2);
     settings->emulationSpeedMultiplier = 1;
 }
 

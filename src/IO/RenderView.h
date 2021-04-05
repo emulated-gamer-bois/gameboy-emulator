@@ -14,6 +14,7 @@
 #include <memory>
 
 #include "Palette.h"
+#include "../AppSettings.h"
 #include "../helpers/ErrorReport.h"
 #include "../gameboy/Definitions.h"
 

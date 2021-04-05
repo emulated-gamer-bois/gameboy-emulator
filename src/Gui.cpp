@@ -16,9 +16,12 @@
  * Constructor
  */
 
-Gui::Gui(std::shared_ptr<AppSettings> settings) {
+Gui::Gui(std::shared_ptr<AppSettings> settings, std::shared_ptr<PaletteHandler> paletteHandler) {
     this->settings = std::move(settings);
+    this->paletteHandler = std::move(paletteHandler);
     selectedFile = -1;
+    // TODO get from settings probably
+    selectedPalette = 0;
     disableWidgets();
     displayToolbar = true;
 }
@@ -49,6 +52,7 @@ void Gui::handleGui(SDL_Window *window) {
     if (displayToolbar) { showToolbar(); }
     if (displayEditControls) { showEditControls(); }
     if (displayFileDialog) { showFileDialog(); }
+    if (displayPaletteSettings) { showPaletteSettings(); }
 
     //Render ImGui
     ImGui::Render();
@@ -87,8 +91,11 @@ void Gui::setLoadRomCallback(std::function<void(std::string)>&& loadRomCallback)
     this->loadRomCallback = loadRomCallback;
 }
 
+void Gui::setChangePaletteCallback(std::function<void(int)>&& changePaletteCallback) {
+    this->changePaletteCallback = changePaletteCallback;
+}
+
 void Gui::showEditControls() {
-    //ImGui::SetNextWindowSize(ImGui::GetWindowSize(), ImGuiCond_Once);
     ImGui::Begin("Controls", &displayEditControls, windowFlags);
     for (int i = 0; i < settings->keyBinds.keybinds.capacity(); i++) {
         if (i == KEY_INDEX_JOYPAD_START) {
@@ -123,7 +130,6 @@ void Gui::showEditControls() {
 }
 
 void Gui::showFileDialog() {
-    float fileSelectAreaHeight = 150.f;
     bool loadRom = false;
 
     ImGui::Begin("Load ROM", &displayFileDialog, windowFlags);
@@ -140,7 +146,7 @@ void Gui::showFileDialog() {
     // Display File Select
     ImGui::Text("File Select ");
     ImGui::Indent(indentSpace);
-    if (ImGui::BeginListBox("##FileList", ImVec2(350.f, fileSelectAreaHeight))) {
+    if (ImGui::BeginListBox("##FileList", ImVec2(listBoxWidth, listBoxHeight))) {
         for (int i = 0; i < fileEntryList.size(); i++) {
             int flags = ImGuiSelectableFlags_AllowDoubleClick;
             bool isSelected = (selectedFile == i);
@@ -161,7 +167,7 @@ void Gui::showFileDialog() {
 
     // Display Rom Folder Buttons
     ImGui::SameLine();
-    ImGui::BeginChild("RomFolderButtons", ImVec2(140, fileSelectAreaHeight), true);
+    ImGui::BeginChild("RomFolderButtons", ImVec2(140, listBoxHeight), true);
     if (ImGui::Button("Set Rom Folder")) {
         settings->romPath = fileExplorer.getCurrentDir().absolutePath;
     }
@@ -209,7 +215,52 @@ void Gui::showFileDialog() {
         try {
             loadRomCallback(fileEntryList.at(selectedFile).absolutePath);
         } catch(...) {
-            std::cerr << "GUI error: something went wrong with the load rom callback." << std::endl;
+            FATAL_ERROR("Could not call loadRomCallback.");
+        }
+    }
+}
+
+void Gui::showPaletteSettings() {
+    bool changeColor = false;
+
+    ImGui::Begin("Palette Settings", &displayPaletteSettings, windowFlags);
+    // Display File Select
+    ImGui::Text("Palette Select ");
+    ImGui::Indent(indentSpace);
+    if (ImGui::BeginListBox("##PaletteList", ImVec2(listBoxWidth, listBoxHeight))) {
+        for (int i = 0; i < paletteHandler->getPaletteAmount(); i++) {
+            int flags = ImGuiSelectableFlags_AllowDoubleClick;
+            bool isSelected = (selectedPalette == i);
+            if (ImGui::Selectable(paletteHandler->getPaletteName(i).c_str(), isSelected, flags)) {
+                selectedPalette = i;
+                if (ImGui::IsMouseDoubleClicked(0)) {
+                    changeColor = true;
+                }
+            }
+        }
+        ImGui::EndListBox();
+    }
+
+    Palette temp = paletteHandler->getPalette(selectedPalette);
+    ImVec4 c1 = ImVec4(temp.c1.r, temp.c1.g, temp.c1.b, 1.f);
+    ImVec4 c2 = ImVec4(temp.c2.r, temp.c2.g, temp.c2.b, 1.f);
+    ImVec4 c3 = ImVec4(temp.c3.r, temp.c3.g, temp.c3.b, 1.f);
+    ImVec4 c4 = ImVec4(temp.c4.r, temp.c4.g, temp.c4.b, 1.f);
+    ImGui::ColorButton("##c1", c1, ImGuiColorEditFlags_NoBorder, ImVec2(87.5f, 30.f));
+    ImGui::SameLine(0.f, 0.f);
+    ImGui::ColorButton("##c2", c2, ImGuiColorEditFlags_NoBorder, ImVec2(87.5f, 30.f));
+    ImGui::SameLine(0.f, 0.f);
+    ImGui::ColorButton("##c3", c3, ImGuiColorEditFlags_NoBorder, ImVec2(87.5f, 30.f));
+    ImGui::SameLine(0.f, 0.f);
+    ImGui::ColorButton("##c4", c4, ImGuiColorEditFlags_NoBorder, ImVec2(87.5f, 30.f));
+
+    ImGui::End();
+
+    if (changeColor) {
+        try {
+            changePaletteCallback(selectedPalette);
+        } catch(...) {
+            FATAL_ERROR("Could not call changePaletteCallback.");
         }
     }
 }
@@ -226,6 +277,9 @@ void Gui::showToolbar() {
             displayPlaySpeed();
             if (ImGui::MenuItem("Key Binds")) {
                 displayEditControls = !displayEditControls;
+            }
+            if (ImGui::MenuItem("Palette Settings")) {
+                displayPaletteSettings = !displayPaletteSettings;
             }
             ImGui::EndMenu();
 
@@ -260,6 +314,7 @@ void Gui::keyBind() {
 void Gui::disableWidgets() {
     displayEditControls = false;
     displayFileDialog = false;
+    displayPaletteSettings = false;
     displayToolbar = false;
     waitingForKeyBind =false;
 }
