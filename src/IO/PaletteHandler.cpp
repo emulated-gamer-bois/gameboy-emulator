@@ -76,6 +76,46 @@ PaletteHandler::PaletteHandler() {
                            {0.96f, 0.99f, 0.02f},
                            {0.02f, 0.64f, 0.64f},
                            {0.f, 0.f, 0.f}};
+    palettes[15].paletteName = "SGB 1A";
+    palettes[15].palette = {{0.19f, 0.09f, 0.31f},
+                            {0.66f, 0.16f, 0.13f},
+                            {0.85f, 0.56f, 0.28f},
+                            {0.97f, 0.91f, 0.78f}};
+    palettes[16].paletteName = "SGB 1B";
+    palettes[16].palette = {{0.f, 0.f, 0.f},
+                            {0.69f, 0.31f, 0.06f},
+                            {0.78f, 0.69f, 0.44f},
+                            {0.85f, 0.85f, 0.75f}};
+    palettes[17].paletteName = "SGB 1C";
+    palettes[17].palette = {{0.22f, 0.22f, 0.6f},
+                            {0.6f, 0.22f, 0.38f},
+                            {0.91f, 0.6f, 0.31f},
+                            {0.97f, 0.75f, 0.97f}};
+    palettes[18].paletteName = "SGB 1D";
+    palettes[18].palette = {{0.31f, 0.09f, 0.f},
+                            {0.97f, 0.f, 0.f},
+                            {0.75f, 0.5f, 0.28f},
+                            {0.97f, 0.97f, 0.66f}};
+    palettes[19].paletteName = "SGB 1E";
+    palettes[19].palette = {{0.35f, 0.22f, 0.13f},
+                            {0.41f, 0.53f, 0.25f},
+                            {0.47f, 0.75f, 0.47f},
+                            {0.97f, 0.85f, 0.69f}};
+    palettes[20].paletteName = "SGB 1F";
+    palettes[20].palette = {{0.f, 0.25f, 0.06f},
+                            {0.66f, 0.f, 0.f},
+                            {0.88f, 0.53f, 0.31f},
+                            {0.85f, 0.91f, 0.97f}};
+    palettes[21].paletteName = "SGB 1G";
+    palettes[21].palette = {{0.97f, 0.97f, 0.35},
+                            {0.47f, 0.47f, 0.f},
+                            {0.f, 0.63f, 0.91f},
+                            {0.f, 0.f, 0.31f}};
+    palettes[22].paletteName = "SGB 1H";
+    palettes[22].palette = {{0.19f, 0.09f, 0.f},
+                            {0.5f, 0.25f, 0.f},
+                            {0.97f, 0.72f, 0.53f},
+                            {0.97f, 0.91f, 0.88f}};
 
 }
 
