@@ -91,3 +91,47 @@ TEST(AUDIO, PLAY_NOISE) {
         a.stopSource(3);
     }
 }
+
+TEST(AUDIO, FREQUENCY) {
+    AudioController a;
+    ALuint source;
+    ALuint buffers[2];
+
+    /*auto device = alcOpenDevice(nullptr);
+    auto context = alcCreateContext(device, nullptr);
+    alcMakeContextCurrent(context);*/
+
+    alGenBuffers(2, buffers);
+    alGenSources(1, &source);
+
+    alSourcef(source, AL_PITCH, 1);
+    alSourcef(source, AL_GAIN, 1.0f);
+    alSource3f(source, AL_POSITION, 0, 0, 0);
+    alSource3f(source, AL_VELOCITY, 0, 0, 0);
+    alSourcei(source, AL_LOOPING, AL_FALSE);
+
+    auto soundData = new unsigned char[]{0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0};
+    auto size = 8;
+    auto tone = 220;
+    auto buffer = 0;
+    auto optimized = false;
+    for(auto i = 0; i < 100; i++) {
+        if(optimized) {
+            alBufferData(buffers[buffer], AL_FORMAT_MONO8, soundData, size, size * tone);
+            alSourcef(source, AL_GAIN, 0.1f);
+            alSourcei(source, AL_LOOPING, 1);
+            alSourceStop(source);
+            alSourcei(source, AL_BUFFER, buffers[buffer]);
+            alSourcePlay(source);
+            //tone *= 2;
+            buffer = ++buffer % 2;
+        } else {
+            a.stopSource(0);
+            a.playSound(0, soundData, size, size * tone, 0.1f);
+            //tone *= 2;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+
+    alSourceStop(source);
+}
