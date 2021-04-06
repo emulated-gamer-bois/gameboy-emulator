@@ -19,6 +19,7 @@
 #include "AppSettings.h"
 #include "Gui.h"
 #include "Keybinds.h"
+#include "View.h"
 
 class Application {
 public:
@@ -33,22 +34,14 @@ private:
     } state;
 
     std::shared_ptr<AppSettings> settings{std::make_shared<AppSettings>()};
-    SDL_Window* window;
-    SDL_GLContext glContext;
-    RenderView renderView;
     AudioController audio;
     GameBoy gameBoy;
-    Gui gui = Gui(settings);
-
+    View view = View(settings);
     float savedEmulationSpeed;
     int framesUntilStep{0};
     void init();
-    void initSDL();
-    void terminateSDL();
-    void handleSDLEvents();
     void handleEmulatorInputPress(SDL_Keycode key);
     void handleEmulatorInputRelease(SDL_Keycode key);
-    void updateSDLWindowSize();
     void terminate();
     void initSettings();
     void updateSound(uint8_t ready);
@@ -61,5 +54,5 @@ private:
 
     void stepEmulation();
 
-    void renderEmulation();
+    void handleSDLEvents();
 };
