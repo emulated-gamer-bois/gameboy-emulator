@@ -1,5 +1,5 @@
 /*
- * Application
+ * application
  * The purpose of this class is to setup the application side of this project as well as serve as an entry point
  * to the emulator.
  */
@@ -20,6 +20,7 @@
 #include "../Gui.h"
 #include "Keybinds.h"
 #include "../View.h"
+#include "../Controller.h"
 
 class Application {
 public:
@@ -35,24 +36,18 @@ private:
 
     std::shared_ptr<AppSettings> settings{std::make_shared<AppSettings>()};
     AudioController audio;
-    GameBoy gameBoy;
-    View view = View(settings);
-    float savedEmulationSpeed;
+    std::shared_ptr<GameBoy> gameBoy{std::make_shared<GameBoy>()};
+    std::shared_ptr<View> view{std::make_shared<View>(settings)};
+    Controller controller = Controller(settings,view,gameBoy);
     int framesUntilStep{0};
     void init();
-    void handleEmulatorInputPress(SDL_Keycode key);
-    void handleEmulatorInputRelease(SDL_Keycode key);
+
     void terminate();
     void initSettings();
     void updateSound(uint8_t ready);
-
     void stepFast();
-
     void gameBoyStep();
-
     void stepSlowly();
-
     void stepEmulation();
 
-    void handleSDLEvents();
 };
