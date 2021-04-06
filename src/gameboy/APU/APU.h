@@ -28,9 +28,9 @@
 #define NR43_ADDRESS 0xFF22
 #define NR44_ADDRESS 0xFF23
 
-#define NR50_ADDRESS 0xFF23
-#define NR51_ADDRESS 0xFF24
-#define NR52_ADDRESS 0xFF25
+#define NR50_ADDRESS 0xFF24
+#define NR51_ADDRESS 0xFF25
+#define NR52_ADDRESS 0xFF26
 
 #define WAVE_PATTERN_START 0xFF30
 #define WAVE_PATTERN_END 0xFF3F
@@ -105,6 +105,10 @@ private:
     uint8_t length_counter_b;
 
     uint16_t length_counter_wave;
+
+    uint8_t period_envelope_noise;
+    uint8_t volume_envelope_noise;
+    uint16_t length_counter_noise;
 
     const float WAVE_VOLUMES[4] = {0.0f, 0.25f, 0.125f, 0.0675f};
 };

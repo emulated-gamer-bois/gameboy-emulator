@@ -46,6 +46,7 @@ void Application::start() {
             audio.stopSource(0);
             audio.stopSource(1);
             audio.stopSource(2);
+            audio.stopSource(3);
             gui.handleGui(window);
         }
 
@@ -280,6 +281,14 @@ void Application::updateSound(uint8_t ready) {
             this->audio.stopSource(2);
             if(state->enable_wave) {
                 this->audio.playGBWave(2, state->waveform_wave, state->frequency_wave, state->volume_wave);
+            }
+        }
+
+        //Noise
+        if(ready & 8) {
+            this->audio.stopSource(3);
+            if(state->enable_noise) {
+                this->audio.playNoise(3, state->is_7_bit_mode, state->frequency_noise, state->volume_noise);
             }
         }
 
