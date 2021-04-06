@@ -21,6 +21,7 @@
 #include "Keybinds.h"
 #include "../View.h"
 #include "../Controller.h"
+#include "State.h"
 
 class Application {
 public:
@@ -28,12 +29,7 @@ public:
     void start();
 
 private:
-    enum State {
-        EMULATION,
-        MENU,
-        TERMINATION
-    } state;
-
+    State state;
     std::shared_ptr<AppSettings> settings{std::make_shared<AppSettings>()};
     AudioController audio;
     std::shared_ptr<GameBoy> gameBoy{std::make_shared<GameBoy>()};

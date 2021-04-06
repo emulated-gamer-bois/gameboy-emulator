@@ -18,13 +18,14 @@
 #include "Gui.h"
 #include "application/Keybinds.h"
 #include "View.h"
+#include "application/State.h"
 
 class Controller {
 public:
 
 
     Controller(const std::shared_ptr<AppSettings> &settings, const std::shared_ptr<View> &view,const std::shared_ptr<GameBoy> &gameBoy);
-    void handleSDLEvents();
+    State handleSDLEvents(State state);
 
 private:
     void handleEmulatorInputPress(SDL_Keycode key);

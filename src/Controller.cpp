@@ -14,9 +14,8 @@ Controller::Controller(const std::shared_ptr<AppSettings> &appSettings, const st
 /**
  * Handles SDL Events including keyboard input.
  */
-void Controller::handleSDLEvents() {
+State Controller::handleSDLEvents(State state) {
     SDL_Event event;
-   // State tempState = state;
     while (SDL_PollEvent(&event)) {
         SDL_Keycode key = event.key.keysym.sym;
 
@@ -36,7 +35,7 @@ void Controller::handleSDLEvents() {
                 }
 
                 if (key == SDLK_ESCAPE) {
-                    //  gui.toggleGui();
+                    view->toggleGui();
                     state = (state == State::EMULATION) ? State::MENU : State::EMULATION;
                 }
                 if (key == settings->keyBinds.turboMode.keyval) {
@@ -58,6 +57,7 @@ void Controller::handleSDLEvents() {
                 break;
         }
     }
+    return state;
 }
 
 void Controller::handleEmulatorInputPress(SDL_Keycode key) {

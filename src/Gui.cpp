@@ -41,6 +41,7 @@ void Gui::init(SDL_Window *window,SDL_GLContext *glContext, char * glsl_version,
 /**
  */
 void Gui::handleGui(SDL_Window *window) {
+    displayToolbar=true;
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(window);
     ImGui::NewFrame();

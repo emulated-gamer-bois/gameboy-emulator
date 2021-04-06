@@ -31,7 +31,7 @@ if(NOT TRAVIS)
             application/Keybinds.cpp
             application/Keybinds.h
             application/AppSettings.h
-            View.cpp View.h Controller.cpp Controller.h)
+            View.cpp View.h Controller.cpp Controller.h application/State.h)
 
     target_link_libraries ( ${PROJECT_NAME} gameboy IO helpers )
     config_build_output()

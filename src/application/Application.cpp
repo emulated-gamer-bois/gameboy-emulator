@@ -35,7 +35,7 @@ void Application::start() {
             }
         }
         view->render(state == State::EMULATION && gameBoy->isOn(),gameBoy->getScreenTexture().get());
-        controller.handleSDLEvents();
+        this->state=controller.handleSDLEvents(state);
 
         // Render menu
         if (state == State::MENU) {
@@ -45,8 +45,6 @@ void Application::start() {
             view->renderGui();
         }
         view->swapbuffers();
-        // Swap buffers
-       // SDL_GL_SwapWindow(window);
 
         // Time application to 60Hz
         float msSinceTick = timer.msSinceTick();
@@ -74,8 +72,6 @@ void Application::init() {
 void Application::terminate() {
     view->terminateView();
 }
-
-
 
 /**
  * Initialize settings to some default values. This should be called if settings couldn't be loaded from file.
