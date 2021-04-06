@@ -11,10 +11,10 @@
 
 TEST(AUDIO, START_SOUND) {
     AudioController a;
-    a.playGBSquare(0, 2, 0x783, 1.0f);
+    a.playGBSquare(0, 2, 0x783, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     a.stopSource(0);
-    a.playGBSquare(0, 2, 0x7C1, 1.0f);
+    a.playGBSquare(0, 2, 0x7C1, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     a.stopSource(0);
 }
@@ -26,7 +26,7 @@ TEST(AUDIO, SAWTOOTH_WAVE) {
     }
 
     AudioController a;
-    a.playGBWave(0, sawTooth, 0x6D6, 1.0f);
+    a.playGBWave(0, sawTooth, 0x6D6, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     a.stopSource(0);
 }
@@ -39,17 +39,17 @@ TEST(AUDIO, SIN_WAVE) {
     }
 
     AudioController a;
-    a.playGBWave(0, sine, 0x6D6, 1.0f);
+    a.playGBWave(0, sine, 0x6D6, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     a.stopSource(0);
 }
 
 TEST(AUDIO, START_SOUND_B) {
     AudioController a;
-    a.playGBSquare(1, 2, 0x783, 1.0f);
+    a.playGBSquare(1, 2, 0x783, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     a.stopSource(1);
-    a.playGBSquare(1, 2, 0x7C1, 1.0f);
+    a.playGBSquare(1, 2, 0x7C1, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     a.stopSource(1);
 }
@@ -72,8 +72,8 @@ TEST(AUDIO, NOISE) {
     }
 
     AudioController a;
-    a.playSound(3, samples, size, 10000, 1);
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    a.playSound(3, samples, size, 10000, 0.1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 
 TEST(AUDIO, PLAY_NOISE) {
