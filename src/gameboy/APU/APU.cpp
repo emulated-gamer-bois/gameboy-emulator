@@ -211,6 +211,7 @@ void APU::trigger_event(uint8_t source) {
             length_counter_noise = this->NR41 & 0x3F ? this->NR41 & 0x3F : 0x40;
             this->period_envelope_noise = this->NR42 & 0x7;
             volume_envelope_noise = (this->NR42 >> 4) & 0xF;
+            this->readyToPlay |= 8;
     }
 }
 
@@ -335,8 +336,8 @@ APUState* APU::getAPUState() {
         (uint16_t)((((uint16_t)(this->NR34 & 0x7)) << 8) + this->NR33),
         WAVE_VOLUMES[(this->NR32 >> 5) & 0x3],
 
-        (bool)(this->NR34 & 0x80),
-        ((262144*2) / NOISE_DIVISOR[this->NR43 & 0x07]),
+        (bool)(this->NR44 & 0x80),
+        (int)((524288.0 / (NR43 & 0x07 ? NR43 & 0x07 : 0.5f)) / (2 << (NR43 >> 4))),
         (float)volume_envelope_noise/15.0f,
         (bool)(this->NR43 & 8)
     };

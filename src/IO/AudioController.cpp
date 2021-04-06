@@ -83,6 +83,7 @@ void AudioController::init() {
 }
 
 void AudioController::playSound(int source, uint8_t *soundData, int size, int sampleRate, float volume) {
+    alSourcei(sources[source], AL_BUFFER, 0);
     alBufferData(buffers[source], AL_FORMAT_MONO8, soundData, size, sampleRate);
     alSourcef(sources[source], AL_GAIN, volume);
     alSourcei(sources[source], AL_BUFFER, buffers[source]);

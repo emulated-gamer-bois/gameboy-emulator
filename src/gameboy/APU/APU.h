@@ -111,7 +111,6 @@ private:
     uint16_t length_counter_noise;
 
     const float WAVE_VOLUMES[4] = {0.0f, 0.25f, 0.125f, 0.0675f};
-    const uint8_t NOISE_DIVISOR[8] = {8,16,32,48,64,80,96,112};
 };
 
 

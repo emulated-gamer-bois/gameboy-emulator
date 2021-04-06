@@ -46,6 +46,7 @@ void Application::start() {
             audio.stopSource(0);
             audio.stopSource(1);
             audio.stopSource(2);
+            audio.stopSource(3);
             gui.handleGui(window);
         }
 
