@@ -10,16 +10,16 @@
 #include <string>
 #include <chrono> // time
 #include <thread> // sleep
-#include "IO/RenderView.h"
-#include "gameboy/GameBoy.h"
-#include "gameboy/Definitions.h"
-#include "IO/AudioController.h"
-#include "helpers/ErrorReport.h"
+#include "../IO/RenderView.h"
+#include "../gameboy/GameBoy.h"
+#include "../gameboy/Definitions.h"
+#include "../IO/AudioController.h"
+#include "../helpers/ErrorReport.h"
 #include "imgui.h"
 #include "AppSettings.h"
-#include "Gui.h"
+#include "../Gui.h"
 #include "Keybinds.h"
-#include "View.h"
+#include "../View.h"
 
 class Application {
 public:

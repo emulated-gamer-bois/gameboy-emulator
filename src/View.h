@@ -4,38 +4,37 @@
 
 #ifndef LAME_BOY_VIEW_H
 #define LAME_BOY_VIEW_H
-#include <SDL.h>
-#include <string>
-#include <chrono> // time
-#include <thread> // sleep
+
+
+#include <memory>
+#include <functional>
+#include "Application/AppSettings.h"
 #include "IO/RenderView.h"
-#include "gameboy/GameBoy.h"
-#include "gameboy/Definitions.h"
-#include "IO/AudioController.h"
-#include "helpers/ErrorReport.h"
-#include "imgui.h"
-#include "AppSettings.h"
 #include "Gui.h"
-#include "Keybinds.h"
 
 class View {
+public:
+    View(std::shared_ptr<AppSettings> sharedPtr);
+    void View::init(std::function<void(std::string)> &&loadRomCallback,int screenMultiplier);
+    void render(bool renderEmu, uint8_t *textureData);
+    void renderGui();
+    void terminateView();
+    void swapbuffers();
+    void toggleGui();
+    void handleGuiInput(SDL_Event event);
 
-    void RenderEmulation();
-    void RenderGUI();
 private:
     SDL_Window* window;
     SDL_GLContext glContext;
     RenderView renderView;
-    AudioController audio;
-    Gui gui = Gui(settings);
-
+    std::shared_ptr<AppSettings> settings;
+    Gui gui;
     void updateSDLWindowSize();
+    void initSDL();
+    void renderEmulation(uint8_t *textureData);
+    void terminateSDL();
 
-    void handleSDLEvents();
 
-    void handleEmulatorInputPress(SDL_Keycode key);
-
-    void handleEmulatorInputRelease(SDL_Keycode key);
 };
 
 

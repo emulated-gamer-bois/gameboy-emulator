@@ -4,22 +4,27 @@
 
 #include "View.h"
 
+#include <utility>
 
-void View::RenderGUI(){
-
+View::View(std::shared_ptr<AppSettings> sharedPtr) {
+    this->settings = std::move(sharedPtr);
 }
 
-void View::RenderEmulation(){
+void View::render(bool renderEmu,uint8_t textureData[]) {
     updateSDLWindowSize();
     renderView.clear();
-
-    // Handle Events
-    handleSDLEvents();
-    if (state == State::EMULATION && gameBoy.isOn()) {
-
-        renderEmulation();
+    if(renderEmu){
+        renderEmulation(textureData);
     }
+  //  SDL_GL_SwapWindow(window);
+}
+void View::renderEmulation(uint8_t textureData[]) {
+    renderView.setScreenTexture(textureData);
+    renderView.render();
+}
 
+void View::renderGui() {
+    gui.handleGui(this->window);
 }
 
 /**
@@ -34,96 +39,84 @@ void View::updateSDLWindowSize() {
     }
 }
 
+void View::init(std::function<void(std::string)> &&loadRomCallback,int screenMultiplier) {
+    initSDL();
+    renderView.initGL();
+    renderView.setScreenMultiplier(screenMultiplier);
+    gui.init(window, &glContext, "#version 130", this->settings); // GLSL version
+    gui.setLoadRomCallback(std::move(loadRomCallback));
+
+}
+
+/*
+ * This function initializes SDL, creates a window and gets a OpenGL context. If an error occurs in this function
+ * the program should exit.
+ */
+void View::initSDL() {
+    // Initialize SDL and check if SDL could be initialize.
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        FATAL_ERROR("SDL failed to initialize");
+    }
+    atexit(SDL_Quit);
+    SDL_GL_LoadLibrary(nullptr); // Load the default OpenGL library
+
+    // Request an OpenGL 4.1 context and require hardware acceleration.
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
+    // Use double buffering. May be on by default. Not sure.
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+    // Create the window.
+    window = SDL_CreateWindow(EMULATOR_NAME_STRING,
+                              SDL_WINDOWPOS_UNDEFINED,
+                              SDL_WINDOWPOS_UNDEFINED,
+                              LCD_WIDTH,
+                              LCD_HEIGHT,
+                              SDL_WINDOW_OPENGL);
+    if (!window) {FATAL_ERROR("Failed to create SDL window."); }
+
+    // Get gl context and set it to the current context for this window.
+    glContext = SDL_GL_CreateContext(window);
+    if (!glContext) {FATAL_ERROR("Failed to create GL context."); }
+
+    // Don't know if this is needed.
+    glewInit();
+
+    // Disable v-sync. The gameboy lcd is 60Hz and that will be synced manually.
+    SDL_GL_SetSwapInterval(0);
+
+    // Workaround for AMD. Must not be removed.
+    if (!glBindFragDataLocation) {
+        glBindFragDataLocation = glBindFragDataLocationEXT;
+    }
+}
+
+void View::terminateView() {
+    gui.terminate();
+    terminateSDL();
+}
 
 /**
- * Handles SDL Events including keyboard input.
+ * Cleans up after SDL.
  */
-void View::handleSDLEvents() {
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        SDL_Keycode key = event.key.keysym.sym;
-
-        if (state == State::MENU) {
-            gui.handleInput(event);
-        }
-
-        switch (event.type) {
-            case SDL_QUIT:
-                state = State::TERMINATION;
-                break;
-
-            case SDL_KEYDOWN:
-                // Disable key repeat
-                if (event.key.repeat != 0) {
-                    break;
-                }
-
-                if (key == SDLK_ESCAPE) {
-                    gui.toggleGui();
-                    state = (state == State::EMULATION) ? State::MENU : State::EMULATION;
-                }
-                if (key == settings->keyBinds.turboMode.keyval) {
-                    savedEmulationSpeed = settings->emulationSpeedMultiplier;
-                    settings->emulationSpeedMultiplier = MAX_EMULATION_SPEED_FLOAT;
-                }
-                if (state == State::EMULATION) {
-                    handleEmulatorInputPress(key);
-                }
-                break;
-
-            case SDL_KEYUP:
-                if (key == settings->keyBinds.turboMode.keyval) {
-                    settings->emulationSpeedMultiplier = savedEmulationSpeed;
-                }
-                if (state == State::EMULATION) {
-                    handleEmulatorInputRelease(key);
-                }
-                break;
-        }
-    }
+void View::terminateSDL() {
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 }
 
-void View::handleEmulatorInputPress(SDL_Keycode key) {
-    // Left and right can not be pressed simultaneously, the same goes for up and down!
-    if (key == settings->keyBinds.left.keyval) {
-        gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
-        gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
-    } else if (key == settings->keyBinds.right.keyval) {
-        gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
-        gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_PRESS);
-    } else if (key == settings->keyBinds.up.keyval) {
-        gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
-        gameBoy.joypad_input(JOYPAD_UP, JOYPAD_PRESS);
-    } else if (key == settings->keyBinds.down.keyval) {
-        gameBoy.joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
-        gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_PRESS);
-    } else if (key == settings->keyBinds.a.keyval) {
-        gameBoy.joypad_input(JOYPAD_A, JOYPAD_PRESS);
-    } else if (key == settings->keyBinds.b.keyval) {
-        gameBoy.joypad_input(JOYPAD_B, JOYPAD_PRESS);
-    } else if (key == settings->keyBinds.start.keyval) {
-        gameBoy.joypad_input(JOYPAD_START, JOYPAD_PRESS);
-    } else if (key == settings->keyBinds.select.keyval) {
-        gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_PRESS);
-    }
+
+void View::swapbuffers() {
+    SDL_GL_SwapWindow(window);
 }
 
-void View::handleEmulatorInputRelease(SDL_Keycode key) {
-    if (key == settings->keyBinds.left.keyval) {
-        gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
-    } else if (key == settings->keyBinds.right.keyval) {
-        gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
-    } else if (key == settings->keyBinds.up.keyval) {
-        gameBoy.joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
-    } else if (key == settings->keyBinds.down.keyval) {
-        gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
-    } else if (key == settings->keyBinds.a.keyval) {
-        gameBoy.joypad_input(JOYPAD_A, JOYPAD_RELEASE);
-    } else if (key == settings->keyBinds.b.keyval) {
-        gameBoy.joypad_input(JOYPAD_B, JOYPAD_RELEASE);
-    } else if (key == settings->keyBinds.start.keyval) {
-        gameBoy.joypad_input(JOYPAD_START, JOYPAD_RELEASE);
-    } else if (key == settings->keyBinds.select.keyval) {
-        gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_RELEASE);
-    }
+void View::toggleGui() {
+    gui.toggleGui();
 }
+
+void View::handleGuiInput(SDL_Event event) {
+    gui.handleInput(event);
+}
+
+

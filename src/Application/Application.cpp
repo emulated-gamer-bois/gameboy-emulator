@@ -6,7 +6,7 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 */
 
 #include "Application.h"
-#include "helpers/AppTimer.h"
+#include "../helpers/AppTimer.h"
 
 /**
  * Constructor
