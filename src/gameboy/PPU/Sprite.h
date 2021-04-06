@@ -31,7 +31,7 @@ public:
 
     int getX() const;
     int getY() const;
-    uint8_t getTileID(uint8_t lcdY) const;
+    uint8_t getTileID(uint8_t lcdY, uint8_t objectSize) const;
     uint8_t getTileX(uint8_t lcdX) const;
     uint8_t getTileY(uint8_t lcdY) const;
     uint8_t getPaletteNumber() const;

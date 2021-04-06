@@ -30,7 +30,10 @@ bool Sprite::hasHigherPriorityThan(const Sprite &other) const {
     return this->positionInOAM < other.positionInOAM;
 }
 
-uint8_t Sprite::getTileID(uint8_t lcdY) const {
+uint8_t Sprite::getTileID(uint8_t lcdY, uint8_t objectSize) const {
+    if (objectSize == 0) {
+        return tileIndex;
+    }
     uint8_t tileY = lcdY - getY();
     if ((tileY < 8 && !yFlip) || (tileY >= 8 && yFlip)) {
         return tileIndex & 0xFE;
