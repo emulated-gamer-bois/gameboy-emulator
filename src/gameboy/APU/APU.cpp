@@ -192,6 +192,11 @@ void APU::trigger_event(uint8_t source) {
 
             this->period_envelope_a = this->NR12 & 0x7;
             this->volume_envelope_a = (this->NR12 >> 4) & 0xF;
+
+            //Sweep
+            sweep_counter = (NR10 >> 4) & 7;
+            sweep_shadow_register = ((NR14 & 7) << 8) + NR13;
+
             this->readyToPlay |= 1;
             break;
         case 1:
@@ -287,7 +292,15 @@ void APU::vol_envelope_step(IVolumeController* vc) {
 }
 
 void APU::sweep_step() {
-    //TODO: Update with sweep
+    if((NR10 & 0x70) && !--sweep_counter) {
+        if(NR10 & 8) {
+            sweep_shadow_register -= sweep_shadow_register/(1 << (NR10 & 7));
+        } else {
+            sweep_shadow_register += sweep_shadow_register/(1 << (NR10 & 7));
+        }
+        sweep_counter = (NR10 >> 4) & 7;
+        readyToPlay |= 1;
+    }
 }
 
 void APU::update(uint16_t cpuCycles, IVolumeController* vc) {
@@ -323,7 +336,7 @@ APUState* APU::getAPUState() {
     return new APUState{
         (bool)(this->NR14 & 0x80),
         (uint8_t)((this->NR11 >> 6) & 0x3),
-        (uint16_t)((((uint16_t)(this->NR14 & 0x7)) << 8) + this->NR13),
+        sweep_shadow_register,
         (float)volume_envelope_a / 15.0f,
 
         (bool)(this->NR24 & 0x80),

@@ -99,6 +99,8 @@ private:
     uint8_t period_envelope_a;
     uint8_t volume_envelope_a;
     uint8_t length_counter_a;
+    uint8_t sweep_counter;
+    uint16_t sweep_shadow_register;
 
     uint8_t period_envelope_b;
     uint8_t volume_envelope_b;
