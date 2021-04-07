@@ -47,7 +47,6 @@ private:
     unsigned char duties[N_SOURCES][SQUARE_SAMPLE_RATE];
 
     void stopSource(int source);
-
 };
 
 
