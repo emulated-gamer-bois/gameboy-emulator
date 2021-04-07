@@ -13,10 +13,9 @@ TEST(AUDIO, START_SOUND) {
     AudioController a;
     a.playGBSquare(0, 2, 0x783, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    a.stopSource(0);
     a.playGBSquare(0, 2, 0x7C1, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    a.stopSource(0);
+    a.stopSound();
 }
 
 TEST(AUDIO, SAWTOOTH_WAVE) {
@@ -28,7 +27,7 @@ TEST(AUDIO, SAWTOOTH_WAVE) {
     AudioController a;
     a.playGBWave(0, sawTooth, 0x6D6, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    a.stopSource(0);
+    a.stopSound();
 }
 
 TEST(AUDIO, SIN_WAVE) {
@@ -41,17 +40,16 @@ TEST(AUDIO, SIN_WAVE) {
     AudioController a;
     a.playGBWave(0, sine, 0x6D6, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    a.stopSource(0);
+    a.stopSound();
 }
 
 TEST(AUDIO, START_SOUND_B) {
     AudioController a;
     a.playGBSquare(1, 2, 0x783, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    a.stopSource(1);
     a.playGBSquare(1, 2, 0x7C1, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    a.stopSource(1);
+    a.stopSound();
 }
 
 TEST(AUDIO, NOISE) {
@@ -74,6 +72,7 @@ TEST(AUDIO, NOISE) {
     AudioController a;
     a.playSound(3, samples, size, 10000, 0.1);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    a.stopSound();
 }
 
 TEST(AUDIO, PLAY_NOISE) {
@@ -82,56 +81,11 @@ TEST(AUDIO, PLAY_NOISE) {
     for(int i = 0; i < 8; i++){
         a.playNoise(3, 0, (262144*2)/divisors[i], 0.1);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        a.stopSource(3);
     }
 
     for(int i = 0; i < 8; i++){
         a.playNoise(3, 1, (262144*2)/divisors[i], 0.1);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        a.stopSource(3);
     }
-}
-
-TEST(AUDIO, FREQUENCY) {
-    AudioController a;
-    ALuint source;
-    ALuint buffers[2];
-
-    /*auto device = alcOpenDevice(nullptr);
-    auto context = alcCreateContext(device, nullptr);
-    alcMakeContextCurrent(context);*/
-
-    alGenBuffers(2, buffers);
-    alGenSources(1, &source);
-
-    alSourcef(source, AL_PITCH, 1);
-    alSourcef(source, AL_GAIN, 1.0f);
-    alSource3f(source, AL_POSITION, 0, 0, 0);
-    alSource3f(source, AL_VELOCITY, 0, 0, 0);
-    alSourcei(source, AL_LOOPING, AL_FALSE);
-
-    auto soundData = new unsigned char[]{0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0};
-    auto size = 8;
-    auto tone = 220;
-    auto buffer = 0;
-    auto optimized = false;
-    for(auto i = 0; i < 100; i++) {
-        if(optimized) {
-            alBufferData(buffers[buffer], AL_FORMAT_MONO8, soundData, size, size * tone);
-            alSourcef(source, AL_GAIN, 0.1f);
-            alSourcei(source, AL_LOOPING, 1);
-            alSourceStop(source);
-            alSourcei(source, AL_BUFFER, buffers[buffer]);
-            alSourcePlay(source);
-            //tone *= 2;
-            buffer = ++buffer % 2;
-        } else {
-            a.stopSource(0);
-            a.playSound(0, soundData, size, size * tone, 0.1f);
-            //tone *= 2;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    }
-
-    alSourceStop(source);
+    a.stopSound();
 }
