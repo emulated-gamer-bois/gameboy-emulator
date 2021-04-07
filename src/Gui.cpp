@@ -16,8 +16,7 @@
  * Constructor
  */
 
-Gui::Gui(std::shared_ptr<AppSettings> settings) {
-    this->settings = std::move(settings);
+Gui::Gui() {
     selectedFile = -1;
     disableWidgets();
     displayToolbar = true;
@@ -25,9 +24,10 @@ Gui::Gui(std::shared_ptr<AppSettings> settings) {
 
 /**
  */
-void Gui::init(SDL_Window *window,SDL_GLContext *glContext, char * glsl_version) {
+void Gui::init(SDL_Window *window,SDL_GLContext *glContext, char * glsl_version,std::shared_ptr<AppSettings> appSettings) {
     // File dialog init
-    fileExplorer.setCurrentDir(settings->romPath);
+    this->settings = std::move(appSettings);
+    fileExplorer.setCurrentDir(this->settings->romPath);
     fileExplorer.setFilter(".gb");
 
     // Setup Dear ImGui context
@@ -41,6 +41,7 @@ void Gui::init(SDL_Window *window,SDL_GLContext *glContext, char * glsl_version)
 /**
  */
 void Gui::handleGui(SDL_Window *window) {
+    displayToolbar=true;
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(window);
     ImGui::NewFrame();

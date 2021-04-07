@@ -22,16 +22,16 @@ if(NOT TRAVIS)
     add_executable ( ${PROJECT_NAME}
         main.cpp
         ${SHADERS}
-        Application.h
-        Application.cpp
+            application/Application.h
+            application/Application.cpp
         FileExplorer.h
         FileExplorer.cpp
         Gui.cpp
         Gui.h
-        Keybinds.cpp
-        Keybinds.h
-        AppSettings.h
-            )
+            application/Keybinds.cpp
+            application/Keybinds.h
+            application/AppSettings.h
+            View.cpp View.h Controller.cpp Controller.h application/State.h)
 
     target_link_libraries ( ${PROJECT_NAME} gameboy IO helpers )
     config_build_output()

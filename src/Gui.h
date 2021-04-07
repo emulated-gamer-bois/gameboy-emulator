@@ -8,15 +8,15 @@
 #include <imgui.h>
 #include <functional>
 
-#include "Keybinds.h"
+#include "Application/Keybinds.h"
 #include "FileExplorer.h"
-#include "AppSettings.h"
+#include "Application/AppSettings.h"
 #include "gameboy/Definitions.h"
 
 class Gui {
 public:
-    Gui(std::shared_ptr<AppSettings> settings);
-    void init(SDL_Window *window, SDL_GLContext *glContext,char *glsl_version);
+    Gui();
+    void init(SDL_Window *window, SDL_GLContext *glContext, char *glsl_version, std::shared_ptr<AppSettings> appSettings);
     void handleGui(SDL_Window *window);
     void handleInput(SDL_Event event);
     void terminate();
