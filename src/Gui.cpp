@@ -237,22 +237,24 @@ void Gui::showPaletteSettings() {
                     changeColor = true;
                 }
             }
+
+            // Preview palette
+            ImGui::SameLine(150.f, 0.f);
+            Palette temp = paletteHandler->getPalette(i);
+            ImVec4 c1 = ImVec4(temp.c1.r, temp.c1.g, temp.c1.b, 1.f);
+            ImVec4 c2 = ImVec4(temp.c2.r, temp.c2.g, temp.c2.b, 1.f);
+            ImVec4 c3 = ImVec4(temp.c3.r, temp.c3.g, temp.c3.b, 1.f);
+            ImVec4 c4 = ImVec4(temp.c4.r, temp.c4.g, temp.c4.b, 1.f);
+            ImGui::ColorButton("##c1", c1, ImGuiColorEditFlags_NoBorder, ImVec2(33.f, 13.f));
+            ImGui::SameLine(0.f, 0.f);
+            ImGui::ColorButton("##c2", c2, ImGuiColorEditFlags_NoBorder, ImVec2(33.f, 13.f));
+            ImGui::SameLine(0.f, 0.f);
+            ImGui::ColorButton("##c3", c3, ImGuiColorEditFlags_NoBorder, ImVec2(33.f, 13.f));
+            ImGui::SameLine(0.f, 0.f);
+            ImGui::ColorButton("##c4", c4, ImGuiColorEditFlags_NoBorder, ImVec2(33.f, 13.f));
         }
         ImGui::EndListBox();
     }
-
-    Palette temp = paletteHandler->getPalette(selectedPalette);
-    ImVec4 c1 = ImVec4(temp.c1.r, temp.c1.g, temp.c1.b, 1.f);
-    ImVec4 c2 = ImVec4(temp.c2.r, temp.c2.g, temp.c2.b, 1.f);
-    ImVec4 c3 = ImVec4(temp.c3.r, temp.c3.g, temp.c3.b, 1.f);
-    ImVec4 c4 = ImVec4(temp.c4.r, temp.c4.g, temp.c4.b, 1.f);
-    ImGui::ColorButton("##c1", c1, ImGuiColorEditFlags_NoBorder, ImVec2(87.5f, 30.f));
-    ImGui::SameLine(0.f, 0.f);
-    ImGui::ColorButton("##c2", c2, ImGuiColorEditFlags_NoBorder, ImVec2(87.5f, 30.f));
-    ImGui::SameLine(0.f, 0.f);
-    ImGui::ColorButton("##c3", c3, ImGuiColorEditFlags_NoBorder, ImVec2(87.5f, 30.f));
-    ImGui::SameLine(0.f, 0.f);
-    ImGui::ColorButton("##c4", c4, ImGuiColorEditFlags_NoBorder, ImVec2(87.5f, 30.f));
 
     ImGui::End();
 
