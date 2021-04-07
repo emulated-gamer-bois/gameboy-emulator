@@ -65,11 +65,29 @@ void AudioController::init() {
             } while(j % stepLength);
         }
     }
+
+    uint16_t lfsr7 = 0x7F;
+    uint16_t lfsr15 = 0x7FFF;
+    auto xor_res = 0;
+    for(auto i = 0; i < NOISE_BUFFER_SIZE; i++) {
+        xor_res = (lfsr15 ^ (lfsr15 >> 1)) & 1;
+        lfsr15 >>= 1;
+        lfsr15 |= xor_res << 14;
+        noise15bit[i] = lfsr15 & 1 ? 0 : (char)0xFF;
+
+        xor_res = (lfsr7 ^ (lfsr7 >> 1)) & 1;
+        lfsr7 >>= 1;
+        lfsr7 |= xor_res << 6;
+        noise7bit[i] = lfsr7 & 1 ? 0 : (char)0xFF;
+    }
 }
 
-void AudioController::playSound(int source, char *soundData, int size, int sampleRate) {
+void AudioController::playSound(int source, uint8_t *soundData, int size, int sampleRate, float volume) {
+    alSourcei(sources[source], AL_BUFFER, 0);
     alBufferData(buffers[source], AL_FORMAT_MONO8, soundData, size, sampleRate);
+    alSourcef(sources[source], AL_GAIN, volume);
     alSourcei(sources[source], AL_BUFFER, buffers[source]);
+    alSourcei(sources[source], AL_LOOPING, 1);
     alSourcePlay(sources[source]);
 }
 
@@ -142,4 +160,8 @@ void AudioController::setVolume(int source, float volume) {
 
 AudioController::AudioController() {
     init();
+}
+
+void AudioController::playNoise(int source, bool is_7_bit_mode, ALsizei frequency, float volume) {
+    playSound(source, is_7_bit_mode ? noise7bit : noise15bit, NOISE_BUFFER_SIZE, frequency, volume);
 }
