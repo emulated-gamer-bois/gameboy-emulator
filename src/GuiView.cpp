@@ -2,7 +2,7 @@
 // Created by isaaklindgren on 2021-03-18.
 //
 
-#include "Gui.h"
+#include "GuiView.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -16,23 +16,17 @@
  * Constructor
  */
 
-Gui::Gui(std::shared_ptr<AppSettings> settings, std::shared_ptr<PaletteHandler> paletteHandler) {
-    this->settings = std::move(settings);
-    this->paletteHandler = std::move(paletteHandler);
-    selectedFile = -1;
-    // TODO get from settings probably
-    selectedPalette = 0;
+GuiView::GuiView(AppSettings& settings, PaletteHandler& paletteHandler):
+    settings{settings}, paletteHandler{paletteHandler}, selectedFile{-1}, selectedPalette{-1}
+{
     disableWidgets();
     displayToolbar = true;
+
+    fileExplorer.setCurrentDir(settings.romPath);
+    fileExplorer.setFilter(".gb");
 }
 
-/**
- */
-void Gui::init(SDL_Window *window,SDL_GLContext *glContext, char * glsl_version) {
-    // File dialog init
-    fileExplorer.setCurrentDir(settings->romPath);
-    fileExplorer.setFilter(".gb");
-
+void GuiView::initImGui(SDL_Window *window, SDL_GLContext *glContext, char* glsl_version) {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -41,9 +35,8 @@ void Gui::init(SDL_Window *window,SDL_GLContext *glContext, char * glsl_version)
     ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
-/**
- */
-void Gui::handleGui(SDL_Window *window) {
+void GuiView::updateAndRender(SDL_Window *window) {
+    displayToolbar=true;
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(window);
     ImGui::NewFrame();
@@ -64,7 +57,7 @@ void Gui::handleGui(SDL_Window *window) {
 /**
  * Cleans up after ImGui.
  */
-void Gui::terminate() {
+void GuiView::terminate() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
@@ -72,14 +65,14 @@ void Gui::terminate() {
 
 /**
  */
-void Gui::handleInput(SDL_Event event) {
+void GuiView::handleInput(SDL_Event event) {
     ImGui_ImplSDL2_ProcessEvent(&event);
 }
 
 /**
  * Toggles the showToolbar.
  */
-void Gui::toggleGui() {
+void GuiView::toggleGui() {
     displayToolbar = !displayToolbar;
     if (!displayToolbar) {
         // Disable all widgets
@@ -87,17 +80,17 @@ void Gui::toggleGui() {
     }
 }
 
-void Gui::setLoadRomCallback(std::function<void(std::string)>&& loadRomCallback) {
+void GuiView::setLoadRomCallback(std::function<void(std::string)>&& loadRomCallback) {
     this->loadRomCallback = loadRomCallback;
 }
 
-void Gui::setChangePaletteCallback(std::function<void(int)>&& changePaletteCallback) {
+void GuiView::setChangePaletteCallback(std::function<void(int)>&& changePaletteCallback) {
     this->changePaletteCallback = changePaletteCallback;
 }
 
-void Gui::showEditControls() {
+void GuiView::showEditControls() {
     ImGui::Begin("Controls", &displayEditControls, windowFlags);
-    for (int i = 0; i < settings->keyBinds.keybinds.capacity(); i++) {
+    for (int i = 0; i < settings.keyBinds.keybinds.capacity(); i++) {
         if (i == KEY_INDEX_JOYPAD_START) {
             ImGui::Text("JoyPad Keys ");
             ImGui::Spacing();
@@ -107,7 +100,7 @@ void Gui::showEditControls() {
         }
 
         ImGui::Indent(indentSpace);
-        ImGui::Text("%s", settings->keyBinds.keybinds[i]->action_description.c_str());
+        ImGui::Text("%s", settings.keyBinds.keybinds[i]->action_description.c_str());
         ImGui::SameLine(130,0);
 
         if(waitingForKeyBind && keyBindIndex == i) {
@@ -117,7 +110,7 @@ void Gui::showEditControls() {
         }
 
         ImVec2 buttonSize(90, 18);
-        if (ImGui::Button(settings->keyBinds.keybinds[i]->keybind.c_str(), buttonSize)) {
+        if (ImGui::Button(settings.keyBinds.keybinds[i]->keybind.c_str(), buttonSize)) {
             keyBindIndex = i;
             waitingForKeyBind = true;
         }
@@ -129,7 +122,7 @@ void Gui::showEditControls() {
     ImGui::End();
 }
 
-void Gui::showFileDialog() {
+void GuiView::showFileDialog() {
     bool loadRom = false;
 
     ImGui::Begin("Load ROM", &displayFileDialog, windowFlags);
@@ -169,11 +162,11 @@ void Gui::showFileDialog() {
     ImGui::SameLine();
     ImGui::BeginChild("RomFolderButtons", ImVec2(140, listBoxHeight), true);
     if (ImGui::Button("Set Rom Folder")) {
-        settings->romPath = fileExplorer.getCurrentDir().absolutePath;
+        settings.romPath = fileExplorer.getCurrentDir().absolutePath;
     }
     ImGui::Spacing();
     if (ImGui::Button("Go to Rom Folder")) {
-        fileExplorer.setCurrentDir(settings->romPath);
+        fileExplorer.setCurrentDir(settings.romPath);
     }
     ImGui::EndChild();
     ImGui::Unindent(indentSpace);
@@ -220,7 +213,7 @@ void Gui::showFileDialog() {
     }
 }
 
-void Gui::showPaletteSettings() {
+void GuiView::showPaletteSettings() {
     bool changeColor = false;
 
     ImGui::Begin("Palette Settings", &displayPaletteSettings, windowFlags);
@@ -228,10 +221,10 @@ void Gui::showPaletteSettings() {
     ImGui::Text("Palette Select ");
     ImGui::Indent(indentSpace);
     if (ImGui::BeginListBox("##PaletteList", ImVec2(listBoxWidth, listBoxHeight))) {
-        for (int i = 0; i < paletteHandler->getPaletteAmount(); i++) {
+        for (int i = 0; i < paletteHandler.getPaletteAmount(); i++) {
             int flags = ImGuiSelectableFlags_AllowDoubleClick;
             bool isSelected = (selectedPalette == i);
-            if (ImGui::Selectable(paletteHandler->getPaletteName(i).c_str(), isSelected, flags)) {
+            if (ImGui::Selectable(paletteHandler.getPaletteName(i).c_str(), isSelected, flags)) {
                 selectedPalette = i;
                 if (ImGui::IsMouseDoubleClicked(0)) {
                     changeColor = true;
@@ -240,7 +233,7 @@ void Gui::showPaletteSettings() {
 
             // Preview palette
             ImGui::SameLine(150.f, 0.f);
-            Palette temp = paletteHandler->getPalette(i);
+            Palette temp = paletteHandler.getPalette(i);
             ImVec4 c1 = ImVec4(temp.c1.r, temp.c1.g, temp.c1.b, 1.f);
             ImVec4 c2 = ImVec4(temp.c2.r, temp.c2.g, temp.c2.b, 1.f);
             ImVec4 c3 = ImVec4(temp.c3.r, temp.c3.g, temp.c3.b, 1.f);
@@ -267,7 +260,7 @@ void Gui::showPaletteSettings() {
     }
 }
 
-void Gui::showToolbar() {
+void GuiView::showToolbar() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Load ROM", "")) {
@@ -290,7 +283,7 @@ void Gui::showToolbar() {
     }
 }
 
-void Gui::displayPlaySpeed(){
+void GuiView::displayPlaySpeed(){
      //TODO allow for slowing down the play speed.
     if (ImGui::BeginMenu("Emulation speed")) {
         float speed = MIN_EMULATION_SPEED_FLOAT;
@@ -298,7 +291,7 @@ void Gui::displayPlaySpeed(){
             std::stringstream ss;
             ss << speed << 'x';
             if (ImGui::MenuItem(ss.str().c_str())) {
-                    settings->emulationSpeedMultiplier = speed;
+                    settings.emulationSpeedMultiplier = speed;
             }
 
             speed = speed * 2;
@@ -307,13 +300,13 @@ void Gui::displayPlaySpeed(){
     }
  }
 
-void Gui::keyBind() {
-    if(settings->keyBinds.editKeyBinds(ImGui::GetIO().KeysDown, keyBindIndex)){
+void GuiView::keyBind() {
+    if(settings.keyBinds.editKeyBinds(ImGui::GetIO().KeysDown, keyBindIndex)){
         waitingForKeyBind=false;
     }
 }
 
-void Gui::disableWidgets() {
+void GuiView::disableWidgets() {
     displayEditControls = false;
     displayFileDialog = false;
     displayPaletteSettings = false;

@@ -19,4 +19,9 @@ struct APUState {
     std::array<uint8_t, 16> waveform_wave;
     uint16_t frequency_wave;
     float volume_wave;
+
+    bool enable_noise;
+    int frequency_noise;
+    float volume_noise;
+    bool is_7_bit_mode;
 };

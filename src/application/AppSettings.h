@@ -9,13 +9,17 @@
 #include <string>
 
 #include "Keybinds.h"
-#include "IO/Palette.h"
-#include "gameboy/Definitions.h"
 
-struct AppSettings {
+#include "../gameboy/Definitions.h"
+
+class AppSettings {
+public:
     std::string romPath; // The path where the file dialog will always be in when opened.
     Keybinds keyBinds;
     int screenMultiplier;
-    Palette palette;
+    int paletteNumber;
     float emulationSpeedMultiplier;
+
+    AppSettings();
+    ~AppSettings();
 };

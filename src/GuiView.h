@@ -8,20 +8,21 @@
 #include <imgui.h>
 #include <functional>
 
-#include "Keybinds.h"
+#include "application/Keybinds.h"
 #include "FileExplorer.h"
-#include "AppSettings.h"
 #include "IO/PaletteHandler.h"
 #include "helpers/ErrorReport.h"
+#include "application/AppSettings.h"
 #include "gameboy/Definitions.h"
 
-class Gui {
+class GuiView {
 public:
-    Gui(std::shared_ptr<AppSettings> settings, std::shared_ptr<PaletteHandler> paletteHandler);
-    void init(SDL_Window *window, SDL_GLContext *glContext,char *glsl_version);
-    void handleGui(SDL_Window *window);
+    explicit GuiView(AppSettings& settings, PaletteHandler& paletteHandler);
+
+    void updateAndRender(SDL_Window *window);
     void handleInput(SDL_Event event);
     void terminate();
+    void initImGui(SDL_Window *window, SDL_GLContext *glContext, char *glsl_version);
 
     // Enables/Disables the gui
     void toggleGui();
@@ -38,8 +39,8 @@ private:
     const float listBoxHeight = 150.f;
     const int windowFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse;
 
-    std::shared_ptr<AppSettings> settings;
-    std::shared_ptr<PaletteHandler> paletteHandler;
+    AppSettings& settings;
+    PaletteHandler& paletteHandler;
     bool displayEditControls;
     bool displayFileDialog;
     bool displayPaletteSettings;

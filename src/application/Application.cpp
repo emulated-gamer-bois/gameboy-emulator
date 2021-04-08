@@ -1,0 +1,188 @@
+// Uncomment if opengl won't work
+/*
+#ifdef _WIN32
+extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
+#endif
+*/
+
+#include "Application.h"
+#include "../helpers/AppTimer.h"
+
+/**
+ * Constructor
+ */
+Application::Application() : framesUntilStep{0}, state{State::MENU},
+    renderView(settings, paletteHandler), guiView(settings, paletteHandler),
+    controller(settings, guiView, gameBoy)
+{
+    initSDL(); // Creates gl context and sdl window. This needs to be called before other inits.
+    renderView.initGL();
+    guiView.initImGui(window, &glContext, "#version 130");
+
+    guiView.setLoadRomCallback([this](std::string&& romPath) -> void {
+        gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", romPath);
+        state = State::EMULATION;
+        guiView.toggleGui();
+    });
+
+    guiView.setChangePaletteCallback([this](int index) -> void {
+        settings.paletteNumber = index;
+        state = State::EMULATION;
+        guiView.toggleGui();
+    });
+}
+
+/**
+ */
+void Application::start() {
+    AppTimer timer;
+    float frameTime = 1000.f / LCD_REFRESH_RATE;
+
+    while (state != State::TERMINATION) {
+        // Create time stamp.
+        timer.tick();
+
+        // Resize window if requested
+        updateSDLWindowSize();
+
+        // Clear renderView
+        renderView.clear();
+
+        // Step through emulation until playspeed number of frames are produced, then display the last one.
+        if (state == State::EMULATION && gameBoy.isOn()) {
+            stepEmulation();
+            if (gameBoy.isReadyToDraw()) {
+                gameBoy.confirmDraw();
+            }
+            renderView.setScreenTexture(gameBoy.getScreenTexture().get());
+        }
+        renderView.render();
+
+        this->state = controller.handleSDLEvents(state);
+
+        // Render menu
+        if (state == State::MENU) {
+            audio.stopSound();
+            guiView.updateAndRender(window);
+        }
+        SDL_GL_SwapWindow(window);
+
+        // Time application to 60Hz
+        float msSinceTick = timer.msSinceTick();
+        if (msSinceTick < frameTime) {
+            int msToSleep = frameTime - msSinceTick;
+            std::this_thread::sleep_for(std::chrono::milliseconds(msToSleep));
+        }
+    }
+
+    if (gameBoy.save()) {
+        std::cout << "Saved successfully" << std::endl;
+    } else {
+        std::cout << "Save failed" << std::endl;
+    }
+
+    terminate();
+}
+
+void Application::initSDL() {
+// Initialize SDL and check if SDL could be initialize.
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        FATAL_ERROR("SDL failed to initialize");
+    }
+    atexit(SDL_Quit);
+    SDL_GL_LoadLibrary(nullptr); // Load the default OpenGL library
+
+    // Request an OpenGL 4.1 context and require hardware acceleration.
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
+    // Use double buffering. May be on by default. Not sure.
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+    // Create the window.
+    window = SDL_CreateWindow(EMULATOR_NAME_STRING,
+                              SDL_WINDOWPOS_UNDEFINED,
+                              SDL_WINDOWPOS_UNDEFINED,
+                              LCD_WIDTH,
+                              LCD_HEIGHT,
+                              SDL_WINDOW_OPENGL);
+    if (!window) {FATAL_ERROR("Failed to create SDL window."); }
+
+    // Get gl context and set it to the current context for this window.
+    glContext = SDL_GL_CreateContext(window);
+    if (!glContext) {FATAL_ERROR("Failed to create GL context."); }
+
+    // Don't know if this is needed.
+    glewInit();
+
+    // Disable v-sync. The gameboy lcd is 60Hz and that will be synced manually.
+    SDL_GL_SetSwapInterval(0);
+
+    // Workaround for AMD. Must not be removed.
+    if (!glBindFragDataLocation) {
+        glBindFragDataLocation = glBindFragDataLocationEXT;
+    }
+}
+
+void Application::terminate() {
+    guiView.terminate();
+
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+}
+
+void Application::stepFast() {
+    for (int i = 0; i < settings.emulationSpeedMultiplier; i++) {
+        gameBoyStep();
+    }
+}
+
+void Application::stepSlowly() {
+    if (framesUntilStep == 0) {
+        gameBoyStep();
+        framesUntilStep = 1 / settings.emulationSpeedMultiplier;
+    }
+    framesUntilStep--;
+}
+
+void Application::gameBoyStep() {
+    if (gameBoy.isReadyToDraw()) {
+        //Actually discards frame until settings->playSpeed number of frames have been produced.
+        gameBoy.confirmDraw();
+    }
+    while (!gameBoy.isReadyToDraw()) {
+        gameBoy.step(&audio);
+    }
+
+    auto playSound = gameBoy.isReadyToPlaySound();
+    if (playSound) {
+        audio.stepSound(playSound, gameBoy.getAPUState());
+        gameBoy.confirmPlay();
+    }
+}
+
+void Application::stepEmulation() {
+    if (settings.emulationSpeedMultiplier == 1) {
+        gameBoyStep();
+    } else if (settings.emulationSpeedMultiplier < 1) {
+        stepSlowly();
+    } else {
+        stepFast();
+    }
+}
+
+/**
+ * Makes sure the window dimensions updates to match changes in RenderView dimensions.
+ */
+void Application::updateSDLWindowSize() {
+    int oldWidth, oldHeight, newWidth, newHeight;
+    SDL_GetWindowSize(window, &oldWidth, &oldHeight);
+    newWidth = LCD_WIDTH * settings.screenMultiplier;
+    newHeight = LCD_HEIGHT * settings.screenMultiplier;
+
+    if (oldWidth != newWidth || oldHeight != newHeight) {
+        SDL_SetWindowSize(window, newWidth, newHeight);
+    }
+}
+
