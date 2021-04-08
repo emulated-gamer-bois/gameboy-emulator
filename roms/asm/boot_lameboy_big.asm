@@ -14,25 +14,7 @@ Start:
     ld hl, $ff47
     ld [hl], $e4
 
-Setup_Sound:				; CODE XREF: sub_0000+82p
-		ld	a, $80 ; '€'
-		ld	[unk_FF26], a	; Enable sound system, all channels OFF
-		ld	[unk_FF11], a	; Sound	wave duty 50%
-		ld	a, $F3 ; 'ó'
-		ld	[unk_FF12], a	; Init Envelope
-		ld	[unk_FF25], a	; Set enabled soudn channels
-		ld	a, $77 ; 'w'
-		ld	[unk_FF24], a	; Set full volume
-		ld	hl, $FF30	; Setup	00 FF repeating	waveform in wave RAM
-		xor	a
-		ld	c, $10
-
-_loop_clear_wave_data:			; CODE XREF: Setup_Sound+19j
-		ldi	[hl], a
-		cpl
-		dec	c
-		jr	nz, _loop_clear_wave_data
-; End of function Setup_Sound
+    call Setup_Sound
 
     ;Set map positions
 SetMap:
@@ -120,6 +102,27 @@ LoadTiles:
     jr .loop_byte
 
 .end:
+
+; Initializes sound
+Setup_Sound:				; CODE XREF: sub_0000+82p
+		ld	a, $80 ; '€'
+		ld	[unk_FF26], a	; Enable sound system, all channels OFF
+		ld	[unk_FF11], a	; Sound	wave duty 50%
+		ld	a, $F3 ; 'ó'
+		ld	[unk_FF12], a	; Init Envelope
+		ld	[unk_FF25], a	; Set enabled soudn channels
+		ld	a, $77 ; 'w'
+		ld	[unk_FF24], a	; Set full volume
+		ld	hl, $FF30	; Setup	00 FF repeating	waveform in wave RAM
+		xor	a
+		ld	c, $10
+
+_loop_clear_wave_data:			; CODE XREF: Setup_Sound+19j
+		ldi	[hl], a
+		cpl
+		dec	c
+		jr	nz, _loop_clear_wave_data
+; End of function Setup_Sound
 
 Animation:
     ld hl, $ff42    ; addr for camera pos
