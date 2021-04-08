@@ -17,10 +17,10 @@
 #include "../helpers/ErrorReport.h"
 #include "imgui.h"
 #include "AppSettings.h"
-#include "../Gui.h"
+#include "../IO/Gui.h"
 #include "Keybinds.h"
-#include "../View.h"
-#include "../Controller.h"
+#include "../IO/View.h"
+#include "../IO/Controller.h"
 #include "State.h"
 
 class Application {

@@ -8,8 +8,8 @@
 
 #include <memory>
 #include <functional>
-#include "Application/AppSettings.h"
-#include "IO/RenderView.h"
+#include "../application/AppSettings.h"
+#include "RenderView.h"
 #include "Gui.h"
 
 class View {
