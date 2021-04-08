@@ -3,6 +3,7 @@
 //
 
 #include "AudioController.h"
+#include "../gameboy/APU/APUState.h"
 
 AudioController::~AudioController() {
     alDeleteSources(4, sources);
@@ -164,4 +165,44 @@ AudioController::AudioController() {
 
 void AudioController::playNoise(int source, bool is_7_bit_mode, ALsizei frequency, float volume) {
     playSound(source, is_7_bit_mode ? noise7bit : noise15bit, NOISE_BUFFER_SIZE, frequency, volume);
+}
+
+void AudioController::stopSound() {
+    for(int i=0;i<N_SOURCES;i++){
+        stopSource(i);
+    }
+}
+
+void AudioController::stepSound(uint8_t i, APUState *state) {
+
+    //1st square
+    if (i & 1) {
+        stopSource(0);
+        if (state->enable_square_a) {
+            playGBSquare(0, state->duty_square_a, state->frequency_square_a, state->volume_square_a);
+        }
+    }
+
+    //2nd square
+    if (i & 2) {
+        stopSource(1);
+        if (state->enable_square_b) {
+            playGBSquare(1, state->duty_square_b, state->frequency_square_b, state->volume_square_b);
+        }
+    }
+
+    //Wave
+    if (i & 4) {
+        stopSource(2);
+        if (state->enable_wave) {
+            playGBWave(2, state->waveform_wave, state->frequency_wave, state->volume_wave);
+        }
+    }
+    //Noise
+    if(i & 8) {
+        stopSource(3);
+        if(state->enable_noise) {
+            playNoise(3, state->is_7_bit_mode, state->frequency_noise, state->volume_noise);
+        }
+    }
 }
