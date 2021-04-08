@@ -8,10 +8,10 @@
 #include <imgui.h>
 #include <functional>
 
-#include "Application/Keybinds.h"
+#include "../application/Keybinds.h"
 #include "FileExplorer.h"
-#include "Application/AppSettings.h"
-#include "gameboy/Definitions.h"
+#include "../application/AppSettings.h"
+#include "../gameboy/Definitions.h"
 
 class Gui {
 public:

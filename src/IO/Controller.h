@@ -8,17 +8,17 @@
 #include <string>
 #include <chrono> // time
 #include <thread> // sleep
-#include "IO/RenderView.h"
-#include "gameboy/GameBoy.h"
-#include "gameboy/Definitions.h"
-#include "IO/AudioController.h"
-#include "helpers/ErrorReport.h"
+#include "RenderView.h"
+#include "../gameboy/GameBoy.h"
+#include "../gameboy/Definitions.h"
+#include "AudioController.h"
+#include "../helpers/ErrorReport.h"
 #include "imgui.h"
-#include "application/AppSettings.h"
+#include "../application/AppSettings.h"
 #include "Gui.h"
-#include "application/Keybinds.h"
+#include "../application/Keybinds.h"
 #include "View.h"
-#include "application/State.h"
+#include "../application/State.h"
 
 class Controller {
 public:

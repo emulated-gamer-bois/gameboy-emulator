@@ -78,13 +78,13 @@ TEST(AUDIO, NOISE) {
 TEST(AUDIO, PLAY_NOISE) {
     AudioController a;
     uint8_t divisors[8] = {8,16,32,48,64,80,96,112};
-    for(int i = 0; i < 8; i++){
-        a.playNoise(3, 0, (262144*2)/divisors[i], 0.1);
+    for(unsigned char divisor : divisors){
+        a.playNoise(3, 0, (262144*2)/divisor, 0.1);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    for(int i = 0; i < 8; i++){
-        a.playNoise(3, 1, (262144*2)/divisors[i], 0.1);
+    for(unsigned char divisor : divisors){
+        a.playNoise(3, 1, (262144*2)/divisor, 0.1);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     a.stopSound();
