@@ -89,3 +89,14 @@ TEST(AUDIO, PLAY_NOISE) {
     }
     a.stopSound();
 }
+
+TEST(AUDIO, RIGHT_LEFT) {
+    AudioController a;
+    a.setVolumeLR(1, 0);
+    a.playGBSquare(0, 2, 0x783, 0.1f);
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    a.setVolumeLR(0, 1);
+    a.playGBSquare(0, 2, 0x783, 0.1f);
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    a.stopSound();
+}

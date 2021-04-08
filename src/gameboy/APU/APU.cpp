@@ -12,6 +12,7 @@ APU::APU() {
     this->volume_envelope_a = 0;
     this->volume_envelope_b = 0;
     this->reset();
+    wavePatternRAM.fill(0);
 }
 
 uint8_t APU::read(uint16_t address) const {
@@ -42,9 +43,12 @@ uint8_t APU::read(uint16_t address) const {
         case NR51_ADDRESS:
             return this->NR51;
         case NR52_ADDRESS:
-            return this->NR52;
+             return NR52 |                  //Power status at bit 7
+             ((NR44 >> 4) & 8) |            //Noise status at bit 3
+             (((NR34 & NR30) >> 5) & 4) |   //Wave status at bit 2
+             ((NR24 >> 6) & 2) |            //Square 2 status at bit 1
+             (NR14 >> 7);                   //Square 1 status at bit 0
         default:
-            //std::cout << "Tried to read from unimplemented audio address " << address << std::endl;
             return 0;
     }
 }
@@ -132,7 +136,11 @@ void APU::write(uint16_t address, uint8_t data) {
             this->NR51 = data;
             return;
         case NR52_ADDRESS:
-            this->NR52 = data;
+            this->NR52 = data & 0x80;
+            if(!(this->NR52 & 0x80)) {
+                reset();
+                readyToPlay |= 0xF;
+            }
             return;
         default:
             if(address >= WAVE_PATTERN_START && address <= WAVE_PATTERN_END){
@@ -160,13 +168,12 @@ void APU::reset() {
     NR33 = 0;
     NR34 = 0;
 
-    wavePatternRAM.fill(0);
-
     NR41 = 0;
     NR42 = 0;
     NR43 = 0;
     NR44 = 0;
 
+    NR50mem = 0;
     NR50 = 0;
     NR51 = 0;
     NR52 = 0;
@@ -303,7 +310,26 @@ void APU::sweep_step() {
     }
 }
 
+float volumeLeft(uint8_t NR50) {
+    return ((NR50 >> 4) & 7) / 7.0f;
+}
+
+float volumeRight(uint8_t NR50) {
+    return (NR50 & 7) / 7.0f;
+}
+
+float masterVolume(uint8_t NR50) {
+    auto left = volumeLeft(NR50), right = volumeRight(NR50);
+    return left > right ? left : right;
+}
+
 void APU::update(uint16_t cpuCycles, IVolumeController* vc) {
+    if(NR50mem != NR50) {
+        std::cout << "NR50 changed!\n";
+        vc->setVolumeLR(volumeLeft(NR50), volumeRight(NR50));
+        NR50mem = NR50;
+    }
+
     this->accumulated_cycles += cpuCycles;
     if(this->accumulated_cycles < CLOCK_CYCLE_THRESHOLD) {
         return;
@@ -334,24 +360,24 @@ void APU::confirmPlay() {
 //Returns the state of the
 APUState* APU::getAPUState() {
     return new APUState{
-        (bool)(this->NR14 & 0x80),
+        (NR14 & 0x80) && (NR52 & 0x80),
         (uint8_t)((this->NR11 >> 6) & 0x3),
         sweep_shadow_register,
-        (float)volume_envelope_a / 15.0f,
+        masterVolume(NR50) * volume_envelope_a / 15.0f,
 
-        (bool)(this->NR24 & 0x80),
+        (NR24 & 0x80) && (NR52 & 0x80),
         (uint8_t)((this->NR21 >> 6) & 0x3),
         (uint16_t)((((uint16_t)(this->NR24 & 0x7)) << 8) + this->NR23),
-        (float)volume_envelope_b / 15.0f,
+        masterVolume(NR50) * volume_envelope_b / 15.0f,
 
-        (this->NR34 & 0x80) && (this->NR30 & 0x80),
+        (NR34 & 0x80) && (NR30 & 0x80) && (NR52 & 0x80),
         wavePatternRAM,
         (uint16_t)((((uint16_t)(this->NR34 & 0x7)) << 8) + this->NR33),
-        WAVE_VOLUMES[(this->NR32 >> 5) & 0x3],
+        masterVolume(NR50) * WAVE_VOLUMES[(this->NR32 >> 5) & 0x3],
 
-        (bool)(this->NR44 & 0x80),
+        (NR44 & 0x80) && (NR52 & 0x80),
         (int)((524288.0 / (NR43 & 0x07 ? NR43 & 0x07 : 0.5f)) / (2 << (NR43 >> 4))),
-        (float)volume_envelope_noise/15.0f,
+        masterVolume(NR50) * volume_envelope_noise/15.0f,
         (bool)(this->NR43 & 8)
     };
 }

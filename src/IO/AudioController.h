@@ -27,8 +27,7 @@ public:
     void setVolume(int source, float volume);
     void playNoise(int source, bool is_7_bit_mode, ALsizei frequency, float volume);
     void stopSound();
-
-
+    void setVolumeLR(float l, float r);
     void stepSound(uint8_t i, APUState *state);
 
 private:

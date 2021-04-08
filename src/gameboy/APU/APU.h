@@ -92,6 +92,7 @@ private:
     uint8_t NR51;
     uint8_t NR52;
 
+    uint8_t NR50mem;
     uint8_t readyToPlay;
     int accumulated_cycles;
     uint8_t state;
