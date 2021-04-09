@@ -15,7 +15,7 @@
 class View {
 public:
     View(std::shared_ptr<AppSettings> sharedPtr);
-    void View::init(std::function<void(std::string)> &&loadRomCallback,int screenMultiplier);
+    void init(std::function<void(std::string)> &&loadRomCallback,int screenMultiplier);
     void render(bool renderEmu, uint8_t *textureData);
     void renderGui();
     void terminateView();
