@@ -157,6 +157,7 @@ void APU::reset() {
     NR30 = 0;
     NR31 = 0;
     NR32 = 0;
+    NR32mem = 0;
     NR33 = 0;
     NR34 = 0;
 
@@ -304,6 +305,10 @@ void APU::sweep_step() {
 }
 
 void APU::update(uint16_t cpuCycles, IVolumeController* vc) {
+    if(NR32 != NR32mem) {
+        vc->setVolume(2, WAVE_VOLUMES[(this->NR32 >> 5) & 0x3]);
+        NR32mem = NR32;
+    }
     this->accumulated_cycles += cpuCycles;
     if(this->accumulated_cycles < CLOCK_CYCLE_THRESHOLD) {
         return;
