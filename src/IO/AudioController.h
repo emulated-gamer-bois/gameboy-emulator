@@ -39,6 +39,7 @@ private:
     ALCdevice* device;
     ALCcontext* context;
 
+    ALuint tmpBuffer;
     ALuint buffers[N_SOURCES];
     ALuint sources[N_SOURCES];
 

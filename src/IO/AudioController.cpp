@@ -40,6 +40,7 @@ void AudioController::init() {
         return;
     }
 
+    alGenBuffers(1, &tmpBuffer);
     alGenBuffers(N_SOURCES, buffers);
     alGenSources(N_SOURCES, sources);
 
@@ -83,13 +84,20 @@ void AudioController::init() {
     }
 }
 
+void swap(ALuint *a, ALuint *b) {
+    auto tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
 void AudioController::playSound(int source, uint8_t *soundData, int size, int sampleRate, float volume) {
-    alSourcei(sources[source], AL_BUFFER, 0);
-    alBufferData(buffers[source], AL_FORMAT_MONO8, soundData, size, sampleRate);
+    alBufferData(tmpBuffer, AL_FORMAT_MONO8, soundData, size, sampleRate);
     alSourcef(sources[source], AL_GAIN, volume);
-    alSourcei(sources[source], AL_BUFFER, buffers[source]);
-    alSourcei(sources[source], AL_LOOPING, 1);
+    alSourceStop(sources[source]);
+    alSourcei(sources[source], AL_BUFFER, tmpBuffer);
     alSourcePlay(sources[source]);
+    alSourcei(sources[source], AL_LOOPING, 1);
+    swap(&tmpBuffer, buffers + source);
 }
 
 /**
@@ -99,17 +107,19 @@ void AudioController::playSound(int source, uint8_t *soundData, int size, int sa
  * @param frequency the frequency of the sound
  */
 void AudioController::playSquare(int source, char duty, ALsizei frequency, float volume) {
-    alSourcei(sources[source], AL_BUFFER, 0);
+    //alSourcei(sources[source], AL_BUFFER, 0);
     alBufferData(
-        buffers[source],
+        tmpBuffer,
         AL_FORMAT_MONO8,
         duties[duty],
         SQUARE_SAMPLE_RATE,
         SQUARE_SAMPLE_RATE * frequency);
     alSourcef(sources[source], AL_GAIN, volume);
-    alSourcei(sources[source], AL_BUFFER, buffers[source]);
-    alSourcei(sources[source], AL_LOOPING, 1);
+    alSourceStop(sources[source]);
+    alSourcei(sources[source], AL_BUFFER, tmpBuffer);
     alSourcePlay(sources[source]);
+    alSourcei(sources[source], AL_LOOPING, 1);
+    swap(&tmpBuffer, buffers + source);
 }
 
 /**
@@ -136,19 +146,20 @@ void AudioController::playWave(int source, std::array<uint8_t, 16> waveForm, ALs
         wave[i*2+1] = form * form;
     }
 
-    alSourcei(sources[source], AL_BUFFER, 0);
     alBufferData(
-            buffers[source],
+            tmpBuffer,
             AL_FORMAT_MONO8,
             wave,
             32,
             32 * frequency);
     alSourcef(sources[source], AL_GAIN, volume);
-    alSourcei(sources[source], AL_BUFFER, buffers[source]);
-    alSourcei(sources[source], AL_LOOPING, 1);
+    alSourceStop(sources[source]);
+    alSourcei(sources[source], AL_BUFFER, tmpBuffer);
     alSourcePlay(sources[source]);
+    alSourcei(sources[source], AL_LOOPING, 1);
 
     delete[] wave;
+    swap(&tmpBuffer, buffers + source);
 }
 
 void AudioController::playGBWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency, float volume) {
@@ -177,32 +188,36 @@ void AudioController::stepSound(uint8_t i, APUState *state) {
 
     //1st square
     if (i & 1) {
-        stopSource(0);
         if (state->enable_square_a) {
             playGBSquare(0, state->duty_square_a, state->frequency_square_a, state->volume_square_a);
+        } else {
+            stopSource(0);
         }
     }
 
     //2nd square
     if (i & 2) {
-        stopSource(1);
         if (state->enable_square_b) {
             playGBSquare(1, state->duty_square_b, state->frequency_square_b, state->volume_square_b);
+        } else {
+            stopSource(1);
         }
     }
 
     //Wave
     if (i & 4) {
-        stopSource(2);
         if (state->enable_wave) {
             playGBWave(2, state->waveform_wave, state->frequency_wave, state->volume_wave);
+        } else {
+            stopSource(2);
         }
     }
     //Noise
     if(i & 8) {
-        stopSource(3);
         if(state->enable_noise) {
             playNoise(3, state->is_7_bit_mode, state->frequency_noise, state->volume_noise);
+        } else {
+            stopSource(3);
         }
     }
 }

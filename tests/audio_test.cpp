@@ -13,7 +13,6 @@ TEST(AUDIO, START_SOUND) {
     AudioController a;
     a.playGBSquare(0, 2, 0x783, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    a.stopSound();
     a.playGBSquare(0, 2, 0x7C1, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     a.stopSound();
@@ -48,7 +47,6 @@ TEST(AUDIO, START_SOUND_B) {
     AudioController a;
     a.playGBSquare(1, 2, 0x783, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    a.stopSound();
     a.playGBSquare(1, 2, 0x7C1, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     a.stopSound();
@@ -74,6 +72,7 @@ TEST(AUDIO, NOISE) {
     AudioController a;
     a.playSound(3, samples, size, 10000, 0.1);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    a.stopSound();
 }
 
 TEST(AUDIO, PLAY_NOISE) {
@@ -82,12 +81,11 @@ TEST(AUDIO, PLAY_NOISE) {
     for(unsigned char divisor : divisors){
         a.playNoise(3, 0, (262144*2)/divisor, 0.1);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        a.stopSound();
     }
 
     for(unsigned char divisor : divisors){
         a.playNoise(3, 1, (262144*2)/divisor, 0.1);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        a.stopSound();
     }
+    a.stopSound();
 }
