@@ -221,9 +221,3 @@ void AudioController::stepSound(uint8_t i, APUState *state) {
         }
     }
 }
-
-void AudioController::setVolumeLR(float l, float r) {
-    for(auto i = 0; i < N_SOURCES; i++) {
-        alSource3f(sources[i], AL_POSITION, r-l, 0, 0);
-    }
-}

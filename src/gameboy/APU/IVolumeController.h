@@ -7,5 +7,4 @@
 class IVolumeController {
 public:
     virtual void setVolume(int source, float volume) = 0;
-    virtual void setVolumeLR(float l, float r) = 0;
 };

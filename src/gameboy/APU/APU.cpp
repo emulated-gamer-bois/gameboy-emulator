@@ -173,7 +173,6 @@ void APU::reset() {
     NR43 = 0;
     NR44 = 0;
 
-    NR50mem = 0;
     NR50 = 0;
     NR51 = 0;
     NR52 = 0;
@@ -324,12 +323,6 @@ float masterVolume(uint8_t NR50) {
 }
 
 void APU::update(uint16_t cpuCycles, IVolumeController* vc) {
-    if(NR50mem != NR50) {
-        std::cout << "NR50 changed!\n";
-        vc->setVolumeLR(volumeLeft(NR50), volumeRight(NR50));
-        NR50mem = NR50;
-    }
-
     this->accumulated_cycles += cpuCycles;
     if(this->accumulated_cycles < CLOCK_CYCLE_THRESHOLD) {
         return;
