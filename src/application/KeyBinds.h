@@ -11,9 +11,9 @@
 
 
 
-class Keybinds {
+class KeyBinds {
 public:
-    void init_keybinds();
+    KeyBinds();
     struct action {
         std::string action_description;
         std::string keybind;

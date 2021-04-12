@@ -16,7 +16,7 @@
 #include "imgui.h"
 #include "application/AppSettings.h"
 #include "GuiView.h"
-#include "application/Keybinds.h"
+#include "application/KeyBinds.h"
 #include "application/State.h"
 
 class Controller {

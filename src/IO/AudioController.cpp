@@ -185,7 +185,6 @@ void AudioController::stopSound() {
 }
 
 void AudioController::stepSound(uint8_t i, APUState *state) {
-
     //1st square
     if (i & 1) {
         if (state->enable_square_a) {

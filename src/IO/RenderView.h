@@ -27,6 +27,8 @@ public:
     void render() const;
     void clear() const;
     void setScreenTexture(uint8_t textureData[]);
+    void setViewportPos(int x, int y);
+    void setViewportDim(int width, int height);
 
 private:
     const static int VERTEX_AMOUNT = 6;
@@ -35,6 +37,10 @@ private:
     PaletteHandler& paletteHandler;
 
     glm::vec2 screenVertices[VERTEX_AMOUNT];
+    int x;
+    int y;
+    int width;
+    int height;
     GLuint vertexArrayObject;
     GLuint screenTexture;
     GLuint renderShaderProgram;

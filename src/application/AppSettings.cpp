@@ -1,17 +1,12 @@
 #include "AppSettings.h"
 
-AppSettings::AppSettings() {
+AppSettings::AppSettings():
+        romPath{".."}, emulationSpeedMultiplier{1.f}, windowedWidth{LCD_WIDTH * MIN_WINDOW_SIZE_MULTIPLIER},
+        windowedHeight{LCD_HEIGHT * MIN_WINDOW_SIZE_MULTIPLIER}, fullscreen{false}, keepAspectRatio{true},
+        paletteNumber{0}
+{
     // Try to load from file
-    // bool loaded = loadSettings();
-
-    // If no file was found.
-    // if (!loaded) {
-    romPath = "..";
-    keyBinds.init_keybinds();
-    screenMultiplier = 4;
-    paletteNumber = 0;
-    emulationSpeedMultiplier = 1.f; // Not saved or loaded from file
-    // }
+    // loadSettings();
 }
 
 AppSettings::~AppSettings() {

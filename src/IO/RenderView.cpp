@@ -4,7 +4,13 @@
 using namespace glm;
 
 RenderView::RenderView(AppSettings& settings, PaletteHandler& paletteHandler):
-settings{settings}, paletteHandler{paletteHandler} {}
+    settings{settings}, paletteHandler{paletteHandler}
+{
+    x = 0;
+    y = 0;
+    width = 0;
+    height = 0;
+}
 
 void RenderView::initGL() {
     std::string glErrorLog;
@@ -42,7 +48,7 @@ void RenderView::initGL() {
 
 void RenderView::render() const {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, LCD_WIDTH * settings.screenMultiplier, LCD_HEIGHT * settings.screenMultiplier);
+    glViewport(x, y, width, height);
 
     glUseProgram(renderShaderProgram);
     glActiveTexture(GL_TEXTURE0);
@@ -92,6 +98,16 @@ void RenderView::setScreenTexture(uint8_t textureData[]) {
                  textureData);
     glBindTexture(GL_TEXTURE_2D, 0);
     if (glErrorFound(glErrorLog)) { FATAL_ERROR(glErrorLog); }
+}
+
+void RenderView::setViewportPos(int x, int y) {
+    this->x = x;
+    this->y = y;
+}
+
+void RenderView::setViewportDim(int width, int height) {
+    this->width = width;
+    this->height = height;
 }
 
 GLuint RenderView::loadShaderProgram(const std::string& vertexShader, const std::string& fragmentShader) {

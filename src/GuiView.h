@@ -8,7 +8,7 @@
 #include <imgui.h>
 #include <functional>
 
-#include "application/Keybinds.h"
+#include "application/KeyBinds.h"
 #include "FileExplorer.h"
 #include "IO/PaletteHandler.h"
 #include "helpers/ErrorReport.h"
@@ -28,10 +28,13 @@ public:
     void toggleGui();
 
     void setLoadRomCallback(std::function<void(std::string)>&& loadRomCallback);
-    void setChangePaletteCallback(std::function<void(int)>&& changePaletteCallback);
+    void setExitMenuCallback(std::function<void()>&& exitMenuCallback);
+    void setExitProgramCallback(std::function<void()>&& exitProgramCallback);
+    void setCorrectViewportCallback(std::function<void()>&& correctViewportCallback);
+    void setChangeWindowSizeCallback(std::function<void(int width, int height)>&& changeWindowSizeCallback);
+    void setGetWindowCenterCallback(std::function<void(int& x, int& y)>&& getWindowCenterCallback);
 
 private:
-    // General gui constants
     const ImVec4 pressColor{ 0.0f, 0.217f, 1.0f, 0.784f };
     const ImVec4 releaseColor{ 0.202f, 0.549f, 0.798f, 0.784f };
     const float indentSpace = 20.f;
@@ -41,39 +44,45 @@ private:
 
     AppSettings& settings;
     PaletteHandler& paletteHandler;
-    bool displayEditControls;
-    bool displayFileDialog;
-    bool displayPaletteSettings;
+
+    // GUI ------------------------------------------
     bool displayToolbar;
-
-    // File dialog members
-    FileExplorer fileExplorer;
-    std::function<void(std::string)> loadRomCallback;
-    std::function<void(int)> changePaletteCallback;
-    int selectedFile;
-
-    // Key binding members
-    int keyBindIndex;
-    bool waitingForKeyBind;
-
-    // Palette settings members
-    int selectedPalette;
-
-    // File dialog window functions
-    void showFileDialog();
-
-    // Key binding window functions
-    void showEditControls();
-    void keyBind();
-
-    // Palette settings functions
-    void showPaletteSettings();
-
-    // Speed settings functions
-    void displayPlaySpeed();
-
     void showToolbar();
     void disableWidgets();
 
+    // Callbacks
+    std::function<void(std::string)> loadRomCallback;
+    std::function<void()> exitMenuCallback;
+    std::function<void()> exitProgramCallback;
+    std::function<void()> correctViewportCallback;
+    std::function<void(int width, int height)> changeWindowSizeCallback;
+    std::function<void(int& x, int& y)> getWindowCenterCallback;
+
+    // File dialog ----------------------------------
+    FileExplorer fileExplorer;
+    int selectedFile;
+    bool displayFileDialog;
+
+    void showFileDialog();
+    // Key binding ----------------------------------
+    int keyBindIndex;
+    bool waitingForKeyBind;
+    bool displayEditControls;
+
+    void showEditControls();
+    void keyBind();
+
+    // Palette settings -----------------------------
+    int selectedPalette;
+    int previewPalette;
+    bool displayPaletteSettings;
+
+    void showPaletteSettings();
+
+    // Speed settings -------------------------------
+    void generateEmulationSpeedItems();
+    void generateWindowedSizeItems();
+
+    void prepareCenteredWindow();
 };
 

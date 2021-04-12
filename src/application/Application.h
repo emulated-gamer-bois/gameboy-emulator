@@ -10,6 +10,7 @@
 #include <string>
 #include <chrono> // time
 #include <thread> // sleep
+#include <cmath>
 #include "../IO/RenderView.h"
 #include "../gameboy/GameBoy.h"
 #include "../gameboy/Definitions.h"
@@ -18,7 +19,7 @@
 #include "imgui.h"
 #include "AppSettings.h"
 #include "../GuiView.h"
-#include "Keybinds.h"
+#include "KeyBinds.h"
 #include "../Controller.h"
 #include "State.h"
 
@@ -32,9 +33,10 @@ private:
 
     SDL_Window* window;
     SDL_GLContext glContext;
+    int windowWidth;
+    int windowHeight;
 
     State state;
-
     AppSettings settings;
     PaletteHandler paletteHandler;
 
@@ -46,15 +48,14 @@ private:
     GuiView guiView;
     Controller controller;
 
-    void init();
     void initSDL();
     void terminate();
-    void stepFast();
-    void gameBoyStep();
-    void stepSlowly();
+
     void stepEmulation();
+    void stepFast();
+    void stepSlowly();
+    void gameBoyStep();
 
-    void updateSDLWindowSize();
-    void terminateView();
-
+    void correctWindowSize();
+    void correctViewport();
 };

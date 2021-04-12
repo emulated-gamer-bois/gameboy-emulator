@@ -17,13 +17,13 @@
  */
 
 GuiView::GuiView(AppSettings& settings, PaletteHandler& paletteHandler):
-    settings{settings}, paletteHandler{paletteHandler}, selectedFile{-1}, selectedPalette{-1}
+    settings{settings}, paletteHandler{paletteHandler}, selectedFile{-1}, selectedPalette{settings.paletteNumber},
+    previewPalette{settings.paletteNumber}
 {
     disableWidgets();
     displayToolbar = true;
 
     fileExplorer.setCurrentDir(settings.romPath);
-    fileExplorer.setFilter(".gb");
 }
 
 void GuiView::initImGui(SDL_Window *window, SDL_GLContext *glContext, char* glsl_version) {
@@ -84,11 +84,28 @@ void GuiView::setLoadRomCallback(std::function<void(std::string)>&& loadRomCallb
     this->loadRomCallback = loadRomCallback;
 }
 
-void GuiView::setChangePaletteCallback(std::function<void(int)>&& changePaletteCallback) {
-    this->changePaletteCallback = changePaletteCallback;
+void GuiView::setExitMenuCallback(std::function<void()>&& exitMenuCallback) {
+    this->exitMenuCallback = exitMenuCallback;
+}
+
+void GuiView::setExitProgramCallback(std::function<void()>&& exitProgramCallback) {
+    this->exitProgramCallback = exitProgramCallback;
+}
+
+void GuiView::setCorrectViewportCallback(std::function<void()>&& correctViewportCallback) {
+    this->correctViewportCallback = correctViewportCallback;
+}
+
+void GuiView::setChangeWindowSizeCallback(std::function<void(int width, int height)>&& changeWindowSizeCallback) {
+    this->changeWindowSizeCallback = changeWindowSizeCallback;
+}
+
+void GuiView::setGetWindowCenterCallback(std::function<void(int& x, int& y)>&& getWindowCenterCallback) {
+    this->getWindowCenterCallback = getWindowCenterCallback;
 }
 
 void GuiView::showEditControls() {
+    prepareCenteredWindow();
     ImGui::Begin("Controls", &displayEditControls, windowFlags);
     for (int i = 0; i < settings.keyBinds.keybinds.capacity(); i++) {
         if (i == KEY_INDEX_JOYPAD_START) {
@@ -125,6 +142,7 @@ void GuiView::showEditControls() {
 void GuiView::showFileDialog() {
     bool loadRom = false;
 
+    prepareCenteredWindow();
     ImGui::Begin("Load ROM", &displayFileDialog, windowFlags);
 
     // Display Current Directory
@@ -210,12 +228,17 @@ void GuiView::showFileDialog() {
         } catch(...) {
             FATAL_ERROR("Could not call loadRomCallback.");
         }
+
+        try {
+            exitMenuCallback();
+        } catch(...) {
+            FATAL_ERROR("Could not call exitMenuCallback.");
+        }
     }
 }
 
 void GuiView::showPaletteSettings() {
-    bool changeColor = false;
-
+    prepareCenteredWindow();
     ImGui::Begin("Palette Settings", &displayPaletteSettings, windowFlags);
     // Display File Select
     ImGui::Text("Palette Select ");
@@ -223,11 +246,12 @@ void GuiView::showPaletteSettings() {
     if (ImGui::BeginListBox("##PaletteList", ImVec2(listBoxWidth, listBoxHeight))) {
         for (int i = 0; i < paletteHandler.getPaletteAmount(); i++) {
             int flags = ImGuiSelectableFlags_AllowDoubleClick;
-            bool isSelected = (selectedPalette == i);
+            bool isSelected = (previewPalette == i);
             if (ImGui::Selectable(paletteHandler.getPaletteName(i).c_str(), isSelected, flags)) {
-                selectedPalette = i;
+                previewPalette = i;
                 if (ImGui::IsMouseDoubleClicked(0)) {
-                    changeColor = true;
+                    selectedPalette = i;
+                    displayPaletteSettings = false;
                 }
             }
 
@@ -249,14 +273,22 @@ void GuiView::showPaletteSettings() {
         ImGui::EndListBox();
     }
 
+    // Control Buttons
+    if (ImGui::Button("Use Palette")) {
+        selectedPalette = previewPalette;
+        displayPaletteSettings = false;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Cancel")) {
+        displayPaletteSettings = false;
+    }
+
     ImGui::End();
 
-    if (changeColor) {
-        try {
-            changePaletteCallback(selectedPalette);
-        } catch(...) {
-            FATAL_ERROR("Could not call changePaletteCallback.");
-        }
+    if (!displayPaletteSettings) {
+        settings.paletteNumber = previewPalette = selectedPalette;
+    } else {
+        settings.paletteNumber = previewPalette;
     }
 }
 
@@ -264,33 +296,61 @@ void GuiView::showToolbar() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Load ROM", "")) {
-                displayFileDialog = true;
+                if (!displayFileDialog) {
+                    fileExplorer.setFilter(".gb");
+                    displayFileDialog = true;
+                }
+            }
+            if (ImGui::MenuItem("Exit")) {
+                exitProgramCallback();
             }
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Settings")) {
-            displayPlaySpeed();
-            if (ImGui::MenuItem("Key Binds")) {
-                displayEditControls = !displayEditControls;
+        if (ImGui::BeginMenu("Video")) {
+
+            if (ImGui::MenuItem("Fullscreen", "", settings.fullscreen)) {
+                settings.fullscreen = !settings.fullscreen;
+                if (!settings.fullscreen) {
+                    changeWindowSizeCallback(settings.windowedWidth, settings.windowedHeight);
+                }
             }
+            if (ImGui::MenuItem("Keep Aspect Ratio", "", settings.keepAspectRatio)) {
+                settings.keepAspectRatio = !settings.keepAspectRatio;
+                correctViewportCallback();
+            }
+            generateWindowedSizeItems();
+
+            ImGui::Separator();
             if (ImGui::MenuItem("Palette Settings")) {
-                displayPaletteSettings = !displayPaletteSettings;
+                if (!displayPaletteSettings) {
+                    displayPaletteSettings = true;
+                }
             }
             ImGui::EndMenu();
-
+        }
+        if (ImGui::BeginMenu("Emulation")) {
+            generateEmulationSpeedItems();
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Input")) {
+            if (ImGui::MenuItem("Key Binds")) {
+                if (!displayEditControls) {
+                    displayEditControls = true;
+                }
+            }
+            ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
     }
 }
 
-void GuiView::displayPlaySpeed(){
-     //TODO allow for slowing down the play speed.
+void GuiView::generateEmulationSpeedItems(){
     if (ImGui::BeginMenu("Emulation speed")) {
         float speed = MIN_EMULATION_SPEED_FLOAT;
         while (speed <= MAX_EMULATION_SPEED_FLOAT) {
             std::stringstream ss;
             ss << speed << 'x';
-            if (ImGui::MenuItem(ss.str().c_str())) {
+            if (ImGui::MenuItem(ss.str().c_str(), "", settings.emulationSpeedMultiplier == speed)) {
                     settings.emulationSpeedMultiplier = speed;
             }
 
@@ -298,7 +358,26 @@ void GuiView::displayPlaySpeed(){
         }
         ImGui::EndMenu();
     }
- }
+}
+
+void GuiView::generateWindowedSizeItems(){
+    if (ImGui::BeginMenu("Windowed Size")) {
+        float sizeMultiplier = MIN_WINDOW_SIZE_MULTIPLIER;
+        while (sizeMultiplier <= MAX_WINDOW_SIZE_MULTIPLIER) {
+            std::stringstream ss;
+            ss << sizeMultiplier << 'x';
+
+            bool selected = (settings.windowedWidth / LCD_WIDTH == sizeMultiplier &&
+                             settings.windowedHeight / LCD_HEIGHT == sizeMultiplier);
+            if (ImGui::MenuItem(ss.str().c_str(), "", selected, !settings.fullscreen)) {
+                changeWindowSizeCallback(LCD_WIDTH * sizeMultiplier, LCD_HEIGHT * sizeMultiplier);
+            }
+
+            sizeMultiplier++;
+        }
+        ImGui::EndMenu();
+    }
+}
 
 void GuiView::keyBind() {
     if(settings.keyBinds.editKeyBinds(ImGui::GetIO().KeysDown, keyBindIndex)){
@@ -314,14 +393,12 @@ void GuiView::disableWidgets() {
     waitingForKeyBind =false;
 }
 
+void GuiView::prepareCenteredWindow() {
+    int x = 0;
+    int y = 0;
+    getWindowCenterCallback(x, y);
 
-
-
-
-
-
-
-
-
-
-
+    ImGui::SetNextWindowPos(ImVec2(x, y),
+                            ImGuiCond_Appearing,
+                            ImVec2(0.5f, 0.5f));
+}

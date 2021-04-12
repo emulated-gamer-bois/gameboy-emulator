@@ -11,24 +11,40 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 /**
  * Constructor
  */
-Application::Application() : framesUntilStep{0}, state{State::MENU},
-    renderView(settings, paletteHandler), guiView(settings, paletteHandler),
+Application::Application():
+    framesUntilStep{0}, windowWidth{settings.windowedWidth}, windowHeight{settings.windowedHeight},
+    state{State::MENU}, renderView(settings, paletteHandler), guiView(settings, paletteHandler),
     controller(settings, guiView, gameBoy)
 {
     initSDL(); // Creates gl context and sdl window. This needs to be called before other inits.
     renderView.initGL();
     guiView.initImGui(window, &glContext, "#version 130");
+    correctViewport();
 
     guiView.setLoadRomCallback([this](std::string&& romPath) -> void {
         gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", romPath);
+    });
+
+    guiView.setExitMenuCallback([this]() -> void {
         state = State::EMULATION;
         guiView.toggleGui();
     });
 
-    guiView.setChangePaletteCallback([this](int index) -> void {
-        settings.paletteNumber = index;
-        state = State::EMULATION;
-        guiView.toggleGui();
+    guiView.setExitProgramCallback([this]() -> void {
+        state = State::TERMINATION;
+    });
+
+    guiView.setCorrectViewportCallback([this]() -> void {
+        correctViewport();
+    });
+
+    guiView.setChangeWindowSizeCallback([this](int width, int height) -> void {
+        SDL_SetWindowSize(window, width, height);
+    });
+
+    guiView.setGetWindowCenterCallback([this](int& x, int& y) -> void {
+       x = windowWidth * 0.5f;
+       y = windowHeight * 0.5f;
     });
 }
 
@@ -43,11 +59,10 @@ void Application::start() {
         timer.tick();
 
         // Resize window if requested
-        updateSDLWindowSize();
+        correctWindowSize();
 
         // Clear renderView
         renderView.clear();
-
         // Step through emulation until playspeed number of frames are produced, then display the last one.
         if (state == State::EMULATION && gameBoy.isOn()) {
             stepEmulation();
@@ -59,7 +74,6 @@ void Application::start() {
         renderView.render();
 
         this->state = controller.handleSDLEvents(state);
-
         // Render menu
         if (state == State::MENU) {
             audio.stopSound();
@@ -104,10 +118,14 @@ void Application::initSDL() {
     window = SDL_CreateWindow(EMULATOR_NAME_STRING,
                               SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED,
-                              LCD_WIDTH,
-                              LCD_HEIGHT,
-                              SDL_WINDOW_OPENGL);
+                              settings.windowedWidth,
+                              settings.windowedHeight,
+                              SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     if (!window) {FATAL_ERROR("Failed to create SDL window."); }
+
+    SDL_SetWindowMinimumSize(window,
+                             LCD_WIDTH * MIN_WINDOW_SIZE_MULTIPLIER,
+                             LCD_HEIGHT * MIN_WINDOW_SIZE_MULTIPLIER);
 
     // Get gl context and set it to the current context for this window.
     glContext = SDL_GL_CreateContext(window);
@@ -130,6 +148,16 @@ void Application::terminate() {
 
     SDL_DestroyWindow(window);
     SDL_Quit();
+}
+
+void Application::stepEmulation() {
+    if (settings.emulationSpeedMultiplier == 1) {
+        gameBoyStep();
+    } else if (settings.emulationSpeedMultiplier < 1) {
+        stepSlowly();
+    } else {
+        stepFast();
+    }
 }
 
 void Application::stepFast() {
@@ -162,27 +190,46 @@ void Application::gameBoyStep() {
     }
 }
 
-void Application::stepEmulation() {
-    if (settings.emulationSpeedMultiplier == 1) {
-        gameBoyStep();
-    } else if (settings.emulationSpeedMultiplier < 1) {
-        stepSlowly();
-    } else {
-        stepFast();
-    }
-}
-
 /**
  * Makes sure the window dimensions updates to match changes in RenderView dimensions.
  */
-void Application::updateSDLWindowSize() {
-    int oldWidth, oldHeight, newWidth, newHeight;
-    SDL_GetWindowSize(window, &oldWidth, &oldHeight);
-    newWidth = LCD_WIDTH * settings.screenMultiplier;
-    newHeight = LCD_HEIGHT * settings.screenMultiplier;
+void Application::correctWindowSize() {
+    int newWidth, newHeight;
+    SDL_SetWindowFullscreen(window, settings.fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+    SDL_GetWindowSize(window, &newWidth, &newHeight);
 
-    if (oldWidth != newWidth || oldHeight != newHeight) {
+    if (windowWidth != newWidth || windowHeight != newHeight) {
         SDL_SetWindowSize(window, newWidth, newHeight);
+        SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+
+        if (!settings.fullscreen) {
+            settings.windowedWidth = windowWidth;
+            settings.windowedHeight = windowHeight;
+        }
+
+        correctViewport();
+    }
+}
+
+void Application::correctViewport() {
+    if (settings.keepAspectRatio) {
+        int viewportWidth, viewportHeight;
+        int viewportX, viewportY;
+        float screenMultiplier;
+
+        screenMultiplier = std::min((float) windowWidth / LCD_WIDTH,
+                                    (float) windowHeight / LCD_HEIGHT);
+
+        viewportWidth = LCD_WIDTH * screenMultiplier;
+        viewportHeight = LCD_HEIGHT * screenMultiplier;
+        renderView.setViewportDim(viewportWidth, viewportHeight);
+
+        viewportX = windowWidth * 0.5f - viewportWidth * 0.5f;
+        viewportY = windowHeight * 0.5f - viewportHeight * 0.5f;
+        renderView.setViewportPos(viewportX, viewportY);
+    } else {
+        renderView.setViewportDim(windowWidth, windowHeight);
+        renderView.setViewportPos(0, 0);
     }
 }
 

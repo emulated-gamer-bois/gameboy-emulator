@@ -28,8 +28,8 @@ if(NOT TRAVIS)
         FileExplorer.cpp
             GuiView.cpp
             GuiView.h
-            application/Keybinds.cpp
-            application/Keybinds.h
+            application/KeyBinds.cpp
+            application/KeyBinds.h
             application/AppSettings.h
             application/AppSettings.cpp
             Controller.cpp Controller.h application/State.h)
