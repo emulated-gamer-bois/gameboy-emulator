@@ -13,8 +13,8 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
  */
 Application::Application():
     framesUntilStep{0}, windowWidth{settings.windowedWidth}, windowHeight{settings.windowedHeight},
-    state{State::MENU}, renderView(settings, paletteHandler), guiView(settings, paletteHandler),
-    controller(settings, guiView, gameBoy)
+    state{State::MENU}, audio(settings), renderView(settings, paletteHandler),
+    guiView(settings, paletteHandler), controller(settings, guiView, gameBoy)
 {
     initSDL(); // Creates gl context and sdl window. This needs to be called before other inits.
     renderView.initGL();

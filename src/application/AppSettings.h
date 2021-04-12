@@ -27,6 +27,9 @@ public:
     bool keepAspectRatio;
     int paletteNumber;
 
+    // Audio
+    float masterVolume;
+
     AppSettings();
     ~AppSettings();
 };

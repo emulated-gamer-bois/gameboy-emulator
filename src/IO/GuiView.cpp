@@ -46,6 +46,7 @@ void GuiView::updateAndRender(SDL_Window *window) {
     if (displayEditControls) { showEditControls(); }
     if (displayFileDialog) { showFileDialog(); }
     if (displayPaletteSettings) { showPaletteSettings(); }
+    if (displayVolumeSettings) { showVolumeSettings(); }
 
     //Render ImGui
     ImGui::Render();
@@ -292,6 +293,16 @@ void GuiView::showPaletteSettings() {
     }
 }
 
+void GuiView::showVolumeSettings() {
+    prepareCenteredWindow();
+    ImGui::Begin("Volume Settings", &displayVolumeSettings, windowFlags);
+    // Display File Select
+    ImGui::Text("Master Volume ");
+    ImGui::Indent(indentSpace);
+    ImGui::SliderFloat("##Volume", &settings.masterVolume, 0.f, 1.f);
+    ImGui::End();
+}
+
 void GuiView::showToolbar() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
@@ -306,8 +317,13 @@ void GuiView::showToolbar() {
             }
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Video")) {
-
+        if (ImGui::BeginMenu("Audio/Video")) {
+            if (ImGui::MenuItem("Volume", "", settings.fullscreen)) {
+                if (!displayVolumeSettings) {
+                    displayVolumeSettings = true;
+                }
+            }
+            ImGui::Separator();
             if (ImGui::MenuItem("Fullscreen", "", settings.fullscreen)) {
                 settings.fullscreen = !settings.fullscreen;
                 if (!settings.fullscreen) {
@@ -332,7 +348,7 @@ void GuiView::showToolbar() {
             generateEmulationSpeedItems();
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Input")) {
+        if (ImGui::BeginMenu("Controller")) {
             if (ImGui::MenuItem("Key Binds")) {
                 if (!displayEditControls) {
                     displayEditControls = true;
@@ -389,6 +405,7 @@ void GuiView::disableWidgets() {
     displayEditControls = false;
     displayFileDialog = false;
     displayPaletteSettings = false;
+    displayVolumeSettings = false;
     displayToolbar = false;
     waitingForKeyBind =false;
 }

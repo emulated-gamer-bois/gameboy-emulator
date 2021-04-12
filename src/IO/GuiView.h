@@ -64,6 +64,7 @@ private:
     bool displayFileDialog;
 
     void showFileDialog();
+
     // Key binding ----------------------------------
     int keyBindIndex;
     bool waitingForKeyBind;
@@ -79,7 +80,12 @@ private:
 
     void showPaletteSettings();
 
-    // Speed settings -------------------------------
+    // Volume settings ------------------------------
+    bool displayVolumeSettings;
+
+    void showVolumeSettings();
+
+    // Other ----------------------------------------
     void generateEmulationSpeedItems();
     void generateWindowedSizeItems();
 
