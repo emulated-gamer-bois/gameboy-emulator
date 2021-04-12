@@ -24,15 +24,17 @@ if(NOT TRAVIS)
         ${SHADERS}
             application/Application.h
             application/Application.cpp
-        FileExplorer.h
-        FileExplorer.cpp
-            GuiView.cpp
-            GuiView.h
+            IO/FileExplorer.h
+            IO/FileExplorer.cpp
+            IO/GuiView.cpp
+            IO/GuiView.h
             application/KeyBinds.cpp
             application/KeyBinds.h
             application/AppSettings.h
             application/AppSettings.cpp
-            Controller.cpp Controller.h application/State.h)
+            IO/Controller.cpp
+            IO/Controller.h
+            application/State.h)
 
     target_link_libraries ( ${PROJECT_NAME} gameboy IO helpers )
     config_build_output()

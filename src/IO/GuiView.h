@@ -8,12 +8,12 @@
 #include <imgui.h>
 #include <functional>
 
-#include "application/KeyBinds.h"
+#include "../application/KeyBinds.h"
 #include "FileExplorer.h"
-#include "IO/PaletteHandler.h"
-#include "helpers/ErrorReport.h"
-#include "application/AppSettings.h"
-#include "gameboy/Definitions.h"
+#include "PaletteHandler.h"
+#include "../helpers/ErrorReport.h"
+#include "../application/AppSettings.h"
+#include "../gameboy/Definitions.h"
 
 class GuiView {
 public:

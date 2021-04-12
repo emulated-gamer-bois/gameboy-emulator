@@ -18,9 +18,9 @@
 #include "../helpers/ErrorReport.h"
 #include "imgui.h"
 #include "AppSettings.h"
-#include "../GuiView.h"
 #include "KeyBinds.h"
-#include "../Controller.h"
+#include "../IO/GuiView.h"
+#include "../IO/Controller.h"
 #include "State.h"
 
 class Application {
