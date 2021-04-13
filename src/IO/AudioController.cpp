@@ -200,7 +200,6 @@ void AudioController::stepSound(uint8_t i, APUState *state) {
     if (i & 2) {
         if (state->enable_square_b) {
             playGBSquare(1, state->duty_square_b, state->frequency_square_b, state->volume_square_b * settings.masterVolume);
-            std::cout << state->volume_square_b * settings.masterVolume << std::endl;
         } else {
             stopSource(1);
         }
