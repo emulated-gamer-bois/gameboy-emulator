@@ -214,9 +214,9 @@ void PPU::drawBackgroundScanLine() {
         uint8_t absolutePixelY = (SCY + LY) % BACKGROUND_HEIGHT;
         uint8_t tileID = getTileID(bgMapStartAddress, absolutePixelX, absolutePixelY);
         uint8_t colorIndex = getTilePixelColorIndex(bgWindowTileSetSelect, tileID, absolutePixelX % 8, absolutePixelY % 8);
+        bgWindowColorIndexesThisLine[x] = colorIndex;
         uint8_t pixel = getColor(BGP, colorIndex);
         frameBuffer[LY * LCD_WIDTH + x] = pixel;
-        bgWindowColorIndexesThisLine[x] = pixel;
     }
 }
 
@@ -239,9 +239,9 @@ void PPU::drawWindowScanLine() {
         uint8_t absolutePixelY = LY - WY;
         uint8_t tileID = getTileID(windowMapStartAddress, absolutePixelX, absolutePixelY);
         uint8_t colorIndex = getTilePixelColorIndex(bgWindowTileSetSelect, tileID, absolutePixelX % 8, absolutePixelY % 8);
+        bgWindowColorIndexesThisLine[x] = colorIndex;
         uint8_t pixel = getColor(BGP, colorIndex);
         frameBuffer[LY * LCD_WIDTH + x] = pixel;
-        bgWindowColorIndexesThisLine[x] = pixel;
     }
 }
 
