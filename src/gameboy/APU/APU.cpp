@@ -12,6 +12,7 @@ APU::APU() {
     this->volume_envelope_a = 0;
     this->volume_envelope_b = 0;
     this->reset();
+    NR52 = 0;
     wavePatternRAM.fill(0);
 }
 
@@ -72,13 +73,18 @@ uint8_t APU::read(uint16_t address) const {
              (NR14 >> 7) |                  //Square 1 status at bit 0
              0x70;                          //Bit 4 to 6 always 1
         default:
-            return 0;
+            return 0xFF;
     }
 }
 
 void APU::write(uint16_t address, uint8_t data) {
-    if(!(NR52 & 0x80)) {
+    if (IO_WAVEFORM_RAM_START <= address && address <= IO_WAVEFORM_RAM_END) {
+        this->wavePatternRAM[address - IO_WAVEFORM_RAM_START] = data;
+        return;
+    }
+    /*if(!(NR52 & 0x80)) {
         switch (address) {
+            case NR10_ADDRESS:
             case NR11_ADDRESS:
             case NR21_ADDRESS:
             case NR31_ADDRESS:
@@ -90,11 +96,7 @@ void APU::write(uint16_t address, uint8_t data) {
                 //Length registers can still be written to while power is off
                 return;
         }
-    }
-    if (IO_WAVEFORM_RAM_START <= address && address <= IO_WAVEFORM_RAM_END) {
-        this->wavePatternRAM[address - IO_WAVEFORM_RAM_START] = data;
-        //return;
-    }
+    }*/
     switch (address) {
         case NR10_ADDRESS:
             this->NR10 = data;
@@ -175,8 +177,8 @@ void APU::write(uint16_t address, uint8_t data) {
             return;
         case NR52_ADDRESS:
             this->NR52 = data & 0x80;
+            reset();
             if(!(this->NR52 & 0x80)) {
-                reset();
                 readyToPlay |= 0xF;
             }
             return;
@@ -210,7 +212,6 @@ void APU::reset() {
 
     NR50 = 0;
     NR51 = 0;
-    NR52 = 0;
 }
 
 void APU::trigger_event(uint8_t source) {
