@@ -37,5 +37,3 @@ void main()
 	}
 	fragmentColor = vec4(color, 1.f);
 }
-
-

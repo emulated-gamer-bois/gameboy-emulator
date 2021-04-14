@@ -13,6 +13,8 @@ add_library( IO
         AudioController.cpp
         AudioController.h
         Palette.h
+        PaletteHandler.h
+        PaletteHandler.cpp
         RenderView.cpp
         RenderView.h ../gameboy/APU/IVolumeController.h)
 
