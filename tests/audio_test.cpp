@@ -8,9 +8,11 @@
 #include <cmath>
 #include "gtest/gtest.h"
 #include "../src/IO/AudioController.h"
+#include "../src/application/AppSettings.h"
 
 TEST(AUDIO, START_SOUND) {
-    AudioController a;
+    AppSettings setting;
+    AudioController a(setting);
     a.playGBSquare(0, 2, 0x783, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     a.playGBSquare(0, 2, 0x7C1, 0.1f);
@@ -24,7 +26,8 @@ TEST(AUDIO, SAWTOOTH_WAVE) {
         sawTooth[i] =  ((0xF - i) << 4) + (0xF - i);
     }
 
-    AudioController a;
+    AppSettings setting;
+    AudioController a(setting);
     a.playGBWave(0, sawTooth, 0x6D6, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     a.stopSound();
@@ -37,14 +40,16 @@ TEST(AUDIO, SIN_WAVE) {
                 ((uint8_t)(8 + 8 * sin(3.141592 * 2 * ((double)(i*2+1)/32))) & 0xF);
     }
 
-    AudioController a;
+    AppSettings setting;
+    AudioController a(setting);
     a.playGBWave(0, sine, 0x6D6, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     a.stopSound();
 }
 
 TEST(AUDIO, START_SOUND_B) {
-    AudioController a;
+    AppSettings setting;
+    AudioController a(setting);
     a.playGBSquare(1, 2, 0x783, 0.1f);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     a.playGBSquare(1, 2, 0x7C1, 0.1f);
@@ -69,14 +74,16 @@ TEST(AUDIO, NOISE) {
         //std::cout << (int)samples[i] << "\n";
     }
 
-    AudioController a;
+    AppSettings setting;
+    AudioController a(setting);
     a.playSound(3, samples, size, 10000, 0.1);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     a.stopSound();
 }
 
 TEST(AUDIO, PLAY_NOISE) {
-    AudioController a;
+    AppSettings setting;
+    AudioController a(setting);
     uint8_t divisors[8] = {8,16,32,48,64,80,96,112};
     for(unsigned char divisor : divisors){
         a.playNoise(3, 0, (262144*2)/divisor, 0.1);

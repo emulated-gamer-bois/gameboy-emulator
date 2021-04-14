@@ -17,25 +17,20 @@ if(NOT TRAVIS)
 
     add_subdirectory( IO )
     add_subdirectory( helpers ) # No need in tests?
+    add_subdirectory( application )
 
     # Build and link executable.
     add_executable ( ${PROJECT_NAME}
         main.cpp
         ${SHADERS}
-            application/Application.h
-            application/Application.cpp
             IO/FileExplorer.h
             IO/FileExplorer.cpp
             IO/GuiView.cpp
             IO/GuiView.h
-            application/KeyBinds.cpp
-            application/KeyBinds.h
-            application/AppSettings.h
-            application/AppSettings.cpp
             IO/Controller.cpp
             IO/Controller.h
-            application/State.h)
+            )
 
-    target_link_libraries ( ${PROJECT_NAME} gameboy IO helpers )
+    target_link_libraries ( ${PROJECT_NAME} gameboy IO helpers application )
     config_build_output()
 endif()
