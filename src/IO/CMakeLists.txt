@@ -9,14 +9,30 @@ endif()
 
 find_package ( OpenAL REQUIRED )
 
+# Find *all* shaders.
+file(GLOB_RECURSE shaders
+        "shaders/*.vert"
+        "shaders/*.frag"
+        )
+
+# Separate filter for shaders.
+source_group("shaders" FILES ${SHADERS})
+
 add_library( IO
+        ${SHADERS}
         AudioController.cpp
         AudioController.h
         Palette.h
         PaletteHandler.h
         PaletteHandler.cpp
         RenderView.cpp
-        RenderView.h ../gameboy/APU/IVolumeController.h)
+        RenderView.h
+        FileExplorer.h
+        FileExplorer.cpp
+        GuiView.cpp
+        GuiView.h
+        Controller.cpp
+        Controller.h)
 
 target_include_directories ( ${PROJECT_NAME}
         PUBLIC

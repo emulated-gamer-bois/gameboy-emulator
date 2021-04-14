@@ -40,8 +40,8 @@ void RenderView::initGL() {
 
     // Initialize shader programs, if renderShaderProgram is 0, the shader program could not
     // be loaded.
-    renderShaderProgram = loadShaderProgram("../src/shaders/palette.vert",
-                                            "../src/shaders/palette.frag");
+    renderShaderProgram = loadShaderProgram("../src/IO/shaders/palette.vert",
+                                            "../src/IO/shaders/palette.frag");
     fxShaderProgram = 0; // TODO Implement post process fx
     glGenTextures(1, &screenTexture);
 }
