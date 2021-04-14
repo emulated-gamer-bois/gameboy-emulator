@@ -246,6 +246,12 @@ void APU::volume_reset(uint8_t source) {
 void APU::sweep_reset() {
     sweep_counter = (NR10 >> 4) & 7;
     sweep_shadow_register = ((NR14 & 7) << 8) + NR13;
+
+    sweep_enabled = (NR10 & 0x7) || (NR10 & 0x70);
+    if((NR10 & 0x7) && calculateSweep() > 0x7FF) {
+        sweep_enabled = false;
+        NR14 &= 0x7F;
+    }
 }
 
 uint16_t APU::calculateSweep() {
@@ -273,13 +279,7 @@ void APU::trigger_event(uint8_t source) {
         case 0:
             //If length counter is zero, it is set to 64
             length_counter_a = this->NR11 & 0x3F ? this->NR11 & 0x3F : 0x40;
-
             sweep_reset();
-
-            NR14 |= 0x80;
-            if(!(NR10 & 0x77) || calculateSweep() > 0x7FF) {
-                NR14 &= 0x7F;
-            }
             this->readyToPlay |= 1;
             break;
         case 1:
@@ -372,7 +372,7 @@ void APU::vol_envelope_step(IVolumeController* vc) {
 }
 
 void APU::sweep_step() {
-    if((NR10 & 0x70) && !--sweep_counter) {
+    if((NR10 & 0x70) && sweep_enabled && !--sweep_counter) {
         if(NR10 & 8) {
             sweep_shadow_register -= sweep_shadow_register/(1 << (NR10 & 7));
         } else {
