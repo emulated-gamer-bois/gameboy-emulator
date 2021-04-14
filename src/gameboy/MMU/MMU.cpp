@@ -122,11 +122,6 @@ uint8_t MMU::read(uint16_t addr) {
             return this->apu->read(addr);
         }
 
-        // Waveform RAM
-        if (IO_WAVEFORM_RAM_START <= addr && addr <= IO_WAVEFORM_RAM_END) {
-            return this->apu->read(addr);
-        }
-
         // LCD
         if (IO_LCD_START <= addr && addr <= IO_LCD_END) {
             return this->ppu->read(addr);
@@ -219,14 +214,8 @@ void MMU::write(uint16_t addr, uint8_t data) {
             return;
         }
 
-        // Sound TODO: Implement sound
+        // Sound
         if (IO_SOUND_START <= addr && addr <= IO_SOUND_END) {
-            this->apu->write(addr, data);
-            return;
-        }
-
-        // Waveform RAM TODO: Implement sound
-        if (IO_WAVEFORM_RAM_START <= addr && addr <= IO_WAVEFORM_RAM_END) {
             this->apu->write(addr, data);
             return;
         }

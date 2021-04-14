@@ -5,23 +5,23 @@
 #pragma once
 
 struct APUState {
-    bool enable_square_a;
-    uint8_t duty_square_a;
-    uint16_t frequency_square_a;
-    float volume_square_a;
+    bool enableSquareA;
+    uint8_t dutySquareA;
+    uint16_t frequencySquareA;
+    float volumeSquareA;
 
-    bool enable_square_b;
-    uint8_t duty_square_b;
-    uint16_t frequency_square_b;
-    float volume_square_b;
+    bool enableSquareB;
+    uint8_t dutySquareB;
+    uint16_t frequencySquareB;
+    float volumeSquareB;
 
-    bool enable_wave;
-    std::array<uint8_t, 16> waveform_wave;
-    uint16_t frequency_wave;
-    float volume_wave;
+    bool enableWave;
+    std::array<uint8_t, 16> waveform;
+    uint16_t frequencyWave;
+    float volumeWave;
 
-    bool enable_noise;
-    int frequency_noise;
-    float volume_noise;
-    bool is_7_bit_mode;
+    bool enableNoise;
+    int frequencyNoise;
+    float volumeNoise;
+    bool is7BitMode;
 };
