@@ -5,20 +5,20 @@
 #include "APU.h"
 
 APU::APU() {
-    this->accumulated_cycles = 0;
-    this->readyToPlay = 0;
-    this->accumulated_cycles = 0;
-    this->state = 0;
-    this->volume_envelope_a = 0;
-    this->volume_envelope_b = 0;
-    this->reset();
+    accumulatedCycles = 0;
+    readyToPlay = 0;
+    accumulatedCycles = 0;
+    state = 0;
+    volumeEnvelopeA = 0;
+    volumeEnvelopeB = 0;
+    reset();
     NR52 = 0;
     wavePatternRAM.fill(0);
 }
 
 uint8_t APU::read(uint16_t address) const {
-    if (IO_WAVEFORM_RAM_START <= address && address <= IO_WAVEFORM_RAM_END) {
-        return this->wavePatternRAM[address - IO_WAVEFORM_RAM_START];
+    if (WAVE_PATTERN_START <= address && address <= WAVE_PATTERN_END) {
+        return wavePatternRAM[address - WAVE_PATTERN_START];
     }
     switch (address) {
         case NR10_ADDRESS:
@@ -62,9 +62,9 @@ uint8_t APU::read(uint16_t address) const {
         case NR44_ADDRESS:
             return NR43 | 0xBF;
         case NR50_ADDRESS:
-            return this->NR50;
+            return NR50;
         case NR51_ADDRESS:
-            return this->NR51;
+            return NR51;
         case NR52_ADDRESS:
              return NR52 |                  //Power status at bit 7
              ((NR44 >> 4) & 8) |            //Noise status at bit 3
@@ -78,8 +78,8 @@ uint8_t APU::read(uint16_t address) const {
 }
 
 void APU::write(uint16_t address, uint8_t data) {
-    if (IO_WAVEFORM_RAM_START <= address && address <= IO_WAVEFORM_RAM_END) {
-        this->wavePatternRAM[address - IO_WAVEFORM_RAM_START] = data;
+    if (WAVE_PATTERN_START <= address && address <= WAVE_PATTERN_END) {
+        wavePatternRAM[address - WAVE_PATTERN_START] = data;
         return;
     }
     /*if(!(NR52 & 0x80)) {
@@ -99,96 +99,96 @@ void APU::write(uint16_t address, uint8_t data) {
     }*/
     switch (address) {
         case NR10_ADDRESS:
-            this->NR10 = data;
-            sweep_reset();
+            NR10 = data;
+            sweepReset();
             readyToPlay |= 1;
             return;
         case NR11_ADDRESS:
-            this->NR11 = data;
+            NR11 = data;
             return;
         case NR12_ADDRESS:
-            this->NR12 = data;
-            volume_reset(0);
+            NR12 = data;
+            volumeReset(0);
             readyToPlay |= 1;
             return;
         case NR13_ADDRESS:
-            this->NR13 = data;
+            NR13 = data;
             return;
         case NR14_ADDRESS:
-            this->NR14 = data;
+            NR14 = data;
             // If trigger bit is set
-            if(this->NR14 & 0x80) {
-                trigger_event(0);
+            if(NR14 & 0x80) {
+                triggerEvent(0);
             }
             return;
         case NR21_ADDRESS:
-            this->NR21 = data;
+            NR21 = data;
             return;
         case NR22_ADDRESS:
-            this->NR22 = data;
-            volume_reset(1);
+            NR22 = data;
+            volumeReset(1);
             readyToPlay |= 2;
             return;
         case NR23_ADDRESS:
-            this->NR23 = data;
+            NR23 = data;
             return;
         case NR24_ADDRESS:
-            this->NR24 = data;
+            NR24 = data;
             // If trigger bit is set
-            if(this->NR24 & 0x80) {
-                trigger_event(1);
+            if(NR24 & 0x80) {
+                triggerEvent(1);
             }
             return;
         case NR30_ADDRESS:
-            this->NR30 = data;
-            this->readyToPlay |= 4;
+            NR30 = data;
+            readyToPlay |= 4;
             return;
         case NR31_ADDRESS:
-            this->NR31 = data;
+            NR31 = data;
             return;
         case NR32_ADDRESS:
-            this->NR32 = data;
-            volume_reset(2);
+            NR32 = data;
+            volumeReset(2);
             readyToPlay |= 4;
             return;
         case NR33_ADDRESS:
-            this->NR33 = data;
+            NR33 = data;
             return;
         case NR34_ADDRESS:
-            this->NR34 = data;
+            NR34 = data;
             // If trigger bit is set
-            if(this->NR34 & 0x80) {
-                trigger_event(2);
+            if(NR34 & 0x80) {
+                triggerEvent(2);
             }
             return;
         case NR41_ADDRESS:
-            this->NR41 = data;
+            NR41 = data;
             return;
         case NR42_ADDRESS:
-            this->NR42 = data;
-            volume_reset(3);
+            NR42 = data;
+            volumeReset(3);
             readyToPlay |= 8;
             return;
         case NR43_ADDRESS:
-            this->NR43 = data;
+            NR43 = data;
             return;
         case NR44_ADDRESS:
-            this->NR44 = data;
+            NR44 = data;
             // If trigger bit is set
-            if(this->NR44 & 0x80) {
-                trigger_event(3);
+            if(NR44 & 0x80) {
+                triggerEvent(3);
             }
             return;
         case NR50_ADDRESS:
-            this->NR50 = data;
+            NR50 = data;
             return;
         case NR51_ADDRESS:
-            this->NR51 = data;
+            NR51 = data;
             return;
         case NR52_ADDRESS:
-            this->NR52 = data & 0x80;
+            NR52 = data & 0x80;
             reset();
-            if(!(this->NR52 & 0x80)) {
+            if(!(NR52 & 0x80)) {
                 readyToPlay |= 0xF;
             }
             return;
@@ -224,45 +224,45 @@ void APU::reset() {
     NR51 = 0;
 }
 
-void APU::volume_reset(uint8_t source) {
+void APU::volumeReset(uint8_t source) {
     switch (source) {
         case 0:
-            this->period_envelope_a = this->NR12 & 0x7;
-            this->volume_envelope_a = (this->NR12 >> 4) & 0xF;
+            periodEnvelopeA = NR12 & 0x7;
+            volumeEnvelopeA = (NR12 >> 4) & 0xF;
             break;
         case 1:
-            this->period_envelope_b = this->NR22 & 0x7;
-            this->volume_envelope_b = (this->NR22 >> 4) & 0xF;
+            periodEnvelopeB = NR22 & 0x7;
+            volumeEnvelopeB = (NR22 >> 4) & 0xF;
             break;
         case 2:
             break;
         case 3:
-            this->period_envelope_noise = this->NR42 & 0x7;
-            volume_envelope_noise = (this->NR42 >> 4) & 0xF;
+            periodEnvelopeNoise = NR42 & 0x7;
+            volumeEnvelopeNoise = (NR42 >> 4) & 0xF;
             break;
     }
 }
 
-void APU::sweep_reset() {
-    sweep_counter = (NR10 >> 4) & 7;
-    sweep_shadow_register = ((NR14 & 7) << 8) + NR13;
+void APU::sweepReset() {
+    sweepCounter = (NR10 >> 4) & 7;
+    sweepShadowRegister = ((NR14 & 7) << 8) + NR13;
 
-    sweep_enabled = (NR10 & 0x7) || (NR10 & 0x70);
+    sweepEnabled = (NR10 & 0x7) || (NR10 & 0x70);
     if((NR10 & 0x7) && calculateSweep() > 0x7FF) {
-        sweep_enabled = false;
+        sweepEnabled = false;
         NR14 &= 0x7F;
     }
 }
 
 uint16_t APU::calculateSweep() {
     if(NR10 & 8) {
-        return sweep_shadow_register - sweep_shadow_register/(1 << (NR10 & 7));
+        return sweepShadowRegister - sweepShadowRegister / (1 << (NR10 & 7));
     } else {
-        return sweep_shadow_register + sweep_shadow_register/(1 << (NR10 & 7));
+        return sweepShadowRegister + sweepShadowRegister / (1 << (NR10 & 7));
     }
 }
 
-void APU::trigger_event(uint8_t source) {
+void APU::triggerEvent(uint8_t source) {
     //TODO: Complete functionality
     /**
     - Done - Channel is enabled (see length counter).
@@ -278,132 +278,128 @@ void APU::trigger_event(uint8_t source) {
     switch(source) {
         case 0:
             //If length counter is zero, it is set to 64
-            length_counter_a = this->NR11 & 0x3F ? this->NR11 & 0x3F : 0x40;
-            sweep_reset();
-            this->readyToPlay |= 1;
+            lengthCounterA = NR11 & 0x3F ? NR11 & 0x3F : 0x40;
+            sweepReset();
+            readyToPlay |= 1;
             break;
         case 1:
             //If length counter is zero, it is set to 64
-            length_counter_b = this->NR21 & 0x3F ? this->NR21 & 0x3F : 0x40;
-            this->readyToPlay |= 2;
+            lengthCounterB = NR21 & 0x3F ? NR21 & 0x3F : 0x40;
+            readyToPlay |= 2;
             break;
         case 2:
             //If length counter is zero, it is set to 256
-            length_counter_wave = this->NR31 ? this->NR11 : 0x100;
-            this->readyToPlay |= 4;
+            lengthCounterWave = NR31 ? NR11 : 0x100;
+            readyToPlay |= 4;
             break;
         case 3:
             //If length counter is zero, it is set to 64
-            length_counter_noise = this->NR41 & 0x3F ? this->NR41 & 0x3F : 0x40;
-            this->readyToPlay |= 8;
+            lengthCounterNoise = NR41 & 0x3F ? NR41 & 0x3F : 0x40;
+            readyToPlay |= 8;
     }
-    volume_reset(source);
+    volumeReset(source);
 }
 
-void APU::length_step() {
-    if((this->NR14 & 0x40) && length_counter_a) {
-        if(!--this->length_counter_a) {
-            this->NR14 &= 0x7F;
+void APU::lengthStep() {
+    if((NR14 & 0x40) && lengthCounterA) {
+        if(!--lengthCounterA) {
+            NR14 &= 0x7F;
             readyToPlay |= 1;
         }
     }
 
-    if((this->NR24 & 0x40) && length_counter_b) {
-        if(!--this->length_counter_b) {
-            this->NR24 &= 0x7F;
+    if((NR24 & 0x40) && lengthCounterB) {
+        if(!--lengthCounterB) {
+            NR24 &= 0x7F;
             readyToPlay |= 2;
         }
     }
 
-    if((this->NR34 & 0x40) && length_counter_wave) {
-        if(!--this->length_counter_wave) {
-            this->NR34 &= 0x7F;
+    if((NR34 & 0x40) && lengthCounterWave) {
+        if(!--lengthCounterWave) {
+            NR34 &= 0x7F;
             readyToPlay |= 4;
         }
     }
 
-    if((this->NR44 & 0x40) && length_counter_noise) {
-        if(!--this->length_counter_noise) {
-            this->NR44 &= 0x7F;
+    if((NR44 & 0x40) && lengthCounterNoise) {
+        if(!--lengthCounterNoise) {
+            NR44 &= 0x7F;
             readyToPlay |= 8;
         }
     }
 }
 
-void APU::vol_envelope_step(IVolumeController* vc) {
-    if((this->NR12 & 0x7) && !--this->period_envelope_a) {
-        this->period_envelope_a = this->NR12 & 0x7;
+void APU::volEnvelopeStep(IVolumeController* vc) {
+    if((NR12 & 0x7) && !--periodEnvelopeA) {
+        periodEnvelopeA = NR12 & 0x7;
         //If in increment mode and envelope can be incremented
-        if((this->NR12 & 8) && (volume_envelope_a < 15)) {
-            volume_envelope_a++;
+        if((NR12 & 8) && (volumeEnvelopeA < 15)) {
+            volumeEnvelopeA++;
         }
         //If in decrement mode and envelope can be decremented
-        if(!(this->NR12 & 8) && volume_envelope_a) {
-            volume_envelope_a--;
+        if(!(NR12 & 8) && volumeEnvelopeA) {
+            volumeEnvelopeA--;
         }
-        vc->setVolume(0, (float)volume_envelope_a/15.0f);
+        vc->setVolume(0, (float)volumeEnvelopeA / 15.0f);
     }
 
-    if((this->NR22 & 0x7) && !--this->period_envelope_b) {
-        this->period_envelope_b = this->NR22 & 0x7;
+    if((NR22 & 0x7) && !--periodEnvelopeB) {
+        periodEnvelopeB = NR22 & 0x7;
         //If in increment mode and envelope can be incremented
-        if((this->NR22 & 8) && (volume_envelope_b < 15)) {
-            volume_envelope_b++;
+        if((NR22 & 8) && (volumeEnvelopeB < 15)) {
+            volumeEnvelopeB++;
         }
         //If in decrement mode and envelope can be decremented
-        if(!(this->NR22 & 8) && volume_envelope_b) {
-            volume_envelope_b--;
+        if(!(NR22 & 8) && volumeEnvelopeB) {
+            volumeEnvelopeB--;
         }
-        vc->setVolume(1, (float)volume_envelope_b/15.0f);
+        vc->setVolume(1, (float)volumeEnvelopeB / 15.0f);
     }
 
-    if((this->NR42 & 0x7) && !--this->period_envelope_noise) {
-        this->period_envelope_noise = this->NR42 & 0x7;
+    if((NR42 & 0x7) && !--periodEnvelopeNoise) {
+        periodEnvelopeNoise = NR42 & 0x7;
         //If in increment mode and envelope can be incremented
-        if((this->NR42 & 8) && (volume_envelope_noise < 15)) {
-            volume_envelope_noise++;
+        if((NR42 & 8) && (volumeEnvelopeNoise < 15)) {
+            volumeEnvelopeNoise++;
         }
         //If in decrement mode and envelope can be decremented
-        if(!(this->NR42 & 8) && volume_envelope_noise) {
-            volume_envelope_noise--;
+        if(!(NR42 & 8) && volumeEnvelopeNoise) {
+            volumeEnvelopeNoise--;
         }
-        vc->setVolume(3, (float)volume_envelope_noise/15.0f);
+        vc->setVolume(3, (float)volumeEnvelopeNoise / 15.0f);
     }
 }
 
-void APU::sweep_step() {
-    if((NR10 & 0x70) && sweep_enabled && !--sweep_counter) {
-        if(NR10 & 8) {
-            sweep_shadow_register -= sweep_shadow_register/(1 << (NR10 & 7));
-        } else {
-            sweep_shadow_register += sweep_shadow_register/(1 << (NR10 & 7));
-        }
-        if(sweep_shadow_register > 0x7FF) {
+void APU::sweepStep() {
+    if((NR10 & 0x70) && sweepEnabled && !--sweepCounter) {
+        sweepShadowRegister = calculateSweep();
+        if(sweepShadowRegister > 0x7FF) {
             NR14 &= 0x7F;
         }
-        sweep_counter = (NR10 >> 4) & 7;
+        sweepCounter = (NR10 >> 4) & 7;
         readyToPlay |= 1;
     }
 }
 
 void APU::update(uint16_t cpuCycles, IVolumeController* vc) {
-    this->accumulated_cycles += cpuCycles;
-    if(this->accumulated_cycles < CLOCK_CYCLE_THRESHOLD) {
+    accumulatedCycles += cpuCycles;
+    if(accumulatedCycles < CLOCK_CYCLE_THRESHOLD) {
         return;
     }
-    this->accumulated_cycles -= CLOCK_CYCLE_THRESHOLD;
+    accumulatedCycles -= CLOCK_CYCLE_THRESHOLD;
 
-    this->state++;
+    state++;
     state %= 8;
 
     if(state % 2 == 0) {
-        this->length_step();
+        lengthStep();
     }
     if(state == 7) {
-        this->vol_envelope_step(vc);
+        volEnvelopeStep(vc);
     }
     if(state % 4 == 2) {
-        this->sweep_step();
+        sweepStep();
     }
 }
 uint8_t APU::isReadyToPlaySound() {
@@ -418,23 +414,23 @@ void APU::confirmPlay() {
 APUState* APU::getAPUState() {
     return new APUState{
         (NR14 & 0x80) && (NR52 & 0x80),
-        (uint8_t)((this->NR11 >> 6) & 0x3),
-        sweep_shadow_register,
-        (float)volume_envelope_a / 15.0f,
+        (uint8_t)((NR11 >> 6) & 0x3),
+        sweepShadowRegister,
+        (float)volumeEnvelopeA / 15.0f,
 
         (NR24 & 0x80) && (NR52 & 0x80),
-        (uint8_t)((this->NR21 >> 6) & 0x3),
-        (uint16_t)((((uint16_t)(this->NR24 & 0x7)) << 8) + this->NR23),
-        (float)volume_envelope_b / 15.0f,
+        (uint8_t)((NR21 >> 6) & 0x3),
+        (uint16_t)((((uint16_t)(NR24 & 0x7)) << 8) + NR23),
+        (float)volumeEnvelopeB / 15.0f,
 
         (NR34 & 0x80) && (NR30 & 0x80) && (NR52 & 0x80),
         wavePatternRAM,
-        (uint16_t)((((uint16_t)(this->NR34 & 0x7)) << 8) + this->NR33),
-        WAVE_VOLUMES[(this->NR32 >> 5) & 0x3],
+        (uint16_t)((((uint16_t)(NR34 & 0x7)) << 8) + NR33),
+        WAVE_VOLUMES[(NR32 >> 5) & 0x3],
 
         (NR44 & 0x80) && (NR52 & 0x80),
         (int)((524288.0 / (NR43 & 0x07 ? NR43 & 0x07 : 0.5f)) / (2 << (NR43 >> 4))),
-        (float)volume_envelope_noise/15.0f,
-        (bool)(this->NR43 & 8)
+        (float)volumeEnvelopeNoise / 15.0f,
+        (bool)(NR43 & 8)
     };
 }
