@@ -3,9 +3,13 @@
 
 using namespace glm;
 
-RenderView::RenderView() {
-    screenMultiplier = MIN_SCREEN_MULTIPLIER;
-    palette = PALETTE_POCKET;
+RenderView::RenderView(AppSettings& settings, PaletteHandler& paletteHandler):
+    settings{settings}, paletteHandler{paletteHandler}
+{
+    x = 0;
+    y = 0;
+    width = 0;
+    height = 0;
 }
 
 void RenderView::initGL() {
@@ -44,12 +48,13 @@ void RenderView::initGL() {
 
 void RenderView::render() const {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, LCD_WIDTH * screenMultiplier, LCD_HEIGHT * screenMultiplier);
+    glViewport(x, y, width, height);
 
     glUseProgram(renderShaderProgram);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, screenTexture);
 
+    const Palette& palette = paletteHandler.getPalette(settings.paletteNumber);
     glUniform3f(glGetUniformLocation(renderShaderProgram, "c1"),
                 palette.c1.r, palette.c1.g, palette.c1.b);
     glUniform3f(glGetUniformLocation(renderShaderProgram, "c2"),
@@ -95,20 +100,14 @@ void RenderView::setScreenTexture(uint8_t textureData[]) {
     if (glErrorFound(glErrorLog)) { FATAL_ERROR(glErrorLog); }
 }
 
-void RenderView::setPalette(Palette palette) {
-    this->palette = palette;
+void RenderView::setViewportPos(int x, int y) {
+    this->x = x;
+    this->y = y;
 }
 
-void RenderView::setScreenMultiplier(int screenMultiplier) {
-    this->screenMultiplier = screenMultiplier;
-}
-
-int RenderView::getWidth() const {
-    return LCD_WIDTH * screenMultiplier;
-}
-
-int RenderView::getHeight() const {
-    return LCD_HEIGHT * screenMultiplier;
+void RenderView::setViewportDim(int width, int height) {
+    this->width = width;
+    this->height = height;
 }
 
 GLuint RenderView::loadShaderProgram(const std::string& vertexShader, const std::string& fragmentShader) {

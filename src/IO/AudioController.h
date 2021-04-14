@@ -11,12 +11,13 @@
 #include <array>
 #include "../gameboy/APU/IVolumeController.h"
 #include "../gameboy/APU/APUState.h"
+#include "../application/AppSettings.h"
 
 
 
 class AudioController : public IVolumeController {
 public:
-    AudioController();
+    explicit AudioController(AppSettings& settings);
     ~AudioController();
     void init();
     void playSound(int source, uint8_t *soundData, int size, int sampleRate, float volume);
@@ -36,6 +37,7 @@ private:
 
     ALCdevice* device;
     ALCcontext* context;
+    AppSettings& settings;
 
     ALuint tmpBuffer;
     ALuint buffers[N_SOURCES];

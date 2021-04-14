@@ -3,12 +3,10 @@
 //
 
 #include "Controller.h"
-Controller::Controller(const std::shared_ptr<AppSettings> &appSettings, const std::shared_ptr<View> &viewPtr,
-                       const std::shared_ptr<GameBoy> &gameBoyPtr) {
-    this->settings = appSettings;
-    this->view = viewPtr;
-    this->gameBoy = gameBoyPtr;
-    this->savedEmulationSpeed = settings->emulationSpeedMultiplier;
+Controller::Controller(AppSettings& settings, GuiView& guiView, GameBoy& gameBoy):
+    settings{settings}, guiView{guiView}, gameBoy{gameBoy}
+{
+    savedEmulationSpeed = settings.emulationSpeedMultiplier;
 }
 
 /**
@@ -20,7 +18,7 @@ State Controller::handleSDLEvents(State state) {
         SDL_Keycode key = event.key.keysym.sym;
 
         if (state == State::MENU) {
-            view->handleGuiInput(event);
+            guiView.handleInput(event);
         }
 
         switch (event.type) {
@@ -35,12 +33,12 @@ State Controller::handleSDLEvents(State state) {
                 }
 
                 if (key == SDLK_ESCAPE) {
-                    view->toggleGui();
+                    guiView.toggleGui();
                     state = (state == State::EMULATION) ? State::MENU : State::EMULATION;
                 }
-                if (key == settings->keyBinds.turboMode.keyval) {
-                    savedEmulationSpeed = settings->emulationSpeedMultiplier;
-                    settings->emulationSpeedMultiplier = MAX_EMULATION_SPEED_FLOAT;
+                if (key == settings.keyBinds.turboMode.keyval) {
+                    savedEmulationSpeed = settings.emulationSpeedMultiplier;
+                    settings.emulationSpeedMultiplier = MAX_EMULATION_SPEED_FLOAT;
                 }
                 if (state == State::EMULATION) {
                     handleEmulatorInputPress(key);
@@ -48,8 +46,8 @@ State Controller::handleSDLEvents(State state) {
                 break;
 
             case SDL_KEYUP:
-                if (key == settings->keyBinds.turboMode.keyval) {
-                    settings->emulationSpeedMultiplier = savedEmulationSpeed;
+                if (key == settings.keyBinds.turboMode.keyval) {
+                    settings.emulationSpeedMultiplier = savedEmulationSpeed;
                 }
                 if (state == State::EMULATION) {
                     handleEmulatorInputRelease(key);
@@ -62,47 +60,47 @@ State Controller::handleSDLEvents(State state) {
 
 void Controller::handleEmulatorInputPress(SDL_Keycode key) {
     // Left and right can not be pressed simultaneously, the same goes for up and down!
-    if (key == settings->keyBinds.left.keyval) {
-        gameBoy->joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
-        gameBoy->joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
-    } else if (key == settings->keyBinds.right.keyval) {
-        gameBoy->joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
-        gameBoy->joypad_input(JOYPAD_RIGHT, JOYPAD_PRESS);
-    } else if (key == settings->keyBinds.up.keyval) {
-        gameBoy->joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
-        gameBoy->joypad_input(JOYPAD_UP, JOYPAD_PRESS);
-    } else if (key == settings->keyBinds.down.keyval) {
-        gameBoy->joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
-        gameBoy->joypad_input(JOYPAD_DOWN, JOYPAD_PRESS);
-    } else if (key == settings->keyBinds.a.keyval) {
-        gameBoy->joypad_input(JOYPAD_A, JOYPAD_PRESS);
-    } else if (key == settings->keyBinds.b.keyval) {
-        gameBoy->joypad_input(JOYPAD_B, JOYPAD_PRESS);
-    } else if (key == settings->keyBinds.start.keyval) {
-        gameBoy->joypad_input(JOYPAD_START, JOYPAD_PRESS);
-    } else if (key == settings->keyBinds.select.keyval) {
-        gameBoy->joypad_input(JOYPAD_SELECT, JOYPAD_PRESS);
+    if (key == settings.keyBinds.left.keyval) {
+        gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
+        gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_PRESS);
+    } else if (key == settings.keyBinds.right.keyval) {
+        gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
+        gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_PRESS);
+    } else if (key == settings.keyBinds.up.keyval) {
+        gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
+        gameBoy.joypad_input(JOYPAD_UP, JOYPAD_PRESS);
+    } else if (key == settings.keyBinds.down.keyval) {
+        gameBoy.joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
+        gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_PRESS);
+    } else if (key == settings.keyBinds.a.keyval) {
+        gameBoy.joypad_input(JOYPAD_A, JOYPAD_PRESS);
+    } else if (key == settings.keyBinds.b.keyval) {
+        gameBoy.joypad_input(JOYPAD_B, JOYPAD_PRESS);
+    } else if (key == settings.keyBinds.start.keyval) {
+        gameBoy.joypad_input(JOYPAD_START, JOYPAD_PRESS);
+    } else if (key == settings.keyBinds.select.keyval) {
+        gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_PRESS);
     }
 }
 
 
 void Controller::handleEmulatorInputRelease(SDL_Keycode key) {
-    if (key == settings->keyBinds.left.keyval) {
-        gameBoy->joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
-    } else if (key == settings->keyBinds.right.keyval) {
-        gameBoy->joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
-    } else if (key == settings->keyBinds.up.keyval) {
-        gameBoy->joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
-    } else if (key == settings->keyBinds.down.keyval) {
-        gameBoy->joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
-    } else if (key == settings->keyBinds.a.keyval) {
-        gameBoy->joypad_input(JOYPAD_A, JOYPAD_RELEASE);
-    } else if (key == settings->keyBinds.b.keyval) {
-        gameBoy->joypad_input(JOYPAD_B, JOYPAD_RELEASE);
-    } else if (key == settings->keyBinds.start.keyval) {
-        gameBoy->joypad_input(JOYPAD_START, JOYPAD_RELEASE);
-    } else if (key == settings->keyBinds.select.keyval) {
-        gameBoy->joypad_input(JOYPAD_SELECT, JOYPAD_RELEASE);
+    if (key == settings.keyBinds.left.keyval) {
+        gameBoy.joypad_input(JOYPAD_LEFT, JOYPAD_RELEASE);
+    } else if (key == settings.keyBinds.right.keyval) {
+        gameBoy.joypad_input(JOYPAD_RIGHT, JOYPAD_RELEASE);
+    } else if (key == settings.keyBinds.up.keyval) {
+        gameBoy.joypad_input(JOYPAD_UP, JOYPAD_RELEASE);
+    } else if (key == settings.keyBinds.down.keyval) {
+        gameBoy.joypad_input(JOYPAD_DOWN, JOYPAD_RELEASE);
+    } else if (key == settings.keyBinds.a.keyval) {
+        gameBoy.joypad_input(JOYPAD_A, JOYPAD_RELEASE);
+    } else if (key == settings.keyBinds.b.keyval) {
+        gameBoy.joypad_input(JOYPAD_B, JOYPAD_RELEASE);
+    } else if (key == settings.keyBinds.start.keyval) {
+        gameBoy.joypad_input(JOYPAD_START, JOYPAD_RELEASE);
+    } else if (key == settings.keyBinds.select.keyval) {
+        gameBoy.joypad_input(JOYPAD_SELECT, JOYPAD_RELEASE);
     }
 }
 

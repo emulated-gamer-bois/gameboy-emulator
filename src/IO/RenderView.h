@@ -14,33 +14,37 @@
 #include <memory>
 
 #include "Palette.h"
+#include "../application/AppSettings.h"
 #include "../helpers/ErrorReport.h"
 #include "../gameboy/Definitions.h"
+#include "PaletteHandler.h"
 
 class RenderView {
 public:
-    RenderView();
+    explicit RenderView(AppSettings& settings, PaletteHandler& paletteHandler);
 
     void initGL();
     void render() const;
     void clear() const;
     void setScreenTexture(uint8_t textureData[]);
-    void setPalette(Palette palette);
-    void setScreenMultiplier(int screenMultiplier);
-
-    int getWidth() const;
-    int getHeight() const;
+    void setViewportPos(int x, int y);
+    void setViewportDim(int width, int height);
 
 private:
     const static int VERTEX_AMOUNT = 6;
 
-    int screenMultiplier;
+    AppSettings& settings;
+    PaletteHandler& paletteHandler;
+
     glm::vec2 screenVertices[VERTEX_AMOUNT];
+    int x;
+    int y;
+    int width;
+    int height;
     GLuint vertexArrayObject;
     GLuint screenTexture;
     GLuint renderShaderProgram;
     GLuint fxShaderProgram;
-    Palette palette;
 
     GLuint loadShaderProgram(const std::string& vertexShader, const std::string& fragmentShader);
 

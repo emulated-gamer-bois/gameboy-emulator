@@ -26,13 +26,12 @@ if(NOT TRAVIS)
             application/Application.cpp
             IO/FileExplorer.h
             IO/FileExplorer.cpp
-            IO/Gui.cpp
-            IO/Gui.h
-            application/Keybinds.cpp
-            application/Keybinds.h
+            IO/GuiView.cpp
+            IO/GuiView.h
+            application/KeyBinds.cpp
+            application/KeyBinds.h
             application/AppSettings.h
-            View.cpp
-            IO/View.h
+            application/AppSettings.cpp
             IO/Controller.cpp
             IO/Controller.h
             application/State.h)

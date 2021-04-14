@@ -10,6 +10,7 @@
 #include <string>
 #include <chrono> // time
 #include <thread> // sleep
+#include <cmath>
 #include "../IO/RenderView.h"
 #include "../gameboy/GameBoy.h"
 #include "../gameboy/Definitions.h"
@@ -17,9 +18,8 @@
 #include "../helpers/ErrorReport.h"
 #include "imgui.h"
 #include "AppSettings.h"
-#include "../IO/Gui.h"
-#include "Keybinds.h"
-#include "../IO/View.h"
+#include "KeyBinds.h"
+#include "../IO/GuiView.h"
 #include "../IO/Controller.h"
 #include "State.h"
 
@@ -29,19 +29,33 @@ public:
     void start();
 
 private:
-    State state;
-    std::shared_ptr<AppSettings> settings{std::make_shared<AppSettings>()};
-    AudioController audio;
-    std::shared_ptr<GameBoy> gameBoy{std::make_shared<GameBoy>()};
-    std::shared_ptr<View> view{std::make_shared<View>(settings)};
-    Controller controller = Controller(settings,view,gameBoy);
-    int framesUntilStep{0};
-    void init();
-    void terminate();
-    void initSettings();
-    void stepFast();
-    void gameBoyStep();
-    void stepSlowly();
-    void stepEmulation();
+    int framesUntilStep;
 
+    SDL_Window* window;
+    SDL_GLContext glContext;
+    int windowWidth;
+    int windowHeight;
+
+    State state;
+    AppSettings settings;
+    PaletteHandler paletteHandler;
+
+    GameBoy gameBoy;
+    AudioController audio;
+
+    // Explicitly constructed in constructor.
+    RenderView renderView;
+    GuiView guiView;
+    Controller controller;
+
+    void initSDL();
+    void terminate();
+
+    void stepEmulation();
+    void stepFast();
+    void stepSlowly();
+    void gameBoyStep();
+
+    void correctWindowSize();
+    void correctViewport();
 };

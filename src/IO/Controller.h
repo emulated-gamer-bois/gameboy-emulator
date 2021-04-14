@@ -14,25 +14,23 @@
 #include "AudioController.h"
 #include "../helpers/ErrorReport.h"
 #include "imgui.h"
+
 #include "../application/AppSettings.h"
-#include "Gui.h"
-#include "../application/Keybinds.h"
-#include "View.h"
+#include "GuiView.h"
+#include "../application/KeyBinds.h"
 #include "../application/State.h"
 
 class Controller {
 public:
-
-
-    Controller(const std::shared_ptr<AppSettings> &settings, const std::shared_ptr<View> &view,const std::shared_ptr<GameBoy> &gameBoy);
+    explicit Controller(AppSettings& settings, GuiView& guiView, GameBoy& gameBoy);
     State handleSDLEvents(State state);
 
 private:
     void handleEmulatorInputPress(SDL_Keycode key);
     void handleEmulatorInputRelease(SDL_Keycode key);
-    std::shared_ptr<AppSettings> settings;
-    std::shared_ptr<View> view;
-    std::shared_ptr<GameBoy> gameBoy;
+    AppSettings& settings;
+    GuiView& guiView;
+    GameBoy& gameBoy;
     float savedEmulationSpeed;
 
 };

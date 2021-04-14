@@ -115,6 +115,9 @@ private:
     uint16_t length_counter_noise;
 
     const float WAVE_VOLUMES[4] = {0.0f, 0.25f, 0.125f, 0.0675f};
+
+    void volume_reset(uint8_t source);
+    void sweep_reset();
 };
 
 

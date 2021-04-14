@@ -2,10 +2,10 @@
 // Created by isaaklindgren on 2021-03-19.
 //
 
-#include "Keybinds.h"
+#include "KeyBinds.h"
 
 
-void Keybinds::init_keybinds() {
+KeyBinds::KeyBinds() {
     a.keyval = SDLK_j;
     b.keyval = SDLK_h;
     start.keyval= SDLK_g;
@@ -31,7 +31,7 @@ void Keybinds::init_keybinds() {
     turboMode.action_description = "Turbo Mode";
 }
 
-bool Keybinds::editKeyBinds( bool keysDown [], int keyBindIndex) {
+bool KeyBinds::editKeyBinds(bool keysDown [], int keyBindIndex) {
 
     for(int i =0;i<512;i++) {
         if (keysDown[i]) {
@@ -49,7 +49,7 @@ bool Keybinds::editKeyBinds( bool keysDown [], int keyBindIndex) {
     }
     return false;
 }
-bool Keybinds::validKey(int keyBindIndex,SDL_Scancode scanCode) {
+bool KeyBinds::validKey(int keyBindIndex, SDL_Scancode scanCode) {
     bool forbiddenKeyBind = false;
     for (int j = 0; j < keybinds.capacity(); j++) {
         if (j != keyBindIndex)

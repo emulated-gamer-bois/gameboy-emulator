@@ -100,12 +100,16 @@ void APU::write(uint16_t address, uint8_t data) {
     switch (address) {
         case NR10_ADDRESS:
             this->NR10 = data;
+            sweep_reset();
+            readyToPlay |= 1;
             return;
         case NR11_ADDRESS:
             this->NR11 = data;
             return;
         case NR12_ADDRESS:
             this->NR12 = data;
+            volume_reset(0);
+            readyToPlay |= 1;
             return;
         case NR13_ADDRESS:
             this->NR13 = data;
@@ -122,6 +126,8 @@ void APU::write(uint16_t address, uint8_t data) {
             return;
         case NR22_ADDRESS:
             this->NR22 = data;
+            volume_reset(1);
+            readyToPlay |= 2;
             return;
         case NR23_ADDRESS:
             this->NR23 = data;
@@ -142,6 +148,8 @@ void APU::write(uint16_t address, uint8_t data) {
             return;
         case NR32_ADDRESS:
             this->NR32 = data;
+            volume_reset(2);
+            readyToPlay |= 4;
             return;
         case NR33_ADDRESS:
             this->NR33 = data;
@@ -158,6 +166,8 @@ void APU::write(uint16_t address, uint8_t data) {
             return;
         case NR42_ADDRESS:
             this->NR42 = data;
+            volume_reset(3);
+            readyToPlay |= 8;
             return;
         case NR43_ADDRESS:
             this->NR43 = data;
@@ -214,6 +224,30 @@ void APU::reset() {
     NR51 = 0;
 }
 
+void APU::volume_reset(uint8_t source) {
+    switch (source) {
+        case 0:
+            this->period_envelope_a = this->NR12 & 0x7;
+            this->volume_envelope_a = (this->NR12 >> 4) & 0xF;
+            break;
+        case 1:
+            this->period_envelope_b = this->NR22 & 0x7;
+            this->volume_envelope_b = (this->NR22 >> 4) & 0xF;
+            break;
+        case 2:
+            break;
+        case 3:
+            this->period_envelope_noise = this->NR42 & 0x7;
+            volume_envelope_noise = (this->NR42 >> 4) & 0xF;
+            break;
+    }
+}
+
+void APU::sweep_reset() {
+    sweep_counter = (NR10 >> 4) & 7;
+    sweep_shadow_register = ((NR14 & 7) << 8) + NR13;
+}
+
 void APU::trigger_event(uint8_t source) {
     //TODO: Complete functionality
     /**
@@ -232,20 +266,12 @@ void APU::trigger_event(uint8_t source) {
             //If length counter is zero, it is set to 64
             length_counter_a = this->NR11 & 0x3F ? this->NR11 & 0x3F : 0x40;
 
-            this->period_envelope_a = this->NR12 & 0x7;
-            this->volume_envelope_a = (this->NR12 >> 4) & 0xF;
-
-            //Sweep
-            sweep_counter = (NR10 >> 4) & 7;
-            sweep_shadow_register = ((NR14 & 7) << 8) + NR13;
-
+            sweep_reset();
             this->readyToPlay |= 1;
             break;
         case 1:
             //If length counter is zero, it is set to 64
             length_counter_b = this->NR21 & 0x3F ? this->NR21 & 0x3F : 0x40;
-            this->period_envelope_b = this->NR22 & 0x7;
-            this->volume_envelope_b = (this->NR22 >> 4) & 0xF;
             this->readyToPlay |= 2;
             break;
         case 2:
@@ -256,10 +282,9 @@ void APU::trigger_event(uint8_t source) {
         case 3:
             //If length counter is zero, it is set to 64
             length_counter_noise = this->NR41 & 0x3F ? this->NR41 & 0x3F : 0x40;
-            this->period_envelope_noise = this->NR42 & 0x7;
-            volume_envelope_noise = (this->NR42 >> 4) & 0xF;
             this->readyToPlay |= 8;
     }
+    volume_reset(source);
 }
 
 void APU::length_step() {
