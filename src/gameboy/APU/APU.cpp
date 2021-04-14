@@ -248,6 +248,14 @@ void APU::sweep_reset() {
     sweep_shadow_register = ((NR14 & 7) << 8) + NR13;
 }
 
+uint16_t APU::calculateSweep() {
+    if(NR10 & 8) {
+        return sweep_shadow_register - sweep_shadow_register/(1 << (NR10 & 7));
+    } else {
+        return sweep_shadow_register + sweep_shadow_register/(1 << (NR10 & 7));
+    }
+}
+
 void APU::trigger_event(uint8_t source) {
     //TODO: Complete functionality
     /**
@@ -267,6 +275,11 @@ void APU::trigger_event(uint8_t source) {
             length_counter_a = this->NR11 & 0x3F ? this->NR11 & 0x3F : 0x40;
 
             sweep_reset();
+
+            NR14 |= 0x80;
+            if(!(NR10 & 0x77) || calculateSweep() > 0x7FF) {
+                NR14 &= 0x7F;
+            }
             this->readyToPlay |= 1;
             break;
         case 1:
@@ -364,6 +377,9 @@ void APU::sweep_step() {
             sweep_shadow_register -= sweep_shadow_register/(1 << (NR10 & 7));
         } else {
             sweep_shadow_register += sweep_shadow_register/(1 << (NR10 & 7));
+        }
+        if(sweep_shadow_register > 0x7FF) {
+            NR14 &= 0x7F;
         }
         sweep_counter = (NR10 >> 4) & 7;
         readyToPlay |= 1;

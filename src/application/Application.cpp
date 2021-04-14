@@ -22,7 +22,7 @@ Application::Application():
     correctViewport();
 
     guiView.setLoadRomCallback([this](std::string&& romPath) -> void {
-        gameBoy.load_rom("../roms/gb/boot_lameboy_big.gb", romPath);
+        gameBoy.load_rom("../roms/games/dmg_boot.bin", romPath);
     });
 
     guiView.setExitMenuCallback([this]() -> void {

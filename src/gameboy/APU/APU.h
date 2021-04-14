@@ -118,6 +118,7 @@ private:
 
     void volume_reset(uint8_t source);
     void sweep_reset();
+    uint16_t calculateSweep();
 };
 
 
