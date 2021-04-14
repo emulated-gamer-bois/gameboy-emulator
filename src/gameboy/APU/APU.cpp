@@ -82,21 +82,6 @@ void APU::write(uint16_t address, uint8_t data) {
         wavePatternRAM[address - WAVE_PATTERN_START] = data;
         return;
     }
-    /*if(!(NR52 & 0x80)) {
-        switch (address) {
-            case NR10_ADDRESS:
-            case NR11_ADDRESS:
-            case NR21_ADDRESS:
-            case NR31_ADDRESS:
-            case NR41_ADDRESS:
-            case NR52_ADDRESS:
-                break;
-            default:
-                //Ignoring any writes while APU is off
-                //Length registers can still be written to while power is off
-                return;
-        }
-    }*/
     switch (address) {
         case NR10_ADDRESS:
             NR10 = data;
@@ -263,18 +248,6 @@ uint16_t APU::calculateSweep() {
 }
 
 void APU::triggerEvent(uint8_t source) {
-    //TODO: Complete functionality
-    /**
-    - Done - Channel is enabled (see length counter).
-    - Done - If length counter is zero, it is set to 64 (256 for wave channel).
-    - Done-ish (since frequency timer does not change in our program, it does not need to be reset)
-        - Frequency timer is reloaded with period.
-    - Done - Volume envelope timer is reloaded with period.
-    - Done - Channel volume is reloaded from NRx2.
-    - Done-ish (done in audio controller) - Noise channel's LFSR bits are all set to 1.
-    - Pass - Wave channel's position is set to 0 but sample buffer is NOT refilled.
-    - Pass - Square 1's sweep does several things (see frequency sweep).
-     */
     switch(source) {
         case 0:
             //If length counter is zero, it is set to 64
