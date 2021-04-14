@@ -51,6 +51,6 @@ void Joypad::press(uint8_t button) {
     this->joypad &= ~(1 << button);
 
     // Raise interrupt flag
-    this->mmu->raise_interrupt_flag(CONTROLLER_IF_BIT);
+    this->mmu->raiseInterruptFlag(CONTROLLER_IF_BIT);
 }
 

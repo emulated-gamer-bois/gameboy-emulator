@@ -40,7 +40,7 @@ void Timer::update(uint16_t cycles) {
             // Add modulo
             counter += (modulo + increaseCounter);
             // Raise interrupt request for Timer interrupt
-            mmu->raise_interrupt_flag(1 << 2);
+            mmu->raiseInterruptFlag(1 << 2);
         } else {
             counter += increaseCounter;
         }

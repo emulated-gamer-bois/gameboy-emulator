@@ -9,32 +9,32 @@
 #include <cstring> // memcpy
 
 Cartridge::Cartridge() {
-    this->reset();
+    reset();
 }
 
 void Cartridge::reset() {
-    this->cartridge_type = 0;
-    this->rom_size = 0;
-    this->ram_size = 0;
+    cartridgeType = 0;
+    romSize = 0;
+    ramSize = 0;
 
-    this->rom = std::vector<uint8_t>(0x8000);
-    this->ram;
-    this->mbc = std::make_unique<ROM_Only_MBC>(&this->rom);
+    rom = std::vector<uint8_t>(0x8000);
+    ram;
+    mbc = std::make_unique<ROM_Only_MBC>(&rom);
 }
 
 uint8_t Cartridge::read(uint16_t addr) const {
-    return this->mbc->read(addr);
+    return mbc->read(addr);
 }
 
 void Cartridge::write(uint16_t addr, uint8_t data) {
-    this->mbc->write(addr, data);
+    mbc->write(addr, data);
 }
 
 void Cartridge::write_TEST(uint16_t addr, uint8_t data) {
-    this->rom.at(addr) = data;
+    rom.at(addr) = data;
 }
 
-bool Cartridge::load_rom(const std::string& filepath, bool load_ram_from_file) {
+bool Cartridge::loadRom(const std::string& filepath, bool load_ram_from_file) {
     this->filepath = filepath;
     std::streampos size;
 
@@ -53,18 +53,18 @@ bool Cartridge::load_rom(const std::string& filepath, bool load_ram_from_file) {
         file.close();
 
         // Set ROM/RAM size
-        this->rom_size = memblock[0x148];
-        if (!this->init_rom()) return false;
+        romSize = memblock[0x148];
+        if (!initRom()) return false;
 
-        this->ram_size = memblock[0x149];
-        if (!this->init_ram(load_ram_from_file)) return false;
+        ramSize = memblock[0x149];
+        if (!initRam(load_ram_from_file)) return false;
 
         // Check cartridge type
-        this->cartridge_type = memblock[0x147];
-        if (!this->init_mbc()) return false;
+        cartridgeType = memblock[0x147];
+        if (!initMbc()) return false;
 
         // Copy data
-        std::memcpy(&this->rom.at(this->rom.size() - size), &memblock[0], size);
+        std::memcpy(&rom.at(rom.size() - size), &memblock[0], size);
 
         return true;
     }
@@ -74,19 +74,19 @@ bool Cartridge::load_rom(const std::string& filepath, bool load_ram_from_file) {
     }
 }
 
-bool Cartridge::save_ram() {
+bool Cartridge::saveRam() {
     // Return if Cartridge have no RAM
-    if (this->ram_size == Cartridge::RAM_NO_RAM) {
+    if (ramSize == Cartridge::RAM_NO_RAM) {
         return true;
     }
     // Create file
-    std::ofstream wfile (this->filepath + ".sav", std::ios::out|std::ios::binary|std::ios::ate);
+    std::ofstream wfile (filepath + ".sav", std::ios::out|std::ios::binary|std::ios::ate);
     if(!wfile) {
         std::cout << "Cannot open file!" << std::endl;
         return false;
     }
     // Write to file
-    wfile.write(reinterpret_cast<const char *>(this->ram.data()), this->ram.size());
+    wfile.write(reinterpret_cast<const char *>(ram.data()), ram.size());
     wfile.close();
 
     if(!wfile.good()) {
@@ -96,9 +96,9 @@ bool Cartridge::save_ram() {
     return true;
 }
 
-bool Cartridge::load_ram() {
+bool Cartridge::loadRam() {
     // Return if Cartridge should not have RAM
-    if (this->ram_size == Cartridge::RAM_NO_RAM) {
+    if (ramSize == Cartridge::RAM_NO_RAM) {
         return true;
     }
 
@@ -109,15 +109,15 @@ bool Cartridge::load_ram() {
         // Get file size
         size = rfile.tellg();
 
-        if (size != this->ram.size()) {
+        if (size != ram.size()) {
             std::cout << "Savefile: " << filepath + ".sav" << " has wrong file size" << std::endl;
             return false;
         }
 
         // Move seeker to beginning of file
         rfile.seekg (0, std::ios::beg);
-        // Read file to this->ram
-        rfile.read (reinterpret_cast<char *>(this->ram.data()), size);
+        // Read file to ram
+        rfile.read (reinterpret_cast<char *>(ram.data()), size);
         // Close file
         rfile.close();
 
@@ -129,104 +129,104 @@ bool Cartridge::load_ram() {
     }
 }
 
-bool Cartridge::init_rom() {
-    switch (this->rom_size)
+bool Cartridge::initRom() {
+    switch (romSize)
     {
         case ROM_32KB:
-            this->rom = std::vector<uint8_t>(0x8000);
+            rom = std::vector<uint8_t>(0x8000);
             break;
         case ROM_64KB:
-            this->rom = std::vector<uint8_t>(0x10000);
+            rom = std::vector<uint8_t>(0x10000);
             break;
         case ROM_128KB:
-            this->rom = std::vector<uint8_t>(0x20000);
+            rom = std::vector<uint8_t>(0x20000);
             break;
         case ROM_256KB:
-            this->rom = std::vector<uint8_t>(0x40000);
+            rom = std::vector<uint8_t>(0x40000);
             break;
         case ROM_512KB:
-            this->rom = std::vector<uint8_t>(0x80000);
+            rom = std::vector<uint8_t>(0x80000);
             break;
         case ROM_1MB:
-            this->rom = std::vector<uint8_t>(0x100000);
+            rom = std::vector<uint8_t>(0x100000);
             break;
         case ROM_2MB:
-            this->rom = std::vector<uint8_t>(0x200000);
+            rom = std::vector<uint8_t>(0x200000);
             break;
         case ROM_4MB:
-            this->rom = std::vector<uint8_t>(0x400000);
+            rom = std::vector<uint8_t>(0x400000);
             break;
         case ROM_8MB:
-            this->rom = std::vector<uint8_t>(0x800000);
+            rom = std::vector<uint8_t>(0x800000);
             break;
 
         default:
-            std::cout << "Invalid or unsupported ROM size: " << (int)this->rom_size << std::endl;
+            std::cout << "Invalid or unsupported ROM size: " << (int)romSize << std::endl;
             return false;
     }
-    std::cout << "ROM size: " << (int)this->rom_size << std::endl;
+    std::cout << "ROM size: " << (int)romSize << std::endl;
     return true;
 }
 
-bool Cartridge::init_ram(bool load_from_file) {
-    switch (this->ram_size)
+bool Cartridge::initRam(bool load_from_file) {
+    switch (ramSize)
     {
         case RAM_NO_RAM:
             // Should be empty ram, but for security add accessible memory
         case RAM_8KB:
-            this->ram = std::vector<uint8_t>(0x2000);
+            ram = std::vector<uint8_t>(0x2000);
             break;
         case RAM_32KB:
-            this->ram = std::vector<uint8_t>(0x8000);
+            ram = std::vector<uint8_t>(0x8000);
             break;
         case RAM_128KB:
-            this->ram = std::vector<uint8_t>(0x20000);
+            ram = std::vector<uint8_t>(0x20000);
             break;
         case RAM_64KB:
-            this->ram = std::vector<uint8_t>(0x10000);
+            ram = std::vector<uint8_t>(0x10000);
             break;
 
         default:
-            std::cout << "Invalid or unsupported RAM size: "<< (int)this->ram_size << std::endl;
+            std::cout << "Invalid or unsupported RAM size: "<< (int)ramSize << std::endl;
             return false;
     }
     if (load_from_file) {
-        if (!this->load_ram()) {
+        if (!loadRam()) {
             std::cout << "Could not load extended RAM from file!" << std::endl;
         } else {
             std::cout << "Extended RAM loaded from file!" << std::endl;
         }
     }
-    std::cout << "RAM size: "<< (int)this->ram_size << std::endl;
+    std::cout << "RAM size: "<< (int)ramSize << std::endl;
     return true;
 }
 
-bool Cartridge::init_mbc() {
-    switch (this->cartridge_type) {
+bool Cartridge::initMbc() {
+    switch (cartridgeType) {
         case ROM_ONLY:
-            this->mbc = std::make_unique<ROM_Only_MBC>(&this->rom);
+            mbc = std::make_unique<ROM_Only_MBC>(&rom);
             break;
         case MBC1:
         case MBC1_R:
         case MBC1_R_B:
-            this->mbc = std::make_unique<MBC1_MBC>(&this->rom, &this->ram);
+            mbc = std::make_unique<MBC1_MBC>(&rom, &ram);
             break;
         case MBC3_T_B:
         case MBC3_T_R_B:
         case MBC3:
         case MBC_R:
         case MBC_R_B:
-            this->mbc = std::make_unique<MBC3_MBC>(&this->rom, &this->ram);
+            mbc = std::make_unique<MBC3_MBC>(&rom, &ram);
             break;
 
         default:
-            std::cout << "ROM file has unsupported cartridge type: " << (int)this->cartridge_type << std::endl;
+            std::cout << "ROM file has unsupported cartridge type: " << (int)cartridgeType << std::endl;
             return false;
     }
-    std::cout << "Cartridge type: " << (int)this->cartridge_type << std::endl;
+    std::cout << "Cartridge type: " << (int)cartridgeType << std::endl;
     return true;
 }
 
 void Cartridge::update(uint8_t cycles) {
-    this->mbc->update(cycles);
+    mbc->update(cycles);
 }
