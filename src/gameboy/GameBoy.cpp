@@ -12,7 +12,7 @@ GameBoy::GameBoy()
     timer = std::make_shared<Timer>(mmu);
     cartridge = std::make_shared<Cartridge>();
 
-    cpu = std::make_unique<CPU>(0x0000, 0xFFFE, mmu);
+    cpu = std::make_unique<CPU>(mmu);
     ppu = std::make_shared<PPU>(mmu);
     apu = std::make_shared<APU>();
     mmu->linkDevices(this->ppu, this->apu, this->joypad, this->timer, this->cartridge);
