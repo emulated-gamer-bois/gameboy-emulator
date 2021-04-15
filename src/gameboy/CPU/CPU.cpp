@@ -26,8 +26,8 @@ CPU::CPU(uint16_t PC, uint16_t SP, std::shared_ptr<MMU> mmu) {
 }
 
 void CPU::reset() {
-    this->PC = 0x0000;
-    this->SP.all_16 = 0xFFFE;
+    PC = 0x0000;
+    SP.all_16 = 0xFFFE;
     A = 0x00;
     BC.all_16 = 0x00;
     DE.all_16 = 0x00;
@@ -36,32 +36,32 @@ void CPU::reset() {
     IME = 0;
 }
 
-void CPU::cpu_dump() {
+void CPU::cpuDump() {
     std::cout << "=---------------------------=" << std::endl;
-    std::cout << "A: 0x" << std::hex << (int) this->A << std::endl;
-    std::cout << "BC: 0x" << std::hex << this->BC.all_16 << std::endl;
-    std::cout << "DE: 0x" << std::hex << this->DE.all_16 << std::endl;
-    std::cout << "HL: 0x" << std::hex << this->HL.all_16 << std::endl;
-    std::cout << "F: 0x" << std::hex << (int) this->F.all_8 << std::endl;
-    std::cout << "PC: 0x" << std::hex << this->PC << std::endl;
-    std::cout << "SP: 0x" << std::hex << this->SP.all_16 << std::endl;
+    std::cout << "A: 0x" << std::hex << (int) A << std::endl;
+    std::cout << "BC: 0x" << std::hex << BC.all_16 << std::endl;
+    std::cout << "DE: 0x" << std::hex << DE.all_16 << std::endl;
+    std::cout << "HL: 0x" << std::hex << HL.all_16 << std::endl;
+    std::cout << "F: 0x" << std::hex << (int) F.all_8 << std::endl;
+    std::cout << "PC: 0x" << std::hex << PC << std::endl;
+    std::cout << "SP: 0x" << std::hex << SP.all_16 << std::endl;
     std::cout << "=---------------------------=" << std::endl;
 }
 
 int CPU::update() {
-    if (this->isInterrupted()) {
-        return this->handleInterrupts();
+    if (isInterrupted()) {
+        return handleInterrupts();
     }
 
-    if (this->halt) {
+    if (halt) {
         return 1;
     }
 
-    return this->execute_instruction();
+    return executeInstruction();
 }
 
 void CPU::skipBootRom() {
-    this->PC = 0x0100;
+    PC = 0x0100;
 }
 
 void nop() {}
@@ -148,10 +148,10 @@ void CPU::storeAddr(uint16_t addr, uint8_t value) {
  * stores the result in A. Can be done with or without carry.
  */
 void CPU::addA(uint8_t value, bool withCarry) {
-    add_8bit(A, value, withCarry);
+    add8bit(A, value, withCarry);
 }
 
-void CPU::add_8bit(uint8_t &a, uint8_t b, bool withCarry) {
+void CPU::add8bit(uint8_t &a, uint8_t b, bool withCarry) {
     auto CFlag = withCarry ? F.c : 0;
     setCFlag(a, b + CFlag, false);
     setHFlag(a, b, false, CFlag);
@@ -165,17 +165,17 @@ void CPU::add_8bit(uint8_t &a, uint8_t b, bool withCarry) {
  * */
 void CPU::addHL(RegisterPair reg) {
     auto tempZ = F.z;
-    add_8bit(HL.low_8, reg.low_8, false);
-    add_8bit(HL.high_8, reg.high_8, true);
+    add8bit(HL.low_8, reg.low_8, false);
+    add8bit(HL.high_8, reg.high_8, true);
     F.z = tempZ;
     F.n = 0;
 }
 
 void CPU::addSignedToRegPair(RegisterPair &regPair, int8_t value) {
-    add_8bit(regPair.low_8, value, false);
+    add8bit(regPair.low_8, value, false);
     auto tmpH = F.h;
     auto tmpC = F.c;
-    add_8bit(regPair.high_8, value & 0x80 ? 0xFF : 0x00, true);
+    add8bit(regPair.high_8, value & 0x80 ? 0xFF : 0x00, true);
     F.z = 0;
     F.n = 0;
     F.h = tmpH;
@@ -572,7 +572,7 @@ void CPU::set(uint8_t bit_nr, uint8_t &reg) {
 /**
  * Every time we read PC, we want to increment it.
  * */
-uint8_t CPU::read_and_inc_pc() {
+uint8_t CPU::readAndIncPc() {
     return memory->read(PC++);
 }
 
@@ -629,7 +629,7 @@ void CPU::daa() {
  * Stops all execution. Is cancelled if any button is pressed. Resets IE flags, and sets all IO ports (P10-P13) to low.
  *
  * */
-void CPU::stop_op() {
+void CPU::stopOp() {
 
     loadIm8(BC.high_8, memory->read(INTERRUPT_ENABLE)); // Save IE
     memory->write(INTERRUPT_ENABLE, 0x00); //clear IE
@@ -638,7 +638,7 @@ void CPU::stop_op() {
 
 }
 
-void CPU::return_from_stop() {
+void CPU::returnFromStop() {
     loadIm8(A, BC.high_8);
     memory->write(0xffff, A);
     stop = false;
@@ -654,7 +654,7 @@ bool CPU::getStop() {
  * Simply continues after halt is over.
  *
  * */
-void CPU::halt_op() {
+void CPU::haltOp() {
     if (IME) {
         halt = true;
     } else if ((memory->read(INTERRUPT_ENABLE) & memory->read(INTERRUPT_FLAG) & 0x1F) == 0) {
@@ -696,7 +696,7 @@ uint8_t CPU::swapBits(uint8_t value) {
  * The second byte is the higher byte
  * @return
  */
-uint16_t CPU::read16_and_inc_pc() {
+uint16_t CPU::read16AndIncPc() {
     PC += 2;
     return combine_bytes(memory->read(PC - 2), memory->read(PC - 1));
 }
@@ -715,14 +715,14 @@ uint16_t combine_bytes(uint8_t first_byte, uint8_t second_byte) {
  * Fetches, decodes and executes the instruction at location PC
  * @returns amount of machine cycles operation takes.
  */
-int CPU::execute_instruction() {
+int CPU::executeInstruction() {
     RegisterPair tmpReg;
-    switch (read_and_inc_pc()) {
+    switch (readAndIncPc()) {
         case 0x00:
             nop();
             return 1;
         case 0x01:
-            loadIm16(read16_and_inc_pc(), BC);
+            loadIm16(read16AndIncPc(), BC);
             return 3;
         case 0x02:
             storeAddr(BC.all_16, A);
@@ -737,7 +737,7 @@ int CPU::execute_instruction() {
             decrement8(BC.high_8);
             return 1;
         case 0x06:
-            loadIm8(BC.high_8, read_and_inc_pc());
+            loadIm8(BC.high_8, readAndIncPc());
             return 2;
         case 0x07: //RLCA
             rlc(A);
@@ -765,19 +765,19 @@ int CPU::execute_instruction() {
             decrement8(BC.low_8);
             return 1;
         case 0x0E:
-            loadIm8(BC.low_8, read_and_inc_pc());
+            loadIm8(BC.low_8, readAndIncPc());
             return 2;
         case 0x0F: //RRCA
             rrc(A);
             F.all_8 &= 0x10;
             return 1;
         case 0x10:
-            stop_op();
+            stopOp();
             //Says it should take 2 bytes.
             PC++;
             return 1;
         case 0x11:
-            loadIm16(read16_and_inc_pc(), DE);
+            loadIm16(read16AndIncPc(), DE);
             return 3;
         case 0x12:
             storeAddr(DE.all_16, A);
@@ -792,14 +792,14 @@ int CPU::execute_instruction() {
             decrement8(DE.high_8);
             return 1;
         case 0x16:
-            loadIm8(DE.high_8, read_and_inc_pc());
+            loadIm8(DE.high_8, readAndIncPc());
             return 2;
         case 0x17: //RLA
             rl(A);
             F.z = 0;
             return 1;
         case 0x18:
-            jumpRelative(read_and_inc_pc());
+            jumpRelative(readAndIncPc());
             return 3;
         case 0x19:
             addHL(DE);
@@ -817,20 +817,20 @@ int CPU::execute_instruction() {
             decrement8(DE.low_8);
             return 1;
         case 0x1E:
-            loadIm8(DE.low_8, read_and_inc_pc());
+            loadIm8(DE.low_8, readAndIncPc());
             return 2;
         case 0x1F: //RRA
             rr(A);
             F.z = 0; // Special case
             return 1;
         case 0x20:
-            if (jumpRelativeZ(read_and_inc_pc(), false))
+            if (jumpRelativeZ(readAndIncPc(), false))
                 return 3;
             else
                 return 2;
         case 0x21:
 
-            loadIm16(read16_and_inc_pc(), HL);
+            loadIm16(read16AndIncPc(), HL);
             return 3;
         case 0x22:
             storeAddr(HL.all_16, A);
@@ -846,13 +846,13 @@ int CPU::execute_instruction() {
             decrement8(HL.high_8);
             return 1;
         case 0x26:
-            loadIm8(HL.high_8, read_and_inc_pc());
+            loadIm8(HL.high_8, readAndIncPc());
             return 2;
         case 0x27:
             daa();
             return 1;
         case 0x28:
-            if (jumpRelativeZ(read_and_inc_pc(), true))
+            if (jumpRelativeZ(readAndIncPc(), true))
                 return 3;
             else
                 return 2;
@@ -873,18 +873,18 @@ int CPU::execute_instruction() {
             decrement8(HL.low_8);
             return 1;
         case 0x2E:
-            loadIm8(HL.low_8, read_and_inc_pc());
+            loadIm8(HL.low_8, readAndIncPc());
             return 2;
         case 0x2F:
             cpl();
             return 1;
         case 0x30:
-            if (jumpRelativeC(read_and_inc_pc(), false))
+            if (jumpRelativeC(readAndIncPc(), false))
                 return 3;
             else
                 return 2;
         case 0x31:
-            loadIm16(read16_and_inc_pc(), SP);
+            loadIm16(read16AndIncPc(), SP);
             return 3;
         case 0x32:
             storeAddr(HL.all_16, A);
@@ -900,14 +900,14 @@ int CPU::execute_instruction() {
             decrementAddr(HL.all_16);
             return 3;
         case 0x36:
-            storeAddr(HL.all_16, read_and_inc_pc());
+            storeAddr(HL.all_16, readAndIncPc());
             return 3;
         case 0x37:
             F.all_8 &= 0x80;
             F.c = 1;
             return 1;
         case 0x38:
-            if (jumpRelativeC(read_and_inc_pc(), true))
+            if (jumpRelativeC(readAndIncPc(), true))
                 return 3;
             else
                 return 2;
@@ -928,7 +928,7 @@ int CPU::execute_instruction() {
             decrement8(A);
             return 1;
         case 0x3E:
-            loadIm8(A, read_and_inc_pc());
+            loadIm8(A, readAndIncPc());
             return 2;
         case 0x3F:
             ccf();
@@ -1097,7 +1097,7 @@ int CPU::execute_instruction() {
             storeAddr(HL.all_16, HL.low_8);
             return 2;
         case 0x76:
-            halt_op();
+            haltOp();
             return 1;
         case 0x77:
             storeAddr(HL.all_16, A);
@@ -1327,12 +1327,12 @@ int CPU::execute_instruction() {
             popReg(BC);
             return 3;
         case 0xC2:
-            if (jumpZ(read16_and_inc_pc(), false))
+            if (jumpZ(read16AndIncPc(), false))
                 return 4;
             else
                 return 3;
         case 0xC3:
-            jump(read16_and_inc_pc());
+            jump(read16AndIncPc());
             return 4;
         case 0xC4:
             PC += 2;
@@ -1345,7 +1345,7 @@ int CPU::execute_instruction() {
             pushReg(BC);
             return 4;
         case 0xC6:
-            addA(read_and_inc_pc(), false);
+            addA(readAndIncPc(), false);
             return 2;
         case 0xC7:
             reset(0);
@@ -1359,12 +1359,12 @@ int CPU::execute_instruction() {
             ret(false);
             return 4;
         case 0xCA:
-            if (jumpZ(read16_and_inc_pc(), true))
+            if (jumpZ(read16AndIncPc(), true))
                 return 4;
             else
                 return 3;
         case 0xCB:
-            return CB_ops();
+            return CBOps();
         case 0xCC:
             PC += 2;
             if (callZ(memory->read(PC - 2), memory->read(PC - 1), true)) {
@@ -1377,7 +1377,7 @@ int CPU::execute_instruction() {
             call(memory->read(PC - 2), memory->read(PC - 1));
             return 6;
         case 0xCE:
-            addA(read_and_inc_pc(), true);
+            addA(readAndIncPc(), true);
             return 2;
         case 0xCF:
             reset(1);
@@ -1391,7 +1391,7 @@ int CPU::execute_instruction() {
             popReg(DE);
             return 3;
         case 0xD2:
-            if (jumpC(read16_and_inc_pc(), false))
+            if (jumpC(read16AndIncPc(), false))
                 return 4;
             else
                 return 3;
@@ -1406,7 +1406,7 @@ int CPU::execute_instruction() {
             pushReg(DE);
             return 4;
         case 0xD6:
-            subA(read_and_inc_pc(), false);
+            subA(readAndIncPc(), false);
             return 2;
         case 0xD7:
             reset(2);
@@ -1420,7 +1420,7 @@ int CPU::execute_instruction() {
             ret(true);
             return 4;
         case 0xDA:
-            if (jumpC(read16_and_inc_pc(), true))
+            if (jumpC(read16AndIncPc(), true))
                 return 4;
             else
                 return 3;
@@ -1432,13 +1432,13 @@ int CPU::execute_instruction() {
                 return 3;
             }
         case 0xDE:
-            subA(read_and_inc_pc(), true);
+            subA(readAndIncPc(), true);
             return 2;
         case 0xDF:
             reset(3);
             return 4;
         case 0xE0:
-            storeAddr(0xFF00 + read_and_inc_pc(), A);
+            storeAddr(0xFF00 + readAndIncPc(), A);
             return 3;
         case 0xE1:
             popReg(HL);
@@ -1450,28 +1450,28 @@ int CPU::execute_instruction() {
             pushReg(HL);
             return 4;
         case 0xE6:
-            andA(read_and_inc_pc());
+            andA(readAndIncPc());
             return 2;
         case 0xE7:
             reset(4);
             return 4;
         case 0xE8:
-            addSignedToRegPair(SP, read_and_inc_pc());
+            addSignedToRegPair(SP, readAndIncPc());
             return 4;
         case 0xE9:
             jump(HL.all_16);
             return 1;
         case 0xEA:
-            memory->write(read16_and_inc_pc(), A);
+            memory->write(read16AndIncPc(), A);
             return 4;
         case 0xEE:
-            xorA(read_and_inc_pc());
+            xorA(readAndIncPc());
             return 2;
         case 0xEF:
             reset(5);
             return 4;
         case 0xF0:
-            loadImp(0xFF00 + read_and_inc_pc(), A);
+            loadImp(0xFF00 + readAndIncPc(), A);
             return 3;
         case 0xF1:
             popReg(tmpReg);
@@ -1490,26 +1490,26 @@ int CPU::execute_instruction() {
             pushReg(tmpReg);
             return 4;
         case 0xF6:
-            orA(read_and_inc_pc());
+            orA(readAndIncPc());
             return 2;
         case 0xF7:
             reset(6);
             return 4;
         case 0xF8:
             HL = SP;
-            addSignedToRegPair(HL, read_and_inc_pc());
+            addSignedToRegPair(HL, readAndIncPc());
             return 3;
         case 0xF9:
             loadIm16(HL.all_16, SP);
             return 2;
         case 0xFA:
-            loadImp(read16_and_inc_pc(), A);
+            loadImp(read16AndIncPc(), A);
             return 4;
         case 0xFB:
             IME = 1;
             return 1;
         case 0xFE:
-            compareA(read_and_inc_pc());
+            compareA(readAndIncPc());
             return 2;
         case 0xFF:
             reset(7);
@@ -1522,9 +1522,9 @@ int CPU::execute_instruction() {
 
 }
 
-int CPU::CB_ops() {
+int CPU::CBOps() {
     uint8_t tmpVal = 0;
-    switch (read_and_inc_pc()) {
+    switch (readAndIncPc()) {
         case 0x00:
             rlc(BC.high_8);
             return 2;
@@ -2358,8 +2358,8 @@ bool CPU::isInterrupted() {
 
 int CPU::handleInterrupts() {
     int cycles = 0;
-    if (this->halt) {
-        this->halt = false;
+    if (halt) {
+        halt = false;
         cycles++;
     }
     if(IME){
@@ -2378,19 +2378,19 @@ int CPU::handleInterrupts() {
         uint16_t interruptVector = PC;
 
         if (maskedFlags & V_BLANK_IF_BIT) {
-            memory->clear_interrupt_flag(V_BLANK_IF_BIT);
+            memory->clearInterruptFlag(V_BLANK_IF_BIT);
             interruptVector = 0x40;
         } else if (maskedFlags & STAT_IF_BIT) {
-            memory->clear_interrupt_flag(STAT_IF_BIT);
+            memory->clearInterruptFlag(STAT_IF_BIT);
             interruptVector = 0x48;
         } else if (maskedFlags & TIMER_IF_BIT) {
-            memory->clear_interrupt_flag(TIMER_IF_BIT);
+            memory->clearInterruptFlag(TIMER_IF_BIT);
             interruptVector = 0x50;
         } else if (maskedFlags & SERIAL_IF_BIT) {
-            memory->clear_interrupt_flag(SERIAL_IF_BIT);
+            memory->clearInterruptFlag(SERIAL_IF_BIT);
             interruptVector = 0x58;
         } else if (maskedFlags & CONTROLLER_IF_BIT) {
-            memory->clear_interrupt_flag(CONTROLLER_IF_BIT);
+            memory->clearInterruptFlag(CONTROLLER_IF_BIT);
             interruptVector = 0x60;
         }
         PC = interruptVector;

@@ -15,7 +15,7 @@ GameBoy::GameBoy()
     cpu = std::make_unique<CPU>(0x0000, 0xFFFE, mmu);
     ppu = std::make_shared<PPU>(mmu);
     apu = std::make_shared<APU>();
-    mmu->link_devices(this->ppu, this->apu, this->joypad, this->timer, this->cartridge);
+    mmu->linkDevices(this->ppu, this->apu, this->joypad, this->timer, this->cartridge);
     on = false;
 }
 
@@ -27,7 +27,7 @@ void GameBoy::step(IVolumeController *vc)
     }
     if(cpu->getStop()){
         if(mmu->read(JOYPAD) & mmu->read(INTERRUPT_ENABLE)){
-            cpu->return_from_stop();
+            cpu->returnFromStop();
         }
         return;
     }
@@ -76,26 +76,26 @@ void GameBoy::load_rom(std::string bootFilepath, std::string romFilepath)
     mmu->reset();
     timer->reset();
     joypad->reset();
-    if (!mmu->load_boot_rom(bootFilepath))
+    if (!mmu->loadBootRom(bootFilepath))
     {
         cpu->skipBootRom();
     }
-    on = cartridge->load_rom(romFilepath, true);
+    on = cartridge->loadRom(romFilepath, true);
 }
 
 void GameBoy::load_game_rom(std::string filepath)
 {
-    cartridge->load_rom(filepath);
+    cartridge->loadRom(filepath);
 }
 
 void GameBoy::load_boot_rom(std::string filepath)
 {
-    mmu->load_boot_rom(filepath);
+    mmu->loadBootRom(filepath);
 }
 
 void GameBoy::cpu_dump()
 {
-    cpu->cpu_dump();
+    cpu->cpuDump();
 }
 
 bool GameBoy::isOn() const
@@ -128,7 +128,7 @@ APUState *GameBoy::getAPUState()
 
 bool GameBoy::save() {
     // Save RAM to separate file
-    if (!this->cartridge->save_ram()) {
+    if (!this->cartridge->saveRam()) {
         return false;
     }
     return true;
