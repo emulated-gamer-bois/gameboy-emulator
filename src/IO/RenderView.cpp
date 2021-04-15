@@ -1,4 +1,5 @@
 #include "RenderView.h" // implements
+#include "shaders.h"
 #include <fstream>
 #include <thread>
 
@@ -41,8 +42,7 @@ void RenderView::initGL() {
 
     // Initialize shader programs, if renderShaderProgram is 0, the shader program could not
     // be loaded.
-    renderShaderProgram = loadShaderProgram("palette.vert",
-                                            "palette.frag");
+    renderShaderProgram = loadShaderProgram(paletteVert, paletteFrag);
     fxShaderProgram = 0; // TODO Implement post process fx
     glGenTextures(1, &screenTexture);
 }
@@ -118,18 +118,14 @@ GLuint RenderView::loadShaderProgram(const std::string& vertexShader, const std:
     GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-    // Load shader source codes.
-    std::ifstream vsFile(vertexShader);
-    std::string vsSrc((std::istreambuf_iterator<char>(vsFile)), std::istreambuf_iterator<char>());
-
-    std::ifstream fsFile(fragmentShader);
-    std::string fsSrc((std::istreambuf_iterator<char>(fsFile)), std::istreambuf_iterator<char>());
-
     // Set vertex shader and fragment shader source code.
-    const char* vsTemp = vsSrc.c_str();
-    const char* fsTemp = fsSrc.c_str();
+    const char* vsTemp = vertexShader.c_str();
+    const char* fsTemp = fragmentShader.c_str();
     glShaderSource(vertShader, 1, &vsTemp, nullptr);
     glShaderSource(fragShader, 1, &fsTemp, nullptr);
+
+    delete[] vsTemp;
+    delete[] fsTemp;
 
     // For shader compilation error handling.
     GLint compiled = 0;

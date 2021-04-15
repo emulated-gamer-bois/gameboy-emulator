@@ -24,13 +24,6 @@ find_package ( glm    REQUIRED )
 find_package ( GLEW   REQUIRED )
 find_package ( OpenGL REQUIRED )
 
-# Copies shaders to binary folder
-file( COPY
-        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/palette.vert
-        DESTINATION ${CMAKE_BINARY_DIR}/src)
-file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders/palette.frag
-        DESTINATION ${CMAKE_BINARY_DIR}/src)
-
 # Adding source files
 add_library( IO
         AudioController.cpp
@@ -50,6 +43,7 @@ add_library( IO
         imgui_impl/imgui_impl_opengl3.h
         imgui_impl/imgui_impl_sdl.cpp
         imgui_impl/imgui_impl_sdl.h
+        shaders.h
         )
 
 # Adding include directories (.h files)
