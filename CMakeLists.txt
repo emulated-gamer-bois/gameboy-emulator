@@ -55,7 +55,7 @@ endif()
 
 # Excludes graphics code if tests are run in travis
 if( NOT TRAVIS )
-    add_subdirectory ( labhelper )
+    #add_subdirectory ( labhelper )
 endif()
 
 add_subdirectory ( src )

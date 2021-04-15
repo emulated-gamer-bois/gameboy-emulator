@@ -16,6 +16,16 @@
  * Constructor
  */
 
+/*
+ * ImGui_ImplSDL2_InitForOpenGL(window, glContext)
+ * ImGui_ImplOpenGL3_Init(glsl_version)
+ * ImGui_ImplOpenGL3_NewFrame();
+ * ImGui_ImplSDL2_NewFrame(window);
+ * ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+ * ImGui_ImplOpenGL3_Shutdown();
+ * ImGui_ImplSDL2_Shutdown();
+ * */
+
 GuiView::GuiView(AppSettings& settings, PaletteHandler& paletteHandler):
     settings{settings}, paletteHandler{paletteHandler}, selectedFile{-1}, selectedPalette{settings.paletteNumber},
     previewPalette{settings.paletteNumber}
@@ -50,7 +60,7 @@ void GuiView::updateAndRender(SDL_Window *window) {
 
     //Render ImGui
     ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // --
 
     if (waitingForKeyBind) { keyBind(); }
 }
@@ -60,7 +70,7 @@ void GuiView::updateAndRender(SDL_Window *window) {
  */
 void GuiView::terminate() {
     ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
+    ImGui_ImplSDL2_Shutdown(); // --
     ImGui::DestroyContext();
 }
 
