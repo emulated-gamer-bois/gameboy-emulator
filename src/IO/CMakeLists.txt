@@ -3,34 +3,36 @@ cmake_minimum_required ( VERSION 3.0.2 )
 project ( IO )
 
 # External libraries which need to be built.
-add_subdirectory(${CMAKE_SOURCE_DIR}/external_src/imgui-1.81 ${CMAKE_CURRENT_BINARY_DIR}/imgui)
-set_target_properties(imgui PROPERTIES FOLDER external)
+add_subdirectory(
+        ${CMAKE_SOURCE_DIR}/external_src/imgui-1.81
+        ${CMAKE_CURRENT_BINARY_DIR}/imgui
+        )
+set_target_properties( imgui PROPERTIES FOLDER external )
 
-set(glm_DIR "${CMAKE_SOURCE_DIR}/external/glm")
-set(OpenGL_GL_PREFERENCE "GLVND")
+# Finding external packages
+set( glm_DIR "${CMAKE_SOURCE_DIR}/external/glm" )
+set( OpenGL_GL_PREFERENCE "GLVND" )
 
-set(OPENAL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external_src/openal-soft/include")
+set( OPENAL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external_src/openal-soft/include" )
 if(WIN32)
-    set(OPENAL_LIBRARY "${CMAKE_SOURCE_DIR}/external/openal/OpenAL32.lib")
+    set( OPENAL_LIBRARY "${CMAKE_SOURCE_DIR}/external/openal/OpenAL32.lib" )
 endif()
 
 find_package ( OpenAL REQUIRED )
-find_package ( SDL2   REQUIRED)
-find_package ( glm    REQUIRED)
-find_package ( GLEW   REQUIRED)
-find_package ( OpenGL REQUIRED)
+find_package ( SDL2   REQUIRED )
+find_package ( glm    REQUIRED )
+find_package ( GLEW   REQUIRED )
+find_package ( OpenGL REQUIRED )
 
-# Find *all* shaders.
-file(GLOB_RECURSE shaders
-        "shaders/*.vert"
-        "shaders/*.frag"
-        )
+# Copies shaders to binary folder
+file( COPY
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders/palette.vert
+        DESTINATION ${CMAKE_BINARY_DIR}/src)
+file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders/palette.frag
+        DESTINATION ${CMAKE_BINARY_DIR}/src)
 
-# Separate filter for shaders.
-source_group("shaders" FILES ${SHADERS})
-
+# Adding source files
 add_library( IO
-        ${SHADERS}
         AudioController.cpp
         AudioController.h
         Palette.h
@@ -50,10 +52,11 @@ add_library( IO
         imgui_impl/imgui_impl_sdl.h
         )
 
+# Adding include directories (.h files)
 target_include_directories( IO
         PUBLIC
-        #${CMAKE_SOURCE_DIR}/external_src/stb-master
-        #${CMAKE_SOURCE_DIR}/external_src/tinyobjloader-1.0.6
+        ${CMAKE_SOURCE_DIR}/external_src/stb-master
+        ${CMAKE_SOURCE_DIR}/external_src/tinyobjloader-1.0.6
         ${SDL2_INCLUDE_DIRS}
         ${GLM_INCLUDE_DIRS}
         ${GLEW_INCLUDE_DIRS}
@@ -61,6 +64,8 @@ target_include_directories( IO
         ${OPENAL_INCLUDE_DIR}
         )
 
+# Linking library source files
+# SDL2::SDL2 needs to be imported in linux, but breaks in Windows
 if(WIN32)
     target_link_libraries ( ${PROJECT_NAME}
             PUBLIC

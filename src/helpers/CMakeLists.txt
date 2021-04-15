@@ -4,4 +4,5 @@ project( helpers )
 add_library( ${PROJECT_NAME}
         AppTimer.cpp
         AppTimer.h
-        ErrorReport.h)
+        ErrorReport.h
+        )

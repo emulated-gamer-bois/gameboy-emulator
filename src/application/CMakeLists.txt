@@ -9,7 +9,8 @@ add_library( ${PROJECT_NAME}
         AppSettings.h
         KeyBinds.cpp
         KeyBinds.h
-        State.h)
+        State.h
+        )
 
-target_link_libraries ( ${PROJECT_NAME} IO helpers)
+target_link_libraries ( ${PROJECT_NAME} IO helpers gameboy )
 

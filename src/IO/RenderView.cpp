@@ -1,5 +1,6 @@
 #include "RenderView.h" // implements
 #include <fstream>
+#include <thread>
 
 using namespace glm;
 
@@ -40,8 +41,8 @@ void RenderView::initGL() {
 
     // Initialize shader programs, if renderShaderProgram is 0, the shader program could not
     // be loaded.
-    renderShaderProgram = loadShaderProgram("../src/IO/shaders/palette.vert",
-                                            "../src/IO/shaders/palette.frag");
+    renderShaderProgram = loadShaderProgram("palette.vert",
+                                            "palette.frag");
     fxShaderProgram = 0; // TODO Implement post process fx
     glGenTextures(1, &screenTexture);
 }
