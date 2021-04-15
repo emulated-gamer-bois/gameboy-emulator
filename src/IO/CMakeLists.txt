@@ -9,17 +9,16 @@ set_target_properties(imgui PROPERTIES FOLDER external)
 set(glm_DIR "${CMAKE_SOURCE_DIR}/external/glm")
 set(OpenGL_GL_PREFERENCE "GLVND")
 
-find_package(SDL2 REQUIRED)
-find_package(glm REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(OpenGL REQUIRED)
-
 set(OPENAL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/external_src/openal-soft/include")
 if(WIN32)
     set(OPENAL_LIBRARY "${CMAKE_SOURCE_DIR}/external/openal/OpenAL32.lib")
 endif()
 
 find_package ( OpenAL REQUIRED )
+find_package ( SDL2   REQUIRED)
+find_package ( glm    REQUIRED)
+find_package ( GLEW   REQUIRED)
+find_package ( OpenGL REQUIRED)
 
 # Find *all* shaders.
 file(GLOB_RECURSE shaders
@@ -45,23 +44,16 @@ add_library( IO
         GuiView.h
         Controller.cpp
         Controller.h
-        imgui_impl_opengl3.cpp
-        imgui_impl_opengl3.h
-        imgui_impl_sdl.cpp
-        imgui_impl_sdl.h
+        imgui_impl/imgui_impl_opengl3.cpp
+        imgui_impl/imgui_impl_opengl3.h
+        imgui_impl/imgui_impl_sdl.cpp
+        imgui_impl/imgui_impl_sdl.h
         )
-
-if (MSVC)
-    string(REPLACE "/Od" "/O2" CMAKE_CXX_FLAGS_DEBUG_MODEL "${CMAKE_CXX_FLAGS_DEBUG_MODEL}")
-    string(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
-else ()
-    set(CMAKE_CXX_FLAGS_DEBUG_MODEL "-O3")
-endif ()
 
 target_include_directories( IO
         PUBLIC
-        ${CMAKE_SOURCE_DIR}/external_src/stb-master
-        ${CMAKE_SOURCE_DIR}/external_src/tinyobjloader-1.0.6
+        #${CMAKE_SOURCE_DIR}/external_src/stb-master
+        #${CMAKE_SOURCE_DIR}/external_src/tinyobjloader-1.0.6
         ${SDL2_INCLUDE_DIRS}
         ${GLM_INCLUDE_DIRS}
         ${GLEW_INCLUDE_DIRS}
