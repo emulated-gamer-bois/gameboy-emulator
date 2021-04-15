@@ -8,7 +8,7 @@
 
 TEST(CPU, Execute_NOP_Instruction) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<CPU> cpu(new CPU(0x0000, 0xFFFE, mmu));
+    std::unique_ptr<CPU> cpu(new CPU(mmu));
     std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>();
     mmu->linkDevices(nullptr, nullptr, nullptr, nullptr, cartridge);
 
@@ -25,7 +25,7 @@ TEST(CPU, Execute_NOP_Instruction) {
 
 TEST(CPU, Execute_LD_SP_D16_Instruction) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<CPU> cpu(new CPU(0x0000, 0xFFFE, mmu));
+    std::unique_ptr<CPU> cpu(new CPU(mmu));
     std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>();
     mmu->linkDevices(nullptr, nullptr, nullptr, nullptr, cartridge);
 
@@ -43,7 +43,8 @@ TEST(CPU, Execute_LD_SP_D16_Instruction) {
 
 TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<CPU> cpu(new CPU(0x00, 0xC100, mmu));
+    std::unique_ptr<CPU> cpu(new CPU(mmu));
+    cpu->SP.all_16 = 0xC100;
 
     // Disable boot ROM
     mmu->write(0xff50, 0x01);
@@ -199,11 +200,11 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
     //RAM: 0xC000 to 0xE000
     prevSP = cpu->SP.all_16;
     cpu->HL.all_16 = 0x98BA;
-    cpu->pushReg(cpu->HL);
+    cpu->pushSP(cpu->HL);
     cpu->HL.all_16 = 0x1234;
     ASSERT_NE(cpu->HL.all_16, 0x98BA);
     ASSERT_EQ(cpu->SP.all_16, prevSP - 2);
-    cpu->popReg(cpu->HL);
+    cpu->popSP(cpu->HL);
     ASSERT_EQ(cpu->HL.all_16, 0x98BA);
     ASSERT_EQ(cpu->SP.all_16, prevSP);
 
@@ -400,7 +401,8 @@ TEST(CPU, FUNDAMENTAL_FUNCTIONS) {
 
 TEST(CPU, sixteen_bit_ops) {
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
-    std::unique_ptr<CPU> cpu(new CPU(0x00, 0xC100, mmu));
+    std::unique_ptr<CPU> cpu(new CPU(mmu));
+    cpu->SP.all_16 = 0xC100;
     cpu->HL.low_8 = 0xFD;
     cpu->bit(1, cpu->HL.low_8);
     ASSERT_EQ(cpu->F.n, 0);
