@@ -12,7 +12,7 @@
 TEST(MMU, read_write){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>();
-    mmu->link_devices(nullptr, nullptr, nullptr, nullptr, cartridge);
+    mmu->linkDevices(nullptr, nullptr, nullptr, nullptr, cartridge);
 
     // Disable boot ROM
     mmu->write(0xff50, 0x01);
@@ -40,7 +40,7 @@ TEST(MMU, read_write_interrupt_enable){
 TEST(MMU, disable_boot_rom){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::shared_ptr<Cartridge> cartridge = std::make_shared<Cartridge>();
-    mmu->link_devices(nullptr, nullptr, nullptr, nullptr, cartridge);
+    mmu->linkDevices(nullptr, nullptr, nullptr, nullptr, cartridge);
 
     mmu->write_BOOT_ROM_ONLY_IN_TESTS(0x00, 0x55);
     ASSERT_EQ(mmu->read(0x00), 0x55);
@@ -54,7 +54,7 @@ TEST(MMU, disable_boot_rom){
 TEST(MMU, joypad){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::shared_ptr<Joypad> joypad = std::make_shared<Joypad>(mmu);
-    mmu->link_devices(nullptr, nullptr, joypad, nullptr, nullptr);
+    mmu->linkDevices(nullptr, nullptr, joypad, nullptr, nullptr);
 
     mmu->write(IO_JOYPAD, JOYPAD_SEL_BUTTONS);
     ASSERT_EQ(mmu->read(IO_JOYPAD), 0b1111);
@@ -92,7 +92,7 @@ TEST(MMU, joypad){
 TEST(MMU, timer){
     std::shared_ptr<MMU> mmu = std::make_shared<MMU>();
     std::shared_ptr<Timer> timer = std::make_shared<Timer>(mmu);
-    mmu->link_devices(nullptr, nullptr, nullptr, timer, nullptr);
+    mmu->linkDevices(nullptr, nullptr, nullptr, timer, nullptr);
 
     // Disable boot ROM
     mmu->write(0xff50, 0x01);

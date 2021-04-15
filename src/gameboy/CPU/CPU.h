@@ -29,9 +29,9 @@ public:
 
     void skipBootRom();
 
-    void cpu_dump();
+    void cpuDump();
     bool getStop();
-    void return_from_stop();
+    void returnFromStop();
 
 private:
     //Registers
@@ -49,7 +49,7 @@ private:
     std::shared_ptr<MMU> memory;
 
     //Update related functions
-    int execute_instruction();
+    int executeInstruction();
     bool isInterrupted();
     int handleInterrupts();
 
@@ -74,7 +74,7 @@ private:
     void decrementAddr(uint16_t addr);
     void decrement8(uint8_t &reg);
     void decrement16(uint16_t &reg);
-    void add_8bit(uint8_t &reg, uint8_t b, bool withCarry);
+    void add8bit(uint8_t &reg, uint8_t b, bool withCarry);
     void addHL(RegisterPair reg);
     void addSignedToRegPair(RegisterPair &regPair, int8_t value);
     void daa();
@@ -119,7 +119,7 @@ private:
     bool callC(uint8_t firstByte, uint8_t secondByte, bool if_one);
 
     //16 bit operations
-    int CB_ops();
+    int CBOps();
     void bit(uint8_t bit_nr, uint8_t value);
     void res(uint8_t bit_nr, uint8_t &reg);
     void sla(uint8_t &reg);
@@ -131,10 +131,10 @@ private:
     //Other
     void reset(uint8_t nth_byte);
     void compareA(uint8_t value);
-    uint8_t read_and_inc_pc();
-    uint16_t read16_and_inc_pc();
-    void stop_op();
-    void halt_op();
+    uint8_t readAndIncPc();
+    uint16_t read16AndIncPc();
+    void stopOp();
+    void haltOp();
     FRIEND_TEST(CPU, Execute_NOP_Instruction);
     FRIEND_TEST(CPU, Execute_LD_SP_D16_Instruction);
     FRIEND_TEST(CPU, FUNDAMENTAL_FUNCTIONS);

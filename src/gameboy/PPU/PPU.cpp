@@ -341,11 +341,11 @@ uint8_t PPU::getColor(uint8_t palette, uint8_t colorIndex) {
 }
 
 void PPU::vBlankInterrupt() {
-    memory->raise_interrupt_flag(V_BLANK_IF_BIT);
+    memory->raiseInterruptFlag(V_BLANK_IF_BIT);
 }
 
 void PPU::statInterrupt() {
-    memory->raise_interrupt_flag(STAT_IF_BIT);
+    memory->raiseInterruptFlag(STAT_IF_BIT);
 }
 
 bool PPU::meetsStatConditions() const {
