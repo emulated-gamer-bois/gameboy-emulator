@@ -53,10 +53,5 @@ if(WIN32 AND ("${CMAKE_GENERATOR}" MATCHES "NMake.*"))
     configure_file("${CMAKE_SOURCE_DIR}/.run/project.run.xml.in" "${CMAKE_SOURCE_DIR}/.run/project.run.xml" @ONLY)
 endif()
 
-# Excludes graphics code if tests are run in travis
-if( NOT TRAVIS )
-    #add_subdirectory ( labhelper )
-endif()
-
 add_subdirectory ( src )
 add_subdirectory ( tests )
