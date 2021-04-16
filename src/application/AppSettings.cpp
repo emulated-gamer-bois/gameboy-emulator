@@ -23,8 +23,14 @@ void AppSettings::loadSettings() {
         char line[lineLength];
 
         while (file.getline(line, lineLength)) {
-            // Ignore comments.
             std::string lineStr(line);
+
+            // Ignore empty lines
+            if (lineStr.empty()) {
+                continue;
+            }
+
+            // Ignore comments.
             if (lineStr.at(0) == '%') {
                 continue;
             }
@@ -83,15 +89,15 @@ void AppSettings::loadSettings() {
                 } else if (key == kbTurboKey && valueIsValidKeyCode) {
                     keyBinds.turboMode.keyval = naturalValue;
                     keyBinds.turboMode.keybind = SDL_GetKeyName(naturalValue);
-                } else if (key == windowWidthKey) {
+                } else if (key == windowWidthKey && (naturalValue >= LCD_WIDTH * MIN_WINDOW_SIZE_MULTIPLIER)) {
                     windowedWidth = naturalValue;
-                } else if (key == windowHeightKey) {
+                } else if (key == windowHeightKey && (naturalValue >= LCD_HEIGHT * MIN_WINDOW_SIZE_MULTIPLIER)) {
                     windowedHeight = naturalValue;
                 } else if (key == fullscreenKey) {
                     fullscreen = naturalValue;
                 } else if (key == keepAspectRatioKey) {
                     keepAspectRatio = naturalValue;
-                } else if (key == paletteNumberKey) {
+                } else if (key == paletteNumberKey && naturalValue >= 0 && naturalValue < PALETTE_AMOUNT) {
                     paletteNumber = naturalValue;
                 }
                 continue;
@@ -101,7 +107,7 @@ void AppSettings::loadSettings() {
             std::regex floatOnly("([0-9]*.[0-9]+|[0-9]+)");
             if (std::regex_match(value, floatOnly)) {
                 float floatValue = std::stof(value);
-                if (key == masterVolumeKey) {
+                if (key == masterVolumeKey && floatValue >= 0.f && floatValue <= 1.f) {
                         masterVolume = floatValue;
                 }
             }
@@ -117,11 +123,12 @@ void AppSettings::saveSettings() {
     if (file.is_open()) {
         file << "% This is an auto generated settings file. Every row that does not follow the" << std::endl;
         file << "% key=value (where key or value is not empty) will be ignored. The same goes" << std::endl;
-        file << "% comments such as these three first lines.";
+        file << "% comments such as these three first lines." << std::endl;
         file << std::endl;
-        file << "% "
+        file << "% Will be ignored if this is not a valid file path." << std::endl;
         file << romFolderKey << "=" << romPath << std::endl;
         file << std::endl;
+        file << "% Lookup SDL keycodes to modify these values manually." << std::endl;
         file << kbAKey << "=" << keyBinds.a.keyval << std::endl;
         file << kbBKey << "=" << keyBinds.b.keyval << std::endl;
         file << kbStartKey << "=" << keyBinds.start.keyval << std::endl;
@@ -132,13 +139,19 @@ void AppSettings::saveSettings() {
         file << kbDownKey << "=" << keyBinds.down.keyval << std::endl;
         file << kbTurboKey << "=" << keyBinds.turboMode.keyval << std::endl;
         file << std::endl;
+        file << "% Must be larger than or equal to " << LCD_WIDTH * MIN_WINDOW_SIZE_MULTIPLIER << std::endl;
         file << windowWidthKey << "=" << windowedWidth << std::endl;
+        file << "% Must be larger than or equal to " << LCD_HEIGHT * MIN_WINDOW_SIZE_MULTIPLIER << std::endl;
         file << windowHeightKey << "=" << windowedHeight << std::endl;
         file << std::endl;
+        file << "% These are boolean values (0 or 1). " << std::endl;
         file << fullscreenKey << "=" << fullscreen << std::endl;
         file << keepAspectRatioKey << "=" << keepAspectRatio << std::endl;
+        file << std::endl;
+        file << "% Must be between 0 and " << PALETTE_AMOUNT << "." << std::endl;
         file << paletteNumberKey << "=" << paletteNumber << std::endl;
         file << std::endl;
+        file << "% Must be between 0 and 1 inclusive." << std::endl;
         file << masterVolumeKey << "=" << masterVolume;
 
         file.close();

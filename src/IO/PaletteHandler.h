@@ -4,6 +4,7 @@
 #include <array>
 
 #include "Palette.h"
+#include "../gameboy/Definitions.h"
 
 class PaletteHandler {
 public:
@@ -18,7 +19,5 @@ private:
         Palette palette;
     };
 
-    const static int paletteAmount = 23;
-
-    std::array<PaletteEntry, paletteAmount> palettes;
+    std::array<PaletteEntry, PALETTE_AMOUNT> palettes;
 };

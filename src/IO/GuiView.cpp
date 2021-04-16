@@ -153,7 +153,7 @@ void GuiView::showFileDialog() {
     ImGui::Unindent(indentSpace);
     ImGui::Spacing();
 
-    const std::vector<FileEntry>& fileEntryList = fileExplorer.getDirContents();
+    const std::vector<FileExplorer::FileEntry>& fileEntryList = fileExplorer.getDirContents();
 
     // Display File Select
     ImGui::Text("File Select ");

@@ -10,6 +10,12 @@
 
 using namespace std;
 
+FileExplorer::FileExplorer():
+    filter("(.[a-zA-Z0-9]+)")
+{
+    setCurrentDir("..");
+}
+
 void FileExplorer::listDir() {
     filesystem::path dirPath(currentDir.absolutePath);
 
@@ -47,13 +53,13 @@ void FileExplorer::setCurrentDir(std::string _currentDir) {
 
     // Check if path is valid.
     if (!filesystem::exists(dirPath)) {
-        cerr << "FileHelper ERROR: Invalid path" << endl;
+        NON_FATAL_ERROR("CurrentDir was not set because the argument is not a path.");
         return;
     }
 
     // Check if path is a directory.
     if (!filesystem::is_directory(dirPath)) {
-        cerr << "FileHelper ERROR: Path is not a directory" << endl;
+        NON_FATAL_ERROR("CurrentDir was not set because path did not lead to a directory.");
         return;
     }
     FileEntry fe = {dirPath.filename().string(), filesystem::absolute(dirPath).string(), true};
@@ -67,7 +73,7 @@ void FileExplorer::setFilter(const std::string& _filter) {
     try {
         r = _filter;
     } catch (regex_error& e) {
-        cerr << "FileHelper ERROR: Filter is not valid regex" << endl;
+        NON_FATAL_ERROR("Filter was not set because the argument was not valid regex.");
         return;
     }
 
@@ -76,19 +82,14 @@ void FileExplorer::setFilter(const std::string& _filter) {
     listDir();
 }
 
-const FileEntry& FileExplorer::getCurrentDir() const {
+const FileExplorer::FileEntry& FileExplorer::getCurrentDir() const {
     return currentDir;
 }
 
-const std::vector<FileEntry>& FileExplorer::getDirContents() const {
+const std::vector<FileExplorer::FileEntry>& FileExplorer::getDirContents() const {
     return fileEntryList;
 }
 
 void FileExplorer::moveTo(const FileEntry& dir) {
-    if (!dir.isDir) {
-        cerr << "FileHelper ERROR: Path is not a directory" << endl;
-        return;
-    }
-
     setCurrentDir(dir.absolutePath);
 }
