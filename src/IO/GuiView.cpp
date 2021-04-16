@@ -142,6 +142,7 @@ void GuiView::showEditControls() {
 
 void GuiView::showFileDialog() {
     bool loadRom = false;
+    bool switchDirectory = false;
 
     prepareCenteredWindow();
     ImGui::Begin("Load ROM", &displayFileDialog, windowFlags);
@@ -163,27 +164,22 @@ void GuiView::showFileDialog() {
             int flags = ImGuiSelectableFlags_AllowDoubleClick;
             bool isSelected = (selectedFile == i);
 
-            bool isDir = fileEntryList.at(i).isDir;
-            if (!isDir) {
+            if (!fileEntryList.at(i).isDir) {
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 0.5f, 1.f));
             }
 
             if (ImGui::Selectable(fileEntryList.at(i).filename.c_str(), isSelected, flags)) {
-                if (!fileEntryList.at(i).isDir) {
-                    ImGui::PopStyleColor();
-                }
-
+                selectedFile = i;
                 if (ImGui::IsMouseDoubleClicked(0)) {
-                    if (isDir) {
-                        fileExplorer.moveTo(fileEntryList.at(i));
-                        selectedFile = -1;
+                    if (fileEntryList.at(i).isDir) {
+                        switchDirectory = true;
                     } else {
                         loadRom = true;
                     }
                 }
             }
 
-            if (!isDir) {
+            if (!fileEntryList.at(i).isDir) {
                 ImGui::PopStyleColor();
             }
         }
@@ -200,7 +196,8 @@ void GuiView::showFileDialog() {
     if (ImGui::Button("Go to Rom Folder")) {
         fileExplorer.setCurrentDir(settings.romPath);
     }
-    ImGui::EndChild();
+    ImGui::EndChild(); // The name on this function
+
     ImGui::Unindent(indentSpace);
     ImGui::Spacing();
 
@@ -235,6 +232,11 @@ void GuiView::showFileDialog() {
     }
 
     ImGui::End();
+
+    if (switchDirectory) {
+        fileExplorer.moveTo(fileEntryList.at(selectedFile));
+        selectedFile = -1;
+    }
 
     if (loadRom) {
         try {

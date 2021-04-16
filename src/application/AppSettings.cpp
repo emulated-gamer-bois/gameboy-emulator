@@ -3,7 +3,7 @@
 AppSettings::AppSettings():
         romPath{".."}, emulationSpeedMultiplier{1.f}, windowedWidth{LCD_WIDTH * MIN_WINDOW_SIZE_MULTIPLIER},
         windowedHeight{LCD_HEIGHT * MIN_WINDOW_SIZE_MULTIPLIER}, fullscreen{false}, keepAspectRatio{true},
-        paletteNumber{0}, masterVolume{0.5f}
+        paletteNumber{0}, masterVolume{0.25f}
 {
     // Try to load from file
     loadSettings();
