@@ -72,6 +72,8 @@ void FileExplorer::setFilter(const std::string& _filter) {
     }
 
     filter = std::move(r);
+
+    listDir();
 }
 
 const FileEntry& FileExplorer::getCurrentDir() const {

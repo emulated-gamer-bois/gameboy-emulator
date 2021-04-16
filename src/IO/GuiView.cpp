@@ -108,7 +108,7 @@ void GuiView::setGetWindowCenterCallback(std::function<void(int& x, int& y)>&& g
 void GuiView::showEditControls() {
     prepareCenteredWindow();
     ImGui::Begin("Controls", &displayEditControls, windowFlags);
-    for (int i = 0; i < settings.keyBinds.keybinds.capacity(); i++) {
+    for (int i = 0; i < settings.keyBinds.keyBinds.capacity(); i++) {
         if (i == KEY_INDEX_JOYPAD_START) {
             ImGui::Text("JoyPad Keys ");
             ImGui::Spacing();
@@ -118,7 +118,7 @@ void GuiView::showEditControls() {
         }
 
         ImGui::Indent(indentSpace);
-        ImGui::Text("%s", settings.keyBinds.keybinds[i]->action_description.c_str());
+        ImGui::Text("%s", settings.keyBinds.keyBinds[i]->action_description.c_str());
         ImGui::SameLine(130,0);
 
         if(waitingForKeyBind && keyBindIndex == i) {
@@ -128,7 +128,7 @@ void GuiView::showEditControls() {
         }
 
         ImVec2 buttonSize(90, 18);
-        if (ImGui::Button(settings.keyBinds.keybinds[i]->keybind.c_str(), buttonSize)) {
+        if (ImGui::Button(settings.keyBinds.keyBinds[i]->keybind.c_str(), buttonSize)) {
             keyBindIndex = i;
             waitingForKeyBind = true;
         }
@@ -162,16 +162,29 @@ void GuiView::showFileDialog() {
         for (int i = 0; i < fileEntryList.size(); i++) {
             int flags = ImGuiSelectableFlags_AllowDoubleClick;
             bool isSelected = (selectedFile == i);
+
+            bool isDir = fileEntryList.at(i).isDir;
+            if (!isDir) {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 0.5f, 1.f));
+            }
+
             if (ImGui::Selectable(fileEntryList.at(i).filename.c_str(), isSelected, flags)) {
-                selectedFile = i;
+                if (!fileEntryList.at(i).isDir) {
+                    ImGui::PopStyleColor();
+                }
+
                 if (ImGui::IsMouseDoubleClicked(0)) {
-                    if (fileEntryList.at(i).isDir) {
+                    if (isDir) {
                         fileExplorer.moveTo(fileEntryList.at(i));
                         selectedFile = -1;
                     } else {
                         loadRom = true;
                     }
                 }
+            }
+
+            if (!isDir) {
+                ImGui::PopStyleColor();
             }
         }
         ImGui::EndListBox();
