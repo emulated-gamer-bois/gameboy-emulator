@@ -8,7 +8,6 @@
 #include <cmath>
 #include "gtest/gtest.h"
 #include "../src/IO/AudioController.h"
-#include "../src/application/AppSettings.h"
 
 TEST(AUDIO, START_SOUND) {
     AppSettings setting;

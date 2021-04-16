@@ -5,11 +5,9 @@
 #include "PPU.h"
 #include <memory>
 #include <iostream>
+#include <utility>
+PPU::PPU(std::shared_ptr<MMU> memory):memory(std::move(memory)){reset();}
 
-PPU::PPU(std::shared_ptr<MMU> memory) {
-    this->memory = memory;
-    this->reset();
-}
 
 uint8_t PPU::read(uint16_t addr) const {
     switch (addr) {
@@ -178,8 +176,6 @@ bool PPU::isReadyToDraw() const {
 }
 
 void PPU::confirmDraw() {
-    //TODO Filling the frame buffer with zeroes seems unnecessary?
-   // this->frameBuffer.fill(0);
     this->readyToDraw = false;
 }
 
@@ -359,9 +355,9 @@ bool PPU::meetsStatConditions() const {
 
 void PPU::dma_transfer(uint8_t startAddress) {
     if (0x00 <= startAddress && startAddress <= 0xdf) {
-        uint16_t start_addr = (startAddress << 8);
+        uint16_t startAddr = (startAddress << 8);
         for (uint8_t i = 0; i <= 0x9f; i++) {
-            this->memory->write(OAM_START + i, this->memory->read(start_addr+i));
+            this->memory->write(OAM_START + i, this->memory->read(startAddr + i));
         }
     } else {
         std::cout << "Tried to use DMA transfer with invalid input: " << startAddress << std::endl;

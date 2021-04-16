@@ -16,7 +16,7 @@ addons:
       - python3-pip
 
 install:
-  -pip install cpp-coveralls --user `whoami`
+  - pip install --user cpp-coveralls
 script:
   - CXX=/usr/bin/g++-6 CC=/usr/bin/gcc-6 cmake -DCOVERAGE=1 -DTRAVIS=1 .
   - cmake --configure .
