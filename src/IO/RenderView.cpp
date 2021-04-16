@@ -124,9 +124,6 @@ GLuint RenderView::loadShaderProgram(const std::string& vertexShader, const std:
     glShaderSource(vertShader, 1, &vsTemp, nullptr);
     glShaderSource(fragShader, 1, &fsTemp, nullptr);
 
-    delete[] vsTemp;
-    delete[] fsTemp;
-
     // For shader compilation error handling.
     GLint compiled = 0;
 
