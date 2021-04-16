@@ -49,29 +49,29 @@ uint8_t MBC1_MBC::read(uint16_t addr) {
         }
         // RAM Banking Mode / Advanced ROM Banking Mode
         else if ((bankingMode & (1 << 0)) == 1) {
-            uint16_t target_bank = (ramBankNumber << 5);
-            target_bank &= MBC::romBankMask(static_cast<uint32_t>(rom->size()));
-            return rom->at((addr) + (0x4000 * target_bank));
+            uint16_t targetBank = (ramBankNumber << 5);
+            targetBank &= MBC::romBankMask(static_cast<uint32_t>(rom->size()));
+            return rom->at((addr) + (0x4000 * targetBank));
         }
     } else if (0x4000 <= addr && addr <= 0x7fff) {
         // Set target bank to 1 if it is 0
-        uint16_t target_bank = romBankNumber == 0 ? 1 : (romBankNumber & 0x1f);
-        target_bank |= (ramBankNumber << 5);
-        target_bank &= MBC::romBankMask(static_cast<uint32_t>(rom->size()));
-        return rom->at((addr - 0x4000) + (0x4000 * target_bank));
+        uint16_t targetBank = romBankNumber == 0 ? 1 : (romBankNumber & 0x1f);
+        targetBank |= (ramBankNumber << 5);
+        targetBank &= MBC::romBankMask(static_cast<uint32_t>(rom->size()));
+        return rom->at((addr - 0x4000) + (0x4000 * targetBank));
 
     } else if (0xa000 <= addr && addr <= 0xbfff) {
         if (ramEnable != 0xa) {
             std::cout << "Tried to access disabled xRAM. addr: " << (int)addr << std::endl;
             return 0xff;
         } else {
-            uint8_t target_bank = 0;
+            uint8_t targetBank = 0;
             uint16_t target = addr - 0xa000;
             if (bankingMode == 1) {
-                target_bank = ramBankNumber;
+                targetBank = ramBankNumber;
             }
-            target_bank &= MBC::ramBankMask(static_cast<uint32_t>(ram->size()));
-            return ram->at(target + static_cast<uint16_t>(target_bank * 0x2000));
+            targetBank &= MBC::ramBankMask(static_cast<uint32_t>(ram->size()));
+            return ram->at(target + static_cast<uint16_t>(targetBank * 0x2000));
         }
     }
     return 0;
@@ -90,13 +90,13 @@ void MBC1_MBC::write(uint16_t addr, uint8_t data) {
         if (ramEnable != 0xa) {
             std::cout << "Tried to write to disabled xRAM. addr: " << (int)addr << std::endl;
         } else {
-            uint8_t target_bank = 0;
+            uint8_t targetBank = 0;
             uint16_t target = addr - 0xa000;
             if (bankingMode == 1) {
-                target_bank = ramBankNumber;
+                targetBank = ramBankNumber;
             }
-            target_bank &= MBC::ramBankMask(static_cast<uint32_t>(ram->size()));
-            ram->at(target + static_cast<uint16_t>(target_bank * 0x2000)) = data;
+            targetBank &= MBC::ramBankMask(static_cast<uint32_t>(ram->size()));
+            ram->at(target + static_cast<uint16_t>(targetBank * 0x2000)) = data;
         }
     } else {
         std::cout << "Tried to write data: " << (int)data << " to addr: " << (int)addr << std::endl;
@@ -134,10 +134,10 @@ uint8_t MBC3_MBC::read(uint16_t addr) {
         return rom->at(addr);
     } else if (0x4000 <= addr && addr <= 0x7fff) {
         // Set target bank to 1 if it is 0
-        uint16_t target_bank = romBankNumber == 0 ? 1 : (romBankNumber & 0x7f);
+        uint16_t targetBank = romBankNumber == 0 ? 1 : (romBankNumber & 0x7f);
 
-        target_bank &= MBC::romBankMask(static_cast<uint32_t>(rom->size()));
-        return rom->at((addr - 0x4000) + (0x4000 * target_bank));
+        targetBank &= MBC::romBankMask(static_cast<uint32_t>(rom->size()));
+        return rom->at((addr - 0x4000) + (0x4000 * targetBank));
     } else if (0xa000 <= addr && addr <= 0xbfff) {
         if (ramTimerEnable != 0xa) {
             return 0xff;
@@ -146,7 +146,7 @@ uint8_t MBC3_MBC::read(uint16_t addr) {
             return 0xff;
         }
         uint16_t target;
-        uint16_t target_bank;
+        uint16_t targetBank;
         switch (ramBankNumberRtcRegisterSelect)
         {
             // Read RAM
@@ -154,9 +154,9 @@ uint8_t MBC3_MBC::read(uint16_t addr) {
             case 0x1:
             case 0x2:
             case 0x3:
-                target_bank = ramBankNumberRtcRegisterSelect;
-                target_bank &= MBC::ramBankMask(static_cast<uint32_t>(ram->size()));
-                target = (addr - 0xa000) + (0x2000 * target_bank);
+                targetBank = ramBankNumberRtcRegisterSelect;
+                targetBank &= MBC::ramBankMask(static_cast<uint32_t>(ram->size()));
+                target = (addr - 0xa000) + (0x2000 * targetBank);
                 return ram->at(target);
 
             // Seconds

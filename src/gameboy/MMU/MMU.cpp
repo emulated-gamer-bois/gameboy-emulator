@@ -303,7 +303,7 @@ bool MMU::loadBootRom(const std::string& filepath) {
 // ONLY TO BE USED IN TESTS. CAN WRITE TO GAME ROM
 void MMU::write_GAME_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data) {
     if (GAME_ROM_START <= addr && addr <= GAME_ROM_END) {
-        cartridge->write_TEST(addr, data);
+        cartridge->writeTest(addr, data);
     } else {
         //std::cout << "Tried to use write_GAME_ROM_ONLY_IN_TESTS with invalid addr: " << addr << std::endl;
     }

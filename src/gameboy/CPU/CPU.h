@@ -59,7 +59,9 @@ private:
     int executeInstruction();
     bool isInterrupted();
     /**
-     *
+     * Handles interrupts by saving relevant data such as SP and PC, then
+     * jumps to interrupt handling depending on what interrupt is requested.
+     * Returns number of cycles required and then continues normal work flow.
      *
      * */
     int handleInterrupts();

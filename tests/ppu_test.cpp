@@ -476,7 +476,7 @@ TEST(PPU, window) {
 
 TEST(PPU, g_tile_rom) {
     GameBoy gb;
-    gb.load_boot_rom("../../roms/gb/boot_g_tile.gb");
+    gb.loadBootRom("../../roms/gb/boot_g_tile.gb");
     while (gb.cpu->PC != 0x34) {
         gb.cpu->executeInstruction();
     }

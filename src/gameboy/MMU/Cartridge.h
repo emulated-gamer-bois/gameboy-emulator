@@ -17,7 +17,7 @@ public:
     uint8_t read(uint16_t addr) const;
     void write(uint16_t addr, uint8_t data);
 
-    void write_TEST(uint16_t addr, uint8_t data);
+    void writeTest(uint16_t addr, uint8_t data);
     bool loadRom(const std::string& filepath, bool load_ram_from_file=false);
 
     bool saveRam();
@@ -69,6 +69,6 @@ private:
     std::string filepath;
 
     bool initRom();
-    bool initRam(bool load_from_ram=false);
+    bool initRam(bool loadFromRam=false);
     bool initMbc();
 };

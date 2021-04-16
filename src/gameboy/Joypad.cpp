@@ -5,23 +5,21 @@
 #include "Joypad.h"
 #include "MMU/MMU.h"
 #include <iostream>
+#include <utility>
 #include "Definitions.h"
+Joypad::Joypad(std::shared_ptr<MMU> mmu):mmu(std::move(mmu)) {}
 
-Joypad::Joypad(std::shared_ptr<MMU> mmu) {
-    this->mmu = mmu;
-    this->reset();
-}
 
 void Joypad::reset() {
     // Select direction buttons by default
-    this->joypad_select = JOYPAD_SEL_DIRECTIONS;
+    this->joypadSelect = JOYPAD_SEL_DIRECTIONS;
     this->joypad = 0xff;
 }
 
 uint8_t Joypad::read(uint16_t addr) const {
     switch (addr) {
         case JOYPAD:
-            if ((this->joypad_select & JOYPAD_SEL_DIRECTIONS)) {
+            if ((this->joypadSelect & JOYPAD_SEL_DIRECTIONS)) {
                 return ((this->joypad >> 0) & 0xf);
             } else {
                 return ((this->joypad >> 4) & 0xf);
@@ -35,7 +33,7 @@ uint8_t Joypad::read(uint16_t addr) const {
 void Joypad::write(uint16_t addr, uint8_t data) {
     switch (addr) {
         case JOYPAD:
-            this->joypad_select = data;
+            this->joypadSelect = data;
             break;
         default:
             std::cout << "Tried to write data: " << (int)data << " to address: " << (int)addr << " on Joypad." << std::endl;

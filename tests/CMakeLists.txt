@@ -17,7 +17,6 @@ link_libraries (
 
 if(NOT TRAVIS)
     add_executable( tests
-            tests.cpp
             cpu_test.cpp
             register_pair_test.cpp
             mmu_test.cpp
@@ -28,7 +27,6 @@ if(NOT TRAVIS)
     target_link_libraries(${PROJECT_NAME} application)
     else()
     add_executable(tests
-            tests.cpp
             cpu_test.cpp
             register_pair_test.cpp
             mmu_test.cpp

@@ -30,7 +30,7 @@ void Cartridge::write(uint16_t addr, uint8_t data) {
     mbc->write(addr, data);
 }
 
-void Cartridge::write_TEST(uint16_t addr, uint8_t data) {
+void Cartridge::writeTest(uint16_t addr, uint8_t data) {
     rom.at(addr) = data;
 }
 
@@ -168,7 +168,7 @@ bool Cartridge::initRom() {
     return true;
 }
 
-bool Cartridge::initRam(bool load_from_file) {
+bool Cartridge::initRam(bool loadFromRam) {
     switch (ramSize)
     {
         case RAM_NO_RAM:
@@ -190,7 +190,7 @@ bool Cartridge::initRam(bool load_from_file) {
             std::cout << "Invalid or unsupported RAM size: "<< (int)ramSize << std::endl;
             return false;
     }
-    if (load_from_file) {
+    if (loadFromRam) {
         if (!loadRam()) {
             std::cout << "Could not load extended RAM from file!" << std::endl;
         } else {

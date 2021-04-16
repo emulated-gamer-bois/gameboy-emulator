@@ -1,6 +1,6 @@
 
 #include "CPU.h"
-#include <iostream> // cpu_dump
+#include <iostream> // cpuDump
 #include <utility>
 
 uint16_t combineBytes(uint8_t firstByte, uint8_t secondByte);
