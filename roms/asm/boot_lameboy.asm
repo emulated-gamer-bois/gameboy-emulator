@@ -55,7 +55,7 @@ Setup_Sound:                    ; CODE XREF: sub_0000+82p
         ld  [$FF11], a          ; Sound wave duty 50%
         ld  a, $F3              ; 'ó'
         ld  [$FF12], a          ; Init Envelope
-        ld  [$FF25], a          ; Set enabled soudn channels
+        ld  [$FF25], a          ; Set enabled sound channels
         ld  a, $77              ; 'w'
         ld  [$FF24], a          ; Set full volume
         ld  hl, $FF30           ; Setup 00 FF repeating waveform in wave RAM

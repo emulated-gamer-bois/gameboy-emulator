@@ -21,7 +21,7 @@ Start:
     ld  [$FF11], a          ; Sound wave duty 50%
     ld  a, $F3              ; 'ó'
     ld  [$FF12], a          ; Init Envelope
-    ld  [$FF25], a          ; Set enabled soudn channels
+    ld  [$FF25], a          ; Set enabled sound channels
     ld  a, $77              ; 'w'
     ld  [$FF24], a          ; Set full volume
 
