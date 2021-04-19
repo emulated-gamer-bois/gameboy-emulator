@@ -13,7 +13,6 @@ APU::APU() {
     volumeEnvelopeB = 0;
     reset();
     NR52 = 0;
-    wavePatternRAM.fill(0);
 }
 
 uint8_t APU::read(uint16_t address) const {
@@ -207,6 +206,11 @@ void APU::reset() {
 
     NR50 = 0;
     NR51 = 0;
+
+    wavePatternRAM = {0x00, 0xff, 0x00, 0xff,
+                      0x00, 0xff, 0x00, 0xff,
+                      0x00, 0xff, 0x00, 0xff,
+                      0x00, 0xff, 0x00, 0xff};
 }
 
 void APU::volumeReset(uint8_t source) {
