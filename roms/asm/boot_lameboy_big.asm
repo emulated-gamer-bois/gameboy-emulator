@@ -14,6 +14,17 @@ Start:
     ld hl, $ff47
     ld [hl], $e4
 
+
+    ;Initializes sound
+    ld  a, $80              ; '€'
+    ld  [$FF26], a          ; Enable sound system, all channels OFF
+    ld  [$FF11], a          ; Sound wave duty 50%
+    ld  a, $F3              ; 'ó'
+    ld  [$FF12], a          ; Init Envelope
+    ld  [$FF25], a          ; Set enabled sound channels
+    ld  a, $77              ; 'w'
+    ld  [$FF24], a          ; Set full volume
+
     ;Set map positions
 SetMap:
     ld de, $10
@@ -38,7 +49,7 @@ SetMap:
 
 
 LoadTiles:
-    ld b, 56        ; set byte-counter
+    ld b, 48        ; set byte-counter
     ld c, 4         ; set tile-counter
     push bc         ; push counter to stack
 
@@ -100,6 +111,7 @@ LoadTiles:
     jr .loop_byte
 
 .end:
+
 
 Animation:
     ld hl, $ff42    ; addr for camera pos
@@ -192,34 +204,28 @@ MakeMask:
 ; -------------------------------------
 
 TileData:
-.l:
-    DB $30,$20,$20,$60
-    DB $40,$40,$7e,$00
-.a:
-    DB $00,$18,$18,$34
-    DB $3c,$66,$c2,$00
-.m:
-    DB $00,$22,$37,$75
-    DB $5d,$c9,$01,$01
-.e:
-    DB $00,$3c,$20,$38
-    DB $20,$60,$7e,$00
-.b:
-    DB $00,$3c,$24,$44
-    DB $7e,$46,$7c,$00
-.o:
-    DB $00,$18,$34,$24
-    DB $24,$3c,$00,$00
-.y:
-    DB $00,$64,$34,$1c
-    DB $08,$18,$10,$10
+    DB $60,$40,$40,$c0
+    DB $80,$81,$fb,$00
+
+    DB $00,$60,$60,$d1
+    DB $f1,$9b,$08,$00
+
+    DB $00,$88,$dc,$d4
+    DB $74,$25,$05,$04
+
+    DB $00,$f1,$81,$e2
+    DB $83,$82,$fb,$00
+
+    DB $00,$e1,$23,$22
+    DB $f2,$33,$e0,$00
+
+    DB $00,$99,$4d,$47
+    DB $42,$c6,$04,$04
 
 
 ;Add padding to file
 ;Disable boot rom
-SECTION "padding", ROM0[$ff-8]
+SECTION "padding", ROM0[$ff-3]
 DisableBoot:
-    ld hl, $ff40
-    ld [hl], $91
     ld a, 1
     ld [$ff00+$50], a
