@@ -1,33 +1,35 @@
-//
-// Created by isaaklindgren on 2021-03-19.
-//
-
-#ifndef LAME_BOY_KEYBINDS_H
-#define LAME_BOY_KEYBINDS_H
+#pragma once
 
 #include <vector>
-#include "string"
+#include <string>
 #include <SDL.h>
-
-
 
 class KeyBinds {
 public:
-    KeyBinds();
     struct action {
         std::string action_description;
         std::string keybind;
         int keyval;
     };
-    action a,b,start,select,left,right,up,down,turboMode;
-    std::vector<action*> keybinds = {&a, &b, &start, &select, &left, &right, &up, &down, &turboMode};
-    bool editKeyBinds(bool *keysDown, int keyBindIndex);
+
+    action a;
+    action b;
+    action start;
+    action select;
+    action left;
+    action right;
+    action up;
+    action down;
+    action turboMode;
+    std::vector<action*> keyBinds;
+
+    KeyBinds();
+
+    bool editKeyBinds(const bool keysDown[], int keyBindIndex);
 
 
 private:
-    std::vector<int> forbiddenKeys {SDLK_ESCAPE};
-    bool validKey(int keyBindIndex,SDL_Scancode scanCode);
+    std::vector<int> nonMapableKeys;
+
+    bool validKey(int keyBindIndex, SDL_Scancode scanCode);
 };
-
-
-#endif //LAME_BOY_KEYBINDS_H
