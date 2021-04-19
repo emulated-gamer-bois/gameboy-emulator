@@ -128,5 +128,5 @@ const Palette PaletteHandler::getPalette(int index) const {
 }
 
 const int PaletteHandler::getPaletteAmount() const {
-    return paletteAmount;
+    return PALETTE_AMOUNT;
 }
