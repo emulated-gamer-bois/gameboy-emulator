@@ -55,6 +55,3 @@ src/project
 - Open the project in CLion
 - Select `Edit Configurations...`, set `Working Directory` to `$FileDir$` and press `OK`
 - Rebuild and run the project
-
-## Known issues
-If cmake fails to find `SDL::SDL`, remove this line (or comment it out with `#`) from `labhelper/CMakeList.txt`

@@ -20,4 +20,5 @@ add_library( ${PROJECT_NAME}
         MMU/Cartridge.h
         MMU/Cartridge.cpp
         MMU/MBC.h
-        MMU/MBC.cpp APU/APU.cpp APU/APU.h APU/APUState.h)
+        MMU/MBC.cpp APU/APU.cpp APU/APU.h APU/APUState.h
+        )
