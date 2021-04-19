@@ -59,7 +59,7 @@ void GuiView::updateAndRender(SDL_Window *window) {
  */
 void GuiView::terminate() {
     ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL2_Shutdown(); // --
+    ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 }
 
