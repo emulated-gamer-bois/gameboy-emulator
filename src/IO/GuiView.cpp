@@ -8,10 +8,9 @@
 #include <imgui_internal.h>
 #include <iostream>
 #include <sstream>
-#include <utility>
 
-#include "imgui_impl_sdl.h"
-#include "imgui_impl_opengl3.h"
+#include "imgui_impl/imgui_impl_sdl.h"
+#include "imgui_impl/imgui_impl_opengl3.h"
 /**
  * Constructor
  */

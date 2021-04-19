@@ -22,7 +22,7 @@ public:
     CPU(std::shared_ptr<MMU> memory);
     void reset();
     /**
-     * Fetches, decodes and executes the instruction at location PC
+     * Fetches, decodes and executes the instruction at location PC, also checks interrupts and halt.
      * @returns amount of machine cycles operation takes.
      */
     int update();

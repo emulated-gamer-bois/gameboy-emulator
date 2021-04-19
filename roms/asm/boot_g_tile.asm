@@ -8,6 +8,8 @@ Start:
     ld hl, $ff47
     ld [hl], $e4
 
+    call Setup_Sound
+
     ;Set map position 0 to tile 3
     ;        position 16 to tile 2
     ;        position 2 to tile 1
@@ -36,6 +38,28 @@ Start:
     ;Stall
 .infLoop:
     jr .infLoop
+
+; Initializes sound
+Setup_Sound:                    ; CODE XREF: sub_0000+82p
+    ld  a, $80              ; '€'
+    ld  [$FF26], a          ; Enable sound system, all channels OFF
+    ld  [$FF11], a          ; Sound wave duty 50%
+    ld  a, $F3              ; 'ó'
+    ld  [$FF12], a          ; Init Envelope
+    ld  [$FF25], a          ; Set enabled sound channels
+    ld  a, $77              ; 'w'
+    ld  [$FF24], a          ; Set full volume
+    ld  hl, $FF30           ; Setup 00 FF repeating waveform in wave RAM
+    xor a
+    ld  c, $10
+
+_loop_clear_wave_data:          ; CODE XREF: Setup_Sound+19j
+    ldi [hl], a
+    cpl
+    dec c
+    jr  nz, _loop_clear_wave_data
+    ret
+; End of function Setup_Sound
 
 ; LoadTile
 ;HL - dst addr

@@ -4,17 +4,10 @@ project( tests )
 add_subdirectory(gtest)
 enable_testing ()
 
-# Find pthread library
-find_package (Threads REQUIRED)
+link_directories ( ${GOOGLETEST_LIBRARY} )
+link_libraries ( gtest gtest_main )
 
-link_directories (
-        ${GOOGLETEST_LIBRARY}
-)
-
-link_libraries (
-        gtest
-        gtest_main)
-
+# Excludes audio_test.cpp from travis since no one will hear it
 if(NOT TRAVIS)
     add_executable( tests
             cpu_test.cpp
@@ -22,7 +15,7 @@ if(NOT TRAVIS)
             mmu_test.cpp
             ppu_test.cpp
             audio_test.cpp
-            "../src/application/AppSettings.cpp")
+            )
     target_link_libraries(${PROJECT_NAME} IO)
     target_link_libraries(${PROJECT_NAME} application)
     else()
@@ -30,7 +23,8 @@ if(NOT TRAVIS)
             cpu_test.cpp
             register_pair_test.cpp
             mmu_test.cpp
-            ppu_test.cpp)
+            ppu_test.cpp
+            )
 endif()
 
-target_link_libraries(${PROJECT_NAME} gameboy )
+target_link_libraries ( ${PROJECT_NAME} gameboy )

@@ -7,6 +7,7 @@
 #include <array>
 #include <cmath>
 #include "gtest/gtest.h"
+#include "../src/application/AppSettings.h"
 #include "../src/IO/AudioController.h"
 
 TEST(AUDIO, START_SOUND) {

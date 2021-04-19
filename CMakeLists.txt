@@ -3,10 +3,24 @@ cmake_minimum_required ( VERSION 3.0.2 )
 project ( lame-boy )
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-# set everything up for c++ 17 features
-set(CMAKE_CXX_STANDARD 17)
-# Don't add this line if you will try_compile with boost.
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set ( CMAKE_CXX_STANDARD            17)
+set ( CMAKE_CXX_STANDARD_REQUIRED   ON)
+set ( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+set ( CMAKE_BUILD_TYPE              DEBUG )
+
+#Makes the emulator go swoosh
+if(MSVC)
+    set ( CMAKE_CXX_FLAGS_DEBUG   "/O2" )
+    set ( CMAKE_CXX_FLAGS_RELEASE "/O2" )
+else()
+    set ( CMAKE_CXX_FLAGS_DEBUG   "-O3" )
+    set ( CMAKE_CXX_FLAGS_RELEASE "-O3" )
+endif()
+
+add_definitions( -DGLM_ENABLE_EXPERIMENTAL )
+if( CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17" )
+endif()
 
 # All libraries made is static
 if (MSVC)
@@ -33,31 +47,11 @@ macro(config_build_output)
     endif(MSVC)
 endmacro(config_build_output)
 
-
 if(WIN32 AND ("${CMAKE_GENERATOR}" MATCHES "NMake.*"))
     set(DLL_DIRECTORIES "${CMAKE_SOURCE_DIR}/external/bin")
     set(RUNTIME_DIR "${CMAKE_SOURCE_DIR}/bin")
     configure_file("${CMAKE_SOURCE_DIR}/.run/project.run.xml.in" "${CMAKE_SOURCE_DIR}/.run/project.run.xml" @ONLY)
 endif()
 
-add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
-set ( CMAKE_EXPORT_COMPILE_COMMANDS ON )
-set ( CMAKE_BUILD_TYPE DEBUG )
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-endif()
-#If you want your game to go swoosh while developing
-if(MSVC)
-    set(CMAKE_CXX_FLAGS_DEBUG  "/O2")
-else()
-    set(CMAKE_CXX_FLAGS_DEBUG  "-O3")
-endif()
-
-# Excludes graphics code if tests are run in travis
-if(NOT TRAVIS)
-    add_subdirectory ( labhelper )
-endif()
-
 add_subdirectory ( src )
-
-add_subdirectory(tests)
+add_subdirectory ( tests )

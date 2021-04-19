@@ -49,9 +49,7 @@ friend class test_case_name##_##test_name##_Test
 #define IO_TIMER_END            0xff07
 #define INTERRUPT_FLAG          0xff0f
 #define IO_SOUND_START          0xff10
-#define IO_SOUND_END            0xff26
-#define IO_WAVEFORM_RAM_START   0xff30
-#define IO_WAVEFORM_RAM_END     0xff3f
+#define IO_SOUND_END            0xff3f
 #define IO_LCD_START            0xff40
 #define IO_LCD_END              0xff4b
 #define IO_DISABLE_BOOT_ROM     0xff50
@@ -83,15 +81,15 @@ private:
     std::shared_ptr<APU> apu;
 
     // Using array for memory with fixed size.
-    std::array<uint8_t, 256> bootRom;
-    std::array<uint8_t, 8192> vram;
-    std::array<uint8_t, 8192> ram;
-    std::array<uint8_t, 160> oam;
-    std::array<uint8_t, 128> hram;
+    std::array<uint8_t, 256> bootRom{};
+    std::array<uint8_t, 8192> vram{};
+    std::array<uint8_t, 8192> ram{};
+    std::array<uint8_t, 160> oam{};
+    std::array<uint8_t, 128> hram{};
 
-    bool booting;
-    uint8_t interruptEnable;
-    uint8_t interruptFlag;
+    bool booting{};
+    uint8_t interruptEnable{};
+    uint8_t interruptFlag{};
 
     // Tests using private stuff
     FRIEND_TEST(MMU, read_write);
