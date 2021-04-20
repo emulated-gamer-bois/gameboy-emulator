@@ -96,3 +96,23 @@ TEST(AUDIO, PLAY_NOISE) {
     }
     a.stopSound();
 }
+
+TEST(AUDIO, GENERATE_NOISE) {
+    uint16_t lfsr7 = 0x7F;
+    uint16_t lfsr15 = 0x7FFF;
+    auto xor_res = 0;
+    for(auto i = 0; i < 32767; i++) {
+        xor_res = (lfsr15 ^ (lfsr15 >> 1)) & 1;
+        lfsr15 >>= 1;
+        lfsr15 |= xor_res << 14;
+    }
+
+    for(auto i = 0; i < 127; i++) {
+        xor_res = (lfsr7 ^ (lfsr7 >> 1)) & 1;
+        lfsr7 >>= 1;
+        lfsr7 |= xor_res << 6;
+    }
+
+    ASSERT_EQ(0x7F, lfsr7);
+    ASSERT_EQ(0x7FFF, lfsr15);
+}

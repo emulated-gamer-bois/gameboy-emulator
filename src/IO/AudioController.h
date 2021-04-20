@@ -33,7 +33,8 @@ public:
 private:
     const static int N_SOURCES = 4;
     const static int SQUARE_SAMPLE_RATE = 32;
-    const static int NOISE_BUFFER_SIZE = 100000;
+    const static int LFSR7_BUFFER_SIZE = 0x7F;
+    const static int LFSR15_BUFFER_SIZE = 0x7FFF;
 
     ALCdevice* device;
     ALCcontext* context;
@@ -43,8 +44,8 @@ private:
     ALuint buffers[N_SOURCES];
     ALuint sources[N_SOURCES];
 
-    unsigned char noise15bit[NOISE_BUFFER_SIZE];
-    unsigned char noise7bit[NOISE_BUFFER_SIZE];
+    unsigned char noise15bit[LFSR15_BUFFER_SIZE];
+    unsigned char noise7bit[LFSR7_BUFFER_SIZE];
     unsigned char duties[N_SOURCES][SQUARE_SAMPLE_RATE];
 
     void stopSource(int source);
