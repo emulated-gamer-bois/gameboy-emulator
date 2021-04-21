@@ -10,7 +10,6 @@ link_libraries ( gtest gtest_main )
 # Excludes audio_test.cpp from travis since no one will hear it
 if(NOT TRAVIS)
     add_executable( tests
-            tests.cpp
             cpu_test.cpp
             register_pair_test.cpp
             mmu_test.cpp
@@ -20,8 +19,7 @@ if(NOT TRAVIS)
     target_link_libraries(${PROJECT_NAME} IO)
     target_link_libraries(${PROJECT_NAME} application)
     else()
-    add_executable( tests
-            tests.cpp
+    add_executable(tests
             cpu_test.cpp
             register_pair_test.cpp
             mmu_test.cpp

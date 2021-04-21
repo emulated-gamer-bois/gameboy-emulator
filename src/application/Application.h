@@ -31,8 +31,8 @@ public:
 private:
     int framesUntilStep;
 
-    SDL_Window* window;
-    SDL_GLContext glContext;
+    SDL_Window* window{};
+    SDL_GLContext glContext{};
     int windowWidth;
     int windowHeight;
 

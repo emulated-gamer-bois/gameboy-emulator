@@ -61,17 +61,17 @@ public:
     uint8_t read(uint16_t addr);
     void write(uint16_t addr, uint8_t data);
 
-    void raise_interrupt_flag(uint8_t bitmask);
-    void clear_interrupt_flag(uint8_t bitmask);
+    void raiseInterruptFlag(uint8_t bitmask);
+    void clearInterruptFlag(uint8_t bitmask);
 
-    void link_devices(std::shared_ptr<PPU> ppu, std::shared_ptr<APU> apu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer, std::shared_ptr<Cartridge> cartridge);
+    void linkDevices(std::shared_ptr<PPU> ppu, std::shared_ptr<APU> apu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer, std::shared_ptr<Cartridge> cartridge);
 
-    bool load_boot_rom(const std::string& filepath);
+    bool loadBootRom(const std::string& filepath);
 
 private:
     void write_GAME_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data);
     void write_BOOT_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data);
-    void disable_boot_rom(uint8_t data);
+    void disableBootRom(uint8_t data);
 
     // Devices
     std::shared_ptr<Cartridge> cartridge;
@@ -81,15 +81,15 @@ private:
     std::shared_ptr<APU> apu;
 
     // Using array for memory with fixed size.
-    std::array<uint8_t, 256> boot_rom;
-    std::array<uint8_t, 8192> vram;
-    std::array<uint8_t, 8192> ram;
-    std::array<uint8_t, 160> oam;
-    std::array<uint8_t, 128> hram;
+    std::array<uint8_t, 256> bootRom{};
+    std::array<uint8_t, 8192> vram{};
+    std::array<uint8_t, 8192> ram{};
+    std::array<uint8_t, 160> oam{};
+    std::array<uint8_t, 128> hram{};
 
-    bool booting;
-    uint8_t interrupt_enable;
-    uint8_t interrupt_flag;
+    bool booting{};
+    uint8_t interruptEnable{};
+    uint8_t interruptFlag{};
 
     // Tests using private stuff
     FRIEND_TEST(MMU, read_write);

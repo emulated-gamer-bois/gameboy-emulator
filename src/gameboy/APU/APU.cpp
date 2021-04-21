@@ -273,6 +273,7 @@ void APU::triggerEvent(uint8_t source) {
             //If length counter is zero, it is set to 64
             lengthCounterNoise = NR41 & 0x3F ? NR41 & 0x3F : 0x40;
             readyToPlay |= 8;
+            break;
     }
     volumeReset(source);
 }

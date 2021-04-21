@@ -24,13 +24,13 @@ public:
     GameBoy();
     void step(IVolumeController* vc);
     std::unique_ptr<uint8_t[]> getScreenTexture();
-    void joypad_input(uint8_t key, uint8_t action);
-    void load_rom(std::string bootFilepath, std::string romFilepath);
-    void load_game_rom(std::string filepath);
-    void load_boot_rom(std::string filepath);
+    void joypadInput(uint8_t key, uint8_t action);
+    void loadRom(std::string bootFilepath, std::string romFilepath);
+    void loadGameRom(std::string filepath);
+    void loadBootRom(std::string filepath);
     bool isReadyToDraw() const;
     void confirmDraw();
-    void cpu_dump();
+    void cpuDump();
     bool isOn() const;
 
     bool save();

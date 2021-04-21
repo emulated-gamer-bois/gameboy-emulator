@@ -5,38 +5,36 @@
 #include "PPU.h"
 #include <memory>
 #include <iostream>
+#include <utility>
+PPU::PPU(std::shared_ptr<MMU> memory):memory(std::move(memory)){reset();}
 
-PPU::PPU(std::shared_ptr<MMU> memory) {
-    this->memory = memory;
-    this->reset();
-}
 
 uint8_t PPU::read(uint16_t addr) const {
     switch (addr) {
         case LCDC_ADDRESS:
-            return this->LCDC;
+            return LCDC;
         case STAT_ADDRESS:
-            return this->STAT;
+            return STAT;
         case SCY_ADDRESS:
-            return this->SCY;
+            return SCY;
         case SCX_ADDRESS:
-            return this->SCX;
+            return SCX;
         case LY_ADDRESS:
-            return this->LY;
+            return LY;
         case LYC_ADDRESS:
-            return this->LYC;
+            return LYC;
         case DMA_ADDRESS:
-            return this->DMA;
+            return DMA;
         case BGP_ADDRESS:
-            return this->BGP;
+            return BGP;
         case OBP0_ADDRESS:
-            return this->OBP0;
+            return OBP0;
         case OBP1_ADDRESS:
-            return this->OBP1;
+            return OBP1;
         case WY_ADDRESS:
-            return this->WY;
+            return WY;
         case WX_ADDRESS:
-            return this->WX;
+            return WX;
         default:
             return 0;
     }
@@ -45,40 +43,40 @@ uint8_t PPU::read(uint16_t addr) const {
 void PPU::write(uint16_t addr, uint8_t data) {
     switch (addr) {
         case LCDC_ADDRESS:
-            this->LCDC = data;
+            LCDC = data;
             break;
         case STAT_ADDRESS:
             statInterrupt(); //Hardware bug, interrupt should be thrown every time STAT is written
-            this->STAT = data;
+            STAT = data;
             break;
         case SCY_ADDRESS:
-            this->SCY = data;
+            SCY = data;
             break;
         case SCX_ADDRESS:
-            this->SCX = data;
+            SCX = data;
             break;
         case LY_ADDRESS:
             break;
         case LYC_ADDRESS:
-            this->LYC = data;
+            LYC = data;
             break;
         case DMA_ADDRESS:
-            this->dma_transfer(data);
+            dma_transfer(data);
             break;
         case BGP_ADDRESS:
-            this->BGP = data;
+            BGP = data;
             break;
         case OBP0_ADDRESS:
-            this->OBP0 = data;
+            OBP0 = data;
             break;
         case OBP1_ADDRESS:
-            this->OBP1 = data;
+            OBP1 = data;
             break;
         case WY_ADDRESS:
-            this->WY = data;
+            WY = data;
             break;
         case WX_ADDRESS:
-            this->WX = data;
+            WX = data;
             break;
         default:
             std::cout << "Tried to write data: " << (int)data << " to address: " << (int)addr << std::endl;
@@ -174,13 +172,11 @@ void PPU::update(uint16_t cpuCycles) {
 }
 
 bool PPU::isReadyToDraw() const {
-    return this->readyToDraw;
+    return readyToDraw;
 }
 
 void PPU::confirmDraw() {
-    //TODO Filling the frame buffer with zeroes seems unnecessary?
-   // this->frameBuffer.fill(0);
-    this->readyToDraw = false;
+    readyToDraw = false;
 }
 
 const std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>* PPU::getFrameBuffer() const {
@@ -341,11 +337,11 @@ uint8_t PPU::getColor(uint8_t palette, uint8_t colorIndex) {
 }
 
 void PPU::vBlankInterrupt() {
-    memory->raise_interrupt_flag(V_BLANK_IF_BIT);
+    memory->raiseInterruptFlag(V_BLANK_IF_BIT);
 }
 
 void PPU::statInterrupt() {
-    memory->raise_interrupt_flag(STAT_IF_BIT);
+    memory->raiseInterruptFlag(STAT_IF_BIT);
 }
 
 bool PPU::meetsStatConditions() const {
@@ -359,9 +355,9 @@ bool PPU::meetsStatConditions() const {
 
 void PPU::dma_transfer(uint8_t startAddress) {
     if (0x00 <= startAddress && startAddress <= 0xdf) {
-        uint16_t start_addr = (startAddress << 8);
+        uint16_t startAddr = (startAddress << 8);
         for (uint8_t i = 0; i <= 0x9f; i++) {
-            this->memory->write(OAM_START + i, this->memory->read(start_addr+i));
+            memory->write(OAM_START + i, memory->read(startAddr + i));
         }
     } else {
         std::cout << "Tried to use DMA transfer with invalid input: " << startAddress << std::endl;

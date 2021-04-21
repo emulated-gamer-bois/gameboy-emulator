@@ -17,11 +17,11 @@ public:
     uint8_t read(uint16_t addr) const;
     void write(uint16_t addr, uint8_t data);
 
-    void write_TEST(uint16_t addr, uint8_t data);
-    bool load_rom(const std::string& filepath, bool load_ram_from_file=false);
+    void writeTest(uint16_t addr, uint8_t data);
+    bool loadRom(const std::string& filepath, bool load_ram_from_file=false);
 
-    bool save_ram();
-    bool load_ram();
+    bool saveRam();
+    bool loadRam();
 
     // For cartridges with timer
     void update(uint8_t cycles);
@@ -60,15 +60,15 @@ private:
         RAM_64KB = 0x5,
     };
 
-    uint8_t cartridge_type;
-    uint8_t rom_size;
-    uint8_t ram_size;
+    uint8_t cartridgeType;
+    uint8_t romSize;
+    uint8_t ramSize;
     std::vector<uint8_t> rom;
     std::vector<uint8_t> ram;
     std::unique_ptr<MBC> mbc;
     std::string filepath;
 
-    bool init_rom();
-    bool init_ram(bool load_from_ram=false);
-    bool init_mbc();
+    bool initRom();
+    bool initRam(bool loadFromRam=false);
+    bool initMbc();
 };

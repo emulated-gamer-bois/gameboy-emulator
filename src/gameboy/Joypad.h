@@ -28,8 +28,8 @@ private:
     std::shared_ptr<MMU> mmu;
 
     // Private registers
-    uint8_t joypad_select;
-    uint8_t joypad;
+    uint8_t joypadSelect{JOYPAD_SEL_DIRECTIONS};
+    uint8_t joypad{0xFF};
 public:
     explicit Joypad(std::shared_ptr<MMU> mmu);
     void reset();

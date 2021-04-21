@@ -53,9 +53,10 @@ public:
 
     uint8_t read(uint16_t address) const;
     void write(uint16_t address, uint8_t data);
+    void reset();
     void update(uint16_t cpuCycles, IVolumeController* vc);
 
-    void reset();
+
 
     void lengthStep();
     void volEnvelopeStep(IVolumeController* vc);
@@ -67,53 +68,53 @@ public:
     APUState* getAPUState();
 
 private:
-    uint8_t NR10;
-    uint8_t NR11;
-    uint8_t NR12;
-    uint8_t NR13;
-    uint8_t NR14;
+    uint8_t NR10{};
+    uint8_t NR11{};
+    uint8_t NR12{};
+    uint8_t NR13{};
+    uint8_t NR14{};
 
-    uint8_t NR21;
-    uint8_t NR22;
-    uint8_t NR23;
-    uint8_t NR24;
+    uint8_t NR21{};
+    uint8_t NR22{};
+    uint8_t NR23{};
+    uint8_t NR24{};
 
-    uint8_t NR30;
-    uint8_t NR31;
-    uint8_t NR32;
-    uint8_t NR33;
-    uint8_t NR34;
+    uint8_t NR30{};
+    uint8_t NR31{};
+    uint8_t NR32{};
+    uint8_t NR33{};
+    uint8_t NR34{};
     std::array<uint8_t, 16> wavePatternRAM{};
 
-    uint8_t NR41;
-    uint8_t NR42;
-    uint8_t NR43;
-    uint8_t NR44;
+    uint8_t NR41{};
+    uint8_t NR42{};
+    uint8_t NR43{};
+    uint8_t NR44{};
 
-    uint8_t NR50;
-    uint8_t NR51;
+    uint8_t NR50{};
+    uint8_t NR51{};
     uint8_t NR52;
 
     uint8_t readyToPlay;
     int accumulatedCycles;
     uint8_t state;
 
-    uint8_t periodEnvelopeA;
+    uint8_t periodEnvelopeA{};
     uint8_t volumeEnvelopeA;
-    uint8_t lengthCounterA;
-    uint8_t sweepCounter;
-    uint16_t sweepShadowRegister;
-    uint8_t sweepEnabled;
+    uint8_t lengthCounterA{};
+    uint8_t sweepCounter{};
+    uint16_t sweepShadowRegister{};
+    uint8_t sweepEnabled{};
 
-    uint8_t periodEnvelopeB;
+    uint8_t periodEnvelopeB{};
     uint8_t volumeEnvelopeB;
-    uint8_t lengthCounterB;
+    uint8_t lengthCounterB{};
 
-    uint16_t lengthCounterWave;
+    uint16_t lengthCounterWave{};
 
-    uint8_t periodEnvelopeNoise;
-    uint8_t volumeEnvelopeNoise;
-    uint16_t lengthCounterNoise;
+    uint8_t periodEnvelopeNoise{};
+    uint8_t volumeEnvelopeNoise{};
+    uint16_t lengthCounterNoise{};
 
     const float WAVE_VOLUMES[4] = {0.0f, 0.25f, 0.125f, 0.0675f};
 

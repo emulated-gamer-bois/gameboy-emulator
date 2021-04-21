@@ -60,7 +60,7 @@ private:
     const static uint16_t VBLANK_LINE_THRESHOLD = 114;
     const static uint16_t OAM_SEARCH_THRESHOLD = 20;
     const static uint16_t SCANLINE_DRAW_THRESHOLD = 43;
-    uint16_t accumulatedCycles;
+    uint16_t accumulatedCycles{};
 
     //The four modes of the PPU
     enum Mode {
@@ -82,7 +82,7 @@ private:
             unsigned int windowTileMapSelect : 1;
             unsigned int lcdDisplayEnable : 1;
         };
-        uint8_t LCDC;
+        uint8_t LCDC{};
     };
 
     // LCD status register
@@ -96,29 +96,28 @@ private:
             unsigned int lycEqualsLyInterruptEnable : 1;
             unsigned int UNUSED : 1;
         };
-        uint8_t STAT;
+        uint8_t STAT{};
     };
 
     // Misc registers
-    uint8_t SCY;
-    uint8_t SCX;
-    uint8_t LY;
-    uint8_t LYC;
-    uint8_t DMA;
-    uint8_t WY;
-    uint8_t WX;
-    uint8_t BGP;
-    uint8_t OBP0;
-    uint8_t OBP1;
+    uint8_t SCY{};
+    uint8_t SCX{};
+    uint8_t LY{};
+    uint8_t LYC{};
+    uint8_t DMA{};
+    uint8_t WY{};
+    uint8_t WX{};
+    uint8_t BGP{};
+    uint8_t OBP0{};
+    uint8_t OBP1{};
 
     //The color indexes of the background and window this scanline. Used to determine priority of sprites
-    std::array<uint8_t, LCD_WIDTH> bgWindowColorIndexesThisLine;
+    std::array<uint8_t, LCD_WIDTH> bgWindowColorIndexesThisLine{};
     std::priority_queue<Sprite> spritesNextScanLine;
-    std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> frameBuffer;
+    std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT> frameBuffer{};
 
-
-    bool readyToDraw;
-    bool anyStatConditionLastUpdate;
+    bool readyToDraw{};
+    bool anyStatConditionLastUpdate{};
 
     //Scanline methods
     void processNextLine();
