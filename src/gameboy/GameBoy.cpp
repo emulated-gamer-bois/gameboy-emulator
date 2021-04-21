@@ -14,12 +14,12 @@ GameBoy::GameBoy() {
     cpu = std::make_unique<CPU>(mmu);
     ppu = std::make_shared<PPU>(mmu);
     apu = std::make_shared<APU>();
-    mmu->linkDevices(this->ppu, this->apu, this->joypad, this->timer, this->cartridge);
+    mmu->linkDevices(ppu, apu, joypad, timer, cartridge);
     on = false;
 }
 
 void GameBoy::step(IVolumeController *vc) {
-    if (!this->on) {
+    if (!on) {
         return;
     }
     if (cpu->getStop()) {
@@ -30,7 +30,7 @@ void GameBoy::step(IVolumeController *vc) {
     }
 
 
-    int cycles = this->cpu->update();
+    int cycles = cpu->update();
     ppu->update(cycles);
     apu->update(cycles, vc);
     timer->update(cycles);
@@ -100,20 +100,20 @@ bool GameBoy::isOn() const {
 
 bool GameBoy::save() {
     // Save RAM to separate file
-    if (!this->cartridge->saveRam()) {
+    if (!cartridge->saveRam()) {
         return false;
     }
     return true;
 }
 
 uint8_t GameBoy::isReadyToPlaySound() {
-    return this->apu->isReadyToPlaySound();
+    return apu->isReadyToPlaySound();
 }
 
 void GameBoy::confirmPlay() {
-    this->apu->confirmPlay();
+    apu->confirmPlay();
 }
 
 APUState *GameBoy::getAPUState() {
-    return this->apu->getAPUState();
+    return apu->getAPUState();
 }
