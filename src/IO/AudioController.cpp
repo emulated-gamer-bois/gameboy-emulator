@@ -77,12 +77,14 @@ void AudioController::init() {
     uint16_t lfsr7 = 0x7F;
     uint16_t lfsr15 = 0x7FFF;
     auto xor_res = 0;
-    for(auto i = 0; i < NOISE_BUFFER_SIZE; i++) {
+    for(auto i = 0; i < LFSR15_BUFFER_SIZE; i++) {
         xor_res = (lfsr15 ^ (lfsr15 >> 1)) & 1;
         lfsr15 >>= 1;
         lfsr15 |= xor_res << 14;
-        noise15bit[i] = lfsr15 & 1 ? 0 : (char)0xFF;
+        noise15bit[i] = lfsr15 & 1 ? 0 : (char) 0xFF;
+    }
 
+    for(auto i = 0; i < LFSR7_BUFFER_SIZE; i++) {
         xor_res = (lfsr7 ^ (lfsr7 >> 1)) & 1;
         lfsr7 >>= 1;
         lfsr7 |= xor_res << 6;
@@ -177,7 +179,11 @@ void AudioController::setVolume(int source, float volume) {
 }
 
 void AudioController::playNoise(int source, bool is_7_bit_mode, ALsizei frequency, float volume) {
-    playSound(source, is_7_bit_mode ? noise7bit : noise15bit, NOISE_BUFFER_SIZE, frequency, volume);
+    if(is_7_bit_mode) {
+        playSound(source, noise7bit, LFSR7_BUFFER_SIZE, frequency, volume);
+    } else {
+        playSound(source, noise15bit, LFSR15_BUFFER_SIZE, frequency, volume);
+    }
 }
 
 void AudioController::stopSound() {
