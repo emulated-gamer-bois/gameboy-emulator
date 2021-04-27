@@ -15,7 +15,6 @@ if(NOT TRAVIS)
             mmu_test.cpp
             ppu_test.cpp
             audio_test.cpp
-            test.cpp
             )
     target_link_libraries(${PROJECT_NAME} IO)
     target_link_libraries(${PROJECT_NAME} application)
@@ -25,7 +24,6 @@ if(NOT TRAVIS)
             register_pair_test.cpp
             mmu_test.cpp
             ppu_test.cpp
-            test.cpp
             )
 endif()
 
