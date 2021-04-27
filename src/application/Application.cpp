@@ -7,6 +7,7 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 
 #include "Application.h"
 #include "../helpers/AppTimer.h"
+#include "Game-Boy-FL.cpp"
 
 /**
  * Constructor
@@ -122,6 +123,20 @@ void Application::initSDL() {
                               settings.windowedHeight,
                               SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     if (!window) {FATAL_ERROR("Failed to create SDL window."); }
+
+    SDL_Surface *surface;
+    surface = SDL_CreateRGBSurfaceFrom(
+            gimp_image.pixel_data,
+            gimp_image.width,
+            gimp_image.height,
+            32,
+            gimp_image.bytes_per_pixel*gimp_image.width,
+            0x00ff0000,
+            0x0000ff00,
+            0x000000ff,
+            0xff000000);
+    SDL_SetWindowIcon(window, surface);
+    SDL_FreeSurface(surface);
 
     SDL_SetWindowMinimumSize(window,
                              LCD_WIDTH * MIN_WINDOW_SIZE_MULTIPLIER,
