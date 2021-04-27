@@ -9,6 +9,7 @@ add_library( ${PROJECT_NAME}
         AppSettings.h
         KeyBinds.cpp
         KeyBinds.h
+        State.h
         Game-Boy-FL.cpp
         )
 
