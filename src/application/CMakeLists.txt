@@ -10,6 +10,7 @@ add_library( ${PROJECT_NAME}
         KeyBinds.cpp
         KeyBinds.h
         State.h
+        Game-Boy-FL.cpp
         )
 
 target_link_libraries ( ${PROJECT_NAME} IO helpers gameboy )
