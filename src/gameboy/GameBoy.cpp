@@ -23,7 +23,7 @@ void GameBoy::step(IVolumeController *vc) {
         return;
     }
     if (cpu->getStop()) {
-        if (mmu->read(JOYPAD) & mmu->read(INTERRUPT_ENABLE)) {
+        if (mmu->read(JOYPAD) != 0xff) {
             cpu->returnFromStop();
         }
         return;

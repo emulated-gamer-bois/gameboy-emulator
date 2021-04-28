@@ -27,3 +27,4 @@ roms/o
 roms/rgbds*
 roms/dmg_boot.bin
 /roms/games/
+/src/.settings

@@ -46,8 +46,6 @@ void CPU::cpuDump() {
     std::cout << "=---------------------------=" << std::endl;
 }
 void CPU::returnFromStop() {
-    loadIm8(A, BC.high_8);
-    memory->write(0xffff, A);
     stop = false;
 }
 
@@ -452,10 +450,6 @@ void CPU::daa() {
 
 
 void CPU::stopOp() {
-
-    loadIm8(BC.high_8, memory->read(INTERRUPT_ENABLE)); // Save IE
-    memory->write(INTERRUPT_ENABLE, 0x00); //clear IE
-    memory->write(IO_START, memory->read(IO_START) & 0xF0);
     stop = true;
 
 }
