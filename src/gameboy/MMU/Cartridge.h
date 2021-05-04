@@ -4,6 +4,10 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <memory> // ptr
+#include <fstream>
+#include <iostream>
+#include <cstring> // memcpy
 
 class Cartridge {
 public:

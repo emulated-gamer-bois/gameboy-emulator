@@ -17,6 +17,8 @@ public:
     explicit Controller(AppSettings& settings, GuiView& guiView, GameBoy& gameBoy);
     /**
     * Handles SDL Events including keyboard input.
+    * Acts differently depending on state of the application.
+    * For example handling GUI or emulation.
     */
     State handleSDLEvents(State state);
 

@@ -40,24 +40,17 @@ void GuiView::updateAndRender(SDL_Window *window) {
     if (waitingForKeyBind) { keyBind(); }
 }
 
-/**
- * Cleans up after ImGui.
- */
 void GuiView::terminate() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 }
 
-/**
- */
 void GuiView::handleInput(SDL_Event event) {
     ImGui_ImplSDL2_ProcessEvent(&event);
 }
 
-/**
- * Toggles the showToolbar.
- */
+
 void GuiView::toggleGui() {
     displayToolbar = !displayToolbar;
     if (!displayToolbar) {

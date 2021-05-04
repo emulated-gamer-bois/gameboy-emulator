@@ -1,11 +1,11 @@
-//
-// Created by Algot on 2021-03-11.
-//
 
 #pragma once
 
 #include <cstdint>
 #include <memory>
+#include "MMU/MMU.h"
+#include <iostream>
+#include <utility>
 
 #define JOYPAD                  0xff00
 #define JOYPAD_SEL_BUTTONS      0x10

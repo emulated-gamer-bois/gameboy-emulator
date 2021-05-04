@@ -1,7 +1,3 @@
-//
-// Created by davidm on 2021-02-12.
-//
-
 #include <memory>
 #include "gtest/gtest.h"
 #include "../src/gameboy/CPU/CPU.h"
