@@ -26,11 +26,13 @@
 class Application {
 public:
     Application();
-    void start();
+    /**
+     * Main loop of application, runs until state is set as TERMINATION.
+     * */
+    void run();
 
 private:
     int framesUntilStep;
-
     SDL_Window* window{};
     SDL_GLContext glContext{};
     int windowWidth;
@@ -50,12 +52,26 @@ private:
 
     void initSDL();
     void terminate();
-
+    /**
+     * Steps the emulation depending on settings.emulationSpeedMultiplier.
+     * */
     void stepEmulation();
+    /**
+     * StepFast steps the emulation settings.emulationSpeedMultiplier number of times.
+     * Skips rendering and speeds up emulation only.
+     * */
     void stepFast();
+    /**
+     * StepSlow renders 1/settings.emulationSpeedMultiplier frames before stepping the emulation once.
+     * */
     void stepSlowly();
+    /**
+     * gameBoyStep steps the Game Boy once.
+     * */
     void gameBoyStep();
-
+    /**
+    * Makes sure the window dimensions updates to match changes in RenderView dimensions.
+    */
     void correctWindowSize();
     void correctViewport();
 };

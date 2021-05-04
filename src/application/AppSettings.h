@@ -16,7 +16,10 @@
 
 class AppSettings {
 public:
-    std::string romPath; // The path where the file dialog will always be in when opened.
+    /**
+     *The path where the file dialog will always be in when opened.
+     **/
+    std::string romPath;
 
     // Emulation settings
     KeyBinds keyBinds;

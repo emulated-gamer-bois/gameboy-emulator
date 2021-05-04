@@ -1,11 +1,7 @@
-//
-// Created by isaaklindgren on 2021-03-19.
-//
-
 #include "KeyBinds.h"
 
 KeyBinds::KeyBinds():
-    keyBinds({&a, &b, &start, &select, &left, &right, &up, &down, &turboMode}), nonMapableKeys({SDLK_ESCAPE})
+    keyBinds({&a, &b, &start, &select, &left, &right, &up, &down, &turboMode}), nonMappableKeys({SDLK_ESCAPE})
 {
     a.keyval = SDLK_j;
     b.keyval = SDLK_h;
@@ -58,8 +54,8 @@ bool KeyBinds::validKey(int keyBindIndex, SDL_Scancode scanCode) {
         }
     }
 
-    for (int i = 0; i < nonMapableKeys.capacity(); i++) {
-        forbiddenKeyBind |= (SDL_GetKeyFromScancode(scanCode) == nonMapableKeys[i]);
+    for (int i = 0; i < nonMappableKeys.capacity(); i++) {
+        forbiddenKeyBind |= (SDL_GetKeyFromScancode(scanCode) == nonMappableKeys[i]);
     }
 
     return !forbiddenKeyBind;
