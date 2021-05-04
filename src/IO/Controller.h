@@ -1,6 +1,4 @@
-//
-// Created by isak_ on 2021-04-06.
-//
+
 
 #ifndef LAME_BOY_CONTROLLER_H
 #define LAME_BOY_CONTROLLER_H
@@ -8,21 +6,18 @@
 #include <string>
 #include <chrono> // time
 #include <thread> // sleep
-#include "RenderView.h"
-#include "../gameboy/GameBoy.h"
-#include "../gameboy/Definitions.h"
-#include "AudioController.h"
-#include "../helpers/ErrorReport.h"
-#include "imgui.h"
-
-#include "../application/AppSettings.h"
+#include "../application/State.h" //State
+#include "../application/AppSettings.h" //Keybinds
+#include "../gameboy/Joypad.h" // Joypad
+#include "../gameboy/GameBoy.h" // JOYPAD_Constants
 #include "GuiView.h"
-#include "../application/KeyBinds.h"
-#include "../application/State.h"
 
 class Controller {
 public:
     explicit Controller(AppSettings& settings, GuiView& guiView, GameBoy& gameBoy);
+    /**
+    * Handles SDL Events including keyboard input.
+    */
     State handleSDLEvents(State state);
 
 private:

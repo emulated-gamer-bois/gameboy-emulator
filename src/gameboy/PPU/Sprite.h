@@ -1,10 +1,5 @@
-//
-// Created by riddarvid on 3/12/21.
-//
-
 #pragma once
 #include <cstdint>
-#include <memory>
 #include <iostream>
 
 class Sprite {

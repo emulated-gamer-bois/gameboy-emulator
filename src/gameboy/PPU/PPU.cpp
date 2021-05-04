@@ -1,11 +1,6 @@
-//
-// Created by riddarvid on 2/23/21.
-//
 
 #include "PPU.h"
-#include <memory>
-#include <iostream>
-#include <utility>
+
 PPU::PPU(std::shared_ptr<MMU> memory):memory(std::move(memory)){reset();}
 
 

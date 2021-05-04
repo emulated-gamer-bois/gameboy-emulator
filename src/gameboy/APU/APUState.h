@@ -1,7 +1,3 @@
-//
-// Created by David on 2021-03-27.
-//
-
 #pragma once
 
 struct APUState {

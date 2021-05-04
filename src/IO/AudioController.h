@@ -1,6 +1,4 @@
-//
-// Created by riddarvid on 3/25/21.
-//
+
 
 #ifndef LAME_BOY_AUDIOCONTROLLER_H
 #define LAME_BOY_AUDIOCONTROLLER_H

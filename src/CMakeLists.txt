@@ -1,6 +1,6 @@
 cmake_minimum_required ( VERSION 3.0.2 )
 
-project ( project )
+project ( LameBoy )
 
 add_subdirectory( gameboy )
 add_subdirectory( helpers )

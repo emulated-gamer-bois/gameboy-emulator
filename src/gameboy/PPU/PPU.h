@@ -1,14 +1,11 @@
-//
-// Created by riddarvid on 2/23/21.
-//
 
 #pragma once
 
 #include <memory> // smart pointers
 #include <cstdint> // uint8_t and uint16_t
 #include <array> // frame buffer
-#include <queue>
-
+#include <queue> //queue
+#include <iostream> //cout
 #include "../Definitions.h" // LCD_WIDTH and LCD_HEIGHT
 #include "../MMU/MMU.h"
 #include "Sprite.h"

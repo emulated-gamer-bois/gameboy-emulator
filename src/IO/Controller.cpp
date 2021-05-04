@@ -1,17 +1,13 @@
-//
-// Created by isak_ on 2021-04-06.
-//
 
 #include "Controller.h"
+
+
 Controller::Controller(AppSettings& settings, GuiView& guiView, GameBoy& gameBoy):
     settings{settings}, guiView{guiView}, gameBoy{gameBoy}
 {
     savedEmulationSpeed = settings.emulationSpeedMultiplier;
 }
 
-/**
- * Handles SDL Events including keyboard input.
- */
 State Controller::handleSDLEvents(State state) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {

@@ -1,7 +1,3 @@
-//
-// Created by riddarvid on 3/12/21.
-//
-
 #include "Sprite.h"
 
 Sprite::Sprite(uint8_t y, uint8_t x, uint8_t tileIndex, uint8_t flags, uint8_t positionInOAM) {

@@ -1,9 +1,5 @@
-//
-// Created by riddarvid on 3/25/21.
-//
 
 #include "AudioController.h"
-#include "../gameboy/APU/APUState.h"
 
 AudioController::AudioController(AppSettings& settings):
     settings{settings}

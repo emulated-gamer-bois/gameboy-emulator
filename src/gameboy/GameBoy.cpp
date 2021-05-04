@@ -1,7 +1,3 @@
-//
-// Created by algot on 2021-02-23.
-//
-
 #include "GameBoy.h"
 
 GameBoy::GameBoy() {
@@ -22,6 +18,7 @@ void GameBoy::step(IVolumeController *vc) {
     if (!on) {
         return;
     }
+    //TODO fix STOP-bug.
     if (cpu->getStop()) {
         if (mmu->read(JOYPAD) & mmu->read(INTERRUPT_ENABLE)) {
             cpu->returnFromStop();

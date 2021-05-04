@@ -1,6 +1,3 @@
-//
-// Created by Andreas on 2021-02-28.
-//
 
 #pragma once
 #define EMULATOR_NAME_STRING "Lame Boy"
