@@ -1,7 +1,3 @@
-//
-// Created by Algot on 2021-03-11.
-//
-
 #pragma once
 
 #include "MBC.h"

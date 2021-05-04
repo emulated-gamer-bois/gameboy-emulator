@@ -1,12 +1,9 @@
-//
-// Created by Algot on 2021-03-11.
-//
-
 #pragma once
 
 #include <cstdint>
-#include <memory>
-
+#include <memory> //ptr
+#include <iostream> // cout
+#include "MMU.h"
 #define TIMER_DIVIDER       0xff04
 #define TIMER_COUNTER       0xff05
 #define TIMER_MODULO        0xff06
@@ -32,8 +29,8 @@ private:
     std::shared_ptr<MMU> mmu;
 
     // Private registers
-    uint16_t divider;
-    uint8_t counter;
-    uint8_t modulo;
-    uint8_t control;
+    uint16_t divider{};
+    uint8_t counter{};
+    uint8_t modulo{};
+    uint8_t control{};
 };

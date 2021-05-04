@@ -1,13 +1,10 @@
-//
-// Created by Algot on 2021-03-11.
-//
-
 #include "Timer.h"
-#include "MMU.h"
-#include <iostream>
+
+#include <utility>
+
 
 Timer::Timer(std::shared_ptr<MMU> mmu)
-    : mmu{mmu} {
+    : mmu{std::move(mmu)} {
     reset();
 }
 

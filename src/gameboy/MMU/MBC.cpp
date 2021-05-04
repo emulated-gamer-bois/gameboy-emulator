@@ -1,9 +1,4 @@
-//
-// Created by Algot on 2021-03-11.
-//
-
 #include "MBC.h"
-#include <iostream>
 
 // MBC
 uint16_t MBC::romBankMask(uint32_t size) {

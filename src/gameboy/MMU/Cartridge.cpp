@@ -1,6 +1,3 @@
-//
-// Created by Algot on 2021-03-11.
-//
 
 #include "Cartridge.h"
 #include <fstream>

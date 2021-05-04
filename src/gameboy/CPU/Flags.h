@@ -1,9 +1,4 @@
-//
-// Created by isaaklindgren on 2021-02-23.
-//
-
 #pragma once
-
 union Flags {
     struct {
     /**

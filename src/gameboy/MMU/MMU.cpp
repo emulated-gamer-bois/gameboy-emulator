@@ -1,16 +1,5 @@
-//
-// Created by algot on 2021-02-15.
-//
-
 #include "MMU.h"
-#include "../Joypad.h"
-#include "../PPU/PPU.h"
-#include "Timer.h"
 
-#include <cstring> // memcpy
-#include <fstream>
-#include <iostream> // cout
-#include <memory>   // smart pointers
 
 MMU::MMU() {
     reset();

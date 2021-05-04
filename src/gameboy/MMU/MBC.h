@@ -1,12 +1,7 @@
-//
-// Created by Algot on 2021-03-11.
-//
-
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <memory>
+#include <vector> //vector
+#include <iostream> //cout
 
 class MBC {
 public:

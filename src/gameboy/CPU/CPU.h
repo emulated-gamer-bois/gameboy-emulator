@@ -1,18 +1,10 @@
-//
-// Created by davidm on 2021-02-12.
-//
-
 #pragma once
 
-#include <iostream>
-#include <cstdint>
-#include <memory>
-#include <cstdint>
 #include "RegisterPair.h"
 #include "../MMU/MMU.h"
 #include "Flags.h"
 #include "../Definitions.h"
-
+#include <iostream> // cpuDump
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
 
