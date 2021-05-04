@@ -18,7 +18,8 @@
 #include "../helpers/ErrorReport.h"
 #include "../gameboy/Definitions.h"
 #include "PaletteHandler.h"
-
+#include "shaders.h"
+#include <fstream>
 class RenderView {
 public:
     explicit RenderView(AppSettings& settings, PaletteHandler& paletteHandler);

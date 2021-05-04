@@ -1,19 +1,5 @@
-//
-// Created by isaaklindgren on 2021-03-18.
-//
-
 #include "GuiView.h"
 
-#include <imgui.h>
-#include <imgui_internal.h>
-#include <iostream>
-#include <sstream>
-
-#include "imgui_impl/imgui_impl_sdl.h"
-#include "imgui_impl/imgui_impl_opengl3.h"
-/**
- * Constructor
- */
 
 GuiView::GuiView(AppSettings& settings, PaletteHandler& paletteHandler):
     settings{settings}, paletteHandler{paletteHandler}, selectedFile{-1}, selectedPalette{settings.paletteNumber},

@@ -4,29 +4,39 @@
 
 #pragma once
 
-#include <SDL.h>
-#include <imgui.h>
-#include <functional>
-
+#include <SDL.h> //keypress
+#include <functional> // functions
 #include "../application/KeyBinds.h"
 #include "FileExplorer.h"
 #include "PaletteHandler.h"
 #include "../helpers/ErrorReport.h"
 #include "../application/AppSettings.h"
 #include "../gameboy/Definitions.h"
+#include "imgui_impl/imgui_impl_sdl.h" //backend for imgui
+#include "imgui_impl/imgui_impl_opengl3.h" //backend for imgui
+#include <imgui.h> //gui
+#include <imgui_internal.h> //gui
+
 
 class GuiView {
 public:
     explicit GuiView(AppSettings& settings, PaletteHandler& paletteHandler);
-
+    /**
+     * Produces and renders new frames for the GUI.
+     * */
     void updateAndRender(SDL_Window *window);
+    /**
+     * Registers SDL_events with ImGui.
+     * */
     void handleInput(SDL_Event event);
     void terminate();
     void initImGui(SDL_Window *window, SDL_GLContext *glContext, char *glsl_version);
-
-    // Enables/Disables the gui
     void toggleGui();
 
+    /**
+     * A number of functions which used to define actions upon interaction with specific buttons.
+     *
+     * */
     void setLoadRomCallback(std::function<void(std::string)>&& loadRomCallback);
     void setExitMenuCallback(std::function<void()>&& exitMenuCallback);
     void setExitProgramCallback(std::function<void()>&& exitProgramCallback);

@@ -1,7 +1,5 @@
 #include "RenderView.h" // implements
-#include "shaders.h"
-#include <fstream>
-#include <thread>
+
 
 using namespace glm;
 

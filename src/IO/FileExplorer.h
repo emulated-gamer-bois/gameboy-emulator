@@ -1,9 +1,8 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <regex>
-
+#include <vector> //vector
+#include <regex> // regex
+#include <filesystem>
 #include "../helpers/ErrorReport.h"
 
 class FileExplorer {
