@@ -11,6 +11,7 @@
 #include "../gameboy/Joypad.h" // Joypad
 #include "../gameboy/GameBoy.h" // JOYPAD_Constants
 #include "GuiView.h"
+#include <memory>
 
 class Controller {
 public:

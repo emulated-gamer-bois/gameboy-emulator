@@ -2,15 +2,9 @@
 
 #include "Cartridge.h"
 #include "../APU/APU.h"
+#include <cstdint>
 #include <array> // array
 #include <string> // string
-#include "../Joypad.h"
-#include "../PPU/PPU.h"
-#include "Timer.h"
-#include <cstring> // memcpy
-#include <fstream> // file
-#include <iostream> // cout
-#include <memory>   // smart pointers
 
 // Forward declaration
 class PPU;

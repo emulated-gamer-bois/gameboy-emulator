@@ -6,6 +6,7 @@
 #include "MMU/MMU.h"
 #include <iostream>
 #include <utility>
+#include "Definitions.h" //IF- Bit
 
 #define JOYPAD                  0xff00
 #define JOYPAD_SEL_BUTTONS      0x10

@@ -1,5 +1,11 @@
 #include "MMU.h"
+#include "../Joypad.h"
+#include "../PPU/PPU.h"
+#include "Timer.h"
 
+#include <cstring> // memcpy
+#include <iostream> // cout
+#include <memory>   // smart pointers
 
 MMU::MMU() {
     reset();
