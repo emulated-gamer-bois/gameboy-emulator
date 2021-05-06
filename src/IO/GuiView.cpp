@@ -1,4 +1,13 @@
-#include "GuiView.h"
+#include "GuiView.h" // implements
+
+#include <sstream>
+#include <imgui_internal.h> //gui
+
+#include "imgui_impl/imgui_impl_sdl.h" //backend for imgui
+#include "imgui_impl/imgui_impl_opengl3.h" //backend for imgui
+
+#include "../helpers/ErrorReport.h"
+#include "../gameboy/Definitions.h"
 
 
 GuiView::GuiView(AppSettings& settings, PaletteHandler& paletteHandler):
@@ -238,7 +247,7 @@ void GuiView::showPaletteSettings() {
     ImGui::Text("Palette Select ");
     ImGui::Indent(indentSpace);
     if (ImGui::BeginListBox("##PaletteList", ImVec2(listBoxWidth, listBoxHeight))) {
-        for (int i = 0; i < paletteHandler.getPaletteAmount(); i++) {
+        for (int i = 0; i < PaletteHandler::paletteAmount; i++) {
             int flags = ImGuiSelectableFlags_AllowDoubleClick;
             bool isSelected = (previewPalette == i);
             if (ImGui::Selectable(paletteHandler.getPaletteName(i).c_str(), isSelected, flags)) {

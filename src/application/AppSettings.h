@@ -1,12 +1,8 @@
 #pragma once
 
 #include <string>
-#include <fstream>
-#include <regex>
 
 #include "KeyBinds.h"
-#include "../helpers/ErrorReport.h"
-#include "../gameboy/Definitions.h"
 
 class AppSettings {
 public:

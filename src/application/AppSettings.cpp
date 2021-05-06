@@ -1,5 +1,11 @@
 #include "AppSettings.h"
 
+#include <fstream>
+#include <regex>
+#include "../IO/PaletteHandler.h" // paletteAmount constant
+#include "../helpers/ErrorReport.h"
+#include "../gameboy/Definitions.h"
+
 AppSettings::AppSettings():
         romPath{".."}, emulationSpeedMultiplier{1.f}, windowedWidth{LCD_WIDTH * MIN_WINDOW_SIZE_MULTIPLIER},
         windowedHeight{LCD_HEIGHT * MIN_WINDOW_SIZE_MULTIPLIER}, fullscreen{false}, keepAspectRatio{true},
@@ -97,7 +103,7 @@ void AppSettings::loadSettings() {
                     fullscreen = naturalValue;
                 } else if (key == keepAspectRatioKey) {
                     keepAspectRatio = naturalValue;
-                } else if (key == paletteNumberKey && naturalValue >= 0 && naturalValue < PALETTE_AMOUNT) {
+                } else if (key == paletteNumberKey && naturalValue >= 0 && naturalValue < PaletteHandler::paletteAmount) {
                     paletteNumber = naturalValue;
                 }
                 continue;

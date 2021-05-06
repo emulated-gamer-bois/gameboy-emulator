@@ -1,8 +1,7 @@
-
-
-
-
 #include "FileExplorer.h"
+
+#include <filesystem>
+#include "../helpers/ErrorReport.h"
 
 using namespace std;
 

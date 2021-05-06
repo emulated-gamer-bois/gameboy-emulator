@@ -4,14 +4,14 @@
 #include <array>
 
 #include "Palette.h"
-#include "../gameboy/Definitions.h"
 
 class PaletteHandler {
 public:
+    static const int paletteAmount = 23;
+
     PaletteHandler();
     [[nodiscard]] const std::string getPaletteName(int index) const;
     [[nodiscard]] const Palette getPalette(int index) const;
-    [[nodiscard]] const int getPaletteAmount() const;
 
 private:
     struct PaletteEntry {
@@ -19,5 +19,5 @@ private:
         Palette palette;
     };
 
-    std::array<PaletteEntry, PALETTE_AMOUNT> palettes;
+    std::array<PaletteEntry, paletteAmount> palettes;
 };

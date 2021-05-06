@@ -2,8 +2,6 @@
 
 #include <vector> //vector
 #include <regex> // regex
-#include <filesystem>
-#include "../helpers/ErrorReport.h"
 
 class FileExplorer {
 public:
@@ -21,7 +19,6 @@ public:
     [[nodiscard]] const std::vector<FileEntry>& getDirContents() const;
 
     void moveTo(const FileEntry& dir);
-    void moveBack();
 
 private:
     FileEntry currentDir;

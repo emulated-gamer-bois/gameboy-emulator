@@ -4,19 +4,13 @@
 
 #pragma once
 
-#include <SDL.h> //keypress
-#include <functional> // functions
-#include "../application/KeyBinds.h"
+#include <SDL.h> // keypress
+#include <imgui.h> // gui
+#include <functional> // callback functions
+
 #include "FileExplorer.h"
 #include "PaletteHandler.h"
-#include "../helpers/ErrorReport.h"
-#include "../application/AppSettings.h"
-#include "../gameboy/Definitions.h"
-#include "imgui_impl/imgui_impl_sdl.h" //backend for imgui
-#include "imgui_impl/imgui_impl_opengl3.h" //backend for imgui
-#include <imgui.h> //gui
-#include <imgui_internal.h> //gui
-
+#include "../application/AppSettings.h" // KeyBinds and AppSettings
 
 class GuiView {
 public:
