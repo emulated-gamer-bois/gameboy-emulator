@@ -1,5 +1,4 @@
 #include "KeyBinds.h"
-
 KeyBinds::KeyBinds():
     keyBinds({&a, &b, &start, &select, &left, &right, &up, &down, &turboMode}), nonMappableKeys({SDLK_ESCAPE})
 {

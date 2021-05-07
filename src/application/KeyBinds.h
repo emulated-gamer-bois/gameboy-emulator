@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vector>
-#include <string>
 #include <SDL.h>
+#include <string>
 
 class KeyBinds {
 public:

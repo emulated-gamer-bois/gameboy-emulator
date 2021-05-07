@@ -1,19 +1,11 @@
 
 #pragma once
 
-#include <SDL.h>
-#include <string>
-#include <chrono> // time
-#include <thread> // sleep
-#include <cmath>
+
 #include "../IO/RenderView.h"
 #include "../gameboy/GameBoy.h"
-#include "../gameboy/Definitions.h"
 #include "../IO/AudioController.h"
-#include "../helpers/ErrorReport.h"
-#include "imgui.h"
 #include "AppSettings.h"
-#include "KeyBinds.h"
 #include "../IO/GuiView.h"
 #include "../IO/Controller.h"
 #include "State.h"
