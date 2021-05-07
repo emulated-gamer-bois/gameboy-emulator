@@ -1,5 +1,5 @@
 #include "GameBoy.h"
-
+#include "APU/APU.h"
 GameBoy::GameBoy() {
     mmu = std::make_shared<MMU>();
 

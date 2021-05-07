@@ -2,7 +2,7 @@
 #include "../Joypad.h"
 #include "../PPU/PPU.h"
 #include "Timer.h"
-
+#include "../APU/APU.h"
 #include <cstring> // memcpy
 #include <iostream> // cout
 #include <memory>   // smart pointers

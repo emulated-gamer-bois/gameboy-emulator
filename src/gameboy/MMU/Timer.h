@@ -2,8 +2,6 @@
 
 #include <cstdint>
 #include <memory> //ptr
-#include <iostream> // cout
-#include "MMU.h"
 #define TIMER_DIVIDER       0xff04
 #define TIMER_COUNTER       0xff05
 #define TIMER_MODULO        0xff06

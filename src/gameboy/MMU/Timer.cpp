@@ -1,6 +1,8 @@
 #include "Timer.h"
 
 #include <utility>
+#include <iostream> // cout
+#include "MMU.h"
 
 
 Timer::Timer(std::shared_ptr<MMU> mmu)

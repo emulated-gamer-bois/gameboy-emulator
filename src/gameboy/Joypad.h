@@ -2,11 +2,7 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
-#include "MMU/MMU.h"
-#include <iostream>
-#include <utility>
-#include "Definitions.h" //IF- Bit
+#include <memory> //ptr
 
 #define JOYPAD                  0xff00
 #define JOYPAD_SEL_BUTTONS      0x10

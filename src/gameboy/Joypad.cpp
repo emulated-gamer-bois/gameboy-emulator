@@ -1,5 +1,8 @@
 
 #include "Joypad.h"
+#include "Definitions.h" //IF- Bit
+#include "MMU/MMU.h"
+#include <iostream> //cout
 
 Joypad::Joypad(std::shared_ptr<MMU> mmu):mmu(std::move(mmu)) {}
 

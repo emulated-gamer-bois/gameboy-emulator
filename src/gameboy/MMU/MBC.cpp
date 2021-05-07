@@ -1,4 +1,5 @@
 #include "MBC.h"
+#include <iostream> //cout
 
 // MBC
 uint16_t MBC::romBankMask(uint32_t size) {

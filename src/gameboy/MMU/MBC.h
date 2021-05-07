@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector> //vector
-#include <iostream> //cout
 
 class MBC {
 public:

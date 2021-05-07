@@ -3,8 +3,7 @@
 #include "RegisterPair.h"
 #include "../MMU/MMU.h"
 #include "Flags.h"
-#include "../Definitions.h" //IF-bits
-#include <iostream> // cpuDump
+#include <memory> //ptr
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
 

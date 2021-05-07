@@ -1,5 +1,9 @@
 
 #include "Cartridge.h"
+#include <iostream>
+#include <cstring> // memcpy
+#include <string>
+
 
 Cartridge::Cartridge() {
     reset();
@@ -11,7 +15,6 @@ void Cartridge::reset() {
     ramSize = 0;
 
     rom = std::vector<uint8_t>(0x8000);
-    ram;
     mbc = std::make_unique<ROM_Only_MBC>(&rom);
 }
 

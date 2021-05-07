@@ -37,9 +37,6 @@
 
 #include <cstdint>
 #include <array>
-#include <memory>
-#include <iostream>
-#include "../MMU/MMU.h"
 #include "APUState.h"
 #include "IVolumeController.h"
 

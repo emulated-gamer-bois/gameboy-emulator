@@ -2,12 +2,9 @@
 
 #include "MBC.h"
 #include <cstdint>
-#include <string>
-#include <vector>
+#include <vector> //vector
 #include <memory> // ptr
 #include <fstream>
-#include <iostream>
-#include <cstring> // memcpy
 
 class Cartridge {
 public:
