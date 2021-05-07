@@ -17,9 +17,22 @@ public:
      * @returns amount of machine cycles operation takes.
      */
     int update();
+    /**
+     * Sets PC to 0x0100, where the boot ROM ends.
+     * */
     void skipBootRom();
+    /**
+     * Used for debugging.
+     * Prints contents of all registers to the console.
+     * */
     void cpuDump();
+    /**
+     * Getter for the boolean Stop which is used by the STOP-instruction.
+     * */
     bool getStop() const;
+    /**
+     * Resets the state of the CPU from being in STOP-mode.
+     * */
     void returnFromStop();
 
 private:
