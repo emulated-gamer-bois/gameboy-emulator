@@ -73,8 +73,8 @@ private:
 
     //Flag management
     /**
-    * Z set if newValue is 0
-    * N set if subtraction is true
+    * @param value Z set if value = 0
+    * @param subtraction set N if subtraction = true
     */
     void setZNFlags(uint8_t value, bool subtraction);
     /**

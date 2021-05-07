@@ -24,14 +24,33 @@ public:
     /**
      * Steps the emulation the equivalent machine cycles of one CPU-instruction.
      * All other units are synchronized to the execution of the CPU-instructions.
-     * VolumeController is used to alter volume.
+     * @param vc is used to alter volume.
      * */
     void step(IVolumeController* vc);
     //TODO Comment exactly how this works and why?
     std::unique_ptr<uint8_t[]> getScreenTexture();
+    /**
+     * Handles the joypad input and redirects it to the Joypad to handle.
+     * @param key which key has changed.
+     * @param action if the action was press or release.
+     * */
     void joypadInput(uint8_t key, uint8_t action);
+    /**
+     * Resets the emulation and loads new boot and game ROMs.
+     * If no or an invalid boot ROM is provided, the boot phase is skipped.
+     * @param bootFilepath path to boot ROM.
+     * @param romFilepath path to game ROM.
+     * */
     void loadRom(std::string bootFilepath, std::string romFilepath);
+    /**
+     * Loads game ROM.
+     * @param path to game ROM.
+     * */
     void loadGameRom(std::string filepath);
+    /**
+    * Loads boot ROM.
+    * @param path to boot ROM.
+    * */
     void loadBootRom(std::string filepath);
     /**
      * Returns whether or not the PPU has completed a whole frame and is ready to produce this.
@@ -41,9 +60,19 @@ public:
      * Resets the status of PPU, confirming that the recently produced frame has been handled.
      * */
     void confirmDraw();
+    /**
+     * Prints all information about CPU state. Useful for debugging.
+     * */
     void cpuDump();
+    /**
+     * Returns a bool depending on if the emulator is turned on or off.
+     * */
     bool isOn() const;
-
+    /**
+     * Saves RAM-data to a file, this used in games which have XRAM which is battery powered, and hence supplies
+     *  an option for the player to save game progress.
+     *  @return returns whether or not the save was a success.
+    * */
     bool save();
     // TODO comment APU-stuff.
     uint8_t isReadyToPlaySound();

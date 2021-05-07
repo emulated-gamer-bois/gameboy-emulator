@@ -33,6 +33,8 @@ public:
     /**
      * Edits keybinds. Checks which key has been pressed of keysDown[] and maps this new keybind to
      * the key located at keyBindIndex in the vector keyBinds.
+     * @param keysDown array containing status of all keys, pressed or not.
+     * @param keyBindIndex which index in keyBinds-vector to be edited.
     * */
     bool editKeyBinds(const bool keysDown[], int keyBindIndex);
 
@@ -45,7 +47,8 @@ private:
     /**
      * Checks whether or not a keybind is a valid keybind or not.
      * Is done by checking that it is not already bound as well as not being one of the "nonMappable"-keys.
-     *
+     * @param keyBindIndex which index in keyBinds-vector to check.
+     * @param scanCode which key to edit check if it is valid or not to bind a new action to.
      * */
     bool validKey(int keyBindIndex, SDL_Scancode scanCode);
 };

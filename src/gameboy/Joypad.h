@@ -20,6 +20,40 @@
 class MMU;
 
 class Joypad {
+
+public:
+    explicit Joypad(std::shared_ptr<MMU> mmu);
+    /**
+     * Resets the Joypad to its initial state.
+     * */
+    void reset();
+    /**
+     * Reads the content of the Joypad.
+     * @param addr address to be read from, if not equal to JOYPAD(0xFF00), 0 is returned.
+     * @return returns status of Joypad.
+     *
+     * */
+    uint8_t read(uint16_t addr) const;
+    /**
+     * If the correct address is given (0xFF00), the data provided is written to the Joypad.
+     * @param addr address of Joypad.
+     * @param data data to write to the given address.
+     *
+     * */
+    void write(uint16_t addr, uint8_t data);
+    /**
+     * Upon the release of a button, this bit of the joypad is reset to
+     * 1.
+     * @param button to reset.
+     * */
+    void release(uint8_t button);
+    /**
+     * Upon the press of a button, this bit of the joypad is set to
+     * 0.
+     * @param button to set.
+     * */
+    void press(uint8_t button);
+
 private:
     // MMU used to set interrupt flags
     std::shared_ptr<MMU> mmu;
@@ -27,13 +61,4 @@ private:
     // Private registers
     uint8_t joypadSelect{JOYPAD_SEL_DIRECTIONS};
     uint8_t joypad{0xFF};
-public:
-    explicit Joypad(std::shared_ptr<MMU> mmu);
-    void reset();
-
-    uint8_t read(uint16_t addr) const;
-    void write(uint16_t addr, uint8_t data);
-
-    void release(uint8_t button);
-    void press(uint8_t button);
 };
