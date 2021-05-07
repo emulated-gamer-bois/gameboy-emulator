@@ -1,5 +1,6 @@
 
 #include "PPU.h"
+#include <iostream> //cout
 
 PPU::PPU(std::shared_ptr<MMU> memory):memory(std::move(memory)){reset();}
 

@@ -1,4 +1,5 @@
 #include "Sprite.h"
+#include <iostream>
 
 Sprite::Sprite(uint8_t y, uint8_t x, uint8_t tileIndex, uint8_t flags, uint8_t positionInOAM) {
     this->x = x;

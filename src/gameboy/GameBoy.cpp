@@ -1,5 +1,8 @@
 #include "GameBoy.h"
 #include "APU/APU.h"
+
+#include <iostream>
+
 GameBoy::GameBoy() {
     mmu = std::make_shared<MMU>();
 

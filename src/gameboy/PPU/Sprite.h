@@ -1,6 +1,5 @@
 #pragma once
 #include <cstdint>
-#include <iostream>
 
 class Sprite {
     uint8_t x;
