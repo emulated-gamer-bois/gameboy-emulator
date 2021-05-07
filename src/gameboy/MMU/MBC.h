@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector> //vector
-
+#include <cstdint>
 class MBC {
 public:
     virtual uint8_t read(uint16_t addr) = 0;
