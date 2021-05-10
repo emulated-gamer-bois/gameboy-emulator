@@ -455,9 +455,8 @@ void CPU::stopOp() {
 
     loadIm8(BC.high_8, memory->read(INTERRUPT_ENABLE)); // Save IE
     memory->write(INTERRUPT_ENABLE, 0x00); //clear IE
-    memory->write(IO_START, memory->read(IO_START) & 0xF0);
+    memory->write(IO_JOYPAD, 0x00);
     stop = true;
-
 }
 
 

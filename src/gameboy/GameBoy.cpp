@@ -16,17 +16,14 @@ GameBoy::GameBoy() {
     mmu->linkDevices(ppu, apu, joypad, timer, cartridge);
     on = false;
 }
-
 void GameBoy::step(IVolumeController *vc) {
     if (!on) {
         return;
     }
-    //TODO fix STOP-bug.
     if (cpu->getStop()) {
-        if (mmu->read(JOYPAD) & mmu->read(INTERRUPT_ENABLE)) {
+        if ( ~mmu->read(JOYPAD) & 0x0f) {
             cpu->returnFromStop();
         }
-        return;
     }
 
 
