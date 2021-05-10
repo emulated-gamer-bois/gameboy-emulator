@@ -1,14 +1,16 @@
+/**
+ * This class contains the main loop of the Emulator.
+ */
 
 #pragma once
 
-
-#include "../IO/RenderView.h"
-#include "../gameboy/GameBoy.h"
-#include "../IO/AudioController.h"
 #include "AppSettings.h"
+#include "State.h"
+#include "../IO/RenderView.h"
+#include "../IO/AudioController.h"
 #include "../IO/GuiView.h"
 #include "../IO/Controller.h"
-#include "State.h"
+#include "../gameboy/GameBoy.h"
 
 class Application {
 public:

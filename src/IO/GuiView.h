@@ -1,6 +1,6 @@
-//
-// Created by isaaklindgren on 2021-03-18.
-//
+/**
+ * A class that contains all ImGui code. Used for the emulators ui.
+ */
 
 #pragma once
 
@@ -17,36 +17,38 @@ public:
     explicit GuiView(AppSettings& settings, PaletteHandler& paletteHandler);
     /**
      * Produces and renders new frames for the GUI.
+     *
      * @param window window to render to.
-     * */
+     */
     void updateAndRender(SDL_Window *window);
     /**
      * Registers SDL_events with ImGui.
+     *
      * @param event SDL_event to register.
-     * */
+     */
     void handleInput(SDL_Event event);
     /**
      * Terminates and shuts down all applications regarding the GUI.
-     * */
+     */
     void terminate();
     /**
      * Initializes ImGUI context and backend.
+     *
      * @param window which window to use.
      * @param glContext which context to work within.
      * @param glsl_version version of OpenGL Shading Language.
      *
-     * */
+     */
     void initImGui(SDL_Window *window, SDL_GLContext *glContext, char *glsl_version);
 
     /**
      * Toggles whether or not to display the GUI.
-     * */
+     */
     void toggleGui();
 
     /**
      * A number of functions which used to define actions upon interaction with specific buttons.
-     *
-     * */
+     */
     void setLoadRomCallback(std::function<void(std::string)>&& loadRomCallback);
     void setExitMenuCallback(std::function<void()>&& exitMenuCallback);
     void setExitProgramCallback(std::function<void()>&& exitProgramCallback);

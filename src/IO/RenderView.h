@@ -1,8 +1,6 @@
-/*
- * RenderView
- * This class handles the rendering of the Game Boy lcd.
- *
- * Author: Andreas Palmqvist
+/**
+ * This class handles the open gl integration in the emulator. The texture data sent to this class is processed and
+ * rendered.
  */
 
 #pragma once
@@ -17,11 +15,42 @@ class RenderView {
 public:
     explicit RenderView(AppSettings& settings, PaletteHandler& paletteHandler);
 
+    /**
+     * Initialises openGl.
+     */
     void initGL();
+
+    /**
+     * Renders the current texture.
+     */
     void render() const;
+
+    /**
+     * Clears the rendered screen.
+     */
     void clear() const;
+
+    /**
+     * Sets the current texture of this view. The texture is a one channel bitmap.
+     *
+     * @param textureData
+     */
     void setScreenTexture(uint8_t textureData[]);
+
+    /**
+     * Sets the position of the viewport.
+     *
+     * @param x
+     * @param y
+     */
     void setViewportPos(int x, int y);
+
+    /**
+     * Sets the dimensions of the viewport.
+     *
+     * @param width
+     * @param height
+     */
     void setViewportDim(int width, int height);
 
 private:

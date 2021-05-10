@@ -1,19 +1,15 @@
-// Uncomment if opengl won't work
-/*
-#ifdef _WIN32
-extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
-#endif
-*/
-
 #include "Application.h"
-#include "../helpers/AppTimer.h"
-#include "../helpers/ErrorReport.h"
-#include "Game-Boy-FL.cpp"
+
 #include <SDL.h>
 #include <string>
 #include <chrono> // time
 #include <thread> // sleep
 #include <cmath>
+
+#include "../helpers/AppTimer.h"
+#include "../helpers/ErrorReport.h"
+#include "Game-Boy-FL.cpp" // Bitmap of icon for app
+
 Application::Application():
     framesUntilStep{0}, windowWidth{settings.windowedWidth}, windowHeight{settings.windowedHeight},
     state{State::MENU}, audio(settings), renderView(settings, paletteHandler),

@@ -1,3 +1,10 @@
+/**
+ * This class acts as a container for data that is being shared between Application, RenderView, GuiView,
+ * AudioController and Controller. The purpose is to have one place where the settings for the application can be
+ * stored and modified. It also defines the file structure of the .settings file which provides a way to modify
+ * settings outside of the application.
+ */
+
 #pragma once
 
 #include <string>
@@ -6,9 +13,7 @@
 
 class AppSettings {
 public:
-    /**
-     *The path where the file dialog will always be in when opened.
-     **/
+    // File path settings
     std::string romPath;
 
     // Emulation settings

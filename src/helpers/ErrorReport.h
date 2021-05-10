@@ -1,3 +1,7 @@
+/**
+ * File contains functions used to check for errors.
+ */
+
 #pragma once
 
 #include <iostream>

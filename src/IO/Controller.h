@@ -1,25 +1,26 @@
+/**
+ * Application delegates the sdl event handling to this class.
+ */
 
+#pragma once
 
-#ifndef LAME_BOY_CONTROLLER_H
-#define LAME_BOY_CONTROLLER_H
 #include <SDL.h>
-#include <string>
-#include <chrono> // time
-#include <thread> // sleep
-#include "../application/State.h" //State
-#include "../application/AppSettings.h" //Keybinds
-#include "../gameboy/Joypad.h" // Joypad
-#include "../gameboy/GameBoy.h" // JOYPAD_Constants
+
+#include "../application/State.h" // State
+#include "../application/AppSettings.h" // Key binds
+#include "../gameboy/GameBoy.h" // Communication with game boy joypad and joypad constants
+
 #include "GuiView.h"
-#include <memory>
 
 class Controller {
 public:
     explicit Controller(AppSettings& settings, GuiView& guiView, GameBoy& gameBoy);
+
     /**
     * Handles SDL Events including keyboard input.
     * Acts differently depending on state of the application.
     * For example handling GUI or emulation.
+     *
     * @param state state of the application.
     */
     State handleSDLEvents(State state);
@@ -31,8 +32,4 @@ private:
     GuiView& guiView;
     GameBoy& gameBoy;
     float savedEmulationSpeed;
-
 };
-
-
-#endif //LAME_BOY_CONTROLLER_H
