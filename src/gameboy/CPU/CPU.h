@@ -37,19 +37,22 @@ public:
 
 private:
     //Registers
-
     uint16_t PC{0x0000};
     RegisterPair SP{};
     uint8_t  A{0x00};
     RegisterPair BC{0x00};
     RegisterPair DE{0x00};
     RegisterPair HL{0x00};
+
     //Flags
     Flags F{0x0};
+
     //Interrupt Master Enable flag
     unsigned int IME : 1;
+
     //Memory
     std::shared_ptr<MMU> memory;
+
     //Clock handling
     bool stop{false};
     bool halt{false};

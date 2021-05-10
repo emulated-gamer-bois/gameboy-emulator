@@ -1,5 +1,9 @@
+/**
+ * Source code for shaders used in this application.
+ */
 
 #pragma once
+
 #include <string>
 
 const std::string paletteFrag = "#version 420\n"

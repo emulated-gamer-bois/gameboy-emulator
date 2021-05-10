@@ -105,7 +105,7 @@ void GuiView::showEditControls() {
         }
 
         ImGui::Indent(indentSpace);
-        ImGui::Text("%s", settings.keyBinds.keyBinds[i]->action_description.c_str());
+        ImGui::Text("%s", settings.keyBinds.keyBinds[i]->actionDescription.c_str());
         ImGui::SameLine(130,0);
 
         if(waitingForKeyBind && keyBindIndex == i) {
@@ -115,7 +115,7 @@ void GuiView::showEditControls() {
         }
 
         ImVec2 buttonSize(90, 18);
-        if (ImGui::Button(settings.keyBinds.keyBinds[i]->keybind.c_str(), buttonSize)) {
+        if (ImGui::Button(settings.keyBinds.keyBinds[i]->keyBind.c_str(), buttonSize)) {
             keyBindIndex = i;
             waitingForKeyBind = true;
         }

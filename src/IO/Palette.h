@@ -1,3 +1,7 @@
+/**
+ * Container structs for color and palettes.
+ */
+
 #pragma once
 
 struct RGB {
