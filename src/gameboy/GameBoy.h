@@ -35,8 +35,22 @@ public:
 
     bool save();
 
+  /**
+   * Indicates if the state of the APU has changed, meaning the audio output should change
+   * @return bit x == 1 -> source x has changed and the output should change
+   */
     uint8_t isReadyToPlaySound();
+
+    /**
+     * Resets the value returned from isReadyToPlaySound
+     */
     void confirmPlay();
+
+    /**
+     * Returns the relevant information audio all audio channels
+     * Make sure to delete the state afterwards in order to prevent memory leaks
+     * @return the state of the APU
+     */
     APUState* getAPUState();
 
 private:
