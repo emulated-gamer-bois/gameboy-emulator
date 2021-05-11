@@ -1,5 +1,8 @@
 #pragma once
 
+/**
+ * Stores the state of all audio sources
+ */
 struct APUState {
     bool enableSquareA;
     uint8_t dutySquareA;

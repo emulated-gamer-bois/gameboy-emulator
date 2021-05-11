@@ -40,24 +40,56 @@
 #include "APUState.h"
 #include "IVolumeController.h"
 
+/**
+ * This class emulates the functionality of the Gameboy APU.
+ * Reading and writing to the APU registers will be managed by this class and trigger events according to the
+ * documentation.
+ * The state of the APU can be retrieved in order to mimic the audio output, normally handled by a DAC and mixer.
+ */
 class APU {
 public:
     explicit APU();
 
+    /**
+     * Reads register value from address 0xff10 to address 0xff3f
+     * @param address to register
+     * @return register value if address is between 0xff10 and 0xff3f, 0xFF otherwise
+     */
     uint8_t read(uint16_t address) const;
+
+    /**
+     * Writes to register from address 0xff10 to address 0xff3f, any address outside of this will be ignored
+     * @param address to register
+     * @param data is the value which will be written
+     */
     void write(uint16_t address, uint8_t data);
+
+    /**
+     * Resets all registers to their default values
+     */
     void reset();
+
+    /**
+     * Updates the APU timers and trigger events accordingly
+     * @param cpuCycles the number of CPU cycles which has passed
+     * @param vc is the volume controller which can change the volume of specific sources
+     */
     void update(uint16_t cpuCycles, IVolumeController* vc);
 
-
-
-    void lengthStep();
-    void volEnvelopeStep(IVolumeController* vc);
-    void sweepStep();
-
-    void triggerEvent(uint8_t source);
+    /**
+     * Indicates if the status of one or more channels has changed
+     * @return bit x == 1 -> source x has changed and the output should change
+     */
     uint8_t isReadyToPlaySound();
+
+    /**
+     * Resets readyToPlay
+     */
     void confirmPlay();
+
+    /**
+     * @return the state of all audio channels, and the waveform of the wave channel
+     */
     APUState* getAPUState();
 
 private:
@@ -114,6 +146,11 @@ private:
     void volumeReset(uint8_t source);
     void sweepReset();
     uint16_t calculateSweep();
+
+    void triggerEvent(uint8_t source);
+    void lengthStep();
+    void volEnvelopeStep(IVolumeController* vc);
+    void sweepStep();
 };
 
 
