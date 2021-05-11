@@ -1,11 +1,11 @@
-/**
- * A helper class to navigate the filesystem.
- */
 
 #pragma once
 
 #include <vector> //vector
 #include <regex> // regex
+/**
+ * A helper class to navigate the filesystem.
+ */
 
 class FileExplorer {
 public:

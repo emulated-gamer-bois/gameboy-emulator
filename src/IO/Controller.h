@@ -1,6 +1,3 @@
-/**
- * Application delegates the sdl event handling to this class.
- */
 
 #pragma once
 
@@ -11,6 +8,9 @@
 #include "../gameboy/GameBoy.h" // Communication with game boy joypad and joypad constants
 
 #include "GuiView.h"
+/**
+ * Application delegates the sdl event handling to this class.
+ */
 
 class Controller {
 public:

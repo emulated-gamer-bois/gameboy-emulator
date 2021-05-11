@@ -17,7 +17,11 @@ friend class test_case_name##_##test_name##_Test
 
 #define JOYPAD_RELEASE 0
 #define JOYPAD_PRESS   1
-
+/**
+ * This class is the result of combining the other microcontrollers, resulting in an interface of an emulator.
+ * Through this the emulation as a whole can be progressed and all information needed can be supplied to the
+ * correct external libraries. In this case OpenAL,OpenGL and ImGui.
+ * */
 class GameBoy {
 public:
     GameBoy();

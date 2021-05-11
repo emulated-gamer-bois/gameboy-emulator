@@ -1,7 +1,3 @@
-/**
- * This class handles the open gl integration in the emulator. The texture data sent to this class is processed and
- * rendered.
- */
 
 #pragma once
 
@@ -10,6 +6,10 @@
 
 #include "../application/AppSettings.h"
 #include "PaletteHandler.h"
+/**
+ * This class handles the open gl integration in the emulator. The texture data sent to this class is processed and
+ * rendered.
+ */
 
 class RenderView {
 public:

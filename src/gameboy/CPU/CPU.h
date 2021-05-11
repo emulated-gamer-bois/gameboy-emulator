@@ -6,7 +6,11 @@
 #include <memory> //ptr
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
-
+/**
+ * This class emulates the functionality of the Game Boy CPU including registers and interrupt handling.
+ * Its main task is to interpret operation codes and executing the correct instruction, whereafter it yields the number
+ * of machine cycles required.
+ * */
 class CPU {
 public:
 

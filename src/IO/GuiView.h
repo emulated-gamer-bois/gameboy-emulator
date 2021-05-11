@@ -1,6 +1,3 @@
-/**
- * A class that contains all ImGui code. Used for the emulators ui.
- */
 
 #pragma once
 
@@ -11,6 +8,9 @@
 #include "FileExplorer.h"
 #include "PaletteHandler.h"
 #include "../application/AppSettings.h" // KeyBinds and AppSettings
+/**
+ * A class that contains all ImGui code. Used for the emulators ui.
+ */
 
 class GuiView {
 public:

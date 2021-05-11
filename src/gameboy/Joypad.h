@@ -15,7 +15,11 @@
 #define JOYPAD_B                5
 #define JOYPAD_SELECT           6
 #define JOYPAD_START            7
-
+/**
+ * This class provides the functionality of the Game Boy Joypad through reading and writing
+ * to the specific addresses regarding this.
+ *
+ * */
 // Forward declaration
 class MMU;
 
