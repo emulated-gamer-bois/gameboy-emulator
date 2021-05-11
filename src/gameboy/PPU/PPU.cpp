@@ -5,8 +5,8 @@
 PPU::PPU(std::shared_ptr<MMU> memory):memory(std::move(memory)){reset();}
 
 
-uint8_t PPU::read(uint16_t addr) const {
-    switch (addr) {
+uint8_t PPU::read(uint16_t address) const {
+    switch (address) {
         case LCDC_ADDRESS:
             return LCDC;
         case STAT_ADDRESS:
@@ -36,8 +36,8 @@ uint8_t PPU::read(uint16_t addr) const {
     }
 }
 
-void PPU::write(uint16_t addr, uint8_t data) {
-    switch (addr) {
+void PPU::write(uint16_t address, uint8_t data) {
+    switch (address) {
         case LCDC_ADDRESS:
             LCDC = data;
             break;
@@ -75,7 +75,7 @@ void PPU::write(uint16_t addr, uint8_t data) {
             WX = data;
             break;
         default:
-            std::cout << "Tried to write data: " << (int)data << " to address: " << (int)addr << std::endl;
+            std::cout << "Tried to write data: " << (int)data << " to address: " << (int)address << std::endl;
     }
 }
 

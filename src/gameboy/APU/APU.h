@@ -41,8 +41,8 @@
 #include "IVolumeController.h"
 
 /**
- * This class emulates the functionality of the Gameboy APU.
- * Reading and writing to the APU registers will be managed by this class and trigger events according to the
+ * This class emulates the functionality of the Game Boy APU.
+ * Reading and writing to the APU registers is managed by this class and events are triggered according to the
  * documentation.
  * The state of the APU can be retrieved in order to mimic the audio output, normally handled by a DAC and mixer.
  */

@@ -31,7 +31,9 @@ public:
      * @param vc is used to alter volume.
      * */
     void step(IVolumeController* vc);
-    //TODO Comment exactly how this works and why?
+    /**
+     * @return the screen buffer to be drawn next frame from the PPU.
+     */
     std::unique_ptr<uint8_t[]> getScreenTexture();
     /**
      * Handles the joypad input and redirects it to the Joypad to handle.
