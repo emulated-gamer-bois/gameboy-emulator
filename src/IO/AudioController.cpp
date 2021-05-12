@@ -188,9 +188,9 @@ void AudioController::stopSound() {
     }
 }
 
-void AudioController::stepSound(uint8_t i, APUState *state) {
+void AudioController::stepSound(uint8_t readyToPlay, APUState *state) {
     //1st square
-    if (i & 1) {
+    if (readyToPlay & 1) {
         if (state->enableSquareA) {
             playGBSquare(0, state->dutySquareA, state->frequencySquareA, state->volumeSquareA * settings.masterVolume);
         } else {
@@ -199,7 +199,7 @@ void AudioController::stepSound(uint8_t i, APUState *state) {
     }
 
     //2nd square
-    if (i & 2) {
+    if (readyToPlay & 2) {
         if (state->enableSquareB) {
             playGBSquare(1, state->dutySquareB, state->frequencySquareB, state->volumeSquareB * settings.masterVolume);
         } else {
@@ -208,7 +208,7 @@ void AudioController::stepSound(uint8_t i, APUState *state) {
     }
 
     //Wave
-    if (i & 4) {
+    if (readyToPlay & 4) {
         if (state->enableWave) {
             playGBWave(2, state->waveform, state->frequencyWave, state->volumeWave * settings.masterVolume);
         } else {
@@ -216,7 +216,7 @@ void AudioController::stepSound(uint8_t i, APUState *state) {
         }
     }
     //Noise
-    if(i & 8) {
+    if(readyToPlay & 8) {
         if(state->enableNoise) {
             playNoise(3, state->is7BitMode, state->frequencyNoise, state->volumeNoise * settings.masterVolume);
         } else {
