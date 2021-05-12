@@ -4,10 +4,42 @@
 #include <cstdint>
 class MBC {
 public:
+    /**
+     * Read a byte from the specified address.
+     * Different behaviour specific for different MBCs.
+     * @param addr address to read from
+     * @returns data stored on address
+     */
     virtual uint8_t read(uint16_t addr) = 0;
+
+    /**
+     * Write a byte to the specified address.
+     * Different behaviour specific for different MBCs.
+     * Used to access control registers, or to access XRAM.
+     * @param addr address to write to
+     * @param data data to be written to address
+     */
     virtual void write(uint16_t addr, uint8_t data) = 0;
+
+    /**
+     * Update the MBC to be synced with the system.
+     * For example used to update RTC, which exist with some MBCs.
+     * @param cycles the amount of cycles to proceed.
+     */
     virtual void update(uint8_t cycles) = 0;
+
+    /**
+     * Returns a bitmask that, when applied, truncate a memory bank number
+     * to prevent accessing memory larger than allocated (index out of bounds).
+     * @param size ROM size
+     */
     static uint16_t romBankMask(uint32_t size);
+
+    /**
+     * Returns a bitmask that, when applied, truncate a memory bank number
+     * to prevent accessing memory larger than allocated (index out of bounds).
+     * @param size RAM size
+     */
     static uint16_t ramBankMask(uint32_t size);
 };
 
