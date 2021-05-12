@@ -111,8 +111,8 @@ private:
     unsigned char duties[N_SOURCES][SQUARE_SAMPLE_RATE];
 
     void init();
-    void stopSource(int source);
     void playSquare(int source, char duty, ALsizei frequency, float volume);
+    void stopSource(int source);
     void playWave(int source, std::array<uint8_t, 16> waveForm, ALsizei frequency, float volume);
 };
 

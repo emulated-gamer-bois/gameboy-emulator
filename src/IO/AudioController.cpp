@@ -170,16 +170,16 @@ void AudioController::playGBWave(int source, std::array<uint8_t, 16> waveForm, A
     this->playWave(source, waveForm, 131072.0/(2048 - frequency), volume);
 }
 
-void AudioController::setVolume(int source, float volume) {
-    alSourcef(sources[source], AL_GAIN, volume * settings.masterVolume);
-}
-
 void AudioController::playNoise(int source, bool is_7_bit_mode, ALsizei frequency, float volume) {
     if(is_7_bit_mode) {
         playSound(source, noise7bit, LFSR7_BUFFER_SIZE, frequency, volume);
     } else {
         playSound(source, noise15bit, LFSR15_BUFFER_SIZE, frequency, volume);
     }
+}
+
+void AudioController::setVolume(int source, float volume) {
+    alSourcef(sources[source], AL_GAIN, volume * settings.masterVolume);
 }
 
 void AudioController::stopSound() {
