@@ -6,6 +6,11 @@
 #include <memory> // ptr
 #include <fstream>
 
+/**
+ * This class emulates a Game Boy cartridge. A ROM-file can be loaded with associated XRAM-file.
+ * The XRAM is saved back to file when the application is closed.
+ * The cartridge is initialized to use the MBC specified in the ROM-file.
+ */
 class Cartridge {
 public:
     Cartridge();

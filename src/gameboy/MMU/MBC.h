@@ -2,6 +2,12 @@
 
 #include <vector> //vector
 #include <cstdint>
+
+/**
+ * The MBC class is an interface to be used when implementing different MBCs.
+ * All MBCs have common needs for a read and write function but also an update
+ * function that can be used to update devices on the MBC.
+ */
 class MBC {
 public:
     /**

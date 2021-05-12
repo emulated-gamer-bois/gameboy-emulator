@@ -49,6 +49,10 @@ friend class test_case_name##_##test_name##_Test
 #define IO_LCD_END              0xff4b
 #define IO_DISABLE_BOOT_ROM     0xff50
 
+/**
+ * This class is used to pack together all the different devices that have memory mapped to an address.
+ * The read and write function can be used to access all of the memory on the Game Boy.
+ */
 class MMU {
 public:
     MMU();

@@ -9,6 +9,12 @@
 
 class MMU;
 
+/**
+ * This class emulates the timer on the Game Boy.
+ * It is possible to read and write to its control registers.
+ * The timer is updated with the update function that updates
+ * the timer with the specified amount of cycles.
+ */
 class Timer {
 public:
     explicit Timer(std::shared_ptr<MMU> mmu);
