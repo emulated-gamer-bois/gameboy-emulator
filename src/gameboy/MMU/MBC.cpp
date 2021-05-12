@@ -20,6 +20,8 @@ uint8_t ROM_Only_MBC::read(uint16_t addr) {
         return rom->at(addr);
     } else if (0xa000 <= addr && addr <= 0xbfff) {
         return 0xff;
+    } else {
+        return 0xff;
     }
 }
 
@@ -292,7 +294,7 @@ void MBC3_MBC::update(uint8_t cycles) {
     }
 
     if (rtcDays == 512) {
-        rtcHours -= 512;
+        rtcDays -= 512;
         rtcDaysOverflow = 1;
     }
 }
