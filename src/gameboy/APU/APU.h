@@ -1,5 +1,4 @@
-#ifndef LAME_BOY_APU_H
-#define LAME_BOY_APU_H
+#pragma once
 
 //Register addresses
 #define NR10_ADDRESS 0xFF10
@@ -154,4 +153,3 @@ private:
 };
 
 
-#endif //LAME_BOY_APU_H

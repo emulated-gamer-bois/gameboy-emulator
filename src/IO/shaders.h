@@ -1,11 +1,9 @@
+#pragma once
+#include <string>
+
 /**
  * Source code for shaders used in this application.
  */
-
-#pragma once
-
-#include <string>
-
 const std::string paletteFrag = "#version 420\n"
                                 "layout(location = 0) out vec4 fragmentColor;\n"
                                 "in vec2 texCoord;\n"

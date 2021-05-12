@@ -1,7 +1,4 @@
-
-
-#ifndef LAME_BOY_AUDIOCONTROLLER_H
-#define LAME_BOY_AUDIOCONTROLLER_H
+#pragma once
 
 #include <AL/alc.h>
 #include <AL/al.h>
@@ -50,4 +47,3 @@ private:
 };
 
 
-#endif //LAME_BOY_AUDIOCONTROLLER_H

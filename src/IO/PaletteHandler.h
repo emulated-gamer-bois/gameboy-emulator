@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <string>
@@ -10,7 +9,6 @@
  * palettes and on the palettes of systems like the Game Boy Color and the Super Game Boy. A palette is described
  * by a name and four colors and is stored sequentially.
  */
-
 class PaletteHandler {
 public:
     static const int paletteAmount = 23;

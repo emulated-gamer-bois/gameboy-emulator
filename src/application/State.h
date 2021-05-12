@@ -1,5 +1,4 @@
-#ifndef LAME_BOY_STATE_H
-#define LAME_BOY_STATE_H
+#pragma once
 /**
  * Defines the states of the emulation.
  * */
@@ -8,4 +7,3 @@ enum State {
     MENU,
     TERMINATION
 };
-#endif //LAME_BOY_STATE_H

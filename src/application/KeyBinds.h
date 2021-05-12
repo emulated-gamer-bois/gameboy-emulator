@@ -1,14 +1,12 @@
-/**
- * This class is closely related to the AppSettings class since this also is a container for application settings.
- * It makes it possible to remap keys.
- */
-
 #pragma once
 
 #include <SDL.h>
 #include <vector>
 #include <string>
-
+/**
+ * This class is closely related to the AppSettings class since this also is a container for application settings.
+ * It makes it possible to remap keys.
+ */
 class KeyBinds {
 public:
     /**

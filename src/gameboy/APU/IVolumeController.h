@@ -1,5 +1,9 @@
 #pragma once
-
+/**
+ *
+ * This class is used to allow an external part to interact with the volume of the
+ * APU.
+ * */
 class IVolumeController {
 public:
   /**

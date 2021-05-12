@@ -1,4 +1,8 @@
 #pragma once
+/**
+ *
+ * This struct is used to contain the flags of the Game Boy CPU.
+ * */
 union Flags {
     struct {
     /**

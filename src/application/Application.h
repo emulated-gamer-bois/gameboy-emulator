@@ -1,7 +1,3 @@
-/**
- * This class contains the main loop of the Emulator.
- */
-
 #pragma once
 
 #include "AppSettings.h"
@@ -11,6 +7,9 @@
 #include "../IO/GuiView.h"
 #include "../IO/Controller.h"
 #include "../gameboy/GameBoy.h"
+/**
+ * This class contains the main loop of the Emulator.
+ */
 
 class Application {
 public:

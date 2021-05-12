@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <vector> //vector
@@ -6,7 +5,6 @@
 /**
  * A helper class to navigate the filesystem.
  */
-
 class FileExplorer {
 public:
     struct FileEntry {

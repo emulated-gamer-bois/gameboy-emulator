@@ -1,10 +1,9 @@
-/**
- * A simple helper class for keeping how much system clock time has elapsed. Measured in milliseconds.
- */
-
 #pragma once
 
 #include <chrono>
+/**
+ * A simple helper class for keeping how much system clock time has elapsed. Measured in milliseconds.
+ */
 
 class AppTimer {
 public:

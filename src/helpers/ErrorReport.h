@@ -1,6 +1,4 @@
-/**
- * File contains functions used to check for errors.
- */
+
 
 #pragma once
 
@@ -12,7 +10,9 @@
 
 // Uncomment for printing non fatal errors
 #define DEBUG_PRINT
-
+/**
+ * Contains functions used to check for errors.
+ */
 namespace ErrorReport {
     static void fatalError(const std::string& errorLog, int line, const char* file) {
         std::cerr << "--FATAL ERROR--" << std::endl;

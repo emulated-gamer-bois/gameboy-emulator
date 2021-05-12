@@ -1,16 +1,14 @@
+#pragma once
+
+#include <string>
+
+#include "KeyBinds.h"
 /**
  * This class acts as a container for data that is being shared between Application, RenderView, GuiView,
  * AudioController and Controller. The purpose is to have one place where the settings for the application can be
  * stored and modified. It also defines the file structure of the .settings file which provides a way to modify
  * settings outside of the application.
  */
-
-#pragma once
-
-#include <string>
-
-#include "KeyBinds.h"
-
 class AppSettings {
 public:
     // File path settings

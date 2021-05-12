@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <SDL.h>
@@ -11,7 +10,6 @@
 /**
  * Application delegates the sdl event handling to this class.
  */
-
 class Controller {
 public:
     explicit Controller(AppSettings& settings, GuiView& guiView, GameBoy& gameBoy);
