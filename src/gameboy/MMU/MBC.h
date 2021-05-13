@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector> //vector
+#include <vector>
 #include <cstdint>
 
 /**
@@ -12,7 +12,7 @@ class MBC {
 public:
     /**
      * Read a byte from the specified address.
-     * Different behaviour specific for different MBCs.
+     * Exact behaviour depends on the subclass specific implementation.
      * @param addr address to read from
      * @returns data stored on address
      */
@@ -20,7 +20,7 @@ public:
 
     /**
      * Write a byte to the specified address.
-     * Different behaviour specific for different MBCs.
+     * Exact behaviour depends on the subclass specific implementation.
      * Used to access control registers, or to access XRAM.
      * @param addr address to write to
      * @param data data to be written to address

@@ -53,8 +53,8 @@ public:
      */
     uint8_t getPaletteNumber() const;
     /**
-     * @return the sprite's drawing priority over the background.
      * If the value is 0, the sprite has priority. Otherwise, the background has priority.
+     * @return the sprite's drawing priority over the background.
      */
     bool isBackgroundOverSprite() const;
 

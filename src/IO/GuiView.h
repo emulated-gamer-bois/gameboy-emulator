@@ -46,13 +46,34 @@ public:
     void toggleGui();
 
     /**
-     * A number of functions which used to define actions upon interaction with specific buttons.
+     * Used to define action upon interaction with LoadRom-button.
+     * @param loadRomCallback function to be called.
      */
     void setLoadRomCallback(std::function<void(std::string)>&& loadRomCallback);
+    /**
+     * Used to define action upon interaction with ExitMenu-button.
+     * @param exitMenuCallback function to be called.
+     */
     void setExitMenuCallback(std::function<void()>&& exitMenuCallback);
+    /**
+     * Used to define action upon interaction with ExitProgram-button.
+     * @param exitProgramCallback function to be called.
+     */
     void setExitProgramCallback(std::function<void()>&& exitProgramCallback);
+    /**
+     * Used to define action upon interaction with correctViewport-button (keep aspect ratio).
+     * @param correctViewportCallback function to be called.
+     */
     void setCorrectViewportCallback(std::function<void()>&& correctViewportCallback);
+    /**
+     * Used to define action to change window size, making it fullscreen or otherwise scale it.
+     * @param changeWindowSizeCallback function to be called.
+     */
     void setChangeWindowSizeCallback(std::function<void(int width, int height)>&& changeWindowSizeCallback);
+    /**
+     * Used to define action to, upon opening a new window, center it.
+     * @param getWindowCenterCallback function to be called.
+     */
     void setGetWindowCenterCallback(std::function<void(int& x, int& y)>&& getWindowCenterCallback);
 
 private:

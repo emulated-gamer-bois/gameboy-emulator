@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector> //vector
-#include <regex> // regex
+#include <vector>
+#include <regex>
 /**
  * A helper class to navigate the filesystem.
  */
@@ -18,14 +18,14 @@ public:
     /**
      * Sets the currently visited directory to currentDir.
      *
-     * @param currentDir
+     * @param currentDir string path to the directory.
      */
     void setCurrentDir(std::string currentDir);
 
     /**
      * Sets the filter for what files to keep track of in the current directory.
      *
-     * @param filter
+     * @param filter string to be used as filter.
      */
     void setFilter(const std::string& filter);
 
