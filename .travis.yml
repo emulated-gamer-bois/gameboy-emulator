@@ -1,0 +1,28 @@
+dist: trusty
+language: cpp
+
+notifications:
+  email: false
+  slack: emulated-gamer-bois:92M1WTR813EoUsescZzmjurB
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-trusty-5.0
+    packages:
+      - g++-6
+      - clang-5.0
+      - python3-pip
+
+install:
+  - pip3 install --user cpp-coveralls
+
+script:
+  - CXX=/usr/bin/g++-6 CC=/usr/bin/gcc-6 cmake -DCOVERAGE=1 -DTRAVIS=1 .
+  - cmake --configure .
+  - cmake --build .
+  - ./tests/tests
+
+after_success:
+  - coveralls --root . -E ".*CMakeFiles.*"
