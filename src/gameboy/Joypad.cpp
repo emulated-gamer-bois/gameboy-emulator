@@ -1,12 +1,9 @@
-//
-// Created by Algot on 2021-03-11.
-//
 
 #include "Joypad.h"
+#include "Definitions.h" //IF- Bit
 #include "MMU/MMU.h"
-#include <iostream>
-#include <utility>
-#include "Definitions.h"
+#include <iostream> //cout
+
 Joypad::Joypad(std::shared_ptr<MMU> mmu):mmu(std::move(mmu)) {}
 
 

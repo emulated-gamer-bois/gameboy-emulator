@@ -1,7 +1,3 @@
-//
-// Created by algot on 2021-02-15.
-//
-
 #include <memory>
 
 #include "gtest/gtest.h"

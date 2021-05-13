@@ -1,21 +1,16 @@
-//
-// Created by davidm on 2021-02-12.
-//
-
 #pragma once
 
-#include <iostream>
-#include <cstdint>
-#include <memory>
-#include <cstdint>
 #include "RegisterPair.h"
 #include "../MMU/MMU.h"
 #include "Flags.h"
-#include "../Definitions.h"
-
+#include <memory> //ptr
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
-
+/**
+ * This class emulates the functionality of the Game Boy CPU including registers and interrupt handling.
+ * Its main task is to interpret operation codes and executing the correct instruction, whereafter it yields the number
+ * of machine cycles required.
+ * */
 class CPU {
 public:
 
@@ -26,26 +21,42 @@ public:
      * @returns amount of machine cycles operation takes.
      */
     int update();
+    /**
+     * Sets PC to 0x0100, where the boot ROM ends.
+     * */
     void skipBootRom();
+    /**
+     * Used for debugging.
+     * Prints contents of all registers to the console.
+     * */
     void cpuDump();
+    /**
+     * Getter for the boolean Stop which is used by the STOP-instruction.
+     * */
     bool getStop() const;
+    /**
+     * Resets the state of the CPU from being in STOP-mode.
+     * */
     void returnFromStop();
 
 private:
     //Registers
-
     uint16_t PC{0x0000};
     RegisterPair SP{};
     uint8_t  A{0x00};
     RegisterPair BC{0x00};
     RegisterPair DE{0x00};
     RegisterPair HL{0x00};
+
     //Flags
     Flags F{0x0};
+
     //Interrupt Master Enable flag
     unsigned int IME : 1;
+
     //Memory
     std::shared_ptr<MMU> memory;
+
     //Clock handling
     bool stop{false};
     bool halt{false};
@@ -69,8 +80,8 @@ private:
 
     //Flag management
     /**
-    * Z set if newValue is 0
-    * N set if subtraction is true
+    * @param value Z set if value = 0
+    * @param subtraction set N if subtraction = true
     */
     void setZNFlags(uint8_t value, bool subtraction);
     /**

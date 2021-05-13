@@ -1,7 +1,3 @@
-//
-// Created by davidm on 2021-02-14.
-//
-
 #include "gtest/gtest.h"
 #include "../src/gameboy/CPU/RegisterPair.h"
 #include "../src/gameboy/CPU/Flags.h"

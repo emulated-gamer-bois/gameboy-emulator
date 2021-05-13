@@ -1,12 +1,7 @@
-//
-// Created by Andreas on 2021-03-24.
-//
-
-#include <iostream>
-#include <filesystem>
-#include <algorithm>
-
 #include "FileExplorer.h"
+
+#include <filesystem>
+#include "../helpers/ErrorReport.h"
 
 using namespace std;
 

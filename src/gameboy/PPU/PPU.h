@@ -1,14 +1,10 @@
-//
-// Created by riddarvid on 2/23/21.
-//
 
 #pragma once
 
 #include <memory> // smart pointers
 #include <cstdint> // uint8_t and uint16_t
 #include <array> // frame buffer
-#include <queue>
-
+#include <queue> //queue
 #include "../Definitions.h" // LCD_WIDTH and LCD_HEIGHT
 #include "../MMU/MMU.h"
 #include "Sprite.h"
@@ -37,20 +33,52 @@
 
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
-
+/**
+ * This class emulates the functionality of the Game Boy PPU.
+ * Reading and writing to the PPU registers is managed by this class.
+ * The main purpose of the class is to produce a frame buffer for each frame.
+ */
 class PPU {
 public:
     explicit PPU(std::shared_ptr<MMU> mmu);
 
     //Device methods
-    uint8_t read(uint16_t addr) const;
-    void write(uint16_t addr, uint8_t data);
+    /**
+     * Reads from PPU registers.
+     * @param address address to register.
+     * @return value value of the specified register.
+     */
+    uint8_t read(uint16_t address) const;
+    /**
+     * Writes to PPU registers.
+     * @param address address to register.
+     * @param data data to be written to the specified register.
+     */
+    void write(uint16_t address, uint8_t data);
 
     //Drawing methods
+    /**
+     * Resets all registers to their default values,
+     * clears frame buffer and sets the PPU mode to OAM_SEARCH.
+     */
     void reset();
+    /**
+     * Updates the PPU depending on how many cycles have passed since last update.
+     * @param cpuCycles CPU cycles since last update.
+     */
     void update(uint16_t cpuCycles);
+    /**
+     * Shows whether the PPU is done rendering the next frame.
+     * @return true if the PPU is done rendering the next frame.
+     */
     bool isReadyToDraw() const;
+    /**
+     * Informs the PPU that the current frame can now be discarded.
+     */
     void confirmDraw();
+    /**
+     * @return the current frame buffer.
+     */
     const std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>* getFrameBuffer() const;
 private:
     std::shared_ptr<MMU> memory;

@@ -1,8 +1,7 @@
-//
-// Created by algot on 2021-02-23.
-//
-
 #include "GameBoy.h"
+#include "APU/APU.h"
+
+#include <iostream>
 
 GameBoy::GameBoy() {
     mmu = std::make_shared<MMU>();
@@ -17,16 +16,14 @@ GameBoy::GameBoy() {
     mmu->linkDevices(ppu, apu, joypad, timer, cartridge);
     on = false;
 }
-
 void GameBoy::step(IVolumeController *vc) {
     if (!on) {
         return;
     }
     if (cpu->getStop()) {
-        if (mmu->read(JOYPAD) & mmu->read(INTERRUPT_ENABLE)) {
+        if ( ~mmu->read(JOYPAD) & 0x0f) {
             cpu->returnFromStop();
         }
-        return;
     }
 
 

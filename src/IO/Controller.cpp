@@ -1,17 +1,11 @@
-//
-// Created by isak_ on 2021-04-06.
-//
-
 #include "Controller.h"
+
 Controller::Controller(AppSettings& settings, GuiView& guiView, GameBoy& gameBoy):
     settings{settings}, guiView{guiView}, gameBoy{gameBoy}
 {
     savedEmulationSpeed = settings.emulationSpeedMultiplier;
 }
 
-/**
- * Handles SDL Events including keyboard input.
- */
 State Controller::handleSDLEvents(State state) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -36,7 +30,7 @@ State Controller::handleSDLEvents(State state) {
                     guiView.toggleGui();
                     state = (state == State::EMULATION) ? State::MENU : State::EMULATION;
                 }
-                if (key == settings.keyBinds.turboMode.keyval) {
+                if (key == settings.keyBinds.turboMode.keyVal) {
                     savedEmulationSpeed = settings.emulationSpeedMultiplier;
                     settings.emulationSpeedMultiplier = MAX_EMULATION_SPEED_FLOAT;
                 }
@@ -46,7 +40,7 @@ State Controller::handleSDLEvents(State state) {
                 break;
 
             case SDL_KEYUP:
-                if (key == settings.keyBinds.turboMode.keyval) {
+                if (key == settings.keyBinds.turboMode.keyVal) {
                     settings.emulationSpeedMultiplier = savedEmulationSpeed;
                 }
                 if (state == State::EMULATION) {
@@ -60,49 +54,45 @@ State Controller::handleSDLEvents(State state) {
 
 void Controller::handleEmulatorInputPress(SDL_Keycode key) {
     // Left and right can not be pressed simultaneously, the same goes for up and down!
-    if (key == settings.keyBinds.left.keyval) {
+    if (key == settings.keyBinds.left.keyVal) {
         gameBoy.joypadInput(JOYPAD_RIGHT, JOYPAD_RELEASE);
         gameBoy.joypadInput(JOYPAD_LEFT, JOYPAD_PRESS);
-    } else if (key == settings.keyBinds.right.keyval) {
+    } else if (key == settings.keyBinds.right.keyVal) {
         gameBoy.joypadInput(JOYPAD_LEFT, JOYPAD_RELEASE);
         gameBoy.joypadInput(JOYPAD_RIGHT, JOYPAD_PRESS);
-    } else if (key == settings.keyBinds.up.keyval) {
+    } else if (key == settings.keyBinds.up.keyVal) {
         gameBoy.joypadInput(JOYPAD_DOWN, JOYPAD_RELEASE);
         gameBoy.joypadInput(JOYPAD_UP, JOYPAD_PRESS);
-    } else if (key == settings.keyBinds.down.keyval) {
+    } else if (key == settings.keyBinds.down.keyVal) {
         gameBoy.joypadInput(JOYPAD_UP, JOYPAD_RELEASE);
         gameBoy.joypadInput(JOYPAD_DOWN, JOYPAD_PRESS);
-    } else if (key == settings.keyBinds.a.keyval) {
+    } else if (key == settings.keyBinds.a.keyVal) {
         gameBoy.joypadInput(JOYPAD_A, JOYPAD_PRESS);
-    } else if (key == settings.keyBinds.b.keyval) {
+    } else if (key == settings.keyBinds.b.keyVal) {
         gameBoy.joypadInput(JOYPAD_B, JOYPAD_PRESS);
-    } else if (key == settings.keyBinds.start.keyval) {
+    } else if (key == settings.keyBinds.start.keyVal) {
         gameBoy.joypadInput(JOYPAD_START, JOYPAD_PRESS);
-    } else if (key == settings.keyBinds.select.keyval) {
+    } else if (key == settings.keyBinds.select.keyVal) {
         gameBoy.joypadInput(JOYPAD_SELECT, JOYPAD_PRESS);
     }
 }
 
-
 void Controller::handleEmulatorInputRelease(SDL_Keycode key) {
-    if (key == settings.keyBinds.left.keyval) {
+    if (key == settings.keyBinds.left.keyVal) {
         gameBoy.joypadInput(JOYPAD_LEFT, JOYPAD_RELEASE);
-    } else if (key == settings.keyBinds.right.keyval) {
+    } else if (key == settings.keyBinds.right.keyVal) {
         gameBoy.joypadInput(JOYPAD_RIGHT, JOYPAD_RELEASE);
-    } else if (key == settings.keyBinds.up.keyval) {
+    } else if (key == settings.keyBinds.up.keyVal) {
         gameBoy.joypadInput(JOYPAD_UP, JOYPAD_RELEASE);
-    } else if (key == settings.keyBinds.down.keyval) {
+    } else if (key == settings.keyBinds.down.keyVal) {
         gameBoy.joypadInput(JOYPAD_DOWN, JOYPAD_RELEASE);
-    } else if (key == settings.keyBinds.a.keyval) {
+    } else if (key == settings.keyBinds.a.keyVal) {
         gameBoy.joypadInput(JOYPAD_A, JOYPAD_RELEASE);
-    } else if (key == settings.keyBinds.b.keyval) {
+    } else if (key == settings.keyBinds.b.keyVal) {
         gameBoy.joypadInput(JOYPAD_B, JOYPAD_RELEASE);
-    } else if (key == settings.keyBinds.start.keyval) {
+    } else if (key == settings.keyBinds.start.keyVal) {
         gameBoy.joypadInput(JOYPAD_START, JOYPAD_RELEASE);
-    } else if (key == settings.keyBinds.select.keyval) {
+    } else if (key == settings.keyBinds.select.keyVal) {
         gameBoy.joypadInput(JOYPAD_SELECT, JOYPAD_RELEASE);
     }
 }
-
-
-

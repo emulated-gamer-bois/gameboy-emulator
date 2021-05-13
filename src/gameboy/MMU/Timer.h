@@ -1,12 +1,7 @@
-//
-// Created by Algot on 2021-03-11.
-//
-
 #pragma once
 
 #include <cstdint>
-#include <memory>
-
+#include <memory> //ptr
 #define TIMER_DIVIDER       0xff04
 #define TIMER_COUNTER       0xff05
 #define TIMER_MODULO        0xff06
@@ -14,26 +9,49 @@
 
 class MMU;
 
+/**
+ * This class emulates the timer on the Game Boy.
+ * It is possible to read and write to its control registers.
+ * The timer is updated with the update function that updates
+ * the timer with the specified amount of cycles.
+ */
 class Timer {
 public:
     explicit Timer(std::shared_ptr<MMU> mmu);
 
-    // Reset private registers
+    /**
+     * Reset the divider-, counter-, modulo- and control-register.
+     */
     void reset();
 
+    /**
+     * Return 1 byte according to the specified address.
+     * If the address is not mapped to any of the four registers return 0.
+     * @param addr memory address
+     */
     uint8_t read(uint16_t addr) const;
+
+    /**
+     * Write to register mapped to address.
+     * If address correspond to the divider register, write 0.
+     * Else write data to the corresponding register.
+     */
     void write(uint16_t addr, uint8_t data);
 
-    // Update the timer with cycles @ 1,048,576Hz
+    /**
+     * Update the counter registers according to the number of cycles.
+     * Behaviour depends on control register. A detailed description is available on: https://gbdev.io/pandocs/#timer-and-divider-registers.
+     * @param cycles number oif cycles @ 1,048,576Hz to update the timer
+     */
     void update(uint16_t cycles);
 
 private:
     // MMU used to set interrupt flags
     std::shared_ptr<MMU> mmu;
 
-    // Private registers
-    uint16_t divider;
-    uint8_t counter;
-    uint8_t modulo;
-    uint8_t control;
+    // Address mapped registers
+    uint16_t divider{};
+    uint8_t counter{};
+    uint8_t modulo{};
+    uint8_t control{};
 };

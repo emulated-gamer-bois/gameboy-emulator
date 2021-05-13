@@ -1,22 +1,18 @@
-/*
- * AppSettings
- * In the AppSettings struct we will put all emulator settings. Settings that will be changed by ImGui, read from file
- * and written to file.
- */
-
 #pragma once
 
 #include <string>
-#include <fstream>
-#include <regex>
 
 #include "KeyBinds.h"
-#include "../helpers/ErrorReport.h"
-#include "../gameboy/Definitions.h"
-
+/**
+ * This class acts as a container for data that is being shared between Application, RenderView, GuiView,
+ * AudioController and Controller. The purpose is to have one place where the settings for the application can be
+ * stored and modified. It also defines the file structure of the .settings file which provides a way to modify
+ * settings outside of the application.
+ */
 class AppSettings {
 public:
-    std::string romPath; // The path where the file dialog will always be in when opened.
+    // File path settings
+    std::string romPath;
 
     // Emulation settings
     KeyBinds keyBinds;

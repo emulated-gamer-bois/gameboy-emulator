@@ -1,29 +1,73 @@
-//
-// Created by Algot on 2021-03-11.
-//
-
 #pragma once
 
 #include "MBC.h"
 #include <cstdint>
-#include <string>
-#include <vector>
+#include <vector> //vector
+#include <memory> // ptr
+#include <fstream>
 
+/**
+ * This class emulates a Game Boy cartridge. A ROM-file can be loaded with associated XRAM-file.
+ * The XRAM is saved back to file when the application is closed.
+ * The cartridge is initialized to use the MBC specified in the ROM-file.
+ */
 class Cartridge {
 public:
     Cartridge();
+
+    /**
+     * Reset all variables and initiate rom and mbc to match a ROM_ONLY_MBC.
+     */
     void reset();
 
+    /**
+     * Read from the rom or ram at a specific address according to the mbc:s read function.
+     * @param addr address to read from
+     */
     uint8_t read(uint16_t addr) const;
+
+    /**
+     * Write to the mbc or ram at the address specified using the mbc:s write function.
+     * @param addr address to write to
+     * @param data data to write
+     */
     void write(uint16_t addr, uint8_t data);
 
+    /**
+     * Write directly to the rom at the specified address.
+     * To be used only in testing.
+     * @param addr address to write to
+     * @param data data to write
+     */
     void writeTest(uint16_t addr, uint8_t data);
+
+    /**
+     * Load a rom file into memory.
+     * @param filepath filepath to load rom-file from
+     * @param load_ram_from_file whether to load corresponding ram file or not
+     * @return false, if unable to open file, or if romSize, ramSize or cartridgeType is unsupported
+     * @return true, if file is loaded successfully
+     */
     bool loadRom(const std::string& filepath, bool load_ram_from_file=false);
 
+    /**
+     * Save the contents of the ram, if any, to a file.
+     * @return false, if unable to open file or unable to write to file
+     * @return true, write to file successful
+     */
     bool saveRam();
+
+    /**
+     * Load a ram file to memory.
+     * @returns false, if unable to open file, or if file size does not match ramSize
+     * @returns true, if load successful
+     */
     bool loadRam();
 
-    // For cartridges with timer
+    /**
+     * Update the mbc, which in turn updates rtc (real time clock), if any.
+     * @param cycles the amount of cycles to update
+     */
     void update(uint8_t cycles);
 
 private:
@@ -68,7 +112,26 @@ private:
     std::unique_ptr<MBC> mbc;
     std::string filepath;
 
+    /**
+     * Initiate rom to the size according to romSize.
+     * @return false, if unsupported romSize.
+     * @return true, if size successfully initiated
+     */
     bool initRom();
+
+    /**
+     * Initiate ram to the size according to ramSize.
+     * If loadFromRam is true, load ram from file.
+     * @param loadFromRam whether to load the ram from a file
+     * @return false, if unsupported romSize.
+     * @return true, if size successfully initiated
+     */
     bool initRam(bool loadFromRam=false);
+
+    /**
+     * Initiates mbc with an mbc instance according to cartridgeType.
+     * @return false, if unsupported cartridgeType
+     * @return true, if successful initiation
+     */
     bool initMbc();
 };

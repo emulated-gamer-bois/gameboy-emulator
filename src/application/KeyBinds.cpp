@@ -1,35 +1,30 @@
-//
-// Created by isaaklindgren on 2021-03-19.
-//
-
 #include "KeyBinds.h"
-
 KeyBinds::KeyBinds():
-    keyBinds({&a, &b, &start, &select, &left, &right, &up, &down, &turboMode}), nonMapableKeys({SDLK_ESCAPE})
+    keyBinds({&a, &b, &start, &select, &left, &right, &up, &down, &turboMode}), nonMappableKeys({SDLK_ESCAPE})
 {
-    a.keyval = SDLK_j;
-    b.keyval = SDLK_h;
-    start.keyval= SDLK_g;
-    select.keyval = SDLK_f;
-    left.keyval = SDLK_a;
-    right.keyval = SDLK_d;
-    up.keyval = SDLK_w;
-    down.keyval = SDLK_s;
-    turboMode.keyval = SDLK_SPACE;
+    a.keyVal = SDLK_j;
+    b.keyVal = SDLK_h;
+    start.keyVal= SDLK_g;
+    select.keyVal = SDLK_f;
+    left.keyVal = SDLK_a;
+    right.keyVal = SDLK_d;
+    up.keyVal = SDLK_w;
+    down.keyVal = SDLK_s;
+    turboMode.keyVal = SDLK_SPACE;
 
     for(int i=0; i < keyBinds.capacity(); i++){
-        keyBinds[i]->keybind = SDL_GetKeyName(keyBinds[i]->keyval);
+        keyBinds[i]->keyBind = SDL_GetKeyName(keyBinds[i]->keyVal);
     }
 
-    a.action_description = "A";
-    b.action_description = "B";
-    start.action_description = "Start";
-    select.action_description = "Select";
-    left.action_description = "Gamepad Left";
-    right.action_description = "Gamepad Right";
-    up.action_description = "Gamepad Up";
-    down.action_description = "Gamepad Down";
-    turboMode.action_description = "Turbo Mode";
+    a.actionDescription = "A";
+    b.actionDescription = "B";
+    start.actionDescription = "Start";
+    select.actionDescription = "Select";
+    left.actionDescription = "Gamepad Left";
+    right.actionDescription = "Gamepad Right";
+    up.actionDescription = "Gamepad Up";
+    down.actionDescription = "Gamepad Down";
+    turboMode.actionDescription = "Turbo Mode";
 }
 
 bool KeyBinds::editKeyBinds(const bool keysDown[], int keyBindIndex) {
@@ -39,8 +34,8 @@ bool KeyBinds::editKeyBinds(const bool keysDown[], int keyBindIndex) {
                 return true;
             }
             if (validKey(keyBindIndex,static_cast<SDL_Scancode>(i))) {
-                keyBinds[keyBindIndex]->keybind = SDL_GetScancodeName(static_cast<SDL_Scancode>(i));
-                keyBinds[keyBindIndex]->keyval = SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(i));
+                keyBinds[keyBindIndex]->keyBind = SDL_GetScancodeName(static_cast<SDL_Scancode>(i));
+                keyBinds[keyBindIndex]->keyVal = SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(i));
                 return true;
             }
         }
@@ -54,12 +49,12 @@ bool KeyBinds::validKey(int keyBindIndex, SDL_Scancode scanCode) {
 
     for (int i = 0; i < keyBinds.capacity(); i++) {
         if (i != keyBindIndex) {
-            forbiddenKeyBind |= (keyBinds[i]->keyval == SDL_GetKeyFromScancode(scanCode));
+            forbiddenKeyBind |= (keyBinds[i]->keyVal == SDL_GetKeyFromScancode(scanCode));
         }
     }
 
-    for (int i = 0; i < nonMapableKeys.capacity(); i++) {
-        forbiddenKeyBind |= (SDL_GetKeyFromScancode(scanCode) == nonMapableKeys[i]);
+    for (int i = 0; i < nonMappableKeys.capacity(); i++) {
+        forbiddenKeyBind |= (SDL_GetKeyFromScancode(scanCode) == nonMappableKeys[i]);
     }
 
     return !forbiddenKeyBind;

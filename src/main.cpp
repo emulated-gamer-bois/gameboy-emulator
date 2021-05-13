@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
     ::ShowWindow(::GetConsoleWindow(), SW_HIDE);
 #endif
     Application app;
-    app.start();
+    app.run();
 
     return 0;
 }

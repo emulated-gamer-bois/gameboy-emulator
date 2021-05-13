@@ -1,9 +1,10 @@
 #include "RenderView.h" // implements
-#include "shaders.h"
-#include <fstream>
-#include <thread>
 
-using namespace glm;
+#include <sstream>
+
+#include "shaders.h"
+#include "../helpers/ErrorReport.h"
+#include "../gameboy/Definitions.h"
 
 RenderView::RenderView(AppSettings& settings, PaletteHandler& paletteHandler):
     settings{settings}, paletteHandler{paletteHandler}
@@ -181,7 +182,7 @@ bool RenderView::glErrorFound(std::string& errorLog) const {
     return foundError;
 }
 
-const std::string RenderView::getShaderErrorLog(GLuint shader) const {
+std::string RenderView::getShaderErrorLog(GLuint shader) const {
     int logLength = 0;
     int charsWritten = 0;
 
@@ -196,7 +197,7 @@ const std::string RenderView::getShaderErrorLog(GLuint shader) const {
     return strLog;
 }
 
-const std::string RenderView::getProgramErrorLog(GLuint program) const {
+std::string RenderView::getProgramErrorLog(GLuint program) const {
     int logLength = 0;
     int charsWritten = 0;
 

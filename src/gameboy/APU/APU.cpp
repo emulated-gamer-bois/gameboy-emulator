@@ -1,7 +1,3 @@
-//
-// Created by riddarvid on 3/24/21.
-//
-
 #include "APU.h"
 
 APU::APU() {

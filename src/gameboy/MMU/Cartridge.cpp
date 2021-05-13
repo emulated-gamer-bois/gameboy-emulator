@@ -1,12 +1,9 @@
-//
-// Created by Algot on 2021-03-11.
-//
 
 #include "Cartridge.h"
-#include <fstream>
 #include <iostream>
-#include <memory>
 #include <cstring> // memcpy
+#include <string>
+
 
 Cartridge::Cartridge() {
     reset();
@@ -18,7 +15,6 @@ void Cartridge::reset() {
     ramSize = 0;
 
     rom = std::vector<uint8_t>(0x8000);
-    ram;
     mbc = std::make_unique<ROM_Only_MBC>(&rom);
 }
 

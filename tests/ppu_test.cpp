@@ -1,7 +1,3 @@
-//
-// Created by riddarvid on 2/26/21.
-//
-
 #include <iostream>
 #include <gtest/gtest.h>
 #include "../src/gameboy/PPU/PPU.h"

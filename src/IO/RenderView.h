@@ -1,33 +1,54 @@
-/*
- * RenderView
- * This class handles the rendering of the Game Boy lcd.
- *
- * Author: Andreas Palmqvist
- */
-
 #pragma once
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
-#include <iostream>
-#include <sstream>
-#include <memory>
 
-#include "Palette.h"
 #include "../application/AppSettings.h"
-#include "../helpers/ErrorReport.h"
-#include "../gameboy/Definitions.h"
 #include "PaletteHandler.h"
-
+/**
+ * This class handles the OpenGL integration in the emulator. The texture data sent to this class is processed and
+ * rendered.
+ */
 class RenderView {
 public:
     explicit RenderView(AppSettings& settings, PaletteHandler& paletteHandler);
 
+    /**
+     * Initialises OpenGL.
+     */
     void initGL();
+
+    /**
+     * Renders the current texture.
+     */
     void render() const;
+
+    /**
+     * Clears the rendered screen.
+     */
     void clear() const;
+
+    /**
+     * Sets the current texture of this view. The texture is a one channel bitmap.
+     *
+     * @param textureData
+     */
     void setScreenTexture(uint8_t textureData[]);
+
+    /**
+     * Sets the position of the viewport.
+     *
+     * @param x
+     * @param y
+     */
     void setViewportPos(int x, int y);
+
+    /**
+     * Sets the dimensions of the viewport.
+     *
+     * @param width
+     * @param height
+     */
     void setViewportDim(int width, int height);
 
 private:
@@ -49,6 +70,6 @@ private:
     GLuint loadShaderProgram(const std::string& vertexShader, const std::string& fragmentShader);
 
     bool glErrorFound(std::string& errorLog) const;
-    [[nodiscard]] const std::string getShaderErrorLog(GLuint shader) const;
-    [[nodiscard]] const std::string getProgramErrorLog(GLuint program) const;
+    [[nodiscard]] std::string getShaderErrorLog(GLuint shader) const;
+    [[nodiscard]] std::string getProgramErrorLog(GLuint program) const;
 };

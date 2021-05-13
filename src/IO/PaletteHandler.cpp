@@ -119,14 +119,10 @@ PaletteHandler::PaletteHandler() {
 
 }
 
-const std::string PaletteHandler::getPaletteName(int index) const {
+std::string PaletteHandler::getPaletteName(int index) const {
     return palettes[index].paletteName;
 }
 
-const Palette PaletteHandler::getPalette(int index) const {
+Palette PaletteHandler::getPalette(int index) const {
     return palettes[index].palette;
-}
-
-const int PaletteHandler::getPaletteAmount() const {
-    return PALETTE_AMOUNT;
 }

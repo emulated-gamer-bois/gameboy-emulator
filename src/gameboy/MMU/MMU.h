@@ -1,11 +1,6 @@
-//
-// Created by algot on 2021-02-15.
-//
-
 #pragma once
 
 #include "Cartridge.h"
-#include "../APU/APU.h"
 #include <cstdint>
 #include <array> // array
 #include <string> // string
@@ -54,23 +49,86 @@ friend class test_case_name##_##test_name##_Test
 #define IO_LCD_END              0xff4b
 #define IO_DISABLE_BOOT_ROM     0xff50
 
+/**
+ * This class is used to pack together all the different devices that have memory mapped to an address.
+ * The read and write function can be used to access all of the memory on the Game Boy.
+ */
 class MMU {
 public:
     MMU();
+
+    /**
+     * Clear all the following memory arrays: vram, ram, oam, hram.
+     * Enable all interrupts and set booting to true.
+     */
     void reset();
+
+    /**
+     * Return 1 byte according to the specified address, either from memory or from a device's memory
+     * @param addr memory address
+     */
     uint8_t read(uint16_t addr);
+
+    /**
+     * Write data to memory or a device's memory according to addr
+     * @param addr memory address where data is to be stored
+     * @param data value to be stored on memory address
+     */
     void write(uint16_t addr, uint8_t data);
 
+    /**
+     * Set the bits specified in bitmask in the interrupt flag
+     * @param bitmask bits to be set
+     */
     void raiseInterruptFlag(uint8_t bitmask);
+
+    /**
+     * Clear the bits specified in bitmask in the interrupt flag
+     * @param bitmask bits to be cleared
+     */
     void clearInterruptFlag(uint8_t bitmask);
 
+    /**
+     * Add references to various devices
+     * @param ppu reference to ppu instance
+     * @param apu reference to apu instance
+     * @param joypad reference to joypad instance
+     * @param timer reference to timer instance
+     * @param cartridge reference to cartridge instance
+     */
     void linkDevices(std::shared_ptr<PPU> ppu, std::shared_ptr<APU> apu, std::shared_ptr<Joypad> joypad, std::shared_ptr<Timer> timer, std::shared_ptr<Cartridge> cartridge);
 
+    /**
+     * Load boot rom from file specified by filepath.
+     * Disable boot rom if load is not successful.
+     * @param filepath filepath to boot rom file
+     * @return true if boot rom is successfully loaded
+     * @return false if file size is not 256 bytes or if unable to read file
+     */
     bool loadBootRom(const std::string& filepath);
 
 private:
+    /**
+     * Write to game rom located on cartridge.
+     * Is only to be used in test.
+     * @param addr memory address to cartridge rom
+     * @param data data to be written on address
+     */
     void write_GAME_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data);
+
+    /**
+     * Write to boot rom.
+     * Is only to be used in test.
+     * @param addr memory address to boot rom
+     * @param data data to be written on address
+     */
     void write_BOOT_ROM_ONLY_IN_TESTS(uint16_t addr, uint8_t data);
+
+    /**
+     * Disable boot rom.
+     * Sets booting to false if data != 0.
+     * @param data disable boot rom if data != 0
+     */
     void disableBootRom(uint8_t data);
 
     // Devices

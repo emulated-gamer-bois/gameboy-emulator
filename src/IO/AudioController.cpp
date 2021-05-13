@@ -1,9 +1,5 @@
-//
-// Created by riddarvid on 3/25/21.
-//
 
 #include "AudioController.h"
-#include "../gameboy/APU/APUState.h"
 
 AudioController::AudioController(AppSettings& settings):
     settings{settings}
@@ -174,10 +170,6 @@ void AudioController::playGBWave(int source, std::array<uint8_t, 16> waveForm, A
     this->playWave(source, waveForm, 131072.0/(2048 - frequency), volume);
 }
 
-void AudioController::setVolume(int source, float volume) {
-    alSourcef(sources[source], AL_GAIN, volume * settings.masterVolume);
-}
-
 void AudioController::playNoise(int source, bool is_7_bit_mode, ALsizei frequency, float volume) {
     if(is_7_bit_mode) {
         playSound(source, noise7bit, LFSR7_BUFFER_SIZE, frequency, volume);
@@ -186,15 +178,19 @@ void AudioController::playNoise(int source, bool is_7_bit_mode, ALsizei frequenc
     }
 }
 
+void AudioController::setVolume(int source, float volume) {
+    alSourcef(sources[source], AL_GAIN, volume * settings.masterVolume);
+}
+
 void AudioController::stopSound() {
     for(int i=0;i<N_SOURCES;i++){
         stopSource(i);
     }
 }
 
-void AudioController::stepSound(uint8_t i, APUState *state) {
+void AudioController::stepSound(uint8_t readyToPlay, APUState *state) {
     //1st square
-    if (i & 1) {
+    if (readyToPlay & 1) {
         if (state->enableSquareA) {
             playGBSquare(0, state->dutySquareA, state->frequencySquareA, state->volumeSquareA * settings.masterVolume);
         } else {
@@ -203,7 +199,7 @@ void AudioController::stepSound(uint8_t i, APUState *state) {
     }
 
     //2nd square
-    if (i & 2) {
+    if (readyToPlay & 2) {
         if (state->enableSquareB) {
             playGBSquare(1, state->dutySquareB, state->frequencySquareB, state->volumeSquareB * settings.masterVolume);
         } else {
@@ -212,7 +208,7 @@ void AudioController::stepSound(uint8_t i, APUState *state) {
     }
 
     //Wave
-    if (i & 4) {
+    if (readyToPlay & 4) {
         if (state->enableWave) {
             playGBWave(2, state->waveform, state->frequencyWave, state->volumeWave * settings.masterVolume);
         } else {
@@ -220,7 +216,7 @@ void AudioController::stepSound(uint8_t i, APUState *state) {
         }
     }
     //Noise
-    if(i & 8) {
+    if(readyToPlay & 8) {
         if(state->enableNoise) {
             playNoise(3, state->is7BitMode, state->frequencyNoise, state->volumeNoise * settings.masterVolume);
         } else {

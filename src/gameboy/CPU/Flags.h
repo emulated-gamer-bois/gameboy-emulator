@@ -1,9 +1,8 @@
-//
-// Created by isaaklindgren on 2021-02-23.
-//
-
 #pragma once
-
+/**
+ *
+ * This struct is used to contain the flags of the Game Boy CPU.
+ * */
 union Flags {
     struct {
     /**

@@ -1,3 +1,5 @@
+
+
 #pragma once
 
 #include <iostream>
@@ -8,8 +10,19 @@
 
 // Uncomment for printing non fatal errors
 #define DEBUG_PRINT
-
+/**
+ * Contains functions used to check for errors.
+ */
 namespace ErrorReport {
+    /**
+     * Prints a pre-defined string error to the console together with the
+     * file and line where the error occurred.
+     * Aborts the current process, making an abnormal program termination
+     * with a host environment specific error code.
+     * @param errorLog string describing error.
+     * @param line where the error occurred.
+     * @param file which file the error occurred in.
+     * */
     static void fatalError(const std::string& errorLog, int line, const char* file) {
         std::cerr << "--FATAL ERROR--" << std::endl;
         std::cerr << "FILE: " << file << std::endl;
@@ -18,7 +31,13 @@ namespace ErrorReport {
 
         abort();
     }
-
+    /**
+     * Prints a pre-defined string error to the console together with the
+     * file and line where the error occurred.
+     * @param errorLog string describing error.
+     * @param line where the error occurred.
+     * @param file which file the error occurred in.
+     * */
     static void nonFatalError(const std::string& errorLog, int line, const char* file) {
 #ifdef DEBUG_PRINT
         std::cout << "--NON FATAL ERROR--" << std::endl;

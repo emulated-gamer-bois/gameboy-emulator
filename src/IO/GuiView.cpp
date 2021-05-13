@@ -1,19 +1,14 @@
-//
-// Created by isaaklindgren on 2021-03-18.
-//
+#include "GuiView.h" // implements
 
-#include "GuiView.h"
-
-#include <imgui.h>
-#include <imgui_internal.h>
-#include <iostream>
 #include <sstream>
+#include <imgui_internal.h> //gui
 
-#include "imgui_impl/imgui_impl_sdl.h"
-#include "imgui_impl/imgui_impl_opengl3.h"
-/**
- * Constructor
- */
+#include "imgui_impl/imgui_impl_sdl.h" //backend for imgui
+#include "imgui_impl/imgui_impl_opengl3.h" //backend for imgui
+
+#include "../helpers/ErrorReport.h"
+#include "../gameboy/Definitions.h"
+
 
 GuiView::GuiView(AppSettings& settings, PaletteHandler& paletteHandler):
     settings{settings}, paletteHandler{paletteHandler}, selectedFile{-1}, selectedPalette{settings.paletteNumber},
@@ -54,24 +49,17 @@ void GuiView::updateAndRender(SDL_Window *window) {
     if (waitingForKeyBind) { keyBind(); }
 }
 
-/**
- * Cleans up after ImGui.
- */
 void GuiView::terminate() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 }
 
-/**
- */
 void GuiView::handleInput(SDL_Event event) {
     ImGui_ImplSDL2_ProcessEvent(&event);
 }
 
-/**
- * Toggles the showToolbar.
- */
+
 void GuiView::toggleGui() {
     displayToolbar = !displayToolbar;
     if (!displayToolbar) {
@@ -117,7 +105,7 @@ void GuiView::showEditControls() {
         }
 
         ImGui::Indent(indentSpace);
-        ImGui::Text("%s", settings.keyBinds.keyBinds[i]->action_description.c_str());
+        ImGui::Text("%s", settings.keyBinds.keyBinds[i]->actionDescription.c_str());
         ImGui::SameLine(130,0);
 
         if(waitingForKeyBind && keyBindIndex == i) {
@@ -127,7 +115,7 @@ void GuiView::showEditControls() {
         }
 
         ImVec2 buttonSize(90, 18);
-        if (ImGui::Button(settings.keyBinds.keyBinds[i]->keybind.c_str(), buttonSize)) {
+        if (ImGui::Button(settings.keyBinds.keyBinds[i]->keyBind.c_str(), buttonSize)) {
             keyBindIndex = i;
             waitingForKeyBind = true;
         }
@@ -259,7 +247,7 @@ void GuiView::showPaletteSettings() {
     ImGui::Text("Palette Select ");
     ImGui::Indent(indentSpace);
     if (ImGui::BeginListBox("##PaletteList", ImVec2(listBoxWidth, listBoxHeight))) {
-        for (int i = 0; i < paletteHandler.getPaletteAmount(); i++) {
+        for (int i = 0; i < PaletteHandler::paletteAmount; i++) {
             int flags = ImGuiSelectableFlags_AllowDoubleClick;
             bool isSelected = (previewPalette == i);
             if (ImGui::Selectable(paletteHandler.getPaletteName(i).c_str(), isSelected, flags)) {

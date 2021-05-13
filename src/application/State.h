@@ -1,12 +1,9 @@
-//
-// Created by isak_ on 2021-04-06.
-//
-
-#ifndef LAME_BOY_STATE_H
-#define LAME_BOY_STATE_H
+#pragma once
+/**
+ * Defines the states of the emulation.
+ * */
 enum State {
     EMULATION,
     MENU,
     TERMINATION
 };
-#endif //LAME_BOY_STATE_H

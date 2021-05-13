@@ -1,9 +1,5 @@
-//
-// Created by Algot on 2021-03-11.
-//
-
 #include "MBC.h"
-#include <iostream>
+#include <iostream> //cout
 
 // MBC
 uint16_t MBC::romBankMask(uint32_t size) {
@@ -23,6 +19,8 @@ uint8_t ROM_Only_MBC::read(uint16_t addr) {
     if (0x0000 <= addr && addr <= 0x7fff) {
         return rom->at(addr);
     } else if (0xa000 <= addr && addr <= 0xbfff) {
+        return 0xff;
+    } else {
         return 0xff;
     }
 }
@@ -296,7 +294,7 @@ void MBC3_MBC::update(uint8_t cycles) {
     }
 
     if (rtcDays == 512) {
-        rtcHours -= 512;
+        rtcDays -= 512;
         rtcDaysOverflow = 1;
     }
 }
