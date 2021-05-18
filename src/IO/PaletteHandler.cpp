@@ -116,6 +116,11 @@ PaletteHandler::PaletteHandler() {
                             {0.5f, 0.25f, 0.f},
                             {0.97f, 0.72f, 0.53f},
                             {0.97f, 0.91f, 0.88f}};
+    palettes[23].paletteName = "Presentation";
+    palettes[23].palette = {{0.05f, 0.14f, 0.2f},
+                            {0.16f, 0.43f, 0.60f},
+                            {1.f, 1.f, 0.f},
+                            {0.27f, 0.71f, 1.f}};
 
 }
 

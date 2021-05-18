@@ -11,7 +11,7 @@
  */
 class PaletteHandler {
 public:
-    static const int paletteAmount = 23;
+    static const int paletteAmount = 24;
 
     PaletteHandler();
 
